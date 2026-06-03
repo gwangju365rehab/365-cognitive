@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IADL 시나리오 훈련 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 16px 16px 80px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f7fa; color: #222;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      min-height: 100vh;
+    }
+    h1 { margin: 0 0 2px; font-size: 1.8rem; font-weight: 800; text-align: center; color: #1a237e; }
+    .subtitle { font-size: 0.95rem; color: #666; text-align: center; }
+
+    #home-btn {
+      position: fixed; top: 14px; left: 14px; z-index: 100;
+      padding: 10px 18px; border-radius: 999px; border: none;
+      background: #eee; color: #333; font-weight: 600; font-size: 14px;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* ── 활동 목록 ── */
+    #activity-list {
+      width: 100%; max-width: 720px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    @media (max-width: 520px) { #activity-list { grid-template-columns: 1fr; } }
+
+    .act-card {
+      padding: 14px 16px; border-radius: 14px;
+      border: 2px solid #dde3ec; background: #fff;
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .act-card:hover { border-color: #3f51b5; background: #e8eaf6; }
+    .act-card.done { border-color: #4caf50; background: #f0fff4; opacity: 0.75; }
+    .act-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      background: #3f51b5; color: #fff;
+      font-size: 0.8rem; font-weight: 800; text-align: center; line-height: 28px;
+      flex-shrink: 0;
+    }
+    .act-card.done .act-num { background: #4caf50; }
+    .act-info { flex: 1; }
+    .act-title { font-size: 0.95rem; font-weight: 700; color: #222; line-height: 1.4; }
+    .act-tag {
+      display: inline-block; margin-top: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700; color: #fff;
+    }
+    .tag-seq    { background: #ff7043; }
+    .tag-plan   { background: #1976d2; }
+    .tag-conflict { background: #7b1fa2; }
+    .tag-budget { background: #388e3c; }
+    .tag-prior  { background: #f57c00; }
+    .tag-adapt  { background: #0097a7; }
+    .tag-health { background: #c62828; }
+
+    /* ── 훈련 화면 ── */
+    #training-screen {
+      display: none; width: 100%; max-width: 720px;
+      flex-direction: column; gap: 14px;
+    }
+
+    /* 진행 바 */
+    .prog-wrap { width: 100%; }
+    .prog-bg { width: 100%; height: 8px; border-radius: 999px; background: #dde3ec; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 999px; background: #3f51b5; transition: width .4s; }
+    .prog-txt { font-size: 0.88rem; color: #666; margin-top: 4px; text-align: center; }
+    .prog-txt span { font-weight: 800; color: #222; }
+
+    /* 활동 제목 배너 */
+    .act-header {
+      width: 100%; padding: 14px 20px; border-radius: 14px;
+      background: #3f51b5; color: #fff;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .act-header-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); font-size: 1rem; font-weight: 900;
+      text-align: center; line-height: 36px; flex-shrink: 0;
+    }
+    .act-header-title { font-size: 1.1rem; font-weight: 800; }
+    .act-header-tag {
+      margin-left: auto; padding: 3px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.2); font-size: 0.78rem; font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* 카드 공통 */
+    .card {
+      width: 100%; border-radius: 16px; overflow: hidden;
+      border: 2px solid #e0e4f0; background: #fff;
+    }
+    .card-hd {
+      padding: 10px 18px; font-size: 0.85rem; font-weight: 800;
+      letter-spacing: 0.5px; border-bottom: 2px solid #e0e4f0;
+    }
+    .card-hd.situation { background: #e3f2fd; color: #0d47a1; border-color: #90bef5; }
+    .card-hd.instruct  { background: #f3e5f5; color: #4a148c; border-color: #ce93d8; }
+    .card-hd.question  { background: #fff8e1; color: #e65100; border-color: #ffcc02; }
+    .card-bd { padding: 16px 18px; font-size: 1.05rem; line-height: 1.85; color: #222; }
+    .card-bd ul { margin: 6px 0; padding-left: 20px; }
+    .card-bd li { margin-bottom: 6px; }
+    .card-bd .sub { color: #555; font-size: 0.95rem; }
+    .card-bd b { color: #1976d2; }
+
+    /* 지시사항 스텝 */
+    .step-list { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; }
+    .step-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 14px; border-radius: 12px;
+      border: 2px solid #e0e4f0; background: #fafafa;
+      font-size: 1rem; font-weight: 600; color: #333; line-height: 1.6;
+      cursor: pointer; transition: all .15s;
+    }
+    .step-item.done { border-color: #4caf50; background: #f0fff4; color: #1b5e20; }
+    .step-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      background: #e0e4f0; color: #555;
+      font-size: 0.85rem; font-weight: 800; text-align: center; line-height: 28px;
+      flex-shrink: 0; transition: all .15s;
+    }
+    .step-item.done .step-num { background: #4caf50; color: #fff; }
+    .step-check { margin-left: auto; font-size: 1.1rem; opacity: 0; transition: opacity .15s; }
+    .step-item.done .step-check { opacity: 1; }
+
+    /* 완료 후 질문 */
+    .q-list { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; }
+    .q-item {
+      padding: 12px 14px; border-radius: 12px;
+      border: 2px solid #ffe082; background: #fffde7;
+      font-size: 1rem; font-weight: 600; color: #4e342e; line-height: 1.6;
+      display: flex; gap: 10px; align-items: flex-start;
+      cursor: pointer; transition: all .15s;
+    }
+    .q-item.done { border-color: #ffb300; background: #fff8e1; opacity: 0.65; }
+    .q-num {
+      min-width: 24px; height: 24px; border-radius: 50%;
+      background: #ffb300; color: #fff;
+      font-size: 0.8rem; font-weight: 800; text-align: center; line-height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* 변수 하이라이트 */
+    .var { color: #7b1fa2; font-weight: 800; }
+
+    /* 컨트롤 */
+    .ctrl-wrap { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
+    .ctrl-btn {
+      padding: 14px 28px; border-radius: 999px; border: none;
+      font-size: 1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.14); transition: transform .08s;
+    }
+    .ctrl-btn:active { transform: translateY(1px); }
+    .btn-complete { background: #4caf50; color: #fff; }
+    .btn-complete:hover { background: #388e3c; }
+    .btn-next { background: #3f51b5; color: #fff; }
+    .btn-next:hover { background: #303f9f; }
+    .btn-list { background: #eee; color: #333; }
+    .btn-list:hover { background: #ddd; }
+
+    /* 완료 메시지 */
+    #complete-banner {
+      display: none; width: 100%; max-width: 720px;
+      padding: 24px; border-radius: 16px;
+      background: #4caf50; color: #fff; text-align: center;
+    }
+    #complete-banner h2 { margin: 0 0 8px; font-size: 1.5rem; }
+
+    #hospital-logo {
+      position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666;
+      padding: 5px 10px; background: rgba(255,255,255,0.9); border-radius: 4px; font-weight: 500;
+    }
+
+    /* 타이머 */
+    .timer-bar {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px; border-radius: 10px; background: #e8eaf6;
+      font-size: 0.92rem; font-weight: 700; color: #3f51b5;
+    }
+    .timer-val { font-size: 1.1rem; font-weight: 900; }
+    .timer-btn {
+      padding: 6px 14px; border-radius: 999px; border: none;
+      background: #3f51b5; color: #fff; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer;
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+
+<button id="home-btn" onclick="location.href='index.html'">← 홈</button>
+<h1>IADL 시나리오 훈련</h1>
+<div class="subtitle">활동을 선택하면 상황과 지시사항이 표시됩니다.</div>
+
+<!-- 활동 목록 -->
+<div id="activity-list"></div>
+
+<!-- 훈련 화면 -->
+<div id="training-screen">
+  <div class="prog-wrap">
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-txt">지시사항 <span id="prog-cur">0</span>/<span id="prog-tot">0</span> 완료</div>
+  </div>
+
+  <div class="act-header" id="act-header">
+    <div class="act-header-num" id="hdr-num"></div>
+    <div class="act-header-title" id="hdr-title"></div>
+    <div class="act-header-tag" id="hdr-tag"></div>
+  </div>
+
+  <div class="timer-bar">
+    <span>⏱ 경과 시간</span>
+    <span class="timer-val" id="timer-val">00:00</span>
+    <button class="timer-btn" id="timer-btn" onclick="toggleTimer()">시작</button>
+  </div>
+
+  <!-- 상황 카드 -->
+  <div class="card" id="card-situation">
+    <div class="card-hd situation">📋 상황</div>
+    <div class="card-bd" id="bd-situation"></div>
+  </div>
+
+  <!-- 지시사항 -->
+  <div class="card" id="card-instruct">
+    <div class="card-hd instruct">✏️ 지시사항 <span style="font-size:0.8rem;font-weight:500">(탭하면 완료 표시)</span></div>
+    <div class="step-list" id="step-list"></div>
+  </div>
+
+  <!-- 완료 후 질문 -->
+  <div class="card" id="card-questions" style="display:none">
+    <div class="card-hd question">💬 완료 후 질문</div>
+    <div class="q-list" id="q-list"></div>
+  </div>
+
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-complete" onclick="markComplete()">활동 완료</button>
+    <button class="ctrl-btn btn-list" onclick="goList()">목록으로</button>
+  </div>
+</div>
+
+<div id="complete-banner">
+  <h2>🎉 모든 활동 완료!</h2>
+  <p>19가지 집행기능 훈련을 모두 마쳤습니다.</p>
+  <button class="ctrl-btn btn-list" style="margin-top:10px" onclick="location.href='index.html'">홈으로</button>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ── 변수 풀 ──────────────────────────────
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+const HOSPITALS = ['내과','정형외과','신경과','재활의학과','피부과','안과','이비인후과'];
+const DAYS = ['월요일','화요일','수요일','목요일','금요일'];
+const TIMES = ['오전 9시','오전 10시','오전 11시','오후 1시','오후 2시','오후 3시'];
+const MEDS = ['혈압약','당뇨약','관절약','수면제','위장약','골다공증약'];
+const MARTS = ['이마트','홈플러스','롯데마트','하나로마트'];
+const BUDGETS = ['60,000원','70,000원','80,000원','50,000원'];
+const THERAPY = ['물리치료','작업치료','언어치료','인지치료'];
+
+// ── 19가지 활동 데이터 ────────────────────
+function makeActivities(){
+  const h1=pick(HOSPITALS), h2=pick(HOSPITALS);
+  const t1=pick(TIMES), t2=pick(TIMES);
+  const day=pick(DAYS);
+  const med=pick(MEDS);
+  const mart=pick(MARTS);
+  const budget=pick(BUDGETS);
+  const th1=pick(THERAPY), th2=pick(THERAPY);
+  const monthly=pick(['1,200,000원','1,500,000원','1,800,000원']);
+  const fixed=pick(['600,000원','700,000원','800,000원']);
+
+  return [
+    {
+      id:1, title:'아침 준비하기', tag:'순서화', tagClass:'tag-seq',
+      situation:`다음은 아침에 할 수 있는 활동들입니다.\n\n침대에서 일어나기 / 세수하기 / 이 닦기 / 옷 입기 / 아침 식사하기 / 약 복용하기`,
+      steps:[
+        '위의 6가지 활동을 가장 적절한 순서로 번호를 매겨보세요.',
+        '각 활동에 걸리는 예상 시간을 말해보세요.',
+        '순서를 정한 이유를 설명해보세요.',
+      ],
+      questions:[
+        '이 활동들을 모두 마치는 데 얼마나 시간이 걸릴까요?',
+        '시간이 부족하다면 어떤 활동을 먼저 해야 할까요?',
+        '어떤 활동이 가장 중요하다고 생각하나요?',
+      ]
+    },
+    {
+      id:2, title:'병원 방문 계획하기', tag:'시간계획', tagClass:'tag-plan',
+      situation:`내일 ${t1}에 ${h1} 예약이 있습니다.\n병원까지는 차로 30분이 걸리고, 접수 및 대기 시간으로 20분이 필요합니다.\n병원 방문 전에 아침 식사와 약 복용, 개인위생 관리를 해야 하며 병원에 가져갈 서류와 보험카드도 준비해야 합니다.`,
+      steps:[
+        '병원에 늦지 않기 위해 언제 준비를 시작해야 할지 계산해보세요.',
+        '아침 7시부터 병원 도착까지 필요한 모든 활동을 순서대로 나열해보세요.',
+        '각 활동에 소요되는 예상 시간을 말해보세요.',
+      ],
+      questions:[
+        '예상치 못한 교통 체증이 발생한다면 계획을 어떻게 조정할 수 있을까요?',
+        '어떤 활동이 가장 중요하고 반드시 해야 하나요?',
+        '시간을 절약할 수 있는 방법은 무엇일까요?',
+      ]
+    },
+    {
+      id:3, title:'나의 하루 계획하기', tag:'시간계획', tagClass:'tag-plan',
+      situation:`오늘 해야 할 활동들이 아래와 같습니다.\n\n아침 식사 준비 및 식사 / 병원 또는 치료 방문 / 점심 식사 / 운동 / 저녁 식사 준비 및 식사 / 취미 활동 / 내일 준비하기`,
+      steps:[
+        '각 활동에 소요될 것으로 예상되는 시간을 말해보세요.',
+        '활동들을 오전 7시부터 오후 9시 사이에 배치해보세요.',
+        '활동 간 이동 시간과 휴식 시간도 고려해서 말해보세요.',
+        '계획이 현실적인지 스스로 평가해보세요.',
+      ],
+      questions:[
+        '계획한 시간표가 현실적이라고 생각하나요?',
+        '우선순위에 맞게 시간을 배분했나요?',
+        '계획대로 안 될 때 어떻게 조정할 수 있을까요?',
+      ]
+    },
+    {
+      id:4, title:'한 주의 약속 관리하기', tag:'일정관리', tagClass:'tag-plan',
+      situation:`다음 주에 여러 중요한 약속이 있습니다.\n\n• 월요일 오전 10시: ${th1} (1시간)\n• 화요일 오후 2시: 정기 건강검진 (2시간)\n• 수요일 오전 11시: 친구와 점심 약속 (1시간 30분)\n• 목요일 오후 3시: 은행 업무 (1시간)\n• 금요일 오전 9시: ${th2} (1시간)\n\n각 장소까지는 평균 30분이 소요되며, 귀가 시간도 동일합니다.`,
+      steps:[
+        '모든 약속을 요일별로 정리해보세요.',
+        '각 약속에 필요한 이동 시간을 포함해서 말해보세요.',
+        '약속 준비에 필요한 시간(30분)도 포함하여 계획해보세요.',
+        '약속 사이에 충돌이 있는지 확인해보세요.',
+      ],
+      questions:[
+        '가장 바쁜 날은 언제이며, 에너지 관리를 어떻게 할 계획인가요?',
+        '약속 전후로 휴식 시간을 어떻게 배치했나요?',
+        '갑작스러운 컨디션 저하에 대비한 계획은 무엇인가요?',
+      ]
+    },
+    {
+      id:5, title:'건강한 식사 계획과 장보기', tag:'예산관리', tagClass:'tag-budget',
+      situation:`의사는 저염식, 저지방 식단을 권장했습니다.\n이번 주 식단을 계획하고 필요한 식재료를 구매하려고 합니다.\n예산은 ${budget}이며, 장보러 갈 수 있는 시간은 내일 오전 10시부터 12시까지입니다.`,
+      steps:[
+        '3일치 식단(아침, 점심, 저녁)을 계획해보세요.',
+        '저염·저지방 원칙에 맞는 식재료 목록을 작성해보세요.',
+        `${mart}에서 물건을 효율적으로 구매하기 위한 순서를 말해보세요.`,
+        '예산 내에서 구매 가능한지 확인해보세요.',
+      ],
+      questions:[
+        '건강에 좋은 식품을 어떻게 선택했나요?',
+        '장보기 시간을 효율적으로 사용하기 위해 어떤 전략을 사용했나요?',
+        '예상보다 장보기가 오래 걸린다면 어떻게 대처할 계획인가요?',
+      ]
+    },
+    {
+      id:6, title:'복잡한 투약 일정 관리하기', tag:'건강관리', tagClass:'tag-health',
+      situation:`의사가 다음과 같은 약을 처방했습니다.\n\n• 혈압약: 하루 2회 (아침·저녁 식사 30분 전)\n• 혈당 조절제: 하루 3회 (매 식사 직후)\n• 항응고제: 하루 1회 (저녁 식사 후)\n• 진통제: 필요시 (통증 있을 때, 최소 4시간 간격)\n• 비타민: 하루 1회 (아침 식사와 함께)`,
+      steps:[
+        '일일 투약 일정표를 오전 6시부터 취침 시간까지 말해보세요.',
+        '식사 시간을 고려하여 약 복용 시간을 정확히 설명해보세요.',
+        '약을 잊지 않고 복용하기 위한 알림 방법을 3가지 말해보세요.',
+        '외출 시 약 관리 방법을 계획해보세요.',
+      ],
+      questions:[
+        '여러 약을 동시에 복용해야 할 때 어떻게 구분할 계획인가요?',
+        '약 복용을 잊었을 때 어떻게 대처할 계획인가요?',
+        '약 복용 일정을 가족에게 어떻게 설명할 수 있을까요?',
+      ]
+    },
+    {
+      id:7, title:'월간 생활비 계획하기', tag:'예산관리', tagClass:'tag-budget',
+      situation:`이번 달 생활비로 ${monthly}이 있습니다.\n고정 지출(월세, 공과금, 통신비 등)은 ${fixed}입니다.\n나머지 금액으로 식비, 의료비, 교통비, 여가 활동비 등을 계획해야 합니다.`,
+      steps:[
+        '나머지 금액이 얼마인지 계산해보세요.',
+        '각 항목별로 적절한 예산을 배분해보세요.',
+        '주별 지출 계획을 세워보세요.',
+        '예상치 못한 지출에 대비한 비상금을 설정해보세요.',
+      ],
+      questions:[
+        '어떤 항목에 우선순위를 두었나요? 그 이유는 무엇인가요?',
+        '예산을 초과하게 된다면 어떤 항목을 조정할 계획인가요?',
+        '남은 금액이 생긴다면 어떻게 활용할 계획인가요?',
+      ]
+    },
+    {
+      id:8, title:'겹치는 의료 약속 조정하기', tag:'일정충돌', tagClass:'tag-conflict',
+      situation:`다음 주에 여러 의료 약속이 잡혀 있습니다.\n\n• 월요일 오전 10시: 신경과 진료 (1시간)\n• 월요일 오전 11시: 물리치료 (1시간)\n• 수요일 오후 2시: 작업치료 (1시간)\n• 수요일 오후 3시: 심장 전문의 진료 (1시간)\n• 금요일 오전 9시: 혈액 검사 (30분)\n\n병원 간 이동 시간은 약 30분이 필요합니다.`,
+      steps:[
+        '위 일정에서 겹치거나 문제가 되는 약속을 찾아보세요.',
+        '겹치는 약속 중 변경해야 할 약속을 결정하고 이유를 말해보세요.',
+        '변경 가능한 대체 시간을 제안해보세요.',
+        '약속 변경을 위해 어떤 순서로 연락할지 계획해보세요.',
+      ],
+      questions:[
+        '어떤 약속을 우선시했나요? 그 이유는 무엇인가요?',
+        '약속 변경이 어려울 경우 어떤 대안을 생각할 수 있을까요?',
+      ]
+    },
+    {
+      id:9, title:'일상 루틴에 약속 통합하기', tag:'일정관리', tagClass:'tag-plan',
+      situation:`평소 일상 루틴:\n• 오전 7시: 기상 / 오전 7:30: 아침 식사 및 약 복용\n• 오전 8:30: 가벼운 스트레칭 / 오전 11:30: 점심 식사 및 약 복용\n• 오후 2:00: 낮잠(30분) / 오후 5:30: 저녁 식사 및 약 복용 / 오후 10:00: 취침\n\n이번 주 ${day}에 추가 약속:\n• 오전 10시: 치과 진료 (1시간)\n• 오후 1시: 은행 방문 (1시간)\n• 오후 4시: 친구 만남 (2시간)\n\n각 장소까지는 약 30분이 소요됩니다.`,
+      steps:[
+        '이동 시간과 준비 시간을 포함하여 ${day} 전체 일정표를 작성해보세요.',
+        '약 복용 시간을 고려하여 식사 시간을 조정해보세요.',
+        '에너지 관리를 위해 필요한 휴식 시간을 계획해보세요.',
+      ],
+      questions:[
+        '일상 루틴 중 어떤 부분을 조정했나요? 그 이유는 무엇인가요?',
+        '약속 사이에 충분한 휴식 시간을 확보했나요?',
+        '이런 바쁜 날 컨디션 관리를 위한 전략은 무엇인가요?',
+      ]
+    },
+    {
+      id:10, title:'가족 행사와 개인 일정 조율하기', tag:'일정충돌', tagClass:'tag-conflict',
+      situation:`이번 주 토요일에 가족 결혼식이 있습니다 (오후 1시~5시).\n결혼식장까지는 차로 1시간이 걸립니다.\n\n같은 날 개인 일정:\n• 오전 9시: 정기 물리치료 (1시간)\n• 오후 3시: 중요한 약 복용\n• 오후 6시: 이웃과의 저녁 식사 약속`,
+      steps:[
+        '토요일 전체 일정을 시간순으로 계획해보세요.',
+        '결혼식 참석을 위한 준비 시간(옷 갈아입기, 선물 준비 등)을 포함해보세요.',
+        '약 복용 시간을 어떻게 관리할지 계획해보세요.',
+        '이웃과의 저녁 식사 약속을 유지할지 변경할지 결정하고 이유를 설명해보세요.',
+        '하루 동안 필요한 휴식 시간을 계획해보세요.',
+      ],
+      questions:[
+        '이 계획에서 가장 어려운 부분은 무엇이었나요?',
+        '예상치 못한 교통 체증이 발생한다면 어떻게 조정할 수 있을까요?',
+        '결혼식에서 피로감을 느낀다면 어떻게 대처할 계획인가요?',
+      ]
+    },
+    {
+      id:11, title:'계절 변화에 따른 일정 조정', tag:'돌발대응', tagClass:'tag-adapt',
+      situation:`겨울이 다가오고 있으며, 다음 주에는 눈이 내릴 가능성이 높습니다.\n\n다음 주 일정:\n• 월요일 오전 9시: 재활센터 방문 (2시간)\n• 화요일 오후 2시: 친구와 카페 만남 (1시간)\n• 수요일 오전 10시: 병원 검진 (1시간 30분)\n• 목요일 오후 3시: 지역 센터 모임 (2시간)\n• 금요일 오전 11시: 미용실 예약 (1시간)\n\n대중교통 이용 중이며, 눈이 오면 이동 시간이 평소보다 2배 길어질 수 있습니다.`,
+      steps:[
+        '날씨 상황을 고려하여 다음 주 일정을 재평가해보세요.',
+        '꼭 유지해야 할 약속과 변경/취소 가능한 약속을 구분해보세요.',
+        '변경이 필요한 약속에 대한 대안 일정을 제안해보세요.',
+        '눈이 올 경우를 대비한 이동 계획을 말해보세요.',
+      ],
+      questions:[
+        '어떤 약속을 필수적으로 유지해야 한다고 판단했나요? 이유는?',
+        '날씨로 인한 불확실성에 대비하기 위해 어떤 전략을 사용했나요?',
+        '갑작스러운 기상 악화로 외출이 불가능해질 경우의 대비책은 무엇인가요?',
+      ]
+    },
+    {
+      id:12, title:'가족 생일 모임 계획하기', tag:'시간계획', tagClass:'tag-plan',
+      situation:`다음 주 토요일은 배우자의 생일입니다.\n15명의 가족과 친구들을 초대하여 집에서 특별한 생일 모임을 열기로 했습니다.\n\n손님 중:\n• 2명은 음식 알레르기 (견과류, 해산물)\n• 3명은 당뇨가 있어 설탕 섭취 제한 필요`,
+      steps:[
+        '모임 준비를 위한 5일 계획표를 작성해보세요.',
+        '모든 손님의 식이 제한을 고려한 메뉴를 계획해보세요.',
+        '필요한 물품 목록과 구매 계획을 세워보세요.',
+        '당일 시간별 진행 계획을 세워보세요 (손님 맞이부터 환송까지).',
+        '모임 중 진행할 간단한 활동이나 게임을 계획해보세요.',
+      ],
+      questions:[
+        '다양한 식이 제한을 가진 손님들을 어떻게 배려했나요?',
+        '모임 중 피로해질 경우를 대비한 계획은 무엇인가요?',
+        '준비 과정에서 도움이 필요한 부분은 어떻게 해결할 계획인가요?',
+      ]
+    },
+    {
+      id:13, title:'주택 수리 계획 및 예산 관리', tag:'예산관리', tagClass:'tag-budget',
+      situation:`집의 여러 부분에 수리가 필요합니다.\n수리 예산으로 3,000,000원이 있으며, 모든 수리를 한 번에 할 수는 없습니다.\n\n수리 견적:\n• 부엌 싱크대: 1,500,000원 (3일 소요)\n• 화장실 샤워 부스: 1,200,000원 (2일 소요)\n• 현관 계단: 800,000원 (1일 소요)`,
+      steps:[
+        '우선순위를 정하고 그 이유를 설명해보세요.',
+        '수리 일정과 예산 계획을 세워보세요.',
+        '수리 기간 동안의 일상생활 조정 계획을 말해보세요.',
+        '예상치 못한 추가 비용(20%)이 발생할 경우의 대응 계획을 세워보세요.',
+      ],
+      questions:[
+        '우선순위를 결정할 때 어떤 요소를 고려했나요?',
+        '예산 제약 내에서 어떻게 최대한의 수리를 계획했나요?',
+        '수리 중 발생할 수 있는 불편함을 어떻게 최소화할 계획인가요?',
+      ]
+    },
+    {
+      id:14, title:'지역사회 활동 참여 계획하기', tag:'시간계획', tagClass:'tag-plan',
+      situation:`지역 센터에서 다음과 같은 프로그램을 제공합니다.\n\n• 월/수/금 오전 10시: 시니어 체조 (1시간)\n• 화/목 오후 2시: 원예 치료 (1시간 30분)\n• 수요일 오후 3시: 독서 모임 (2시간)\n• 목요일 오전 11시: 요리 교실 (2시간)\n• 토요일 오전 9시: 산책 모임 (1시간)`,
+      steps:[
+        '참여하고 싶은 프로그램을 2~3개 선택하고 그 이유를 설명해보세요.',
+        '선택한 프로그램 참여를 위한 월간 일정표를 작성해보세요.',
+        '각 활동에 필요한 준비물과 준비 사항을 말해보세요.',
+        '활동 참여를 위한 교통 계획을 세워보세요.',
+        '건강 상태에 따른 참여 조정 계획을 말해보세요.',
+      ],
+      questions:[
+        '이 활동들이 재활과 사회적 연결에 어떻게 도움이 될 것 같나요?',
+        '활동 참여에 장애가 될 수 있는 요소는 무엇이며, 어떻게 극복할 계획인가요?',
+        '새로운 사람들과의 교류에 대한 계획은 무엇인가요?',
+      ]
+    },
+    {
+      id:15, title:'여러 가족 구성원의 약속 조율', tag:'일정충돌', tagClass:'tag-conflict',
+      situation:`가족의 일정 관리를 담당하고 있습니다.\n혼자 운전하기 어려우며, 가족은 차량 1대를 공유합니다.\n\n나의 일정:\n• 월요일 오전 10시: ${th1} (1시간)\n• 수요일 오후 2시: 의사 진료 (1시간)\n• 금요일 오전 11시: ${th2} (1시간)\n\n배우자 일정:\n• 화요일 오후 3시: 건강검진 (2시간)\n• 목요일 오전 9시: 치과 진료 (1시간)\n\n성인 자녀: 월~금 직장 (오전 9시~오후 6시), 수요일 저녁 회의`,
+      steps:[
+        '가족 구성원 모두의 일정을 통합한 주간 일정표를 작성해보세요.',
+        '교통 문제를 해결하기 위한 계획을 세워보세요.',
+        '약속 장소가 서로 다른 방향에 있을 경우 대안을 제시해보세요.',
+        '예상치 못한 상황(차량 고장, 약속 연장)에 대한 대비책을 마련해보세요.',
+      ],
+      questions:[
+        '가장 복잡한 일정 충돌은 무엇이었으며 어떻게 해결했나요?',
+        '가족 구성원들과 일정 조율을 위해 어떤 의사소통이 필요할까요?',
+        '이런 복잡한 일정 관리를 더 효율적으로 할 수 있는 방법은 무엇인가요?',
+      ]
+    },
+    {
+      id:16, title:'제한된 에너지로 우선순위 결정', tag:'우선순위', tagClass:'tag-prior',
+      situation:`의사는 하루에 4시간 이상 활동하지 말고 충분한 휴식을 취할 것을 권고했습니다.\n\n다음 주 화요일 일정:\n• 오전 9시: 중요한 의사 진료 (1시간)\n• 오전 11시: 은행에서 중요한 서류 제출 (마감일)\n• 오후 1시: 손자의 학교 발표회 (2시간)\n• 오후 4시: 이웃 주민 모임 (1시간 30분)\n• 저녁 식사 준비 (1시간)\n\n각 장소 간 이동 시간은 약 30분씩 소요됩니다.`,
+      steps:[
+        '각 활동의 중요도와 긴급성을 평가해보세요.',
+        '4시간 활동 제한을 고려하여 참석할 활동과 조정/취소할 활동을 결정해보세요.',
+        '선택한 활동들에 대한 시간 계획을 세워보세요 (이동·휴식 포함).',
+        '취소해야 하는 활동에 대한 대안이나 대처 방안을 제시해보세요.',
+      ],
+      questions:[
+        '활동 우선순위를 어떤 기준으로 결정했나요?',
+        '참석하지 못하는 활동에 대한 아쉬움을 어떻게 관리할 계획인가요?',
+        '비슷한 상황이 반복된다면 어떻게 미리 계획을 조정할 수 있을까요?',
+      ]
+    },
+    {
+      id:17, title:'갑작스러운 일정 변경에 대응하기', tag:'돌발대응', tagClass:'tag-adapt',
+      situation:`오늘은 월요일이며, 이번 주 계획은 다음과 같습니다.\n• 화요일 오전 10시: 물리치료\n• 수요일 오후 2시: 친구와 차 마시기\n• 목요일 오전 11시: 정기 검진\n• 금요일 오후 3시: 미용실 예약\n\n방금 다음 상황이 발생했습니다.\n1. 병원에서 전화: 목요일 검진 취소 → 내일(화요일) 오후 2시로 변경\n2. 자녀 연락: 금요일 오전에 중요한 일로 도움 요청\n3. 수도 수리공: 수요일 오전 10시 방문 예정`,
+      steps:[
+        '변경된 상황을 모두 반영하여 이번 주 일정을 재조정해보세요.',
+        '겹치는 일정을 해결하기 위한 방안을 제시해보세요.',
+        '각 일정 변경에 필요한 연락과 조치를 계획해보세요.',
+        '향후 비슷한 상황에 대비하기 위한 전략을 3가지 제안해보세요.',
+      ],
+      questions:[
+        '일정 변경 과정에서 가장 어려웠던 결정은 무엇이었나요?',
+        '일정 변경으로 인한 스트레스를 어떻게 관리할 계획인가요?',
+        '이런 갑작스러운 변화에 더 잘 대응하기 위해 평소에 어떤 준비를 할 수 있을까요?',
+      ]
+    },
+    {
+      id:18, title:'명절 기간 건강관리와 가족 행사 조율', tag:'건강관리', tagClass:'tag-health',
+      situation:`추석 연휴(5일간) 가족 행사:\n• 첫째 날: 고향 방문 및 차례 준비 (이동 3시간)\n• 둘째 날: 차례 및 가족 식사\n• 셋째 날: 친척 방문\n• 넷째 날: 가족 나들이\n• 다섯째 날: 귀가 (이동 3시간)\n\n건강관리 필요 사항:\n• 매일 정해진 시간에 약 복용 (하루 3회)\n• 하루 30분 가벼운 운동\n• 충분한 휴식 (과로 금지)\n• 저염식 식단 유지\n• 스트레스 관리`,
+      steps:[
+        '5일간의 상세 일정표를 작성해보세요.',
+        '가족 행사와 건강관리를 어떻게 통합할지 계획해보세요.',
+        '각 날짜별로 예상되는 어려움과 대처 방안을 말해보세요.',
+        '명절 음식 섭취와 관련된 전략을 세워보세요.',
+        '필요한 휴식 시간을 일정에 포함해보세요.',
+      ],
+      questions:[
+        '가족 행사 참여와 건강관리 사이에서 어떻게 균형을 맞추었나요?',
+        '예상치 못한 피로나 건강 이슈가 발생할 경우 어떻게 대처할 계획인가요?',
+        '가족들에게 건강관리 필요성을 어떻게 설명할 계획인가요?',
+      ]
+    },
+    {
+      id:19, title:'건강 이슈와 사회적 약속 균형 맞추기', tag:'우선순위', tagClass:'tag-prior',
+      situation:`최근 건강이 좋지 않아 피로감이 심합니다.\n이번 주에 다음과 같은 약속들이 있습니다.\n\n• ${DAYS[0]} ${TIMES[0]}: ${pick(THERAPY)} (1시간)\n• ${DAYS[1]} 오후: 오랜 친구와의 만남 (2시간)\n• ${DAYS[2]} ${TIMES[1]}: ${h1} 정기 진료 (1시간)\n• ${DAYS[3]}: 가족 식사 모임\n• ${DAYS[4]}: 동네 주민 봉사 활동\n\n모든 약속을 지키면 과로가 예상됩니다.`,
+      steps:[
+        '각 약속의 중요도(건강, 사회적 의무, 개인 의지)를 평가해보세요.',
+        '건강을 최우선으로 고려하여 조정할 약속을 결정해보세요.',
+        '조정이 필요한 약속에 대해 상대방에게 어떻게 설명할지 말해보세요.',
+        '남은 약속들을 에너지 소모를 최소화하며 진행하는 방법을 계획해보세요.',
+      ],
+      questions:[
+        '건강과 사회적 책임 사이에서 어떻게 균형을 잡았나요?',
+        '약속을 취소하거나 변경할 때 어떤 감정이 생길 수 있고 어떻게 관리할까요?',
+        '앞으로 비슷한 상황을 예방하기 위해 어떻게 일정을 관리할 수 있을까요?',
+      ]
+    },
+  ];
+}
+
+// ── 상태 ──────────────────────────────────
+let activities = makeActivities();
+let doneSet = new Set();
+let currentIdx = null;
+let stepDone = [];
+let qDone = [];
+let timerInterval = null;
+let timerSec = 0;
+let timerRunning = false;
+
+// ── 타이머 ────────────────────────────────
+function toggleTimer(){
+  const btn = document.getElementById('timer-btn');
+  if(!timerRunning){
+    timerRunning = true;
+    btn.textContent = '정지';
+    btn.style.background = '#d32f2f';
+    timerInterval = setInterval(()=>{
+      timerSec++;
+      const m = String(Math.floor(timerSec/60)).padStart(2,'0');
+      const s = String(timerSec%60).padStart(2,'0');
+      document.getElementById('timer-val').textContent = m+':'+s;
+    }, 1000);
+  } else {
+    timerRunning = false;
+    btn.textContent = '계속';
+    btn.style.background = '#388e3c';
+    clearInterval(timerInterval);
+  }
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSec = 0;
+  document.getElementById('timer-val').textContent = '00:00';
+  document.getElementById('timer-btn').textContent = '시작';
+  document.getElementById('timer-btn').style.background = '#3f51b5';
+}
+
+// ── 목록 렌더 ─────────────────────────────
+function renderList(){
+  const container = document.getElementById('activity-list');
+  container.innerHTML = '';
+  activities.forEach((act, i) => {
+    const card = document.createElement('div');
+    card.className = 'act-card' + (doneSet.has(act.id) ? ' done' : '');
+    card.innerHTML = `
+      <div class="act-num">${act.id}</div>
+      <div class="act-info">
+        <div class="act-title">${act.title}</div>
+        <span class="act-tag ${act.tagClass}">${act.tag}</span>
+        ${doneSet.has(act.id) ? '<span style="font-size:0.8rem;color:#4caf50;font-weight:700;margin-left:6px">✓ 완료</span>' : ''}
+      </div>
+    `;
+    card.onclick = () => startActivity(i);
+    container.appendChild(card);
+  });
+
+  if(doneSet.size === activities.length){
+    document.getElementById('complete-banner').style.display = 'block';
+  }
+}
+
+// ── 활동 시작 ─────────────────────────────
+function startActivity(idx){
+  currentIdx = idx;
+  const act = activities[idx];
+  stepDone = new Array(act.steps.length).fill(false);
+  qDone    = new Array(act.questions.length).fill(false);
+
+  // 헤더
+  document.getElementById('hdr-num').textContent   = act.id;
+  document.getElementById('hdr-title').textContent = act.title;
+  document.getElementById('hdr-tag').textContent   = act.tag;
+
+  // 상황
+  document.getElementById('bd-situation').innerHTML =
+    act.situation.split('\n').map(l => l.trim() ? `<p style="margin:4px 0">${l}</p>` : '').join('');
+
+  // 지시사항
+  const stepList = document.getElementById('step-list');
+  stepList.innerHTML = '';
+  act.steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'step-item';
+    div.innerHTML = `<span class="step-num">${i+1}</span><span>${s}</span><span class="step-check">✓</span>`;
+    div.onclick = () => toggleStep(i, div, act);
+    stepList.appendChild(div);
+  });
+
+  // 질문
+  const qList = document.getElementById('q-list');
+  qList.innerHTML = '';
+  act.questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-item';
+    div.innerHTML = `<span class="q-num">${i+1}</span><span>${q}</span>`;
+    div.onclick = () => { div.classList.toggle('done'); };
+    qList.appendChild(div);
+  });
+
+  document.getElementById('card-questions').style.display = 'block';
+  updateProgress(act);
+  resetTimer();
+
+  document.getElementById('activity-list').style.display = 'none';
+  document.getElementById('training-screen').style.display = 'flex';
+  window.scrollTo(0, 0);
+}
+
+function toggleStep(i, div, act){
+  stepDone[i] = !stepDone[i];
+  div.classList.toggle('done', stepDone[i]);
+  updateProgress(act);
+}
+
+function updateProgress(act){
+  const done = stepDone.filter(Boolean).length;
+  const total = act.steps.length;
+  document.getElementById('prog-fill').style.width = (done/total*100)+'%';
+  document.getElementById('prog-cur').textContent  = done;
+  document.getElementById('prog-tot').textContent  = total;
+}
+
+function markComplete(){
+  const act = activities[currentIdx];
+  doneSet.add(act.id);
+  resetTimer();
+  goList();
+}
+
+function goList(){
+  resetTimer();
+  document.getElementById('training-screen').style.display = 'none';
+  document.getElementById('activity-list').style.display = 'grid';
+  renderList();
+  window.scrollTo(0, 0);
+}
+
+// ── 초기 렌더 ─────────────────────────────
+renderList();
+</script>
+</body>
+</html>

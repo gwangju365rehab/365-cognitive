@@ -1,0 +1,3780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메뉴판 과제 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px;
+      font-family: 'Malgun Gothic', '맑은 고딕', 'Apple SD Gothic Neo', 'Noto Sans KR',
+                   system-ui, -apple-system, BlinkMacSystemFont,
+                   'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+      background: #fff; color: #222;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    h1 { margin: 0 0 2px; font-size: 1.9rem; font-weight: 800; text-align: center; }
+    .subtitle { font-size: 13px; color: #888; margin: 0; text-align: center; }
+    .hidden { display: none !important; }
+
+    /* ══ 모드 선택 화면 ══ */
+    #mode-screen {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; max-width: 600px; width: 100%;
+    }
+    .mode-desc { font-size: 0.93rem; color: #555; line-height: 1.7; text-align: center; }
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+    .mode-card {
+      border: 2px solid #ddd; border-radius: 16px; padding: 22px 16px;
+      cursor: pointer; text-align: center; background: #fff;
+      transition: all 0.15s; display: flex; flex-direction: column; gap: 8px;
+    }
+    .mode-card:hover { border-color: #90caf9; background: #f0f7ff; }
+    .mode-card.selected { border-color: #1976d2; background: #e3f2fd; }
+    .mode-icon { font-size: 2rem; }
+    .mode-title { font-size: 16px; font-weight: 800; }
+    .mode-badge {
+      font-size: 11px; font-weight: 600; border-radius: 999px;
+      padding: 3px 12px; display: inline-block; margin: 0 auto;
+    }
+    .mode-card.standard .mode-badge { background: #e3f2fd; color: #1565c0; }
+    .mode-card.custom   .mode-badge { background: #f3e5f5; color: #6a1b9a; }
+    .mode-subdesc { font-size: 12px; color: #777; line-height: 1.5; }
+
+    /* ══ 설정 화면 공통 ══ */
+    #setup-screen {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 14px; max-width: 660px; width: 100%;
+    }
+    .setup-box {
+      background: #f7f9fc; border: 1px solid #ddd; border-radius: 14px;
+      padding: 16px 20px; width: 100%;
+    }
+    .setup-box h3 { margin: 0 0 10px; font-size: 0.9rem; font-weight: 700; color: #333; }
+    .opt-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .opt-btn {
+      padding: 7px 16px; border-radius: 999px; border: 2px solid #ddd;
+      background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .opt-btn.selected { border-color: #1976d2; background: #1976d2; color: #fff; }
+
+    /* 난이도 카드 */
+    .diff-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .diff-card {
+      border: 2px solid #ddd; border-radius: 12px; padding: 14px 12px;
+      cursor: pointer; text-align: center; background: #fff;
+      transition: all 0.15s; display: flex; flex-direction: column; gap: 5px;
+    }
+    .diff-card:hover { border-color: #90caf9; background: #f0f7ff; }
+    .diff-card.selected { border-color: #1976d2; background: #e3f2fd; }
+    .diff-title { font-size: 15px; font-weight: 800; }
+    .diff-badge {
+      font-size: 11px; border-radius: 999px; padding: 2px 11px;
+      display: inline-block; margin: 0 auto; font-weight: 600;
+    }
+    .diff-card.easy   .diff-badge { background:#c8e6c9; color:#1b5e20; }
+    .diff-card.medium .diff-badge { background:#fff9c4; color:#e65100; }
+    .diff-card.hard   .diff-badge { background:#ffe0b2; color:#bf360c; }
+    .diff-card.expert .diff-badge { background:#e1bee7; color:#4a148c; }
+    .diff-desc  { font-size:13px; color:#888; }
+
+    /* 건강 상태 */
+    .health-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .health-card {
+      border: 2px solid #ddd; border-radius: 10px; padding: 10px 16px;
+      cursor: pointer; background: #fff; transition: all 0.15s;
+      display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600;
+    }
+    .health-card:hover { border-color: #80cbc4; background: #e0f2f1; }
+    .health-card.selected { border-color: #00897b; background: #e0f2f1; color: #004d40; }
+    .health-card .hc-icon {
+      font-size: 11px; font-weight: 800; background: #1976d2; color: #fff;
+      border-radius: 6px; padding: 3px 6px; letter-spacing: 0.03em; flex-shrink: 0;
+    }
+    .health-card.selected .hc-icon { background: #00897b; }
+    .health-card .hc-sub { font-size: 11px; color:#777; font-weight:400; display:block; margin-top:1px; }
+    .health-card.selected .hc-sub { color: #00695c; }
+
+    /* 칼로리 기준 카드 */
+    .kcal-card {
+      border: 2px solid #ddd; border-radius: 10px; padding: 10px 14px;
+      cursor: pointer; background: #fff; transition: all 0.15s; min-width: 120px;
+    }
+    .kcal-card:hover { border-color: #90caf9; background: #f0f7ff; }
+    .kcal-card.selected { border-color: #1976d2; background: #e3f2fd; }
+
+    /* 시작 버튼 */
+    .start-btn {
+      padding: 12px 44px; border-radius: 999px; border: none;
+      background: #1976d2; color: #fff; font-weight: 700; font-size: 16px; cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18); margin-top: 4px;
+    }
+    .start-btn:hover { background: #1565c0; }
+    .back-btn {
+      padding: 8px 20px; border-radius: 999px; border: 2px solid #ddd;
+      background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; color: #555;
+    }
+    .back-btn:hover { background: #f5f5f5; }
+
+    /* ══ 게임 화면 ══ */
+    #game-screen {
+      width: 100%; max-width: 1200px;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    /* 규칙 패널 — 왼쪽 고정 */
+    #rules-panel {
+      grid-column: 1;
+      grid-row: 1 / 10;
+      background: #fffde7; border: 2px solid #f9a825;
+      border-radius: 14px; padding: 14px 22px 16px;
+      position: sticky; top: 12px;
+      box-sizing: border-box;
+      overflow-wrap: break-word;
+      word-break: keep-all;
+    }
+    /* 오른쪽 영역 */
+    #top-bar, #progress-bar-wrap, #meal-tabs, #menu-area, #bottom-bar, #examiner-watch-game {
+      grid-column: 2;
+    }
+    #rules-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+    }
+    #rules-header h3 { margin: 0; font-size: 0.95rem; color: #e65100; font-weight: 800; }
+    #toggle-rules-btn {
+      font-size: 12px; padding: 3px 11px; border-radius: 999px;
+      border: 1px solid #f9a825; background: #fff8e1; color: #e65100; cursor: pointer; font-weight: 600;
+    }
+    #rules-list { margin: 0; padding-left: 20px; padding-right: 4px; font-size: 13.5px; line-height: 1.9; color: #333; word-break: keep-all; overflow-wrap: break-word; }
+    #rules-list li { margin-bottom: 1px; }
+    .rule-health { color: #00695c; font-weight: 600; }
+    #rules-hidden-msg { font-size: 13px; color: #aaa; font-style: italic; display: none; padding: 2px 0; }
+
+    /* 진행 */
+    #top-bar {
+      display: flex; justify-content: space-between; align-items: center; width: 100%;
+    }
+    #progress-info { font-size: 13px; color: #666; }
+    .stat-badges { display: flex; gap: 8px; }
+    .stat-badge {
+      font-size: 13px; font-weight: 700; padding: 5px 13px;
+      border-radius: 999px; transition: background 0.2s, color 0.2s;
+    }
+    #kcal-badge { background: #e3f2fd; color: #1976d2; }
+    #ml-badge   { background: #e8f5e9; color: #2e7d32; }
+    #progress-bar-wrap { width: 100%; background: #eee; border-radius: 999px; height: 8px; overflow: hidden; }
+    #progress-bar { height: 100%; background: #1976d2; border-radius: 999px; transition: width 0.3s; width: 0%; }
+
+    /* 식사 탭 */
+    #meal-tabs { display: flex; gap: 6px; width: 100%; }
+    .meal-tab {
+      flex: 1; padding: 9px 6px; border-radius: 10px; border: 2px solid #ddd;
+      background: #f7f9fc; text-align: center; font-size: 13px; font-weight: 700;
+      cursor: default; color: #aaa;
+    }
+    .meal-tab.active { border-color: #1976d2; background: #e3f2fd; color: #1976d2; cursor: pointer; }
+    .meal-tab.done   { border-color: #43a047; background: #e8f5e9; color: #2e7d32; cursor: pointer; }
+
+    /* 표준 모드 — 전체 메뉴판 보기 (아침·점심·저녁·간식 한 화면) */
+    .std-meal-section {
+      grid-column: 1 / -1;
+      margin: 14px 0 4px;
+      padding: 10px 14px;
+      background: linear-gradient(90deg, #e3f2fd 0%, #f0f7ff 100%);
+      border-left: 5px solid #1976d2;
+      border-radius: 6px;
+      font-size: 16px; font-weight: 800; color: #0d47a1;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .std-meal-section:first-child { margin-top: 0; }
+    .std-meal-section .std-meal-emoji { font-size: 20px; }
+
+    /* 카테고리 */
+    .cat-header {
+      font-size: 12px; font-weight: 700; color: #888; letter-spacing: 0.04em;
+      margin: 12px 0 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .cat-header::after { content:''; flex:1; height:1px; background:#eee; }
+    .cat-note { font-size: 11px; color: #aaa; font-weight: 400; margin-left: 4px; }
+
+    /* 메뉴 그리드 */
+    #menu-area { width: 100%; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .cat-header {
+      grid-column: 1 / -1;
+      font-size: 12px; font-weight: 700; color: #888; letter-spacing: 0.04em;
+      margin: 8px 0 2px; display: flex; align-items: center; gap: 6px;
+    }
+    .cat-header::after { content:''; flex:1; height:1px; background:#eee; }
+    .cat-note { font-size: 11px; color: #aaa; font-weight: 400; margin-left: 4px; }
+    .menu-grid { display: contents; }
+    .menu-item {
+      background: #f7f9fc; border: 2px solid #ddd; border-radius: 11px;
+      padding: 10px 10px; cursor: pointer; transition: all 0.12s;
+      display: flex; flex-direction: column; gap: 3px; position: relative;
+      min-height: 70px;
+    }
+    .menu-item:hover    { border-color: #1976d2; background: #e3f2fd; }
+    .menu-item.selected { border-color: #1976d2; background: #bbdefb; }
+    .menu-item.violation { border-color: #c62828 !important; background: #ffebee !important; }
+    .menu-name { font-size: 13px; font-weight: 700; }
+    .menu-sub  { font-size: 11px; color: #aaa; }
+    .menu-ml   { font-size: 11px; color: #2196f3; }
+    .heart-mark { position: absolute; top: 6px; right: 7px; font-size: 13px; }
+    .tags-row { display: flex; gap: 3px; flex-wrap: wrap; }
+    .tag { background: #e0e0e0; border-radius: 999px; padding: 2px 6px; font-size: 10.5px; color: #444; }
+    .tag.heart   { background: #fce4ec; color: #c62828; }
+    .tag.diabetes{ background: #e8f5e9; color: #2e7d32; }
+    .tag.cancer  { background: #f3e5f5; color: #6a1b9a; }
+    .sel-count {
+      position: absolute; top: 5px; right: 6px;
+      background: #1976d2; color: #fff; font-size: 11px; font-weight: 800;
+      width: 18px; height: 18px; border-radius: 999px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* 하단 */
+    #bottom-bar { display: flex; gap: 10px; width: 100%; justify-content: flex-end; }
+    .action-btn { padding: 10px 24px; border-radius: 999px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+    #confirm-btn { background: #1976d2; color: #fff; }
+    #confirm-btn:hover { background: #1565c0; }
+    #confirm-btn:disabled { background: #bbb; cursor: default; }
+    #reset-btn { background: #eee; color: #333; }
+    #reset-btn:hover { background: #ddd; }
+    #back-game-btn { background: #fff; border: 2px solid #ddd !important; color: #555; margin-right: auto; }
+    #back-game-btn:hover { background: #f5f5f5; border-color: #bbb !important; }
+
+    /* 피드백 */
+    #feedback-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center; z-index: 100;
+    }
+    #feedback-box {
+      background: #fff; border-radius: 20px; padding: 26px 30px;
+      max-width: 500px; width: 92%; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    #fb-icon   { font-size: 2.6rem; margin-bottom: 6px; }
+    #fb-title  { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    #fb-detail { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 18px; white-space: pre-line; text-align: left; }
+    #fb-next-btn { padding: 10px 30px; border-radius: 999px; border: none; background: #1976d2; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
+    #fb-next-btn:hover { background: #1565c0; }
+
+    /* 결과 */
+    #result-screen { max-width: 660px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .r-card { background: #f7f9fc; border: 1px solid #ddd; border-radius: 14px; padding: 16px 20px; width: 100%; }
+    .r-card h3 { margin: 0 0 12px; font-size: 0.95rem; font-weight: 800; color: #333; }
+    .r-row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid #eee; }
+    .r-row:last-child { border-bottom: none; }
+    .r-row .lbl { color: #555; }
+    .r-row .val { font-weight: 700; color: #1976d2; }
+    .r-row .val.bad { color: #c62828; }
+    .r-row .val.ok  { color: #2e7d32; }
+    .meal-result { margin-bottom: 14px; }
+    .meal-result h4 { margin: 0 0 5px; font-size: 0.88rem; font-weight: 700; color: #444; }
+    .chip { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 12px; margin: 2px; background: #e3f2fd; border: 1px solid #90caf9; }
+    .chip.heart { background: #fce4ec; border-color: #f48fb1; }
+    .chip.bad   { background: #ffebee; border-color: #ef9a9a; color: #c62828; }
+    #score-box {
+      border-radius: 14px; padding: 16px; text-align: center; width: 100%;
+      border: 2px solid #43a047; background: #e8f5e9;
+    }
+    #score-box .score-num { font-size: 2.6rem; font-weight: 900; color: #2e7d32; line-height: 1; }
+    #score-box .score-label { font-size: 13px; color: #555; margin-top: 4px; }
+    #score-box .score-sub { font-size: 12px; color: #888; margin-top: 6px; }
+    #restart-btn { padding: 12px 40px; border-radius: 999px; border: none; background: #1976d2; color: #fff; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.18); }
+    #restart-btn:hover { background: #1565c0; }
+
+    /* ══════════════════════════════════════════════ */
+    /* 레포트 카드 (공식 평가지 스타일)               */
+    /* ══════════════════════════════════════════════ */
+    #report-card {
+      max-width: 1100px; width: 100%;
+      background: #fff; border: 1px solid #bbb;
+      padding: 24px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      color: #222; font-size: 12.5px; line-height: 1.6;
+    }
+    /* 2-column 본문 레이아웃 */
+    .rpt-twocol {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 14px;
+    }
+    .rpt-col-left, .rpt-col-right { min-width: 0; }
+    @media (max-width: 900px) {
+      .rpt-twocol { grid-template-columns: 1fr; gap: 0; }
+    }
+    .rpt-title { text-align: center; margin-bottom: 10px;
+      padding-bottom: 10px; border-bottom: 2px solid #222; }
+    .rpt-title h1 {
+      font-size: 17px; font-weight: 800; color: #222;
+      margin: 0 0 2px;
+    }
+    .rpt-title h2 {
+      font-size: 14px; font-weight: 700; color: #444;
+      margin: 0;
+    }
+    .rpt-info-bar {
+      display: grid; grid-template-columns: 1.4fr 1.3fr 1.1fr 1fr 1.2fr;
+      gap: 0;
+      margin: 0 0 12px;
+      border: 1px solid #999;
+      font-size: 11.5px;
+    }
+    .rpt-info-bar > span {
+      padding: 6px 10px;
+      border-right: 1px solid #ddd;
+      display: flex; align-items: center; gap: 6px;
+      height: 32px;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .rpt-info-bar > span:last-child { border-right: none; }
+    .rpt-info-bar .rpt-info-cell-combo { gap: 4px; }
+    .rpt-info-bar .rpt-info-sex { max-width: 42px; flex: 0 0 42px; }
+    .rpt-info-bar .rpt-info-age { max-width: 60px; flex: 0 0 60px; }
+    .rpt-info-bar b {
+      color: #555; font-weight: 600;
+      white-space: nowrap; flex-shrink: 0;
+      min-width: 48px;
+      font-size: 11px;
+    }
+    .rpt-info-input {
+      flex: 1 1 0; min-width: 0; width: 100%;
+      border: none; border-bottom: 1px dotted #aaa;
+      background: transparent; font-size: 11.5px;
+      padding: 1px 2px; font-family: inherit; outline: none;
+      box-sizing: border-box;
+      height: 18px;
+    }
+    .rpt-info-input:focus { border-bottom-color: #1976d2; background: #f8fbff; }
+    @media print {
+      .rpt-info-input { border-bottom: 1px solid #555 !important; background: transparent !important; }
+      .rpt-info-input::placeholder { color: transparent !important; }
+    }
+
+    .rpt-instruction {
+      font-size: 11.5px; color: #333; line-height: 1.7;
+      margin-bottom: 10px; text-align: justify;
+    }
+    .rpt-q-block { text-align: center; margin: 18px 0; font-size: 12px; }
+    .rpt-q-block .rpt-q { font-weight: 600; margin-bottom: 6px; }
+    .rpt-q-block .rpt-opts { font-size: 12.5px; color: #333; }
+    .rpt-q-block .rpt-opts span { margin: 0 5px; }
+    .rpt-q-block .rpt-opts .checked { font-weight: 800; color: #222; text-decoration: underline; }
+    .rpt-q-block-pre { margin-top: 40px !important; margin-bottom: 36px !important; }
+    .rpt-q-block-post { margin-top: 40px; margin-bottom: 28px; }
+    .rpt-q-block-err { margin-top: 28px; margin-bottom: 36px; }
+
+    .rpt-score-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 11.5px; margin: 12px 0;
+    }
+    .rpt-score-table th, .rpt-score-table td {
+      border: 1px solid #777; padding: 5px 6px; vertical-align: middle;
+    }
+    .rpt-score-table thead th {
+      background: #f0f0f0; font-weight: 700; text-align: center;
+      padding: 6px 4px; font-size: 11px;
+    }
+    .rpt-score-table .rpt-perf-col, .rpt-score-table .rpt-err-col {
+      width: 60px; text-align: center;
+    }
+    .rpt-score-table tr.rpt-section-row td {
+      background: #fafafa; font-weight: 700;
+      padding: 4px 8px; text-align: left; font-size: 11.5px;
+    }
+    .rpt-score-table .rpt-num { width: 28px; text-align: center; font-weight: 600; }
+    .rpt-score-table .rpt-label {
+      padding-left: 10px; font-size: 11.5px;
+      line-height: 1.55; word-break: keep-all;
+    }
+    .rpt-score-table .rpt-label b {
+      display: inline-block;
+      font-weight: 700; color: #333;
+      margin-right: 4px;
+    }
+    .rpt-score-table .rpt-perf-val, .rpt-score-table .rpt-err-val {
+      text-align: center; font-weight: 700; font-size: 12.5px;
+    }
+    .rpt-score-table .rpt-perf-val { color: #1a5e1a; }
+    .rpt-score-table .rpt-err-val { color: #b71c1c; }
+    .rpt-score-table tr.rpt-total-row td {
+      background: #f0f0f0; font-weight: 800;
+      text-align: center; padding: 6px 8px; font-size: 12px;
+    }
+    .rpt-score-table .rpt-radio-cell {
+      text-align: center; padding: 2px 4px;
+    }
+    .rpt-score-table .rpt-radio-cell label {
+      cursor: pointer; display: inline-block; padding: 2px 6px;
+    }
+
+    .rpt-footer-note {
+      margin-top: 14px; font-size: 12px; color: #333;
+      line-height: 1.95; text-align: justify;
+    }
+    .rpt-divider {
+      margin: 16px 0 12px;
+      border-top: 1px solid #999;
+    }
+
+    .rpt-verdict {
+      border: 1.5px solid #555; padding: 12px 16px; margin-bottom: 14px;
+      font-size: 13px; line-height: 1.6; background: #fff;
+    }
+    .rpt-verdict.pending { border-color: #999; }
+    .rpt-verdict.normal  { border-color: #2e7d32; }
+    .rpt-verdict.below   { border-color: #c62828; }
+    .rpt-verdict .rpt-verdict-score {
+      font-size: 16px; font-weight: 800;
+      display: block; margin-bottom: 4px;
+      padding-bottom: 4px; border-bottom: 1px solid #ddd;
+    }
+    .rpt-verdict.normal .rpt-verdict-score { color: #2e7d32; }
+    .rpt-verdict.below  .rpt-verdict-score { color: #c62828; }
+    .rpt-verdict.pending .rpt-verdict-score { color: #555; }
+
+    .rpt-sec { margin-bottom: 14px; }
+    .rpt-sec-title {
+      font-size: 13px; font-weight: 700; color: #222;
+      margin: 0 0 8px;
+      padding: 4px 8px;
+      background: #f0f0f0;
+      border-left: 4px solid #444;
+    }
+    .rpt-subsec {
+      margin-bottom: 10px;
+      padding: 0;
+    }
+    .rpt-subsec:last-child { margin-bottom: 0; }
+    .rpt-subsec-title {
+      font-size: 12.5px; font-weight: 700; color: #333;
+      margin-bottom: 4px;
+      padding-bottom: 2px;
+      border-bottom: 1px solid #ccc;
+    }
+    .rpt-subsec-desc {
+      font-size: 11px; color: #777; margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .rpt-meta-card {
+      border: 1px solid #999;
+      padding: 10px 14px; margin-bottom: 6px;
+      font-size: 12.5px; line-height: 1.7;
+      background: #fff;
+    }
+    .rpt-meta-card.match,
+    .rpt-meta-card.over,
+    .rpt-meta-card.under,
+    .rpt-meta-card.minor {
+      background: #fff; color: #222;
+    }
+    .rpt-meta-card .rpt-meta-label {
+      font-weight: 700; margin-bottom: 4px;
+      padding-bottom: 4px; border-bottom: 1px solid #ddd;
+    }
+    .rpt-meta-card .rpt-meta-numbers {
+      font-size: 11.5px; color: #555; margin-top: 6px;
+      padding-top: 6px; border-top: 1px dashed #ddd;
+    }
+    .rpt-awareness-line {
+      margin-top: 6px; font-size: 12px;
+      padding: 6px 10px; background: #fafafa;
+      border-left: 3px solid #999;
+    }
+
+    /* 메타인지 — 피검자 반응 표 (직관적 3열 구조) */
+    .rpt-meta-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 11.5px; margin: 2px 0 8px;
+    }
+    .rpt-meta-table th, .rpt-meta-table td {
+      border: 1px solid #999; padding: 6px 8px; vertical-align: top;
+    }
+    .rpt-meta-table thead th {
+      background: #fafafa; font-weight: 700; text-align: center;
+      font-size: 11px;
+    }
+    .rpt-meta-table .rpt-meta-q-col { width: 32%; font-weight: 600; }
+    .rpt-meta-table .rpt-meta-resp-col {
+      width: 22%; text-align: center; font-weight: 700; color: #1565c0;
+    }
+    .rpt-meta-table .rpt-meta-actual-col {
+      width: 18%; text-align: center; font-weight: 700;
+    }
+    .rpt-meta-table .rpt-meta-actual-col.ok { color: #1a5e1a; }
+    .rpt-meta-table .rpt-meta-actual-col.bad { color: #b71c1c; }
+    .rpt-meta-table .rpt-meta-implication-col { font-size: 11.5px; color: #333; line-height: 1.5; }
+    .rpt-meta-finding {
+      margin-top: 8px; padding: 8px 12px;
+      background: #fafafa; border: 1px solid #ddd;
+      font-size: 12px; line-height: 1.6; color: #333;
+    }
+    .rpt-meta-finding b { color: #b71c1c; }
+    .rpt-meta-finding.normal b { color: #1a5e1a; }
+
+    /* 인지기능 영역별 분석 — 공식 평가지 표 형식 */
+    .rpt-cog-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 12px; margin: 4px 0 8px;
+    }
+    .rpt-cog-table th, .rpt-cog-table td {
+      border: 1px solid #999; padding: 7px 9px; vertical-align: top;
+      line-height: 1.6; word-break: keep-all;
+    }
+    .rpt-cog-table thead th {
+      background: #fafafa; font-weight: 700; text-align: center;
+      font-size: 11.5px;
+    }
+    .rpt-cog-table .rpt-cog-domain {
+      font-weight: 700; width: 26%;
+    }
+    .rpt-cog-table .rpt-cog-domain-eng {
+      font-size: 10px; color: #666; font-weight: 400;
+      display: block; margin-top: 2px;
+      line-height: 1.45;
+    }
+    .rpt-cog-table .rpt-cog-items-col {
+      width: 11%; text-align: center; white-space: nowrap;
+    }
+    .rpt-cog-table .rpt-cog-result-col {
+      width: 12%; text-align: center; font-weight: 700;
+      white-space: nowrap;
+    }
+    .rpt-cog-table .rpt-cog-result-col.pass { color: #1a5e1a; }
+    .rpt-cog-table .rpt-cog-result-col.fail { color: #b71c1c; }
+    .rpt-cog-table .rpt-cog-detail {
+      font-size: 11.5px; color: #333; line-height: 1.55;
+    }
+    .rpt-cog-table .rpt-cog-detail .fail-line {
+      color: #b71c1c; margin-top: 3px;
+      padding-left: 4px;
+    }
+    .rpt-cog-summary-bar {
+      margin-top: 8px; padding: 8px 12px;
+      background: #fafafa; border: 1px solid #ddd;
+      font-size: 12px; line-height: 1.6; color: #333;
+    }
+
+    .rpt-meal-table {
+      width: 100%; border-collapse: collapse; font-size: 11.5px;
+    }
+    .rpt-meal-table th, .rpt-meal-table td {
+      border: 1px solid #999; padding: 6px 9px;
+      line-height: 1.6; word-break: keep-all;
+    }
+    .rpt-meal-table th {
+      background: #fafafa; font-weight: 700; text-align: left;
+      font-size: 11px;
+    }
+    .rpt-meal-table td:first-child {
+      background: #f5f5f5; font-weight: 600; white-space: nowrap;
+      width: 22%;
+    }
+    .rpt-meal-summary {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 6px;
+      border: 1px solid #999;
+      font-size: 11.5px;
+    }
+    .rpt-meal-summary > span {
+      padding: 6px 12px;
+      border-right: 1px solid #ddd;
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+    .rpt-meal-summary > span:last-child { border-right: none; }
+    .rpt-meal-summary .rpt-summary-criterion {
+      color: #888; font-size: 10.5px; font-weight: 400;
+      display: block; margin-top: 2px;
+    }
+    .rpt-textarea {
+      width: 100%; min-height: 60px;
+      border: 1px solid #999;
+      padding: 6px 8px; font-size: 12px; font-family: inherit;
+      outline: none; resize: vertical;
+      background: #fff;
+    }
+    .rpt-footer {
+      display: flex; justify-content: space-between;
+      margin-top: 14px; padding-top: 8px;
+      border-top: 1px solid #999;
+      font-size: 10.5px; color: #666;
+    }
+
+    /* 인쇄 스타일 — 1쪽: 채점표 영역 여유있게 / 2쪽~: 분석 영역 */
+    @media print {
+      body { background: #fff !important; padding: 0 !important; margin: 0 !important; font-size: 9.5pt; }
+      .no-print, #examiner-toggle-btn { display: none !important; }
+      #setup-screen, #mode-screen, #game-screen, #intro-overlay,
+      #pre-predict-overlay, #examiner-overlay, #post-q-overlay,
+      #feedback-overlay, #hospital-logo, .main-title, .subtitle,
+      h1.main-title { display: none !important; }
+      body > h1, body > p { display: none !important; }
+      #result-screen { padding: 0 !important; margin: 0 !important; gap: 0 !important; }
+      #report-card {
+        box-shadow: none !important; border: none !important;
+        padding: 0 !important; max-width: 100% !important;
+        font-size: 10pt !important; line-height: 1.5 !important;
+      }
+
+      /* ── 1쪽: 제목·정보바·질문·채점표 영역 — 여유 있게 ── */
+      .rpt-title { margin-bottom: 10px !important; padding-bottom: 8px !important; }
+      .rpt-title h1 { font-size: 15pt !important; }
+      .rpt-title h2 { font-size: 11pt !important; }
+      .rpt-info-bar { margin-bottom: 4px !important; font-size: 9pt !important; }
+      .rpt-info-bar > span { padding: 4px 8px !important; height: 26px !important; }
+      .rpt-info-bar b { font-size: 8.5pt !important; min-width: 42px !important; }
+      .rpt-info-input { font-size: 9pt !important; height: 16px !important; }
+
+      /* 질문 지문 위아래 간격 넉넉히 */
+      .rpt-q-block { margin: 18px 0 !important; font-size: 10pt !important; }
+      .rpt-q-block .rpt-q { margin-bottom: 6px !important; font-size: 10.5pt !important; }
+      .rpt-q-block-pre { margin-top: 22px !important; margin-bottom: 18px !important; }
+      .rpt-q-block-post { margin-top: 22px !important; margin-bottom: 14px !important; }
+      .rpt-q-block-err  { margin-top: 14px !important; margin-bottom: 22px !important; }
+
+      /* 채점표 */
+      .rpt-score-table { font-size: 9.5pt !important; margin: 8px 0 !important; }
+      .rpt-score-table th, .rpt-score-table td { padding: 4px 6px !important; line-height: 1.45 !important; }
+      .rpt-score-table tr.rpt-section-row td { padding: 4px 8px !important; font-size: 9.5pt !important; }
+      .rpt-score-table tr.rpt-total-row td { padding: 5px 8px !important; }
+
+      /* 최종 판정 */
+      .rpt-verdict { padding: 10px 14px !important; margin-bottom: 10px !important; font-size: 10pt !important; line-height: 1.5 !important; }
+      .rpt-verdict .rpt-verdict-score { font-size: 12pt !important; margin-bottom: 4px !important; padding-bottom: 4px !important; }
+      .rpt-divider { margin: 14px 0 10px !important; }
+
+      /* ── 2쪽 시작: 인지기능 영역별 분석부터 강제 페이지 분리 ── */
+      #rpt-cog-sec { page-break-before: always !important; margin-top: 0 !important; padding-top: 0 !important; }
+
+      /* 2쪽 영역 — 모두 2쪽 한 장에 들어가도록 압축 */
+      #rpt-cog-sec, #rpt-cog-sec ~ .rpt-sec, #rpt-cog-sec ~ .rpt-footer {
+        font-size: 8pt !important;
+        line-height: 1.3 !important;
+      }
+      .rpt-sec { margin-bottom: 4px !important; }
+      .rpt-sec-title { margin-bottom: 2px !important; padding: 2px 6px !important; font-size: 9.5pt !important; }
+      .rpt-subsec { margin-bottom: 3px !important; }
+      .rpt-subsec-title { font-size: 8.5pt !important; margin-bottom: 2px !important; padding-bottom: 1px !important; }
+      .rpt-subsec-desc { display: none !important; }
+
+      /* 2쪽 분석 표들 — 압축 */
+      .rpt-cog-table { font-size: 8pt !important; }
+      .rpt-cog-table th, .rpt-cog-table td { padding: 2px 4px !important; line-height: 1.25 !important; }
+      .rpt-cog-table thead th { font-size: 7.5pt !important; }
+      .rpt-cog-table .rpt-cog-domain-eng { display: none !important; }
+      .rpt-cog-summary-bar { padding: 3px 6px !important; font-size: 8pt !important; margin-top: 2px !important; line-height: 1.35 !important; }
+
+      .rpt-meta-table { font-size: 8pt !important; }
+      .rpt-meta-table th, .rpt-meta-table td { padding: 2px 4px !important; line-height: 1.25 !important; }
+      .rpt-meta-table thead th { font-size: 7.5pt !important; }
+      .rpt-meta-finding { padding: 3px 6px !important; font-size: 8pt !important; margin-top: 2px !important; line-height: 1.35 !important; }
+      .rpt-meta-card { padding: 4px 8px !important; margin-bottom: 2px !important; font-size: 8pt !important; }
+
+      /* 식사 분석 */
+      .rpt-meal-table { font-size: 8pt !important; }
+      .rpt-meal-table th, .rpt-meal-table td { padding: 2px 4px !important; line-height: 1.25 !important; }
+      .rpt-meal-summary { font-size: 8pt !important; }
+      .rpt-meal-summary > span { padding: 2px 6px !important; }
+      .rpt-meal-summary .rpt-summary-criterion { font-size: 7pt !important; margin-top: 1px !important; }
+
+      /* 임상 소견 */
+      .rpt-textarea { border: 1px solid #555 !important; min-height: 28px !important; font-size: 8pt !important; padding: 3px 5px !important; }
+
+      /* 페이지 분할 제어 — 2쪽 안에 다 들어가도록 섹션 내부 분리 허용 */
+      #rpt-cog-sec, #rpt-cog-sec ~ .rpt-sec { page-break-inside: auto !important; }
+      .rpt-cog-table, .rpt-meta-table, .rpt-meal-table { page-break-inside: auto !important; }
+      .rpt-cog-table tr, .rpt-meta-table tr, .rpt-meal-table tr { page-break-inside: avoid; }
+
+      .rpt-footer { margin-top: 4px !important; padding-top: 3px !important; font-size: 7pt !important; }
+      @page { margin: 10mm 10mm; size: A4; }
+    }
+
+    /* 환자용 안내 오버레이 */
+    #intro-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center; z-index: 300;
+    }
+    #intro-box {
+      background: #fff; border-radius: 20px; padding: 30px 32px;
+      max-width: 640px; width: 94%; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22); max-height: 90vh; overflow-y: auto;
+    }
+
+    /* 수행 전 예측 오버레이 */
+    #pre-predict-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+    }
+    #pre-predict-box {
+      background: #fff; border-radius: 20px; padding: 26px 28px;
+      max-width: 440px; width: 94%; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      max-height: 92vh; overflow-y: auto;
+    }
+    .predict-btn {
+      width: 100%; padding: 11px 16px; border-radius: 10px;
+      border: 2px solid #ddd; background: #fff; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.12s; text-align: left;
+    }
+    .predict-btn:hover { border-color: #1976d2; background: #e3f2fd; color: #1565c0; }
+    .predict-btn.selected { border-color: #1976d2; background: #1976d2; color: #fff; }
+
+    /* 검사자 지시문 오버레이 (논문 매뉴얼 단계별 지시문 표시) */
+    #examiner-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center; z-index: 350;
+    }
+    #examiner-box {
+      background: #fff; border-radius: 20px; padding: 28px 30px;
+      max-width: 480px; width: 94%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+      max-height: 92vh; overflow-y: auto;
+    }
+    .ex-title-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 2px solid #1565c0;
+    }
+    .ex-title-icon { font-size: 1.5rem; }
+    .ex-title-text {
+      font-size: 1.05rem; font-weight: 800; color: #1565c0;
+    }
+    .ex-title-sub {
+      font-size: 11px; color: #888; margin-left: auto;
+    }
+    .ex-script {
+      background: #f0f7ff; border-left: 4px solid #1976d2;
+      border-radius: 6px; padding: 12px 14px; margin-bottom: 12px;
+      font-size: 14px; line-height: 1.8; color: #1a3a6c;
+    }
+    .ex-script-label {
+      font-size: 11px; font-weight: 700; color: #1976d2;
+      letter-spacing: 0.04em; margin-bottom: 4px;
+    }
+    .ex-script-quote {
+      font-style: normal; font-weight: 600;
+    }
+    .ex-note {
+      font-size: 12px; color: #777; line-height: 1.6;
+      margin: 12px 0 16px; padding: 8px 10px;
+      background: #fafafa; border-radius: 6px;
+    }
+    .ex-next-btn {
+      width: 100%; padding: 13px; border-radius: 12px; border: none;
+      background: #1976d2; color: #fff; font-size: 15px; font-weight: 700;
+      cursor: pointer;
+    }
+    .ex-next-btn:hover { background: #1565c0; }
+
+    /* 검사자용 관찰 메모 (피검자 화면 하단의 작은 안내) */
+    .examiner-watch-note {
+      margin-top: 14px;
+      background: #fff8e1; border: 1px dashed #ffb74d;
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 11.5px; line-height: 1.65; color: #6d4c00;
+      text-align: left;
+    }
+    .examiner-watch-note .ew-label {
+      font-weight: 800; color: #e65100;
+      margin-bottom: 4px; display: block;
+    }
+    .examiner-watch-note .ew-item {
+      display: block; margin-top: 2px;
+    }
+    /* 검사자 안내 전체 숨김 (기본값) */
+    body.hide-examiner .examiner-watch-note { display: none !important; }
+    #examiner-toggle-btn {
+      position: fixed; left: 12px; bottom: 12px;
+      z-index: 9999;
+      background: #fff8e1; color: #e65100; border: 1px dashed #ffb74d;
+      border-radius: 20px; padding: 8px 14px; font-size: 12px;
+      font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      opacity: 0.85;
+    }
+    #examiner-toggle-btn:hover { opacity: 1; }
+    /* 결과 화면(레포트)에서는 숨김 — 검사자 안내가 의미 없음 */
+    body.on-result-screen #examiner-toggle-btn { display: none !important; }
+
+    /* 사후 질문 오버레이 (검사 종료 후 점수 기록지 6, 7번) */
+    #post-q-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center; z-index: 320;
+    }
+    /* 시작·억제 오류 입력 오버레이 (점수 기록지 8~12번) */
+    #obs-q-overlay:not(.hidden) {
+      display: flex !important;
+    }
+    .obs-q-item {
+      background: #f7f9fc; border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid #e0e0e0;
+      transition: border-color 0.15s;
+    }
+    .obs-q-item.answered { border-color: #1976d2; background: #f0f7ff; }
+    .obs-q-item .obs-q-text {
+      font-size: 13px; color: #222; margin-bottom: 8px;
+      line-height: 1.55;
+    }
+    .obs-q-item .obs-q-num {
+      font-weight: 800; color: #1565c0; margin-right: 4px;
+    }
+    .obs-q-item .obs-q-btns {
+      display: flex; gap: 8px;
+    }
+    .obs-q-item .obs-q-btn {
+      flex: 1; padding: 7px 12px; border-radius: 8px;
+      border: 2px solid #ddd; background: #fff;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .obs-q-item .obs-q-btn:hover { border-color: #1976d2; }
+    .obs-q-item .obs-q-btn.selected.yes {
+      border-color: #2e7d32; background: #2e7d32; color: #fff;
+    }
+    .obs-q-item .obs-q-btn.selected.no {
+      border-color: #c62828; background: #c62828; color: #fff;
+    }
+    #post-q-box {
+      background: #fff; border-radius: 20px; padding: 26px 28px;
+      max-width: 480px; width: 94%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+      max-height: 92vh; overflow-y: auto;
+    }
+    .post-q-section {
+      background: #f0f7ff; border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 14px;
+    }
+    .post-q-section .q-label {
+      font-size: 11px; font-weight: 700; color: #1976d2;
+      letter-spacing: 0.04em; margin-bottom: 4px;
+    }
+    .post-q-section .q-text {
+      font-weight: 700; font-size: 14.5px; color: #1a3a6c;
+      line-height: 1.65; margin-bottom: 10px;
+    }
+    .post-q-btn {
+      padding: 9px 14px; border-radius: 10px;
+      border: 2px solid #ddd; background: #fff;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .post-q-btn:hover { border-color: #1976d2; background: #e3f2fd; color: #1565c0; }
+    .post-q-btn.selected { border-color: #1976d2; background: #1976d2; color: #fff; }
+    .post-q-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .post-q-err-detail {
+      width: 100%; margin-top: 8px; padding: 8px 10px;
+      border: 1px solid #ccc; border-radius: 8px;
+      font-size: 13px; font-family: inherit; outline: none;
+      resize: vertical; min-height: 50px;
+      box-sizing: border-box;
+    }
+    .post-q-next {
+      width: 100%; padding: 13px; border-radius: 12px; border: none;
+      background: #1976d2; color: #fff; font-size: 15px; font-weight: 700;
+      cursor: pointer; margin-top: 4px;
+    }
+    .post-q-next:hover { background: #1565c0; }
+    .post-q-next:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* 인지기능 접이식 패널 */
+    .cog-section { margin-bottom: 14px; }
+    .cog-domain {
+      font-size: 13px; font-weight: 700; color: #444;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .cog-domain-sub { font-size: 11px; color: #aaa; font-weight: 400; }
+    .cog-items { display: flex; flex-direction: column; gap: 5px; padding-left: 4px; }
+    .cog-item {
+      display: flex; gap: 8px; align-items: flex-start;
+      background: #f7f9fc; border-radius: 8px; padding: 7px 10px; font-size: 12.5px;
+    }
+    .cog-name { font-weight: 700; color: #1976d2; white-space: nowrap; min-width: 72px; }
+    .cog-desc { color: #555; line-height: 1.5; }
+    #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background: rgba(255,255,255,0.85); border-radius: 4px; font-weight: 500; }
+
+    @media(max-width:768px){
+      #game-screen { grid-template-columns: 1fr; }
+      #rules-panel { grid-row: auto; position: static; }
+      #top-bar, #progress-bar-wrap, #meal-tabs, #menu-area, #bottom-bar, #examiner-watch-game { grid-column: 1; }
+    }
+    @media(max-width:560px){
+      .mode-grid { grid-template-columns: 1fr; }
+      .diff-grid { grid-template-columns: 1fr 1fr; }
+      #menu-area { grid-template-columns: repeat(2,1fr); }
+      .meal-tab  { font-size: 11px; padding: 7px 3px; }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body class="hide-examiner">
+
+<h1>메뉴판 과제</h1>
+<p class="subtitle">The Menu Task-K · 한국판 메뉴판 과제 · 기능적 인지 평가</p>
+<button class="no-print" onclick="window.location.href='index.html'" style="
+  position:fixed; top:16px; left:16px; padding:8px 18px;
+  border-radius:999px; border:1px solid #ddd; background:#fff;
+  font-size:13px; font-weight:600; cursor:pointer; color:#555;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:999;">
+  ← 메인으로
+</button>
+<button class="no-print" id="open-records-btn" style="
+  position:fixed; top:16px; right:16px; padding:8px 18px;
+  border-radius:999px; border:1px solid #1976d2; background:#fff;
+  font-size:13px; font-weight:600; cursor:pointer; color:#1976d2;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1); z-index:999;">
+  📂 저장된 평가지
+</button>
+
+<!-- ══ 모드 선택 화면 ══ -->
+<div id="mode-screen">
+  <p class="mode-desc">원하는 모드를 선택하세요.</p>
+  <div class="mode-grid">
+    <div class="mode-card standard" data-mode="standard">
+      <div class="mode-icon">📋</div>
+      <div class="mode-title">표준 검사</div>
+      <span class="mode-badge">The Menu Task-K</span>
+      <div class="mode-subdesc">한국판 메뉴판 과제 표준 평가<br>아침·점심·저녁·간식 · 12점 만점<br>절단점 8점 미만</div>
+    </div>
+    <div class="mode-card custom" data-mode="custom">
+      <div class="mode-icon">⚙️</div>
+      <div class="mode-title">훈련 모드</div>
+      <span class="mode-badge">맞춤 설정</span>
+      <div class="mode-subdesc">난이도·건강상태·칼로리 기준<br>자유롭게 설정 가능<br>훈련 및 연습용</div>
+    </div>
+  </div>
+  <button class="start-btn" id="mode-next-btn" disabled>다음</button>
+</div>
+
+<!-- ══ 설정 화면 ══ -->
+<div id="setup-screen" class="hidden">
+
+  <!-- 표준 검사 설정 -->
+  <div id="std-setup">
+    <div class="setup-box" style="background:#f0f7ff;border-color:#90caf9;">
+      <h3 style="color:#1565c0;">📋 The Menu Task-K (한국판 메뉴판 과제)</h3>
+      <div style="font-size:13px;color:#444;line-height:1.7;">
+        전보라(2025) 박사학위논문 표준화 기준의 정식 평가 모드입니다.<br>
+        <b>아침·점심·저녁·간식 4단계</b>로 수행하며,
+        <b>과제 오류 7점 + 시작·억제 오류 5점 = 총 12점 만점</b>으로 채점합니다.
+        <br><span style="color:#888;font-size:12px;">
+        절단점 7.5점 (AUC=.750) · 8점 미만 = 기능적 인지의 문제 가능성</span>
+      </div>
+    </div>
+    <div class="setup-box">
+      <h3>실시간 정보 표시 <span style="font-weight:400;color:#999;font-size:11px;">(치료사 선택 · 피검자에게 힌트가 될 수 있음)</span></h3>
+      <div class="opt-row">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="show-kcal-opt" style="width:16px;height:16px;cursor:pointer;"> 현재 칼로리 표시
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="show-ml-opt" style="width:16px;height:16px;cursor:pointer;"> 현재 음료 용량 표시
+        </label>
+      </div>
+      <div style="font-size:11.5px;color:#999;margin-top:8px;line-height:1.6;">
+        ※ 정식 평가 시에는 두 옵션 모두 <b>끄기를 권장</b>합니다.
+        피검자가 칼로리/음료 총량을 직접 머릿속에서 계산하는 능력이 채점 항목 1·2번의 평가 대상입니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 훈련 모드 설정 -->
+  <div id="custom-setup" class="hidden">
+    <div class="setup-box">
+      <h3>난이도 선택</h3>
+      <div class="diff-grid">
+        <div class="diff-card easy selected" data-val="easy">
+          <div class="diff-title">🟢 초급</div>
+          <span class="diff-badge">조건 3개</span>
+          <div class="diff-desc">메뉴 8종</div>
+        </div>
+        <div class="diff-card medium" data-val="medium">
+          <div class="diff-title">🟡 중급</div>
+          <span class="diff-badge">조건 5개</span>
+          <div class="diff-desc">메뉴 16종</div>
+        </div>
+        <div class="diff-card hard" data-val="hard">
+          <div class="diff-title">🟠 고급</div>
+          <span class="diff-badge">조건 7개</span>
+          <div class="diff-desc">메뉴 28종</div>
+        </div>
+        <div class="diff-card expert" data-val="expert">
+          <div class="diff-title">🔴 전문가</div>
+          <span class="diff-badge">조건 9개</span>
+          <div class="diff-desc">메뉴 40종</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-box">
+      <h3>건강 상태 <span style="font-weight:400;color:#999;font-size:11px;">(중복 선택 가능 · 조건에 자동 추가)</span></h3>
+      <div class="health-grid">
+        <div class="health-card" data-val="hypertension"><span class="hc-icon">혈압</span><div>고혈압<span class="hc-sub">나트륨 강화 제한</span></div></div>
+        <div class="health-card" data-val="diabetes"><span class="hc-icon">당뇨</span><div>당뇨<span class="hc-sub">혈당 올리는 음식 제한</span></div></div>
+        <div class="health-card" data-val="heart"><span class="hc-icon">심장</span><div>심장질환<span class="hc-sub">심장건강 음식 필수</span></div></div>
+        <div class="health-card" data-val="kidney"><span class="hc-icon">신장</span><div>신장질환<span class="hc-sub">단백질·칼륨 제한</span></div></div>
+        <div class="health-card" data-val="cancer"><span class="hc-icon">항암</span><div>항암<span class="hc-sub">항산화 식품·식이섬유 필수</span></div></div>
+      </div>
+    </div>
+
+    <div class="setup-box">
+      <h3>칼로리 기준 <span style="font-weight:400;color:#999;font-size:11px;">(1끼 기준 · 색상 경고)</span></h3>
+      <div class="opt-row" id="kcal-opts">
+        <div class="kcal-card selected" data-good="800" data-warn="1000">
+          <div style="font-weight:700;font-size:14px;">일반 성인</div>
+          <div style="font-size:11px;color:#666;margin-top:3px;">800kcal 이하 적정 · 1000kcal 초과 주의</div>
+        </div>
+        <div class="kcal-card" data-good="600" data-warn="800">
+          <div style="font-weight:700;font-size:14px;">당뇨·다이어트</div>
+          <div style="font-size:11px;color:#666;margin-top:3px;">600kcal 이하 적정 · 800kcal 초과 주의</div>
+        </div>
+        <div class="kcal-card" data-good="700" data-warn="900">
+          <div style="font-weight:700;font-size:14px;">심장·고혈압</div>
+          <div style="font-size:11px;color:#666;margin-top:3px;">700kcal 이하 적정 · 900kcal 초과 주의</div>
+        </div>
+        <div class="kcal-card" data-good="900" data-warn="1100">
+          <div style="font-weight:700;font-size:14px;">항암·회복기</div>
+          <div style="font-size:11px;color:#666;margin-top:3px;">900kcal 이하 적정 · 1100kcal 초과 주의</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-box">
+      <h3>실시간 칼로리 표시 <span style="font-weight:400;color:#999;font-size:11px;">(피검자에게 힌트가 될 수 있음)</span></h3>
+      <div class="opt-row">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="custom-show-kcal-opt" style="width:16px;height:16px;cursor:pointer;"> 현재 칼로리 표시
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="back-btn" id="setup-back-btn">← 모드 선택</button>
+    <button class="start-btn" id="start-btn">검사 시작</button>
+  </div>
+</div>
+
+<!-- ══ 게임 화면 ══ -->
+<div id="game-screen" class="hidden">
+  <div id="rules-panel">
+    <div id="rules-header">
+      <h3 id="rules-title">📋 메뉴 선택 규칙</h3>
+      <button id="toggle-rules-btn">숨기기</button>
+    </div>
+    <ul id="rules-list"></ul>
+    <div id="rules-hidden-msg">규칙이 숨겨졌습니다. 기억을 바탕으로 선택하세요.</div>
+  </div>
+
+  <div id="top-bar">
+    <div id="progress-info">식사 1 / ?</div>
+    <div class="stat-badges">
+      <span class="stat-badge" id="kcal-badge">0 kcal</span>
+      <span class="stat-badge" id="ml-badge" style="display:none;">음료 0 ml</span>
+    </div>
+  </div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+  <div id="meal-tabs"></div>
+  <div id="menu-area"></div>
+
+  <div id="bottom-bar">
+    <button class="action-btn" id="home-btn" style="background:#fff;border:2px solid #ddd;color:#555;">🏠 홈으로</button>
+    <button class="action-btn" id="back-game-btn">← 설정으로</button>
+    <button class="action-btn" id="reset-btn">선택 초기화</button>
+    <button class="action-btn" id="confirm-btn" disabled>선택 완료</button>
+  </div>
+
+  <!-- 검사자용 관찰 메모 (표준 검사 모드일 때만 표시) -->
+  <div id="examiner-watch-game" class="examiner-watch-note" style="display:none;width:100%;margin-top:0;">
+    <span class="ew-label">👁 검사자 관찰 (메뉴 선택 중)</span>
+    · 피검자가 과제 중 <b>검사자에게 질문을 하지 않는가</b> → <b>채점 11번</b>
+    <span class="ew-item">· 모든 메뉴(아침→점심→저녁→간식) 선택을 마치고 <b>"끝났습니다"라고 말로 알리는가</b> → <b>채점 12번</b></span>
+    <span class="ew-item">· '선택 완료' 버튼은 검사자가 눌러도 되고, 피검자가 말로 알린 후 버튼을 누르도록 안내해도 됩니다.</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 검사 진행 흐름 (논문 매뉴얼 단계별 지시문 반영)               -->
+<!--                                                                -->
+<!-- [1] examiner-overlay  - 검사자 안내 (점수기록지 지시문 1~3번)  -->
+<!-- [2] intro-overlay     - 사전 지시문 (과제 지시문 기록지 1~5번) -->
+<!-- [3] pre-predict       - 수행 전 예측 (점수기록지 지시문 4번)   -->
+<!-- [4] 메뉴 선택 수행                                              -->
+<!-- [5] 결과 화면 → 레포트 (점수기록지 지시문 6, 7번 포함)         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+
+<!-- ══ [1] 검사자 안내 오버레이 (점수 기록지 지시문 1~3번) ══ -->
+<!-- 검사자가 피검자 옆에서 화면을 함께 보며 단계별로 안내 -->
+<div id="examiner-overlay" class="hidden">
+  <div id="examiner-box">
+    <div class="ex-title-row">
+      <span class="ex-title-icon">📋</span>
+      <span class="ex-title-text">검사자 안내 — 도입</span>
+      <span class="ex-title-sub">점수 기록지 지시문 1–3</span>
+    </div>
+
+    <div style="font-size:12.5px;color:#666;margin-bottom:12px;line-height:1.6;">
+      아래 내용을 피검자에게 차례로 안내해 주세요.
+    </div>
+
+    <div class="ex-script">
+      <div class="ex-script-label">1. 과제 안내</div>
+      <div class="ex-script-quote">
+        "메뉴판을 가지고 수행할 과제를 요청드리겠습니다.
+        지시문에 있는 방법에 따라, <b>하루 동안 먹을 음식과 음료 메뉴</b>를 선택해 주십시오."
+      </div>
+    </div>
+
+    <div class="ex-script">
+      <div class="ex-script-label">2. 지시문·메뉴판 안내</div>
+      <div class="ex-script-quote">
+        "다음 화면에 <b>참고할 지시문과 메뉴판</b>이 표시될 것입니다.
+        과제를 수행하시는 동안 지시문은 화면에서 계속 확인할 수 있습니다."
+      </div>
+    </div>
+
+    <div class="ex-script">
+      <div class="ex-script-label">3. 선택 방법 안내</div>
+      <div class="ex-script-quote">
+        "선택하실 메뉴를 <b>화면에서 터치(또는 클릭)하여</b> 고르시면 됩니다.
+        같은 메뉴를 두 번 선택하실 수도 있습니다."
+      </div>
+    </div>
+
+    <div class="examiner-watch-note">
+      <span class="ew-label">👁 검사자 관찰 포인트 (시작·억제 오류 채점)</span>
+      이후 화면에서 피검자의 행동을 관찰하여 검사 종료 후 8~12번을 채점합니다:
+      <span class="ew-item">· 8번 — 지시문을 다 읽고 검사자에게 <b>말로 알리는가</b></span>
+      <span class="ew-item">· 9번 — 메뉴 선택을 시작할 때 검사자에게 <b>말로 알리는가</b></span>
+      <span class="ew-item">· 10번 — <b>추가 설명·힌트 없이</b> 스스로 시작하는가</span>
+      <span class="ew-item">· 11번 — 과제 수행 중 검사자에게 <b>질문하지 않는가</b></span>
+      <span class="ew-item">· 12번 — 과제 종료 시 검사자에게 <b>말로 알리는가</b></span>
+    </div>
+
+    <button class="ex-next-btn" id="examiner-next-btn" style="margin-top:14px;">다음 →</button>
+  </div>
+</div>
+
+<!-- ══ [2] 사전 지시문 오버레이 (과제 지시문 기록지 1~5번) ══ -->
+<!-- 피검자가 직접 읽는 화면 -->
+<div id="intro-overlay" class="hidden">
+  <div id="intro-box">
+    <div style="font-size:2rem;margin-bottom:6px;">🍽️</div>
+    <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;color:#1976d2;">
+      메뉴판 과제 — 시작하기 전에
+    </div>
+    <div style="font-size:11px;color:#999;margin-bottom:18px;">
+      아래 안내를 끝까지 읽어주세요
+    </div>
+
+    <div style="font-size:14px;line-height:2;color:#333;text-align:left;margin-bottom:16px;">
+
+      <div style="background:#f0f7ff;border-radius:10px;padding:14px 16px;line-height:1.95;color:#1a3a6c;">
+        <b>1.</b> 지금 이 안내를 읽으시는 동안 <b>궁금한 것이 있으면 검사자에게 물어보셔도 됩니다.</b>
+        하지만 <b>메뉴 선택을 시작하신 후에는 끝까지 마치셨다고 검사자에게 알리기 전까지 말하지 말아 주세요.</b><br><br>
+
+        <b>2.</b> 안내를 다 읽으셨으면 <b>검사자에게 말로 알려주세요.</b><br><br>
+
+        <b>3.</b> 시작할 준비가 되셨다면 <b>검사자에게 말씀하시고 시작</b>하시면 됩니다.<br><br>
+
+        <b>4.</b> 메뉴 선택을 모두 마치셨을 때 <b>검사자에게 말로 알려주세요.</b><br><br>
+
+        <b>5.</b> 가능한 한 <b>빠르고 정확하게</b> 선택해 주세요.
+      </div>
+
+      <div style="margin-top:14px;background:#fff9c4;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.95;color:#444;">
+        <b>📝 선택 방법</b><br>
+        · <b>아침·점심·저녁</b> 식사 메뉴를 각각 <b>하나씩</b> 선택해 주세요.<br>
+        · <b>오후와 저녁 간식을 하나씩</b> 선택해 주세요. (총 2개)<br>
+        · <b>아침과 점심</b>에는 음료를 <b>2개씩</b>, <b>저녁</b>에는 음료를 <b>1개</b> 선택해 주세요.<br>
+        <br>
+        <b>📌 선택 규칙</b><br>
+        · <b>❤️ 심장에 좋은 두 개 이상의 식품</b>을 선택해 주세요. (간식·식사 모두 가능)<br>
+        · 선택한 모든 식품 메뉴의 <b>칼로리 총합이 1,800kcal를 초과하지</b> 않도록 해주세요.<br>
+        · 선택한 모든 음료의 <b>총량이 1,700ml를 초과하지</b> 않도록 해주세요.<br>
+        · <b>음료의 칼로리는 계산하지 않습니다.</b>
+      </div>
+    </div>
+
+    <!-- 검사자용 관찰 메모 -->
+    <div class="examiner-watch-note">
+      <span class="ew-label">👁 검사자 관찰 (이 화면에서)</span>
+      · 피검자가 안내를 다 읽고 <b>"다 읽었습니다"라고 말로 알리는지</b> 관찰 → <b>채점 8번</b>
+      <span class="ew-item">· 피검자가 안내를 읽는 동안 <b>질문하는 것은 허용</b>됩니다 (이때 질문은 11번 채점에 반영 안 됨)</span>
+      <span class="ew-item">· 말로 알리지 않고 다음 버튼만 누르면 → 8번 0점</span>
+    </div>
+
+    <button id="intro-next-btn" style="
+      margin-top:14px;
+      width:100%; padding:13px; border-radius:12px; border:none;
+      background:#1976d2; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">
+      다 읽었습니다 →
+    </button>
+  </div>
+</div>
+
+<!-- ══ [3] 수행 전 예측 오버레이 (점수 기록지 지시문 4번) ══ -->
+<div id="pre-predict-overlay" class="hidden">
+  <div id="pre-predict-box">
+    <div style="font-size:1.5rem;margin-bottom:8px;">🗣️</div>
+    <div style="font-size:1.15rem;font-weight:800;margin-bottom:6px;color:#1565c0;">수행 전 예측</div>
+    <div style="font-size:11px;color:#999;margin-bottom:16px;">
+      점수 기록지 지시문 4
+    </div>
+
+    <div style="font-size:15px;font-weight:700;color:#222;line-height:1.7;margin-bottom:18px;padding:14px 12px;background:#f0f7ff;border-radius:10px;">
+      "이 과제를 얼마나 잘 수행할 수 있을 것이라고 생각하십니까?"
+    </div>
+
+    <div id="predict-btns" style="display:flex;flex-direction:column;gap:8px;width:100%;">
+      <button class="predict-btn" data-val="1">① 매우 못함</button>
+      <button class="predict-btn" data-val="2">② 못함</button>
+      <button class="predict-btn" data-val="3">③ 보통</button>
+      <button class="predict-btn" data-val="4">④ 잘함</button>
+      <button class="predict-btn" data-val="5">⑤ 매우 잘함</button>
+    </div>
+
+    <!-- 검사자용 관찰 메모 -->
+    <div class="examiner-watch-note">
+      <span class="ew-label">👁 검사자 관찰 (다음 단계로 전환 시)</span>
+      · 응답 선택 직후 <b>시간 측정이 자동 시작</b>됩니다.
+      <span class="ew-item">· 피검자가 메뉴 화면에서 시작할 때 <b>"시작하겠습니다"라고 말로 알리는지</b> → <b>채점 9번</b></span>
+      <span class="ew-item">· 추가 설명·힌트 없이 스스로 시작하는지 → <b>채점 10번</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ [5] 사후 질문 오버레이 (점수 기록지 지시문 6, 7번) ══ -->
+<!-- 검사 종료 후 결과 화면 진입 전 - 피검자 응답을 받음 -->
+<div id="post-q-overlay" class="hidden">
+  <div id="post-q-box">
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:1.5rem;margin-bottom:6px;">📝</div>
+      <div style="font-size:1.15rem;font-weight:800;color:#1565c0;">사후 질문</div>
+      <div style="font-size:11px;color:#999;margin-top:4px;">점수 기록지 지시문 6, 7</div>
+    </div>
+
+    <!-- 6. 수행 후 평가 -->
+    <div class="post-q-section">
+      <div class="q-label">6. 수행 후 평가</div>
+      <div class="q-text">"이 과제를 얼마나 잘 수행했다고 생각하십니까?"</div>
+      <div class="post-q-row" id="post-q-perf-row">
+        <button class="post-q-btn" data-val="1">① 매우 못함</button>
+        <button class="post-q-btn" data-val="2">② 못함</button>
+        <button class="post-q-btn" data-val="3">③ 보통</button>
+        <button class="post-q-btn" data-val="4">④ 잘함</button>
+        <button class="post-q-btn" data-val="5">⑤ 매우 잘함</button>
+      </div>
+    </div>
+
+    <!-- 7. 오류 인식 -->
+    <div class="post-q-section">
+      <div class="q-label">7. 오류 인식</div>
+      <div class="q-text">"실수나 오류 없이 과제를 수행하셨습니까?"</div>
+      <div class="post-q-row" id="post-q-err-row">
+        <button class="post-q-btn" data-val="yes">예 (오류 없음)</button>
+        <button class="post-q-btn" data-val="no">아니오 (오류 있음)</button>
+      </div>
+      <div id="post-q-err-followup" style="display:none;margin-top:10px;">
+        <div style="font-size:12.5px;color:#666;margin-bottom:6px;">
+          "어떤 오류가 있었습니까?"
+          <span style="color:#999;">(피검자가 자발적으로 인식한 오류만 기록)</span>
+        </div>
+        <textarea class="post-q-err-detail" id="post-q-err-text"
+          placeholder="피검자가 인식한 오류를 입력해 주세요..."></textarea>
+      </div>
+    </div>
+
+    <!-- 검사자용 관찰 메모 -->
+    <div class="examiner-watch-note" style="margin-top:0;margin-bottom:14px;">
+      <span class="ew-label">👁 검사자 안내</span>
+      · 위 질문을 피검자에게 차례로 물어보고 응답을 기록해 주세요.
+      <span class="ew-item">· "아니오"로 답한 경우 추가로 "어떤 오류가 있었습니까?"라고 묻되, <b>대답을 유도하지는 마세요</b>.</span>
+      <span class="ew-item">· 피검자가 화면의 지시문을 다시 봐도 됩니다.</span>
+    </div>
+
+    <button class="post-q-next" id="post-q-next-btn" disabled>다음 →</button>
+  </div>
+</div>
+
+<!-- ══ [6] 시작·억제 오류 입력 오버레이 (점수 기록지 8~12번) ══ -->
+<!-- 사후 질문 다음, 결과 화면 진입 전 - 치료사가 관찰한 내용 입력 -->
+<div id="obs-q-overlay" class="hidden" style="
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  align-items: center; justify-content: center; z-index: 330;">
+  <div style="
+    background: #fff; border-radius: 20px; padding: 26px 28px;
+    max-width: 540px; width: 94%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    max-height: 92vh; overflow-y: auto;">
+
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:1.5rem;margin-bottom:6px;">📋</div>
+      <div style="font-size:1.15rem;font-weight:800;color:#1565c0;">시작 · 억제 오류 채점</div>
+      <div style="font-size:11px;color:#999;margin-top:4px;">점수 기록지 지시문 8 – 12 · 치료사 관찰</div>
+    </div>
+
+    <div style="font-size:12.5px;color:#666;margin-bottom:14px;line-height:1.65;">
+      검사 진행 중 관찰한 행동을 바탕으로 아래 5개 항목을 채점해 주세요.
+      각 항목마다 <b>1점(수행함) / 0점(수행 못함)</b>을 선택합니다.
+    </div>
+
+    <div id="obs-q-items" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+
+    <div class="examiner-watch-note" style="margin-top:0;margin-bottom:14px;">
+      <span class="ew-label">💡 채점 가이드</span>
+      · 8·9·12번 — 피검자가 <b>말로</b> 알리지 않고 그냥 다음 버튼만 눌렀다면 0점
+      <span class="ew-item">· 10번 — 검사자의 추가 설명·힌트 없이 스스로 시작했으면 1점</span>
+      <span class="ew-item">· 11번 — 과제 수행 중 검사자에게 질문하지 않았으면 1점</span>
+    </div>
+
+    <button class="post-q-next" id="obs-q-next-btn" disabled>결과지 생성 →</button>
+  </div>
+</div>
+
+<!-- ══ 피드백 ══ -->
+<div id="feedback-overlay" class="hidden">
+  <div id="feedback-box">
+    <div id="fb-icon">✅</div>
+    <div id="fb-title"></div>
+    <div id="fb-detail"></div>
+    <button id="fb-next-btn">다음</button>
+  </div>
+</div>
+
+<!-- ══ 저장된 평가지 목록 모달 ══ -->
+<div id="records-overlay" class="hidden no-print" style="
+  position:fixed; inset:0; background:rgba(0,0,0,0.55);
+  display:flex; align-items:center; justify-content:center; z-index:400;">
+  <div id="records-box" style="
+    background:#fff; border-radius:14px; padding:22px 24px;
+    max-width:760px; width:94%; max-height:88vh; overflow-y:auto;
+    box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #1976d2;">
+      <h3 style="margin:0;font-size:1.05rem;font-weight:800;color:#1565c0;">
+        📂 저장된 평가지 목록
+      </h3>
+      <button id="close-records-btn" style="
+        padding:6px 14px;border-radius:999px;border:1px solid #ddd;
+        background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#555;">
+        ✕ 닫기
+      </button>
+    </div>
+
+    <!-- 검색 + 환자 그룹 -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input type="text" id="records-search" placeholder="환자 성명으로 검색"
+        style="flex:1;padding:8px 12px;border:1px solid #ccc;border-radius:8px;
+        font-size:13px;outline:none;font-family:inherit;">
+      <button id="records-export-btn" style="
+        padding:8px 14px;border-radius:8px;border:1px solid #43a047;
+        background:#fff;color:#2e7d32;font-size:12px;font-weight:600;cursor:pointer;">
+        ⬇ 전체 내보내기(JSON)
+      </button>
+      <button id="records-import-btn" style="
+        padding:8px 14px;border-radius:8px;border:1px solid #1976d2;
+        background:#fff;color:#1565c0;font-size:12px;font-weight:600;cursor:pointer;">
+        ⬆ 불러오기
+      </button>
+      <input type="file" id="records-import-file" accept=".json" style="display:none;">
+    </div>
+
+    <div id="records-list" style="display:flex;flex-direction:column;gap:6px;">
+      <!-- 환자별 목록이 여기에 렌더됨 -->
+    </div>
+
+    <div id="records-empty" style="text-align:center;padding:40px 20px;color:#999;font-size:14px;display:none;">
+      저장된 평가지가 없습니다.<br>
+      <span style="font-size:12px;">평가를 완료한 후 [💾 저장] 버튼을 눌러 저장할 수 있습니다.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 훈련 모드 결과 화면 ══ -->
+<div id="custom-result-screen" class="hidden" style="
+  max-width: 720px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;">
+
+  <div class="no-print" style="display:flex;gap:8px;justify-content:flex-end;width:100%;margin-bottom:4px;">
+    <button id="custom-restart-btn" style="padding:9px 18px;border-radius:999px;border:2px solid #ddd;background:#fff;color:#555;font-weight:700;font-size:13px;cursor:pointer;">
+      ← 처음으로
+    </button>
+    <button id="custom-retry-btn" style="padding:9px 18px;border-radius:999px;border:none;background:#1976d2;color:#fff;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+      🔄 다시 훈련하기
+    </button>
+  </div>
+
+  <div id="custom-result-card" style="
+    width: 100%; background: #fff;
+    border: 1px solid #ddd; border-radius: 14px;
+    padding: 24px 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+
+    <!-- 제목 -->
+    <div style="text-align:center;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #6a1b9a;">
+      <div style="font-size:13px;color:#888;font-weight:600;letter-spacing:0.04em;">메뉴판 과제 · 훈련 모드</div>
+      <div style="font-size:18px;font-weight:800;color:#4a148c;margin-top:3px;">훈련 결과 요약</div>
+    </div>
+
+    <!-- 종합 박스 -->
+    <div id="custom-summary-box" style="
+      border: 1.5px solid #ce93d8;
+      background: #faf5ff;
+      padding: 14px 18px; margin-bottom: 16px;">
+      <!-- JS로 채움 -->
+    </div>
+
+    <!-- 식사별 수행 -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:#444;margin-bottom:6px;padding:4px 8px;background:#f0f0f0;border-left:4px solid #6a1b9a;">
+        ■ 식사별 수행 결과
+      </div>
+      <table id="custom-meal-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#fafafa;">
+            <th style="border:1px solid #999;padding:6px 8px;text-align:center;width:18%;">식사</th>
+            <th style="border:1px solid #999;padding:6px 8px;text-align:left;">선택 메뉴</th>
+            <th style="border:1px solid #999;padding:6px 8px;text-align:center;width:15%;">칼로리</th>
+            <th style="border:1px solid #999;padding:6px 8px;text-align:center;width:15%;">조건 위반</th>
+          </tr>
+        </thead>
+        <tbody id="custom-meal-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 인지기능 영역별 분석 -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:#444;margin-bottom:6px;padding:4px 8px;background:#f0f0f0;border-left:4px solid #6a1b9a;">
+        ■ 인지기능 영역별 분석
+      </div>
+      <div id="custom-cog-analysis"></div>
+    </div>
+
+    <!-- 훈련 해석 -->
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#444;margin-bottom:6px;padding:4px 8px;background:#f0f0f0;border-left:4px solid #6a1b9a;">
+        ■ 훈련 해석
+      </div>
+      <div id="custom-interpretation" style="font-size:12.5px;line-height:1.7;padding:10px 14px;background:#fafafa;border:1px solid #eee;"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 결과 화면 ══ -->
+<!-- ══ 결과 화면 = 레포트 (별도 창 없이 같은 페이지에서 표시) ══ -->
+<div id="result-screen" class="hidden">
+
+  <!-- 상단 버튼 (인쇄 시 숨김) -->
+  <div class="no-print" id="result-top-actions" style="display:flex;gap:8px;justify-content:flex-end;width:100%;max-width:1100px;margin-bottom:8px;flex-wrap:wrap;">
+    <button id="restart-btn" style="padding:9px 18px;border-radius:999px;border:2px solid #ddd;background:#fff;color:#555;font-weight:700;font-size:13px;cursor:pointer;">
+      ← 처음으로
+    </button>
+    <button id="show-records-btn" style="padding:9px 18px;border-radius:999px;border:2px solid #1976d2;background:#fff;color:#1976d2;font-weight:700;font-size:13px;cursor:pointer;">
+      📂 저장된 평가지
+    </button>
+    <button id="save-btn" style="padding:9px 18px;border-radius:999px;border:none;background:#43a047;color:#fff;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+      💾 저장
+    </button>
+    <button id="print-btn" onclick="window.print()" style="padding:9px 18px;border-radius:999px;border:none;background:#1976d2;color:#fff;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+      🖨 인쇄
+    </button>
+  </div>
+
+  <!-- 레포트 카드 -->
+  <div id="report-card">
+
+    <!-- 제목 -->
+    <div class="rpt-title">
+      <h1>한국판 메뉴판 과제(The Menu Task-K)</h1>
+      <h2>점수 기록지</h2>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="rpt-info-bar" style="grid-template-columns: 2fr 1fr; border-bottom: none;">
+      <span><b>성명</b> <input type="text" id="rpt-patient-name" class="rpt-info-input" placeholder="환자 성명"></span>
+      <span class="rpt-info-cell-combo"><b>성별·나이</b>
+        <select id="rpt-patient-sex" class="rpt-info-input rpt-info-sex">
+          <option value="">-</option>
+          <option value="M">남</option>
+          <option value="F">여</option>
+        </select>
+        <input type="text" id="rpt-patient-age" class="rpt-info-input rpt-info-age" placeholder="나이" inputmode="numeric">
+      </span>
+    </div>
+    <div class="rpt-info-bar" style="grid-template-columns: 1.5fr 1fr 1.5fr; margin-bottom: 12px;">
+      <span><b>평가일</b> <span id="rpt-date"></span></span>
+      <span><b>소요 시간</b> <span id="rpt-time"></span></span>
+      <span><b>평가자</b> <input type="text" id="rpt-examiner" class="rpt-info-input" placeholder="평가자명"></span>
+    </div>
+
+    <!-- 본문 영역 (1컬럼) -->
+    <div>
+
+    <!-- 수행 전 예측 -->
+    <div class="rpt-q-block rpt-q-block-pre">
+      <div class="rpt-q">"당신은 이 과제를 얼마나 잘 수행할 수 있을 것이라고 생각하십니까?"</div>
+      <div class="rpt-opts" id="rpt-predict-opts"></div>
+    </div>
+
+    <!-- 채점 표 -->
+    <table class="rpt-score-table" id="rpt-score-table">
+      <thead>
+        <tr>
+          <th colspan="2" style="text-align:center;">점수(올바르게 수행된 각 메뉴에 1점을 주고, 틀린 메뉴에는 0점을 준다)</th>
+          <th class="rpt-perf-col">수행점수</th>
+          <th class="rpt-err-col">오류점수</th>
+        </tr>
+      </thead>
+      <tbody id="rpt-score-tbody">
+        <!-- showResultStd에서 동적으로 채움 -->
+      </tbody>
+    </table>
+
+    <!-- 수행 후 평가 -->
+    <div class="rpt-q-block rpt-q-block-post">
+      <div class="rpt-q">"당신은 이 과제를 얼마나 잘 수행했다고 생각하십니까?"</div>
+      <div class="rpt-opts" id="rpt-post-opts"></div>
+    </div>
+
+    <!-- 오류 인식 -->
+    <div class="rpt-q-block rpt-q-block-err">
+      <div class="rpt-q">"당신은 오류 없이 과제를 수행하셨습니까?" &nbsp;<span id="rpt-err-line"></span></div>
+      <div id="rpt-err-detail-wrap" style="display:none;margin-top:6px;font-size:12.5px;">
+        <b>인식한 오류:</b> <span id="rpt-err-detail"></span>
+      </div>
+    </div>
+
+    <!-- ─── 분석 결과 (점선 아래) ─── -->
+    <div class="rpt-divider"></div>
+
+    <!-- 최종 판정 -->
+    <div id="rpt-verdict" class="rpt-verdict"></div>
+
+    <!-- 인지기능 영역별 분석 -->
+    <div class="rpt-sec" id="rpt-cog-sec">
+      <h3 class="rpt-sec-title">■ 인지기능 영역별 분석</h3>
+      <div id="rpt-cog-analysis"></div>
+    </div>
+
+    <!-- 자기 인식 및 메타인지 -->
+    <div class="rpt-sec">
+      <h3 class="rpt-sec-title">■ 자기 인식 및 메타인지</h3>
+      <div style="font-size:11px;color:#777;margin:-4px 0 6px;">수행 전 예측 ↔ 수행 후 평가 ↔ 실제 수행</div>
+      <div id="rpt-meta-analysis"></div>
+    </div>
+
+    <!-- 수행 분석 -->
+    <div class="rpt-sec">
+      <h3 class="rpt-sec-title">■ 수행 분석</h3>
+      <div class="rpt-subsec">
+        <div class="rpt-subsec-title">식사별 선택 내역</div>
+        <table class="rpt-meal-table">
+          <thead>
+            <tr>
+              <th style="width:22%;">식사</th>
+              <th>선택 메뉴</th>
+            </tr>
+          </thead>
+          <tbody id="rpt-meal-tbody"></tbody>
+        </table>
+        <div class="rpt-meal-summary" id="rpt-meal-summary"></div>
+      </div>
+    </div>
+
+    <!-- 임상 소견 (맨 마지막) -->
+    <div class="rpt-sec">
+      <h3 class="rpt-sec-title">■ 임상 소견 / 특이사항</h3>
+      <textarea class="rpt-textarea" placeholder="임상 소견을 입력하세요..."></textarea>
+    </div>
+
+    </div>
+
+    <!-- Footer (출처는 여기 한 줄만) -->
+    <div class="rpt-footer">
+      <span>광주365재활병원 인지연하팀</span>
+      <span>The Menu Task-K · 전보라(2025) 박사학위논문 표준화 기준</span>
+    </div>
+
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// ① 표준 검사 데이터 (전보라 2025 박사학위논문 The Menu Task-K 기준)
+// ══════════════════════════════════════════════════════════════
+// 메뉴는 논문 부록 메뉴판 이미지 그대로 반영
+// (음료 ml은 oz 단위에서 환산: 8oz≈240ml, 12oz≈360ml, 16oz≈480ml)
+// ❤️ heart = 심장에 좋은 메뉴 (논문 메뉴판의 하트 표시)
+const STD_MEALS = [
+  {
+    key:'breakfast', label:'아침 식사', icon:'🌅',
+    cats:[
+      { name:'식사 메뉴', note:'1가지 선택', type:'food', max:1, items:[
+        {id:'b1', name:'제육볶음, 밥과 국',          kcal:1000, heart:false},
+        {id:'b2', name:'견과류와 씨리얼',            kcal:300,  heart:true},
+        {id:'b3', name:'베이컨과 크림치즈 베이글',   kcal:1000, heart:false},
+        {id:'b4', name:'토스트와 잼',                kcal:800,  heart:false},
+        {id:'b5', name:'신선한 과일',                kcal:200,  heart:false},
+      ]},
+      { name:'음료', note:'2가지 선택 (중복 가능)', type:'drink', max:2, items:[
+        {id:'b6a', name:'과일 주스',     kcal:0, ml:240, heart:false},
+        {id:'b6b', name:'커피 또는 차',  kcal:0, ml:360, heart:false},
+        {id:'b6c', name:'우유',          kcal:0, ml:360, heart:false},
+      ]},
+    ]
+  },
+  {
+    key:'lunch', label:'점심 식사', icon:'☀️',
+    cats:[
+      { name:'식사 메뉴', note:'1가지 선택', type:'food', max:1, items:[
+        {id:'l1', name:'생선찜, 밥과 국',           kcal:800,  heart:true},
+        {id:'l2', name:'햄버거와 감자튀김',         kcal:1200, heart:false},
+        {id:'l3', name:'야채 과일 샐러드',          kcal:350,  heart:false},
+        {id:'l4', name:'돈까스',                    kcal:1000, heart:false},
+        {id:'l5', name:'단호박 고구마 샐러드',      kcal:400,  heart:true},
+      ]},
+      { name:'음료', note:'2가지 선택 (중복 가능)', type:'drink', max:2, items:[
+        {id:'l6a', name:'과일 주스',     kcal:0, ml:240, heart:false},
+        {id:'l6b', name:'커피 또는 차',  kcal:0, ml:360, heart:false},
+        {id:'l6c', name:'우유',          kcal:0, ml:360, heart:false},
+        {id:'l6d', name:'탄산음료',      kcal:0, ml:480, heart:false},
+      ]},
+    ]
+  },
+  {
+    key:'dinner', label:'저녁 식사', icon:'🌙',
+    cats:[
+      { name:'식사 메뉴', note:'1가지 선택', type:'food', max:1, items:[
+        {id:'d1', name:'샌드위치와 샐러드',         kcal:800,  heart:true},
+        {id:'d2', name:'불고기 덮밥',               kcal:500,  heart:false},
+        {id:'d3', name:'비빔밥',                    kcal:400,  heart:true},
+        {id:'d4', name:'야채 과일 샐러드',          kcal:350,  heart:false},
+        {id:'d5', name:'갈비찜, 밥과 국',           kcal:1000, heart:false},
+      ]},
+      { name:'음료', note:'1가지 선택', type:'drink', max:1, items:[
+        {id:'d6a', name:'과일 주스',     kcal:0, ml:240, heart:false},
+        {id:'d6b', name:'커피 또는 차',  kcal:0, ml:360, heart:false},
+        {id:'d6c', name:'우유',          kcal:0, ml:360, heart:false},
+        {id:'d6d', name:'탄산음료',      kcal:0, ml:480, heart:false},
+      ]},
+    ]
+  },
+  {
+    key:'snack', label:'오후/저녁 간식', icon:'🍪',
+    cats:[
+      { name:'간식 메뉴', note:'2가지 선택 (중복 가능)', type:'food', max:2, items:[
+        {id:'s1', name:'요플레/요거트',  kcal:280, heart:false},
+        {id:'s2', name:'신선한 과일',    kcal:150, heart:true},
+        {id:'s3', name:'과자/쿠키',      kcal:200, heart:false},
+        {id:'s4', name:'아이스크림',     kcal:500, heart:false},
+        {id:'s5', name:'젤리',           kcal:100, heart:false},
+      ]},
+    ]
+  },
+];
+
+const STD_RULES_TEXT = [
+  '<b>아침·점심·저녁 식사 메뉴를 각각 하나씩</b> 선택하십시오.',
+  '<b>오후와 저녁 간식을 하나씩</b> 선택하십시오. (총 2개)',
+  '<b>아침과 점심 식사에는 각각 두 개의 음료</b>를 선택하시고, <b>저녁 식사에 한 개의 음료</b>를 선택하십시오.',
+  '<b>❤️ 심장에 좋은 두 개 이상의 식품</b>을 선택하십시오. (간식이나 식사에서 선택 가능)',
+  '선택된 모든 식품 메뉴들의 <b>칼로리 총합은 1,800kcal를 초과하지</b> 마십시오.',
+  '선택된 모든 음료 메뉴의 <b>총량은 1,700ml를 초과하지</b> 마십시오.',
+  '<b>음료의 칼로리는 계산하지</b> 마십시오.',
+  '하나의 메뉴를 한 번 이상 선택할 경우 몇 번 선택했는지 숫자로 표시할 수 있습니다 (예: ×2).',
+];
+
+// ══════════════════════════════════════════════════════════════
+// ② 훈련 모드 데이터
+// ══════════════════════════════════════════════════════════════
+const ALL_MENU = {
+  breakfast:[
+    // 밥
+    {id:'b01',name:'흰쌀밥',       kcal:300, cat:'밥',  tags:['탄수화물','열량높음'],         sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b02',name:'잡곡밥',       kcal:280, cat:'밥',  tags:['탄수화물','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b25',name:'현미밥',       kcal:270, cat:'밥',  tags:['탄수화물','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b26',name:'죽(흰죽)',     kcal:180, cat:'밥',  tags:['열량낮음','소화 잘됨'],         sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b04',name:'오트밀',       kcal:180, cat:'밥',  tags:['탄수화물','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    // 빵
+    {id:'b03',name:'토스트',       kcal:230, cat:'빵',  tags:['탄수화물'],                   sodium:'med',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b05',name:'통밀빵',       kcal:200, cat:'빵',  tags:['탄수화물','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b27',name:'샌드위치',     kcal:320, cat:'빵',  tags:['탄수화물','단백질'],           sodium:'med',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b28',name:'크로와상',     kcal:400, cat:'빵',  tags:['탄수화물','열량높음'],         sodium:'med',  fiber:false,protein:false,hot:false,sweet:false,dairy:true, raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    // 국
+    {id:'b06',name:'된장국',       kcal:60,  cat:'국',  tags:['짠 음식','단백질'],         sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'b07',name:'미역국',       kcal:50,  cat:'국',  tags:['열량낮음','저염','항산화식품'],sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'b08',name:'북어국',       kcal:60,  cat:'국',  tags:['열량낮음','단백질'],           sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b29',name:'콩나물국',     kcal:40,  cat:'국',  tags:['열량낮음','저염'],         sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b30',name:'순두부찌개',   kcal:120, cat:'국',  tags:['단백질','짠 음식'],         sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    // 반찬
+    {id:'b09',name:'계란후라이',   kcal:90,  cat:'반찬',tags:['단백질'],                     sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b10',name:'삶은달걀',     kcal:80,  cat:'반찬',tags:['단백질'],                     sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b11',name:'김치',         kcal:20,  cat:'반찬',tags:['짠 음식','식이섬유'],       sodium:'high', fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b12',name:'시금치무침',   kcal:35,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'b13',name:'두부구이',     kcal:110, cat:'반찬',tags:['단백질','열량낮음'],           sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b31',name:'멸치볶음',     kcal:80,  cat:'반찬',tags:['단백질','칼슘'],               sodium:'med',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b32',name:'콩자반',       kcal:90,  cat:'반찬',tags:['단백질','식이섬유'],           sodium:'med',  fiber:true, protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b33',name:'깍두기',       kcal:15,  cat:'반찬',tags:['짠 음식','열량낮음'],       sodium:'high', fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b34',name:'계란말이',     kcal:120, cat:'반찬',tags:['단백질'],                     sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b35',name:'애호박볶음',   kcal:60,  cat:'반찬',tags:['열량낮음','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    // 음료
+    {id:'b14',name:'우유',         kcal:130, ml:200, cat:'음료',tags:['단백질','유제품'],             sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:true, antioxidant:false},
+    {id:'b15',name:'두유',         kcal:110, ml:200, cat:'음료',tags:['단백질','저염'],           sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b16',name:'오렌지주스',   kcal:110, ml:240, cat:'음료',tags:['비타민C','단맛','항산화식품'],   sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'b17',name:'녹차',         kcal:5,   ml:240, cat:'음료',tags:['열량낮음','항산화식품'],           sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'b18',name:'물',           kcal:0,   ml:240, cat:'음료',tags:['열량낮음'],                   sodium:'low',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b36',name:'커피(아메리카노)',kcal:10,ml:240, cat:'음료',tags:['열량낮음'],                  sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b37',name:'토마토주스',   kcal:80,  ml:240, cat:'음료',tags:['비타민C','항산화식품','열량낮음'], sodium:'low',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    // 간식 (표준 평가와 겹치지 않도록 구성)
+    {id:'b19',name:'그릭요거트',     kcal:120, cat:'간식',tags:['단백질','유제품'],              sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b20',name:'블루베리',       kcal:60,  cat:'간식',tags:['항산화식품','열량낮음'],        sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'b21',name:'바나나',         kcal:90,  cat:'간식',tags:['단맛','혈당 올림'],             sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:true, heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'b22',name:'아몬드 한줌',    kcal:170, cat:'간식',tags:['항산화식품','식이섬유'],        sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'b23',name:'시리얼',         kcal:200, cat:'간식',tags:['탄수화물','단맛','혈당 올림'],  sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'b38',name:'삶은 고구마',    kcal:130, cat:'간식',tags:['탄수화물','식이섬유'],          sodium:'low',  fiber:true, protein:false,hot:true, sweet:true, dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'b39',name:'치즈 1장',       kcal:80,  cat:'간식',tags:['단백질','유제품','칼슘'],       sodium:'med',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b40',name:'방울토마토',     kcal:30,  cat:'간식',tags:['열량낮음','항산화식품','비타민C'],sodium:'low',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'b41',name:'단호박찜',       kcal:90,  cat:'간식',tags:['식이섬유','항산화식품'],        sodium:'low',  fiber:true, protein:false,hot:true, sweet:true, dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'b42',name:'삶은 달걀 1개',  kcal:80,  cat:'간식',tags:['단백질'],                       sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'b43',name:'곶감 1개',       kcal:80,  cat:'간식',tags:['단맛','식이섬유'],              sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'b44',name:'무가당 두유',    kcal:90,  cat:'간식',tags:['단백질','저염'],                sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+  ],
+  lunch:[
+    // 밥
+    {id:'l01',name:'흰쌀밥',       kcal:300, cat:'밥',  tags:['탄수화물','열량높음'],             sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l02',name:'잡곡밥',       kcal:280, cat:'밥',  tags:['탄수화물','식이섬유'],             sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l03',name:'비빔밥',       kcal:550, cat:'밥',  tags:['탄수화물','식이섬유','열량높음'],   sodium:'med',  fiber:true, protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'l04',name:'김치볶음밥',   kcal:600, cat:'밥',  tags:['탄수화물','짠 음식','열량높음'], sodium:'high', fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l05',name:'현미밥',       kcal:270, cat:'밥',  tags:['탄수화물','식이섬유'],             sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l25',name:'볶음밥',       kcal:520, cat:'밥',  tags:['탄수화물','열량높음'],             sodium:'med',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l26',name:'오므라이스',   kcal:580, cat:'밥',  tags:['탄수화물','단백질','열량높음'],     sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l27',name:'카레라이스',   kcal:620, cat:'밥',  tags:['탄수화물','열량높음'],             sodium:'med',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    // 국
+    {id:'l06',name:'된장찌개',     kcal:80,  cat:'국',  tags:['짠 음식','단백질'],             sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'l07',name:'콩나물국',     kcal:40,  cat:'국',  tags:['열량낮음','저염'],             sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l08',name:'미역국',       kcal:50,  cat:'국',  tags:['열량낮음','저염','항산화식품'],     sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l09',name:'김치찌개',     kcal:100, cat:'국',  tags:['짠 음식'],                     sodium:'high', fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l28',name:'순두부찌개',   kcal:120, cat:'국',  tags:['단백질','짠 음식'],             sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l29',name:'육개장',       kcal:150, cat:'국',  tags:['단백질','짠 음식','식이섬유'],   sodium:'high', fiber:true, protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l30',name:'북어국',       kcal:60,  cat:'국',  tags:['열량낮음','단백질'],               sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    // 반찬
+    {id:'l10',name:'두부조림',     kcal:120, cat:'반찬',tags:['단백질','열량낮음'],               sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l11',name:'불고기',       kcal:280, cat:'반찬',tags:['단백질','열량높음'],               sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l12',name:'시금치나물',   kcal:40,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],     sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'l13',name:'김치',         kcal:20,  cat:'반찬',tags:['짠 음식','식이섬유'],           sodium:'high', fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l14',name:'계란찜',       kcal:100, cat:'반찬',tags:['단백질'],                         sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l15',name:'고등어구이',   kcal:220, cat:'반찬',tags:['단백질','혈관건강','항산화식품'],       sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:true},
+    {id:'l16',name:'브로콜리무침', kcal:35,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],     sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'l31',name:'제육볶음',     kcal:320, cat:'반찬',tags:['단백질','열량높음','짠 음식'],   sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l32',name:'잡채',         kcal:250, cat:'반찬',tags:['탄수화물','열량높음'],             sodium:'med',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l33',name:'깻잎무침',     kcal:30,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],     sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l34',name:'콩나물무침',   kcal:35,  cat:'반찬',tags:['식이섬유','열량낮음'],             sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l35',name:'어묵볶음',     kcal:130, cat:'반찬',tags:['단백질','짠 음식'],             sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    // 음료
+    {id:'l17',name:'물',           kcal:0,   ml:240, cat:'음료',tags:['열량낮음'],                       sodium:'low',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l18',name:'녹차',         kcal:5,   ml:240, cat:'음료',tags:['열량낮음','항산화식품'],               sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l19',name:'식혜',         kcal:150, ml:240, cat:'음료',tags:['단맛','혈당 올림','열량높음'],         sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l20',name:'두유',         kcal:110, ml:200, cat:'음료',tags:['단백질','저염'],               sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l36',name:'탄산음료',     kcal:140, ml:250, cat:'음료',tags:['단맛','혈당 올림','열량높음'],         sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l37',name:'아메리카노',   kcal:10,  ml:240, cat:'음료',tags:['열량낮음'],                       sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l38',name:'우유',         kcal:130, ml:200, cat:'음료',tags:['단백질','유제품','칼슘'],           sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:true, antioxidant:false},
+    // 간식 (표준 평가와 겹치지 않도록 구성)
+    {id:'l21',name:'사과',           kcal:80,  cat:'간식',tags:['식이섬유','항산화식품'],         sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l22',name:'호두 한줌',      kcal:170, cat:'간식',tags:['항산화식품','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l23',name:'그릭요거트',     kcal:120, cat:'간식',tags:['단백질','유제품'],               sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'l24',name:'초콜릿 1조각',   kcal:150, cat:'간식',tags:['열량높음','단맛'],               sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:true, raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l39',name:'귤',             kcal:50,  cat:'간식',tags:['비타민C','열량낮음','항산화식품'],sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l40',name:'방울토마토',     kcal:30,  cat:'간식',tags:['열량낮음','항산화식품','비타민C'],sodium:'low',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l41',name:'삶은 옥수수',    kcal:150, cat:'간식',tags:['탄수화물','식이섬유'],           sodium:'low',  fiber:true, protein:false,hot:true, sweet:true, dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l42',name:'에너지바',       kcal:200, cat:'간식',tags:['단맛','열량높음'],               sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l43',name:'딸기',           kcal:40,  cat:'간식',tags:['비타민C','열량낮음','항산화식품'],sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'l44',name:'찐 단호박',      kcal:90,  cat:'간식',tags:['식이섬유','항산화식품'],         sodium:'low',  fiber:true, protein:false,hot:true, sweet:true, dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'l45',name:'미숫가루 한잔',  kcal:130, cat:'간식',tags:['단백질','식이섬유'],             sodium:'low',  fiber:true, protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'l46',name:'쑥떡 1조각',     kcal:120, cat:'간식',tags:['탄수화물','단맛'],               sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+  ],
+  dinner:[
+    // 밥
+    {id:'d01',name:'흰쌀밥',       kcal:300, cat:'밥',  tags:['탄수화물','열량높음'],             sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d02',name:'잡곡밥',       kcal:280, cat:'밥',  tags:['탄수화물','식이섬유'],             sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d03',name:'현미밥',       kcal:270, cat:'밥',  tags:['탄수화물','식이섬유'],             sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d04',name:'죽',           kcal:200, cat:'밥',  tags:['열량낮음','소화 잘됨'],             sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d25',name:'연두부덮밥',   kcal:380, cat:'밥',  tags:['탄수화물','단백질'],               sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d26',name:'나물비빔밥',   kcal:420, cat:'밥',  tags:['탄수화물','식이섬유'],             sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    // 국
+    {id:'d05',name:'북어국',       kcal:60,  cat:'국',  tags:['열량낮음','단백질'],               sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d06',name:'콩나물국',     kcal:40,  cat:'국',  tags:['열량낮음','저염'],             sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d07',name:'미역국',       kcal:50,  cat:'국',  tags:['열량낮음','저염','항산화식품'],     sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d08',name:'김치찌개',     kcal:100, cat:'국',  tags:['짠 음식'],                     sodium:'high', fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d27',name:'된장찌개',     kcal:80,  cat:'국',  tags:['짠 음식','단백질'],             sodium:'high', fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'d28',name:'맑은국(황태)', kcal:55,  cat:'국',  tags:['열량낮음','단백질','저염'],     sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d29',name:'부대찌개',     kcal:280, cat:'국',  tags:['짠 음식','열량높음'],           sodium:'high', fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    // 반찬
+    {id:'d09',name:'생선구이',     kcal:200, cat:'반찬',tags:['단백질','혈관건강','항산화식품'],       sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:true},
+    {id:'d10',name:'두부구이',     kcal:110, cat:'반찬',tags:['단백질','열량낮음'],               sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d11',name:'브로콜리무침', kcal:35,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],     sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'d12',name:'잡채',         kcal:250, cat:'반찬',tags:['탄수화물','열량높음'],             sodium:'med',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d13',name:'김치',         kcal:20,  cat:'반찬',tags:['짠 음식','식이섬유'],           sodium:'high', fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d14',name:'시금치나물',   kcal:40,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],     sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'d15',name:'계란찜',       kcal:100, cat:'반찬',tags:['단백질'],                         sodium:'med',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d30',name:'닭가슴살구이', kcal:170, cat:'반찬',tags:['단백질','열량낮음'],               sodium:'low',  fiber:false,protein:true, hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d31',name:'무생채',       kcal:30,  cat:'반찬',tags:['식이섬유','열량낮음'],             sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d32',name:'감자조림',     kcal:140, cat:'반찬',tags:['탄수화물','혈당 올림'],                 sodium:'med',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'d33',name:'마늘쫑볶음',   kcal:60,  cat:'반찬',tags:['식이섬유','항산화식품'],               sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d34',name:'표고버섯볶음', kcal:55,  cat:'반찬',tags:['식이섬유','열량낮음','항산화식품'],     sodium:'low',  fiber:true, protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    // 음료
+    {id:'d16',name:'물',           kcal:0,   ml:240, cat:'음료',tags:['열량낮음'],                       sodium:'low',  fiber:false,protein:false,hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d17',name:'두유',         kcal:110, ml:200, cat:'음료',tags:['단백질','저염'],               sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d18',name:'녹차',         kcal:5,   ml:240, cat:'음료',tags:['열량낮음','항산화식품'],               sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d19',name:'우유',         kcal:130, ml:200, cat:'음료',tags:['단백질','유제품'],                 sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:true, antioxidant:false},
+    {id:'d35',name:'보리차',       kcal:0,   ml:240, cat:'음료',tags:['열량낮음'],                       sodium:'low',  fiber:false,protein:false,hot:true, sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d36',name:'식혜',         kcal:150, ml:240, cat:'음료',tags:['단맛','혈당 올림','열량높음'],         sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    // 간식 (표준 평가와 겹치지 않도록 구성)
+    {id:'d20',name:'수박',           kcal:50,  cat:'간식',tags:['열량낮음','단맛'],               sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d21',name:'사과',           kcal:80,  cat:'간식',tags:['식이섬유','항산화식품'],         sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d22',name:'아몬드 한줌',    kcal:170, cat:'간식',tags:['항산화식품','식이섬유'],         sodium:'low',  fiber:true, protein:false,hot:false,sweet:false,dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d23',name:'그릭요거트',     kcal:120, cat:'간식',tags:['단백질','유제품'],               sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:true, raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d24',name:'다크초콜릿',     kcal:140, cat:'간식',tags:['항산화식품','단맛'],             sodium:'low',  fiber:false,protein:false,hot:false,sweet:true, dairy:true, raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d37',name:'배',             kcal:60,  cat:'간식',tags:['식이섬유','열량낮음'],           sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d38',name:'두부 한 모',     kcal:90,  cat:'간식',tags:['단백질','열량낮음'],             sodium:'low',  fiber:false,protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:true, highProtein:true, highPotassium:false,antioxidant:false},
+    {id:'d39',name:'고구마',         kcal:130, cat:'간식',tags:['탄수화물','식이섬유'],           sodium:'low',  fiber:true, protein:false,hot:true, sweet:true, dairy:false,raw:false,highGI:false,heartGood:false,highProtein:false,highPotassium:true, antioxidant:false},
+    {id:'d40',name:'쌀과자',         kcal:160, cat:'간식',tags:['탄수화물','단맛'],               sodium:'med',  fiber:false,protein:false,hot:false,sweet:true, dairy:false,raw:false,highGI:true, heartGood:false,highProtein:false,highPotassium:false,antioxidant:false},
+    {id:'d41',name:'블루베리',       kcal:60,  cat:'간식',tags:['항산화식품','열량낮음'],         sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:false,antioxidant:true},
+    {id:'d42',name:'키위',           kcal:50,  cat:'간식',tags:['비타민C','식이섬유','항산화식품'],sodium:'low',  fiber:true, protein:false,hot:false,sweet:true, dairy:false,raw:true, highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'d43',name:'호박죽 작은공기',kcal:150, cat:'간식',tags:['식이섬유','단맛'],               sodium:'low',  fiber:true, protein:false,hot:true, sweet:true, dairy:false,raw:false,highGI:false,heartGood:true, highProtein:false,highPotassium:true, antioxidant:true},
+    {id:'d44',name:'멸치 견과 한입', kcal:100, cat:'간식',tags:['단백질','칼슘','식이섬유'],      sodium:'med',  fiber:true, protein:true, hot:false,sweet:false,dairy:false,raw:false,highGI:false,heartGood:false,highProtein:true, highPotassium:false,antioxidant:false},
+  ]
+};
+
+// SHOW_IDS — 각 난이도/식사에서 모든 건강조건 조합(당뇨·심장·항암 동시)
+// 활성화 시에도 모든 카테고리(밥/빵, 국, 반찬, 음료, 간식)에 충족 메뉴가
+// 최소 1개 이상 존재하도록 구성. 항산화·고섬유 옵션도 포함.
+// (validate.js로 자동 검증됨)
+const SHOW_IDS = {
+  easy:{
+    // 각 식사 ≈ 12종, 모든 조건 충족 가능한 핵심 메뉴 위주
+    breakfast:[
+      'b02','b25',           // 밥: 잡곡밥, 현미밥 (♥섬유)
+      'b04',                  // 빵: 오트밀 (♥섬유)
+      'b07','b29',           // 국: 미역국(♥항산), 콩나물국
+      'b12','b13','b34',     // 반찬: 시금치무침(♥항산섬), 두부구이(♥), 계란말이
+      'b15','b17','b18',     // 음료: 두유(♥), 녹차(♥항산), 물
+      'b22','b40',           // 간식: 아몬드(♥항산섬), 방울토마토(♥항산)
+    ],
+    lunch:[
+      'l02','l05',           // 밥: 잡곡밥(♥섬), 현미밥(♥섬)
+      'l07','l08',           // 국: 콩나물국, 미역국(♥항산)
+      'l10','l12','l15','l16', // 반찬: 두부조림(♥), 시금치나물(♥항산섬), 고등어구이(♥항산), 브로콜리(♥항산섬)
+      'l17','l18','l20',     // 음료: 물, 녹차(♥항산), 두유(♥)
+      'l22','l40',           // 간식: 호두(♥항산섬), 방울토마토(♥항산)
+    ],
+    dinner:[
+      'd02','d03',           // 밥: 잡곡밥(♥섬), 현미밥(♥섬)
+      'd05','d07',           // 국: 북어국, 미역국(♥항산)
+      'd09','d10','d11','d14', // 반찬: 생선구이(♥항산), 두부구이(♥), 브로콜리(♥항산섬), 시금치나물(♥항산섬)
+      'd16','d17','d18',     // 음료: 물, 두유(♥), 녹차(♥항산)
+      'd22','d38',           // 간식: 아몬드(♥항산섬), 두부한모(♥)
+    ],
+  },
+  medium:{
+    // 각 식사 ≈ 20종 + 일부 위반 옵션 포함 (조건 인지 훈련)
+    breakfast:[
+      'b01','b02','b25',                    // 밥: + 흰쌀밥(고GI)
+      'b03','b04','b05',                    // 빵: 토스트(고GI), 오트밀(♥섬), 통밀빵(♥섬)
+      'b06','b07','b29',                    // 국: 된장국(고나트륨), 미역국, 콩나물국
+      'b09','b10','b11','b12','b13',        // 반찬
+      'b14','b15','b17','b18','b36',        // 음료
+      'b19','b22','b40','b42','b44',        // 간식: 그릭요거트, 아몬드, 방울토마토, 삶은달걀, 무가당두유
+    ],
+    lunch:[
+      'l01','l02','l03','l05',              // 밥
+      'l06','l07','l08','l30',              // 국
+      'l10','l11','l12','l13','l14','l15','l16', // 반찬
+      'l17','l18','l19','l20','l37','l38',  // 음료: + 식혜(고GI/단)
+      'l22','l23','l40','l43','l44','l45',  // 간식: 호두, 그릭요거트, 방울토마토, 딸기(당뇨위반), 찐단호박(당뇨위반), 미숫가루
+    ],
+    dinner:[
+      'd01','d02','d03',                    // 밥
+      'd05','d06','d07','d08','d28',        // 국
+      'd09','d10','d11','d12','d14','d15','d30','d31', // 반찬
+      'd16','d17','d18','d19','d35',        // 음료
+      'd21','d22','d23','d37','d38','d44',  // 간식: 사과(당뇨위반), 아몬드, 그릭요거트, 배(당뇨위반), 두부한모, 멸치견과
+    ],
+  },
+  hard:{
+    // 각 식사 ≈ 28~32종 + 위반 메뉴 다수 (조건 변별 훈련)
+    breakfast:[
+      'b01','b02','b25','b26',
+      'b03','b04','b05','b27',
+      'b06','b07','b08','b29','b30',
+      'b09','b10','b11','b12','b13','b31','b32','b35',
+      'b14','b15','b16','b17','b18','b36','b37',
+      'b19','b20','b22','b23','b38','b40','b42','b44',
+    ],
+    lunch:[
+      'l01','l02','l03','l04','l05','l25',
+      'l06','l07','l08','l09','l28','l30',
+      'l10','l11','l12','l13','l14','l15','l16','l33','l34',
+      'l17','l18','l19','l20','l37','l38',
+      'l21','l22','l23','l24','l39','l40','l41','l43','l44','l45',
+    ],
+    dinner:[
+      'd01','d02','d03','d04','d25','d26',
+      'd05','d06','d07','d08','d27','d28',
+      'd09','d10','d11','d12','d13','d14','d15','d30','d31','d33','d34',
+      'd16','d17','d18','d19','d35','d36',
+      'd20','d21','d22','d23','d24','d37','d38','d39','d41','d42','d44',
+    ],
+  },
+  expert:{
+    // 전체 메뉴 노출 (실제 상황과 같은 다양성)
+    breakfast:['b01','b02','b03','b04','b05','b25','b26','b27','b28','b06','b07','b08','b29','b30','b09','b10','b11','b12','b13','b31','b32','b33','b34','b35','b14','b15','b16','b17','b18','b36','b37','b19','b20','b21','b22','b23','b38','b39','b40','b41','b42','b43','b44'],
+    lunch:    ['l01','l02','l03','l04','l05','l25','l26','l27','l06','l07','l08','l09','l28','l29','l30','l10','l11','l12','l13','l14','l15','l16','l31','l32','l33','l34','l35','l17','l18','l19','l20','l36','l37','l38','l21','l22','l23','l24','l39','l40','l41','l42','l43','l44','l45','l46'],
+    dinner:   ['d01','d02','d03','d04','d25','d26','d05','d06','d07','d08','d27','d28','d29','d09','d10','d11','d12','d13','d14','d15','d30','d31','d32','d33','d34','d16','d17','d18','d19','d35','d36','d20','d21','d22','d23','d24','d37','d38','d39','d40','d41','d42','d43','d44'],
+  },
+};
+
+const CAT_ORDER  = ['밥','빵','국','반찬','음료','간식'];
+const CAT_LABELS = {'밥':'🍚 밥','빵':'🍞 빵','국':'🍜 국/찌개','반찬':'🥗 반찬','음료':'🥤 음료','간식':'🍎 간식/후식'};
+
+// 훈련 모드 조건
+const R = (id,text,check,errorMsg,getViolated=()=>[]) => ({id,text,check,errorMsg,getViolated});
+const R_RICE    = R('rice',   '밥 또는 빵 종류를 반드시 1가지만 선택하세요.',
+  it=>{ const n=it.filter(i=>i.cat==='밥'||i.cat==='빵').length; return n===1; },
+  '밥/빵이 없거나 2가지 이상 선택됐습니다.',
+  it=>it.filter(i=>i.cat==='밥'||i.cat==='빵').length>1?it.filter(i=>i.cat==='밥'||i.cat==='빵').map(i=>i.id):[]);
+const R_SOUP    = R('soup',   '국(국/찌개)을 반드시 1가지만 선택하세요.',
+  it=>{ const n=it.filter(i=>i.cat==='국').length; return n===1; },
+  '국이 없거나 2가지 이상 선택됐습니다.',
+  it=>it.filter(i=>i.cat==='국').length>1?it.filter(i=>i.cat==='국').map(i=>i.id):[]);
+const R_PROTEIN = R('prot',   '단백질 음식(계란, 두부, 불고기 등)을 반드시 1가지 이상 포함하세요.',it=>it.some(i=>i.protein),'단백질 음식이 없습니다.');
+const R_KCAL800 = R('k800',   '한 끼 총 칼로리가 800 kcal를 넘지 않아야 합니다.',              it=>it.reduce((s,i)=>s+i.kcal,0)<=800,'칼로리가 800 kcal 초과입니다.');
+const R_KCAL700 = R('k700',   '한 끼 총 칼로리가 700 kcal를 넘지 않아야 합니다.',              it=>it.reduce((s,i)=>s+i.kcal,0)<=700,'칼로리가 700 kcal 초과입니다.');
+const R_FIBER   = R('fiber',  '고섬유질 음식을 반드시 1가지 이상 포함하세요.',                  it=>it.some(i=>i.fiber),'고섬유질 음식이 없습니다.');
+const R_DRINK1  = R('drk1',   '음료는 1가지만 선택할 수 있습니다.',                             it=>it.filter(i=>i.cat==='음료').length<=1,'음료가 2가지 이상입니다.',it=>it.filter(i=>i.cat==='음료').map(i=>i.id));
+const R_DRINKVOL600 = R('dvol600','한 끼 음료 총량이 600 ml를 넘지 않아야 합니다.',it=>it.filter(i=>i.cat==='음료').reduce((s,i)=>s+(i.ml||0),0)<=600,'음료 총량이 600 ml를 초과했습니다.',it=>it.filter(i=>i.cat==='음료').map(i=>i.id));
+const R_DRINKVOL500 = R('dvol500','한 끼 음료 총량이 500 ml를 넘지 않아야 합니다.',it=>it.filter(i=>i.cat==='음료').reduce((s,i)=>s+(i.ml||0),0)<=500,'음료 총량이 500 ml를 초과했습니다.',it=>it.filter(i=>i.cat==='음료').map(i=>i.id));
+const R_SODIUM1 = R('sod1',   '나트륨 높은 음식은 1가지 이하로만 선택하세요.',                  it=>it.filter(i=>i.sodium==='high').length<=1,'나트륨 높은 음식이 2가지 이상입니다.',it=>it.filter(i=>i.sodium==='high').map(i=>i.id));
+const R_HOT2    = R('hot2',   '뜨거운 음식을 반드시 2가지 이상 포함하세요.',                    it=>it.filter(i=>i.hot).length>=2,'뜨거운 음식이 2가지 미만입니다.');
+const R_KRANGE  = R('krange', '한 끼 총 칼로리가 400~750 kcal 범위 안에 들어야 합니다.',       it=>{const t=it.reduce((s,i)=>s+i.kcal,0);return t>=400&&t<=750;},'칼로리가 400~750 kcal 범위를 벗어났습니다.');
+const R_HICAL1  = R('hical1', '300 kcal 이상 고칼로리 음식은 1가지 이하로만 선택하세요.',       it=>it.filter(i=>i.kcal>=300).length<=1,'고칼로리 음식이 2가지 이상입니다.',it=>it.filter(i=>i.kcal>=300).map(i=>i.id));
+const R_SWEET1  = R('swt1',   '달콤한 음식은 1가지 이하로만 선택하세요.',                       it=>it.filter(i=>i.sweet).length<=1,'달콤한 음식이 2가지 이상입니다.',it=>it.filter(i=>i.sweet).map(i=>i.id));
+const R_DAIRY1  = R('dairy1', '유제품(우유, 요거트 등)은 1가지 이하로만 선택하세요.',            it=>it.filter(i=>i.dairy).length<=1,'유제품이 2가지 이상입니다.',it=>it.filter(i=>i.dairy).map(i=>i.id));
+const R_STRUCT  = R('struct', '반드시 밥/빵 1가지, 국 1가지, 반찬 1~2가지, 음료 1가지를 포함하세요.',it=>{const a=it.filter(i=>i.cat==='밥'||i.cat==='빵').length,b=it.filter(i=>i.cat==='국').length,c=it.filter(i=>i.cat==='반찬').length,d=it.filter(i=>i.cat==='음료').length;return a>=1&&b>=1&&c>=1&&c<=2&&d===1;},'식사 구성(밥1·국1·반찬1~2·음료1)이 맞지 않습니다.');
+
+const DIFF_RULES = {
+  easy:  [R_RICE,R_SOUP,R_PROTEIN,R_KCAL800,R_DRINKVOL600],
+  medium:[R_RICE,R_SOUP,R_PROTEIN,R_KCAL700,R_FIBER,R_DRINKVOL600],
+  hard:  [R_RICE,R_SOUP,R_PROTEIN,R_FIBER,R_DRINK1,R_SODIUM1,R_KRANGE,R_DRINKVOL500],
+  expert:[R_RICE,R_SOUP,R_PROTEIN,R_FIBER,R_DRINK1,R_HOT2,R_HICAL1,R_SWEET1,R_STRUCT,R_DRINKVOL500],
+};
+const HEALTH_RULES = {
+  hypertension:[
+    R('hp1','[고혈압] 나트륨 높은 음식을 선택하지 마세요.',it=>it.filter(i=>i.sodium==='high').length===0,'[고혈압] 나트륨 높은 음식이 포함됐습니다.',it=>it.filter(i=>i.sodium==='high').map(i=>i.id)),
+    R('hp2','[고혈압] 중간 나트륨 음식은 1가지 이하로만 선택하세요.',it=>it.filter(i=>i.sodium==='med').length<=1,'[고혈압] 나트륨 중간 음식이 2가지 이상입니다.',it=>it.filter(i=>i.sodium==='med').map(i=>i.id)),
+  ],
+  diabetes:[
+    R('dm1','[당뇨] 고GI 음식(흰쌀밥, 식혜, 바나나 등)을 선택하지 마세요.',it=>it.filter(i=>i.highGI).length===0,'[당뇨] 고GI 음식이 포함됐습니다.',it=>it.filter(i=>i.highGI).map(i=>i.id)),
+    R('dm2','[당뇨] 달콤한 음식을 선택하지 마세요.',it=>it.filter(i=>i.sweet).length===0,'[당뇨] 달콤한 음식이 포함됐습니다.',it=>it.filter(i=>i.sweet).map(i=>i.id)),
+  ],
+  heart:[
+    R('ht1','[심장질환] 심장에 좋은 음식(오메가3·잡곡·채소 등)을 반드시 1가지 이상 포함하세요.',it=>it.some(i=>i.heartGood),'[심장질환] 심장에 좋은 음식이 없습니다.'),
+    R('ht2','[심장질환] 나트륨 높은 음식을 선택하지 마세요.',it=>it.filter(i=>i.sodium==='high').length===0,'[심장질환] 나트륨 높은 음식이 포함됐습니다.',it=>it.filter(i=>i.sodium==='high').map(i=>i.id)),
+    R('ht3','[심장질환] 고칼로리(300kcal↑) 음식은 1가지 이하로만 선택하세요.',it=>it.filter(i=>i.kcal>=300).length<=1,'[심장질환] 고칼로리 음식이 2가지 이상입니다.',it=>it.filter(i=>i.kcal>=300).map(i=>i.id)),
+  ],
+  kidney:[
+    R('kd1','[신장질환] 단백질 높은 음식(고기·생선·달걀 등)은 1가지 이하로만 선택하세요.',it=>it.filter(i=>i.highProtein).length<=1,'[신장질환] 단백질 높은 음식이 2가지 이상입니다.',it=>it.filter(i=>i.highProtein).map(i=>i.id)),
+    R('kd2','[신장질환] 칼륨 높은 음식(바나나·시금치 등)을 선택하지 마세요.',it=>it.filter(i=>i.highPotassium).length===0,'[신장질환] 칼륨 높은 음식이 포함됐습니다.',it=>it.filter(i=>i.highPotassium).map(i=>i.id)),
+  ],
+  cancer:[
+    R('ca1','[항암] 항산화 음식(녹차·브로콜리·견과류·생선 등)을 반드시 1가지 이상 포함하세요.',it=>it.some(i=>i.antioxidant),'[항암] 항산화 음식이 없습니다.'),
+    R('ca2','[항암] 고섬유질 채소·잡곡을 반드시 1가지 이상 포함하세요.',it=>it.some(i=>i.fiber&&!i.sweet),'[항암] 고섬유질 음식이 없습니다.'),
+    R('ca3','[항암] 단 가공식품(과자·아이스크림 등)을 선택하지 마세요.',it=>it.filter(i=>i.sweet&&i.kcal>=150).length===0,'[항암] 단 가공식품이 포함됐습니다.',it=>it.filter(i=>i.sweet&&i.kcal>=150).map(i=>i.id)),
+  ],
+};
+
+const CUSTOM_MEAL_KEYS = ['breakfast','lunch','dinner'];
+const MEAL_NAMES = {breakfast:'아침 식사',lunch:'점심 식사',dinner:'저녁 식사'};
+const MEAL_ICONS = {breakfast:'🌅',lunch:'☀️',dinner:'🌙'};
+const DIFF_LABELS = {easy:'🟢 초급',medium:'🟡 중급',hard:'🟠 고급',expert:'🔴 전문가'};
+const HEALTH_LABELS = {hypertension:'🫀 고혈압',diabetes:'🩸 당뇨',heart:'❤️ 심장질환',kidney:'🫘 신장질환',cancer:'🩷 항암'};
+
+// ══════════════════════════════════════════════════════════════
+// 상태
+// ══════════════════════════════════════════════════════════════
+let G = {
+  mode: null,               // 'standard' | 'custom'
+  difficulty:'easy',
+  healthConditions: new Set(),
+  kcalGood:700, kcalWarn:800,
+  activeRules:[],
+  // 표준 모드
+  stdMealIdx:0,
+  stdDone:[false,false,false,false],
+  stdSel:{},                // {breakfast_food:[], breakfast_drink:[], ...}
+  // 훈련 모드
+  custMealIdx:0,
+  custSel:{breakfast:[],lunch:[],dinner:[]},
+  custViolations:{breakfast:[],lunch:[],dinner:[]},
+  custErrors:{breakfast:0,lunch:0,dinner:0},
+  startTime:null, endTime:null,
+  rulesVisible:true,
+};
+
+// ══════════════════════════════════════════════════════════════
+// 모드 선택 화면
+// ══════════════════════════════════════════════════════════════
+document.querySelectorAll('.mode-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+    G.mode = card.dataset.mode;
+    document.getElementById('mode-next-btn').disabled = false;
+  });
+});
+document.getElementById('mode-next-btn').addEventListener('click',()=>{
+  document.getElementById('mode-screen').classList.add('hidden');
+  document.getElementById('std-setup').classList.toggle('hidden', G.mode!=='standard');
+  document.getElementById('custom-setup').classList.toggle('hidden', G.mode!=='custom');
+  document.getElementById('setup-screen').classList.remove('hidden');
+});
+
+// ── 표준 설정 ──
+// ── 훈련 설정 ──
+document.querySelectorAll('.diff-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('.diff-card').forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected'); G.difficulty=c.dataset.val;
+  });
+});
+document.querySelectorAll('.health-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    c.classList.toggle('selected');
+    G.healthConditions.has(c.dataset.val)?G.healthConditions.delete(c.dataset.val):G.healthConditions.add(c.dataset.val);
+  });
+});
+document.querySelectorAll('#kcal-opts .kcal-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('#kcal-opts .kcal-card').forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected'); G.kcalGood=parseInt(c.dataset.good); G.kcalWarn=parseInt(c.dataset.warn);
+  });
+});
+
+document.getElementById('setup-back-btn').addEventListener('click',()=>{
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('mode-screen').classList.remove('hidden');
+});
+
+// ══════════════════════════════════════════════════════════════
+// 시작
+// ══════════════════════════════════════════════════════════════
+document.getElementById('start-btn').addEventListener('click',()=>{
+  // 표준 모드는 수행 전 예측 응답 직후 시간 측정 시작
+  // (훈련 모드는 즉시 시작)
+  G.startTime = Date.now();
+  G.rulesVisible = true;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('result-screen').classList.add('hidden');
+
+  const rulesList = document.getElementById('rules-list');
+  rulesList.style.display='';
+  document.getElementById('rules-hidden-msg').style.display='none';
+  document.getElementById('toggle-rules-btn').textContent='숨기기';
+
+  if (G.mode==='standard') startStandard();
+  else startCustom();
+});
+
+// ══════════════════════════════════════════════════════════════
+// ① 표준 검사 모드
+// ══════════════════════════════════════════════════════════════
+function startStandard(){
+  G.stdMealIdx=0; G.stdDone=[false,false,false,false];
+  G.stdSel={};
+  G.prePrediction = null;
+  STD_MEALS.forEach(m=>m.cats.forEach(c=>{ G.stdSel[m.key+'_'+c.type]=[]; }));
+
+  // 규칙 표시
+  const rulesList = document.getElementById('rules-list');
+  rulesList.innerHTML = STD_RULES_TEXT.map(t=>`<li>${t}</li>`).join('');
+
+  // 검사자 관찰 메모 표시 (표준 모드 전용)
+  document.getElementById('examiner-watch-game').style.display = '';
+
+  // 치료사 설정: 배지 표시 여부
+  const showKcal = document.getElementById('show-kcal-opt').checked;
+  const showMl   = document.getElementById('show-ml-opt').checked;
+  document.getElementById('kcal-badge').style.display = showKcal ? '' : 'none';
+  document.getElementById('ml-badge').style.display   = showMl   ? '' : 'none';
+
+  // 탭·진행률 숨김 (표준 모드는 전체 메뉴판을 한 화면에 표시)
+  document.getElementById('meal-tabs').style.display = 'none';
+  document.getElementById('progress-info').style.display = 'none';
+  document.getElementById('progress-bar-wrap').style.display = 'none';
+
+  // 검사 흐름: [1] 검사자 안내 → [2] 사전 지시문 → [3] 수행 전 예측 → 메뉴 선택
+  // [1] 검사자 안내 오버레이 (점수 기록지 지시문 1~3번)
+  document.getElementById('examiner-overlay').classList.remove('hidden');
+  document.getElementById('examiner-next-btn').onclick = () => {
+    document.getElementById('examiner-overlay').classList.add('hidden');
+    // [2] 사전 지시문 오버레이 (과제 지시문 기록지 1~5번)
+    document.getElementById('intro-overlay').classList.remove('hidden');
+    document.getElementById('intro-next-btn').onclick = () => {
+      document.getElementById('intro-overlay').classList.add('hidden');
+      // [3] 수행 전 예측 오버레이 (점수 기록지 지시문 4번)
+      document.getElementById('pre-predict-overlay').classList.remove('hidden');
+      document.querySelectorAll('.predict-btn').forEach(btn=>{
+        btn.classList.remove('selected');
+        btn.onclick = () => {
+          document.querySelectorAll('.predict-btn').forEach(b=>b.classList.remove('selected'));
+          btn.classList.add('selected');
+          G.prePrediction = parseInt(btn.dataset.val);
+          // 수행 전 예측 응답 직후 시간 측정 시작
+          G.startTime = Date.now();
+          setTimeout(()=>{
+            document.getElementById('pre-predict-overlay').classList.add('hidden');
+            renderStdAllMeals();
+            updateStdBadges();
+          }, 500);
+        };
+      });
+    };
+  };
+}
+
+function renderStdAllMeals(){
+  // 표준 모드: 아침·점심·저녁·간식 4식사를 한 화면에 모두 표시
+  // 식사 내 카테고리 구분 없이 전체를 하나의 메뉴판으로 표시
+  const area = document.getElementById('menu-area');
+  area.innerHTML='';
+  STD_MEALS.forEach(meal => {
+    // 식사 섹션 헤더 (그리드 전체 폭 차지)
+    const sec = document.createElement('div');
+    sec.className = 'std-meal-section';
+    sec.innerHTML = `<span class="std-meal-emoji">${meal.icon}</span> ${meal.label}`;
+    area.appendChild(sec);
+
+    meal.cats.forEach(cat=>{
+      const selKey = meal.key + '_' + cat.type;
+      const sel = G.stdSel[selKey];
+      // cat-header 제거 — 카테고리 구분 없이 아이템만 표시
+      const grid = document.createElement('div');
+      grid.className = 'menu-grid';
+      cat.items.forEach(item=>{
+        const div = document.createElement('div');
+        div.className = 'menu-item'; div.dataset.id = item.id;
+        const cnt = sel.filter(id=>id===item.id).length;
+        if (cnt>0) div.classList.add('selected');
+        const info = item.ml ? `<div class="menu-ml">${item.ml}ml</div>` : `<div class="menu-sub">${item.kcal} kcal</div>`;
+        div.innerHTML = `<div class="menu-name">${item.name}</div>${info}${item.heart?'<span class="heart-mark">❤️</span>':''}${cnt>1?`<span class="sel-count">${cnt}</span>`:''}`;
+        div.addEventListener('click',()=>toggleStdItem(meal,cat,item.id,div));
+        grid.appendChild(div);
+      });
+      area.appendChild(grid);
+    });
+  });
+  updateStdConfirmBtn();
+}
+
+function toggleStdItem(meal,cat,itemId,div){
+  // 논문 기준: 동일 메뉴를 두 번 선택 가능 (예: X2 표시)
+  // 클릭 사이클: 0개 → 1개 → 2개 → … → max → 다시 0개
+  // (max 미설정 시 max=2로 가정)
+  const selKey=meal.key+'_'+cat.type;
+  const sel=G.stdSel[selKey];
+  const cnt=sel.filter(id=>id===itemId).length;
+  const maxRepeat = cat.max || 2;  // 카테고리 max를 1회 항목당 최대 반복 횟수로 사용
+
+  if (cnt >= maxRepeat) {
+    // 최대치 도달 → 전부 해제
+    G.stdSel[selKey] = sel.filter(id => id !== itemId);
+  } else {
+    // 1회 추가
+    sel.push(itemId);
+  }
+  div.classList.remove('violation');
+  // 카테고리 재렌더
+  cat.items.forEach(item=>{
+    const el=document.querySelector(`[data-id="${item.id}"]`);
+    if(!el)return;
+    const c2=G.stdSel[meal.key+'_'+cat.type].filter(id=>id===item.id).length;
+    el.classList.toggle('selected',c2>0);
+    let badge=el.querySelector('.sel-count');
+    if(c2>1){if(!badge){badge=document.createElement('span');badge.className='sel-count';el.appendChild(badge);}badge.textContent=c2;}
+    else if(badge) badge.remove();
+  });
+  updateStdConfirmBtn();
+  updateStdBadges();
+}
+
+function updateStdConfirmBtn(){
+  // 항상 활성화 (어느 카테고리가 비었는지 힌트가 될 수 있으므로)
+  document.getElementById('confirm-btn').disabled = false;
+}
+
+function updateStdBadges(){
+  const allItems=STD_MEALS.flatMap(m=>m.cats.flatMap(c=>c.items));
+  const allSel=Object.values(G.stdSel).flat();
+  const selected=allSel.map(id=>allItems.find(i=>i.id===id)).filter(Boolean);
+  const foodKcal=selected.filter(i=>!i.ml).reduce((s,i)=>s+i.kcal,0);
+  const totalMl=selected.filter(i=>i.ml).reduce((s,i)=>s+i.ml,0);
+  // 논문 기준: 칼로리 1,800 kcal 이하 / 음료 1,700 ml 이하
+  setBadge(document.getElementById('kcal-badge'),`식품 ${foodKcal} kcal`,foodKcal,1500,1800);
+  setBadge(document.getElementById('ml-badge'),`음료 ${totalMl} ml`,totalMl,1400,1700);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ② 훈련 모드
+// ══════════════════════════════════════════════════════════════
+function startCustom(){
+  G.custMealIdx=0;
+  G.custSel={breakfast:[],lunch:[],dinner:[]};
+  G.custViolations={breakfast:[],lunch:[],dinner:[]};
+  G.custErrors={breakfast:0,lunch:0,dinner:0};
+  G.custFailedRules={breakfast:[],lunch:[],dinner:[]};
+  const base=DIFF_RULES[G.difficulty];
+  const health=[...G.healthConditions].flatMap(h=>HEALTH_RULES[h]||[]);
+  G.activeRules=[...base,...health];
+
+  const rulesList=document.getElementById('rules-list');
+  rulesList.innerHTML=G.activeRules.map(r=>{
+    const isH=r.id.startsWith('hp')||r.id.startsWith('dm')||r.id.startsWith('ht')||r.id.startsWith('kd')||r.id.startsWith('ca');
+    return `<li ${isH?'class="rule-health"':''}>${r.text}</li>`;
+  }).join('');
+
+  // 훈련 모드에서는 검사자 관찰 메모 숨김
+  document.getElementById('examiner-watch-game').style.display = 'none';
+
+  document.getElementById('ml-badge').style.display='none';
+  const showCustomKcal = document.getElementById('custom-show-kcal-opt').checked;
+  document.getElementById('kcal-badge').style.display = showCustomKcal ? '' : 'none';
+  document.getElementById('kcal-badge').textContent='0 kcal';
+
+  const tabs=document.getElementById('meal-tabs');
+  // 훈련 모드는 탭·진행률을 다시 표시 (표준 모드에서 숨겨진 경우 대비)
+  tabs.style.display = '';
+  document.getElementById('progress-info').style.display = '';
+  document.getElementById('progress-bar-wrap').style.display = '';
+  tabs.innerHTML=CUSTOM_MEAL_KEYS.map((k,i)=>`<div class="meal-tab ${i===0?'active':''}" data-idx="${i}">${MEAL_ICONS[k]} ${MEAL_NAMES[k].replace(' 식사','')}</div>`).join('');
+  tabs.querySelectorAll('.meal-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      const i=parseInt(tab.dataset.idx);
+      G.custMealIdx=i; renderCustomMeal(); updateCustomBadge();
+    });
+  });
+
+  renderCustomMeal();
+  updateCustomBadge();
+}
+
+function renderCustomMeal(){
+  const key=CUSTOM_MEAL_KEYS[G.custMealIdx];
+  const ids=SHOW_IDS[G.difficulty][key];
+  const pool=ALL_MENU[key].filter(i=>ids.includes(i.id));
+  const sel=G.custSel[key];
+
+  updateTabs(G.custMealIdx,[true,true,true],3);
+  document.getElementById('progress-info').textContent=`식사 ${G.custMealIdx+1} / 3`;
+  document.getElementById('progress-bar').style.width=`${(G.custMealIdx/3)*100}%`;
+
+  const area=document.getElementById('menu-area');
+  area.innerHTML='';
+  const groups={};
+  pool.forEach(item=>{(groups[item.cat]||(groups[item.cat]=[])).push(item);});
+  CAT_ORDER.forEach(cat=>{
+    if(!groups[cat])return;
+    const hd=document.createElement('div');
+    hd.className='cat-header'; hd.textContent=CAT_LABELS[cat]||cat;
+    area.appendChild(hd);
+    const grid=document.createElement('div');
+    grid.className='menu-grid';
+    groups[cat].forEach(item=>{
+      const div=document.createElement('div');
+      div.className='menu-item'; div.dataset.id=item.id;
+      if(G.custViolations[key].includes(item.id)) div.classList.add('violation');
+      else if(sel.includes(item.id)) div.classList.add('selected');
+      const tagHTML=item.tags.map(t=>{
+        let cls='tag';
+        if(t.includes('심장')||t.includes('오메가'))cls='tag heart';
+        else if(t.includes('GI'))cls='tag diabetes';
+        else if(t.includes('항산화식품'))cls='tag cancer';
+        return `<span class="${cls}">${t}</span>`;
+      }).join('');
+      div.innerHTML=`<div class="menu-name">${item.name}</div><div class="tags-row">${tagHTML}</div><div class="menu-sub">${item.kcal} kcal</div>`;
+      div.addEventListener('click',()=>toggleCustomItem(key,item.id,div));
+      grid.appendChild(div);
+    });
+    area.appendChild(grid);
+  });
+  document.getElementById('confirm-btn').disabled=sel.length===0;
+}
+
+function toggleCustomItem(mealKey,itemId,div){
+  const sel=G.custSel[mealKey];
+  const idx=sel.indexOf(itemId);
+  if(idx===-1) sel.push(itemId); else sel.splice(idx,1);
+  div.classList.toggle('selected',sel.includes(itemId));
+  div.classList.remove('violation');
+  G.custViolations[mealKey]=G.custViolations[mealKey].filter(id=>id!==itemId);
+  document.getElementById('confirm-btn').disabled=sel.length===0;
+  updateCustomBadge();
+}
+
+function updateCustomBadge(){
+  const allItems=CUSTOM_MEAL_KEYS.flatMap(k=>ALL_MENU[k]);
+  const allSel=Object.values(G.custSel).flat();
+  const selected=allSel.map(id=>allItems.find(i=>i.id===id)).filter(Boolean);
+  const total=selected.reduce((s,i)=>s+i.kcal,0);
+  setBadge(document.getElementById('kcal-badge'),`${total} kcal`,total,G.kcalGood,G.kcalWarn);
+}
+
+// ══════════════════════════════════════════════════════════════
+// 공통 유틸
+// ══════════════════════════════════════════════════════════════
+function setBadge(el,text,val,good,warn){
+  el.textContent=text;
+  if(val===0){el.style.background='#e3f2fd';el.style.color='#1976d2';}
+  else if(val<=good){el.style.background='#e8f5e9';el.style.color='#2e7d32';}
+  else if(val<=warn){el.style.background='#fff9c4';el.style.color='#e65100';}
+  else{el.style.background='#ffebee';el.style.color='#c62828';}
+}
+
+function updateTabs(activeIdx, doneArr, total){
+  document.querySelectorAll('.meal-tab').forEach((tab,i)=>{
+    tab.classList.remove('active','done');
+    if(i===activeIdx) tab.classList.add('active');
+    else if(i<total && doneArr[i]) tab.classList.add('done');
+  });
+}
+
+// 규칙 토글
+document.getElementById('toggle-rules-btn').addEventListener('click',()=>{
+  G.rulesVisible=!G.rulesVisible;
+  document.getElementById('rules-list').style.display=G.rulesVisible?'':'none';
+  document.getElementById('rules-hidden-msg').style.display=G.rulesVisible?'none':'';
+  document.getElementById('toggle-rules-btn').textContent=G.rulesVisible?'숨기기':'보이기';
+});
+
+// 초기화
+document.getElementById('reset-btn').addEventListener('click',()=>{
+  if(G.mode==='standard'){
+    // 표준 모드: 전체 메뉴판 모든 선택 초기화
+    STD_MEALS.forEach(meal => {
+      meal.cats.forEach(c => { G.stdSel[meal.key+'_'+c.type] = []; });
+    });
+    renderStdAllMeals(); updateStdBadges();
+  } else {
+    G.custSel[CUSTOM_MEAL_KEYS[G.custMealIdx]]=[];
+    G.custViolations[CUSTOM_MEAL_KEYS[G.custMealIdx]]=[];
+    renderCustomMeal(); updateCustomBadge();
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// 선택 완료 버튼
+// ══════════════════════════════════════════════════════════════
+document.getElementById('confirm-btn').addEventListener('click',()=>{
+  if(G.mode==='standard') confirmStd();
+  else confirmCustom();
+});
+
+function confirmStd(){
+  // 표준 모드: 전체 메뉴 선택 완료 → 바로 사후 질문으로
+  STD_MEALS.forEach((_, i) => { G.stdDone[i] = true; });
+  G.endTime = Date.now();
+  showPostQuestions();
+}
+
+function confirmCustom(){
+  const key=CUSTOM_MEAL_KEYS[G.custMealIdx];
+  const pool=ALL_MENU[key];
+  const selItems=pool.filter(i=>G.custSel[key].includes(i.id));
+  const failed=G.activeRules.filter(r=>!r.check(selItems));
+  // 위반된 규칙 ID 저장 (인지기능 영역 분석용)
+  if (!G.custFailedRules) G.custFailedRules = {breakfast:[],lunch:[],dinner:[]};
+  G.custFailedRules[key] = failed.map(r=>r.id);
+  let viIds=[];
+  if(failed.length>0){
+    failed.forEach(r=>viIds.push(...r.getViolated(selItems)));
+    viIds=[...new Set(viIds)];
+    G.custErrors[key]=failed.length; G.custViolations[key]=viIds;
+    viIds.forEach(id=>{
+      const el=document.querySelector(`[data-id="${id}"]`);
+      if(el){el.classList.remove('selected');el.classList.add('violation');}
+    });
+    const total=selItems.reduce((s,i)=>s+i.kcal,0);
+    const isLast=G.custMealIdx===2;
+    showFeedback('⚠️',`위반 조건 ${failed.length}가지`,
+      failed.map(r=>`• ${r.errorMsg}`).join('\n')+`\n\n선택: ${selItems.map(i=>i.name).join(', ')}\n칼로리: ${total} kcal`,
+      isLast?'결과 보기':'그래도 다음으로');
+  } else {
+    G.custErrors[key]=0; G.custViolations[key]=[];
+    const total=selItems.reduce((s,i)=>s+i.kcal,0);
+    const isLast=G.custMealIdx===2;
+    showFeedback('✅','모든 조건을 지켰습니다!',
+      `선택: ${selItems.map(i=>i.name).join(', ')}\n칼로리: ${total} kcal`,
+      isLast?'결과 보기':'다음 식사로');
+  }
+}
+
+function showFeedback(icon,title,detail,nextLabel){
+  document.getElementById('fb-icon').textContent=icon;
+  document.getElementById('fb-title').textContent=title;
+  document.getElementById('fb-detail').textContent=detail;
+  document.getElementById('fb-next-btn').textContent=nextLabel;
+  document.getElementById('feedback-overlay').classList.remove('hidden');
+}
+
+document.getElementById('fb-next-btn').addEventListener('click',()=>{
+  document.getElementById('feedback-overlay').classList.add('hidden');
+  // 표준 모드는 confirmStd가 사후 질문으로 직접 이동하므로 여기서는 훈련 모드만 처리
+  G.custMealIdx++;
+  if(G.custMealIdx<3){ renderCustomMeal(); updateCustomBadge(); }
+  else { G.endTime=Date.now(); showResultCustom(); }
+});
+
+// ══════════════════════════════════════════════════════════════
+// 사후 질문 오버레이 (점수 기록지 지시문 6, 7번)
+// 검사 종료 후 결과 화면 진입 전 응답을 받음
+// ══════════════════════════════════════════════════════════════
+function showPostQuestions(){
+  G.postPerformance = null;     // 6번 응답 (1~5)
+  G.errorAwareness = null;      // 7번 응답 ('yes' / 'no')
+  G.errorDetail = '';           // 7번 부연 텍스트
+
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('post-q-overlay').classList.remove('hidden');
+
+  // 버튼 상태 초기화
+  document.querySelectorAll('#post-q-perf-row .post-q-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('#post-q-err-row .post-q-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('post-q-err-followup').style.display = 'none';
+  document.getElementById('post-q-err-text').value = '';
+  document.getElementById('post-q-next-btn').disabled = true;
+
+  function checkReady(){
+    const ready = (G.postPerformance !== null) && (G.errorAwareness !== null);
+    document.getElementById('post-q-next-btn').disabled = !ready;
+  }
+
+  // 수행 후 평가 버튼
+  document.querySelectorAll('#post-q-perf-row .post-q-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      document.querySelectorAll('#post-q-perf-row .post-q-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      G.postPerformance = parseInt(btn.dataset.val);
+      checkReady();
+    };
+  });
+
+  // 오류 인식 버튼
+  document.querySelectorAll('#post-q-err-row .post-q-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      document.querySelectorAll('#post-q-err-row .post-q-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      G.errorAwareness = btn.dataset.val;
+      // 아니오 선택 시 추가 텍스트 영역 표시
+      document.getElementById('post-q-err-followup').style.display =
+        (btn.dataset.val === 'no') ? '' : 'none';
+      checkReady();
+    };
+  });
+
+  // 오류 상세 텍스트
+  document.getElementById('post-q-err-text').oninput = (e)=>{
+    G.errorDetail = e.target.value;
+  };
+
+  // 다음 버튼 - 시작·억제 오류 입력 오버레이로
+  document.getElementById('post-q-next-btn').onclick = ()=>{
+    document.getElementById('post-q-overlay').classList.add('hidden');
+    showObsQuestions();
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// 시작·억제 오류 입력 오버레이 (점수 기록지 8~12번)
+// 치료사 관찰 항목 - 결과 화면 진입 전 모두 입력 받음
+// ══════════════════════════════════════════════════════════════
+function showObsQuestions(){
+  G.obsScores = {};  // {1:1, 2:0, ...} 형태로 저장 (8번=key 1, 9번=2 ...)
+
+  const items = [
+    {n:8,  text:'지시문 읽기를 끝마쳤을 때 검사자에게 말한다.'},
+    {n:9,  text:'과제를 시작할 때 검사자에게 말한다.'},
+    {n:10, text:'추가 설명(힌트) 없이 과제를 시작한다.'},
+    {n:11, text:'과제를 하는 동안 검사자에게 질문하지 않는다.'},
+    {n:12, text:'추가 설명(힌트) 없이 과제를 끝마쳤을 때 검사자에게 말한다.'},
+  ];
+
+  const target = document.getElementById('obs-q-items');
+  target.innerHTML = items.map(it=>`
+    <div class="obs-q-item" data-key="${it.n-7}">
+      <div class="obs-q-text"><span class="obs-q-num">${it.n}.</span> ${it.text}</div>
+      <div class="obs-q-btns">
+        <button class="obs-q-btn yes" data-val="1">✓ 수행함 (1점)</button>
+        <button class="obs-q-btn no"  data-val="0">✗ 수행 못함 (0점)</button>
+      </div>
+    </div>
+  `).join('');
+
+  // 클릭 이벤트
+  target.querySelectorAll('.obs-q-item').forEach(item=>{
+    const key = parseInt(item.dataset.key);
+    item.querySelectorAll('.obs-q-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        item.querySelectorAll('.obs-q-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        item.classList.add('answered');
+        G.obsScores[key] = parseInt(btn.dataset.val);
+        checkObsReady();
+      };
+    });
+  });
+
+  function checkObsReady(){
+    const ready = Object.keys(G.obsScores).length === 5;
+    document.getElementById('obs-q-next-btn').disabled = !ready;
+  }
+
+  document.getElementById('obs-q-next-btn').onclick = ()=>{
+    document.getElementById('obs-q-overlay').classList.add('hidden');
+    showResultStd();
+  };
+
+  document.getElementById('obs-q-overlay').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════════════════════════
+// 결과 화면 - 표준 (전보라 2025 박사학위논문 The Menu Task-K 기준)
+// ══════════════════════════════════════════════════════════════
+function showResultStd(){
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.remove('hidden');
+  document.body.classList.add('on-result-screen');
+  document.getElementById('progress-bar').style.width='100%';
+
+  // ─── 계산 ───
+  const allItems = STD_MEALS.flatMap(m=>m.cats.flatMap(c=>c.items));
+  const allSel   = Object.values(G.stdSel).flat();
+  const selected = allSel.map(id=>allItems.find(i=>i.id===id)).filter(Boolean);
+  const foodKcal = selected.filter(i=>!i.ml).reduce((s,i)=>s+i.kcal,0);
+  const totalMl  = selected.filter(i=>i.ml).reduce((s,i)=>s+i.ml,0);
+  const heartCount = selected.filter(i=>i.heart).length;
+  const bFood=G.stdSel['breakfast_food']||[], bDrink=G.stdSel['breakfast_drink']||[];
+  const lFood=G.stdSel['lunch_food']||[],     lDrink=G.stdSel['lunch_drink']||[];
+  const dFood=G.stdSel['dinner_food']||[],    dDrink=G.stdSel['dinner_drink']||[];
+  const snack=G.stdSel['snack_food']||[];
+
+  const elapsed = Math.round((G.endTime-G.startTime)/1000);
+  // 저장 복원 시 기존 평가일 유지, 아니면 오늘 날짜
+  const existingDate = document.getElementById('rpt-date').textContent.trim();
+  if (!existingDate || !G._restoring){
+    const today = new Date();
+    document.getElementById('rpt-date').textContent =
+      `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+  }
+  document.getElementById('rpt-time').textContent = `${elapsed}초`;
+
+  // ─── 과제 오류 1~7번 ───
+  const scoreItems = [
+    {n:1, label:'선택한 메뉴들의 칼로리 총합이 1,800 kcal 이하이다.',
+     pass: foodKcal<=1800,
+     detail: foodKcal<=1800 ? `${foodKcal} kcal` : `${foodKcal} kcal · 상한 1,800kcal 초과`},
+    {n:2, label:'선택한 음료들의 총량이 1,700 ml(58 oz) 이하이다.',
+     pass: totalMl<=1700,
+     detail: totalMl<=1700 ? `${totalMl} ml` : `${totalMl} ml · 상한 1,700ml 초과`},
+    {n:3, label:'아침 및 점심식사에 각각 2개의 음료를 선택한다.',
+     pass: bDrink.length===2 && lDrink.length===2,
+     detail: `아침 ${bDrink.length}개 · 점심 ${lDrink.length}개 (기준 각 2개)`},
+    {n:4, label:'저녁식사에 1개의 음료를 선택한다.',
+     pass: dDrink.length===1,
+     detail: `저녁 ${dDrink.length}개 (기준 1개)`},
+    {n:5, label:'아침, 점심 및 저녁식사로 각각 1개의 식사 메뉴를 선택한다.',
+     pass: bFood.length===1 && lFood.length===1 && dFood.length===1,
+     detail: `아침 ${bFood.length} · 점심 ${lFood.length} · 저녁 ${dFood.length} (기준 각 1개)`},
+    {n:6, label:'심장에 좋은 메뉴를 2개 이상 선택한다.',
+     pass: heartCount>=2,
+     detail: `${heartCount}가지 선택 (기준 2가지 이상)`},
+    {n:7, label:'간식 2개를 선택한다.',
+     pass: snack.length===2,
+     detail: `${snack.length}개 (기준 2개)`},
+  ];
+  const taskScore = scoreItems.filter(s=>s.pass).length;
+
+  // ─── 시작·억제 오류 8~12번 ───
+  const obsItems = [
+    {n:8,  text:'지시문 읽기를 끝마쳤을 때 검사자에게 말한다.'},
+    {n:9,  text:'과제를 시작할 때 검사자에게 말한다.'},
+    {n:10, text:'추가 설명(힌트)없이 과제를 시작한다.'},
+    {n:11, text:'과제를 하는 동안 검사자에게 질문하지 않는다.'},
+    {n:12, text:'추가 설명(힌트) 없이 과제를 끝마쳤을 때 검사자에게 말한다.'},
+  ];
+
+  // ─── 수행 전 예측 체크박스 표시 ───
+  const labels = ['매우 못함','못함','보통','잘함','매우 잘함'];
+  document.getElementById('rpt-predict-opts').innerHTML = labels.map((l,i)=>{
+    const i1 = i+1;
+    const c = G.prePrediction===i1 ? 'checked' : '';
+    return `<span class="${c}">${G.prePrediction===i1?'■':'□'} ${l}</span>`;
+  }).join('');
+
+  // ─── 수행 후 평가 체크박스 표시 ───
+  document.getElementById('rpt-post-opts').innerHTML = labels.map((l,i)=>{
+    const i1 = i+1;
+    const c = G.postPerformance===i1 ? 'checked' : '';
+    return `<span class="${c}">${G.postPerformance===i1?'■':'□'} ${l}</span>`;
+  }).join('');
+
+  // ─── 오류 인식 표시 ───
+  const errYes = G.errorAwareness==='yes' ? '■' : '□';
+  const errNo  = G.errorAwareness==='no'  ? '■' : '□';
+  const errYesC = G.errorAwareness==='yes' ? 'checked' : '';
+  const errNoC  = G.errorAwareness==='no'  ? 'checked' : '';
+  document.getElementById('rpt-err-line').innerHTML =
+    `<span class="${errYesC}">${errYes} 예</span> &nbsp; / &nbsp; <span class="${errNoC}">${errNo} 아니오</span>`;
+  if (G.errorAwareness==='no' && G.errorDetail) {
+    document.getElementById('rpt-err-detail-wrap').style.display = '';
+    document.getElementById('rpt-err-detail').textContent = G.errorDetail;
+  } else {
+    document.getElementById('rpt-err-detail-wrap').style.display = 'none';
+  }
+
+  // ─── 채점 표 채우기 ───
+  const tbody = document.getElementById('rpt-score-tbody');
+  let html = '';
+  // 과제 오류 섹션
+  html += '<tr class="rpt-section-row"><td colspan="4">과제 오류 (0–7)</td></tr>';
+  scoreItems.forEach(s=>{
+    const perfCell = s.pass
+      ? '<td class="rpt-perf-val">1</td><td class="rpt-err-val">—</td>'
+      : '<td class="rpt-perf-val">—</td><td class="rpt-err-val">0</td>';
+    html += `<tr>
+      <td class="rpt-num">${s.n}</td>
+      <td class="rpt-label">${s.label}</td>
+      ${perfCell}
+    </tr>`;
+  });
+  // 시작·억제 오류 섹션 (입력받은 G.obsScores 그대로 표시)
+  html += '<tr class="rpt-section-row"><td colspan="4">시작 및 억제 오류 (0–5)</td></tr>';
+  let obsScore = 0;
+  obsItems.forEach(o=>{
+    const k = o.n - 7;  // 1~5
+    const val = G.obsScores && G.obsScores.hasOwnProperty(k) ? G.obsScores[k] : null;
+    obsScore += (val===1 ? 1 : 0);
+    let perfCell, errCell;
+    if (val === 1){
+      perfCell = '<td class="rpt-perf-val">1</td>';
+      errCell  = '<td class="rpt-err-val">—</td>';
+    } else if (val === 0){
+      perfCell = '<td class="rpt-perf-val">—</td>';
+      errCell  = '<td class="rpt-err-val">0</td>';
+    } else {
+      perfCell = '<td class="rpt-perf-val" style="color:#aaa;">—</td>';
+      errCell  = '<td class="rpt-err-val" style="color:#aaa;">—</td>';
+    }
+    html += `<tr>
+      <td class="rpt-num">${o.n}</td>
+      <td class="rpt-label">${o.text}</td>
+      ${perfCell}
+      ${errCell}
+    </tr>`;
+  });
+  // 총점/시간 - 12점 만점 기준으로 미리 계산
+  const totalPerf = taskScore + obsScore;
+  const obsFilled = G.obsScores ? Object.keys(G.obsScores).length : 0;
+  const totalErr  = (7 - taskScore) + (obsFilled - obsScore);
+  html += `<tr class="rpt-total-row">
+    <td colspan="2">총 점수 (0–12)</td>
+    <td colspan="2" id="rpt-perf-total">${totalPerf} / 12</td>
+  </tr>`;
+  html += `<tr class="rpt-total-row">
+    <td colspan="2">시간(초)</td>
+    <td colspan="2">${elapsed}초</td>
+  </tr>`;
+  tbody.innerHTML = html;
+
+  // ─── 최종 판정 박스 (12점 기준 완성 상태) ───
+  const allObsFilled = obsFilled === 5;
+  updateRptVerdict(taskScore, obsScore, allObsFilled);
+
+  // ─── 메타인지 분석 (수행 전 예측 vs 수행 후 평가) ───
+  // 실제 수행은 이제 12점 기준으로 평가
+  renderMetaAnalysis(taskScore, obsScore, allObsFilled);
+
+  // ─── 인지기능 영역별 분석 (어떤 항목이 틀렸고 어떤 기능 저하인지) ───
+  renderCogAnalysis(scoreItems);
+
+  // ─── 식사별 선택 내역 ───
+  const mealRows = STD_MEALS.map(meal=>{
+    let items=[];
+    meal.cats.forEach(c=>{
+      const ids = G.stdSel[meal.key+'_'+c.type]||[];
+      const seen = {};
+      ids.forEach(id=>{seen[id]=(seen[id]||0)+1;});
+      Object.entries(seen).forEach(([id,cnt])=>{
+        const item = allItems.find(i=>i.id===id);
+        if(item){
+          const sub = item.ml ? ` (${item.ml}ml)` : ` (${item.kcal}kcal)`;
+          items.push(`${item.name}${sub}${item.heart?' ♥':''}${cnt>1?` ×${cnt}`:''}`);
+        }
+      });
+    });
+    return `<tr>
+      <td>${meal.icon} ${meal.label}</td>
+      <td>${items.join(', ') || '<span style="color:#aaa;">미선택</span>'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rpt-meal-tbody').innerHTML = mealRows;
+
+  // 식사 요약
+  document.getElementById('rpt-meal-summary').innerHTML = `
+    <span>총 식품 칼로리: <b style="color:${foodKcal>1800?'#c62828':'#2e7d32'};">${foodKcal} kcal</b>
+      <span class="rpt-summary-criterion">기준: 1,800 kcal 이하</span></span>
+    <span>총 음료 용량: <b style="color:${totalMl>1700?'#c62828':'#2e7d32'};">${totalMl} ml</b>
+      <span class="rpt-summary-criterion">기준: 1,700 ml 이하</span></span>
+    <span>♥ 심장에 좋은 메뉴: <b style="color:${heartCount<2?'#c62828':'#2e7d32'};">${heartCount}가지</b>
+      <span class="rpt-summary-criterion">기준: 2가지 이상</span></span>
+  `;
+}
+
+// (시작·억제 오류 채점은 결과 화면 진입 전 obs-q-overlay에서 모두 입력받음)
+
+// ──────────────────────────────────────────────────────────────
+// 최종 판정 박스 갱신
+// ──────────────────────────────────────────────────────────────
+function updateRptVerdict(taskScore, obsScore, complete){
+  const verdict = document.getElementById('rpt-verdict');
+  const total = taskScore + obsScore;
+  if (!complete){
+    verdict.className = 'rpt-verdict pending';
+    verdict.innerHTML = `
+      <span class="rpt-verdict-score">현재 ${total}점 / 12점</span>
+      <b>시작·억제 오류 5문항(8~12번)을 모두 입력하면 최종 판정이 표시됩니다.</b><br>
+      <span style="font-size:12.5px;">※ 절단점: 총점 8점 미만 = 기능적 인지의 문제 가능성 (Youden's index 7.5점, AUC=.750)</span>`;
+  } else if (total < 8){
+    verdict.className = 'rpt-verdict below';
+    verdict.innerHTML = `
+      <span class="rpt-verdict-score">${total}점 / 12점 — 절단점(8점) 미만</span>
+      <b>기능적 인지의 문제가 있을 가능성이 있어 추가 평가가 권장됩니다.</b><br>
+      <span style="font-size:12.5px;">실제 일상생활 도구적 활동(IADL)의 독립적 수행에 어려움이 있을 가능성을 시사합니다.</span>`;
+  } else {
+    verdict.className = 'rpt-verdict normal';
+    verdict.innerHTML = `
+      <span class="rpt-verdict-score">${total}점 / 12점 — 절단점(8점) 이상</span>
+      <b>기능적 인지 양호 범위로 평가됩니다.</b><br>
+      <span style="font-size:12.5px;">현재 평가 시점 기준 일상생활 도구적 활동(IADL)의 독립적 수행 가능 범위입니다.</span>`;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// 자기 인식 및 메타인지 분석
+// 피검자 반응(예측·평가·오류 인식) ↔ 실제 수행 대조 → 시사점 도출
+// ──────────────────────────────────────────────────────────────
+function renderMetaAnalysis(taskScore, obsScore, complete){
+  const pre  = G.prePrediction;     // 1~5
+  const post = G.postPerformance;   // 1~5
+  const errAware = G.errorAwareness; // 'yes' | 'no' | null
+  const errDetail = (G.errorDetail || '').trim();
+  const target = document.getElementById('rpt-meta-analysis');
+
+  if (!pre || !post){
+    target.innerHTML = `<div class="rpt-meta-finding">
+      수행 전 예측 또는 수행 후 평가 응답이 없어 자기 인식 분석을 수행할 수 없습니다.
+    </div>`;
+    return;
+  }
+
+  const labels = ['','매우 못함','못함','보통','잘함','매우 잘함'];
+  const total = taskScore + (complete ? obsScore : 0);
+
+  // 실제 수행 수준 (12점 만점 → 5점 척도 환산)
+  let actualLevel = 3;
+  if (total >= 11) actualLevel = 5;
+  else if (total >= 9)  actualLevel = 4;
+  else if (total >= 6)  actualLevel = 3;
+  else if (total >= 3)  actualLevel = 2;
+  else                  actualLevel = 1;
+
+  const diff = pre - post;            // 예측 - 평가
+  const postVsActual = post - actualLevel;  // 자기평가 - 실제
+  const preVsActual  = pre  - actualLevel;  // 예측 - 실제
+
+  // 각 항목별 판정 헬퍼
+  // gap: 자기응답 - 실제수준. 양수=과대, 음수=과소
+  function judgeAlignment(gap){
+    if (Math.abs(gap) <= 0) return { text:'일치', cls:'ok' };
+    if (gap >= 2)  return { text:'과대 평가', cls:'bad' };
+    if (gap <= -2) return { text:'과소 평가', cls:'bad' };
+    return { text:'경미한 차이', cls:'ok' };
+  }
+
+  // 오류 인식의 적절성 판정 (실제 오류가 있었는가 vs 피검자가 오류를 인식했는가)
+  // 질문: "오류 없이 과제를 수행하셨습니까?"
+  //   '예'   = 오류 없다고 응답 (errAware === 'yes')
+  //   '아니오' = 오류 있다고 응답 (errAware === 'no')
+  const realErrors = 12 - total;  // 12점 만점 기준 실제 오류 개수
+  let errorJudge;
+  if (errAware === 'yes'){
+    // 피검자: "예" = 오류 없음
+    if (realErrors === 0){
+      errorJudge = { resp:'예', cls:'ok', impl:`실제 오류 없음과 일치 → 오류 모니터링 양호` };
+    } else {
+      errorJudge = { resp:'예', cls:'bad', impl:`실제 오류 ${realErrors}개에도 불구하고 오류 없음을 보고 → 오류 인식 결손 (Anosognosia 양상 가능)` };
+    }
+  } else if (errAware === 'no'){
+    // 피검자: "아니오" = 오류 있음
+    if (realErrors === 0){
+      errorJudge = { resp:'아니오', cls:'bad', impl:'실제로는 오류 없음 → 자신감 결여 또는 과도한 자기 검열 경향' };
+    } else {
+      errorJudge = { resp:'아니오', cls:'ok', impl:`실제 오류 ${realErrors}개와 일치 → 오류 모니터링 양호` };
+    }
+  } else {
+    errorJudge = { resp:'-', cls:'', impl:'오류 인식 문항 미응답' };
+  }
+
+  const preJ  = judgeAlignment(preVsActual);
+  const postJ = judgeAlignment(postVsActual);
+
+  // ─── 피검자 반응 표 ───
+  let html = `<table class="rpt-meta-table">
+    <thead>
+      <tr>
+        <th>질문</th>
+        <th>피검자 응답</th>
+        <th>실제 수행 대비</th>
+        <th>임상적 시사점</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rpt-meta-q-col">① 수행 전 예측<br>"얼마나 잘 수행할 수 있을 것 같습니까?"</td>
+        <td class="rpt-meta-resp-col">${labels[pre]}<br><span style="font-size:10.5px;color:#888;font-weight:400;">(${pre}/5)</span></td>
+        <td class="rpt-meta-actual-col ${preJ.cls}">${preJ.text}</td>
+        <td class="rpt-meta-implication-col">${
+          preVsActual >= 2 ? '과제 난이도를 낙관적으로 예측. 실제 수행은 예측보다 낮음 → <b>난이도 추정 능력 저하</b> 또는 자신감 과잉' :
+          preVsActual <= -2 ? '실제 수행 능력에 비해 자신감이 낮은 상태로 시작 → 우울·불안·낮은 자기효능감 가능성' :
+          '과제 시작 시 자기 능력에 대한 추정이 실제 수행과 부합함'
+        }</td>
+      </tr>
+      <tr>
+        <td class="rpt-meta-q-col">② 수행 후 평가<br>"얼마나 잘 수행했다고 생각하십니까?"</td>
+        <td class="rpt-meta-resp-col">${labels[post]}<br><span style="font-size:10.5px;color:#888;font-weight:400;">(${post}/5)</span></td>
+        <td class="rpt-meta-actual-col ${postJ.cls}">${postJ.text}</td>
+        <td class="rpt-meta-implication-col">${
+          postVsActual >= 2 ? '수행 후에도 자신의 오류를 충분히 인지하지 못함 → <b>온라인 자기 모니터링(self-monitoring) 결손</b>. 전두엽 기능 저하 시 흔히 관찰되는 양상' :
+          postVsActual <= -2 ? '수행을 실제보다 박하게 평가 → <b>부정적 자기 인식</b> 경향. 우울·불안·자기효능감 저하 동반 가능' :
+          '수행 후 자기 평가가 실제 수행과 일치 → 사후 메타인지 적절'
+        }</td>
+      </tr>
+      <tr>
+        <td class="rpt-meta-q-col">③ 오류 인식<br>"오류 없이 과제를 수행하셨습니까?"</td>
+        <td class="rpt-meta-resp-col">${errorJudge.resp}${errDetail ? `<br><span style="font-size:10.5px;color:#888;font-weight:400;">"${escapeHtml(errDetail).slice(0,40)}${errDetail.length>40?'...':''}"</span>` : ''}</td>
+        <td class="rpt-meta-actual-col ${errorJudge.cls}">실제 오류 ${realErrors}개</td>
+        <td class="rpt-meta-implication-col">${errorJudge.impl}</td>
+      </tr>
+    </tbody>
+  </table>`;
+
+  // ─── 통합 종합 소견 ───
+  const absDiff = Math.abs(diff);
+  let summaryParts = [];
+
+  // 예측-평가 패턴
+  if (absDiff === 0){
+    summaryParts.push(`예측과 수행 후 평가가 동일(${labels[pre]})하여 <b>일관된 자기 인식</b>을 보임`);
+  } else if (diff > 0){
+    summaryParts.push(`수행 후 평가(${labels[post]})가 예측(${labels[pre]})보다 낮음 → 과제 중 <b>어려움을 인지하여 자기 평가 조정</b>${absDiff>=2 ? ' (조정 폭 큼)' : ''}`);
+  } else {
+    summaryParts.push(`수행 후 평가(${labels[post]})가 예측(${labels[pre]})보다 높음 → 과제 후 <b>자신감 회복</b> 양상${absDiff>=2 ? ' (회복 폭 큼)' : ''}`);
+  }
+
+  // 핵심 문제 양상 (가장 두드러진 결손 1개 강조)
+  // errAware === 'yes' = 피검자 "예" 응답 = 오류 없다고 보고
+  // errAware === 'no'  = 피검자 "아니오" 응답 = 오류 있다고 보고
+  let coreIssue = null;
+  if (postVsActual >= 2 && errAware === 'yes' && realErrors > 0){
+    coreIssue = '<b>자기 오류 모니터링 능력의 뚜렷한 결손</b> — 자신의 오류를 인지하지 못하며 수행을 과대 평가함. 일상생활에서 위험 인지 및 안전 판단에 어려움이 예상되므로 보호자 감독 및 환경 조정 권장';
+  } else if (postVsActual >= 2){
+    coreIssue = '<b>사후 메타인지 결손</b> — 수행 후에도 자신의 오류 양상을 충분히 인지하지 못함';
+  } else if (postVsActual <= -2){
+    coreIssue = '<b>부정적 자기 평가 경향</b> — 실제 수행에 비해 자기 평가가 낮음. 동기·정서 측면(우울, 자기효능감) 평가 고려';
+  } else if (errAware === 'yes' && realErrors >= 3){
+    coreIssue = '<b>오류 인식 능력 저하</b> — 다수의 실제 오류에도 불구하고 오류 없음을 보고함';
+  }
+
+  const isAllGood = (Math.abs(preVsActual) < 2) && (Math.abs(postVsActual) < 2) &&
+                    ((errAware === 'no' && realErrors > 0) || (errAware === 'yes' && realErrors === 0));
+
+  let findingClass = coreIssue ? '' : (isAllGood ? 'normal' : '');
+  let findingHtml = `<div class="rpt-meta-finding ${findingClass}">`;
+  findingHtml += `<b>종합:</b> ${summaryParts.join('. ')}.`;
+  if (coreIssue){
+    findingHtml += `<br><span style="margin-top:4px;display:inline-block;">▶ ${coreIssue}</span>`;
+  } else if (isAllGood){
+    findingHtml += `<br><span style="margin-top:4px;display:inline-block;">▶ 자기 인식 및 메타인지 기능 전반적으로 양호한 범위</span>`;
+  }
+  findingHtml += `</div>`;
+
+  target.innerHTML = html + findingHtml;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 인지기능 영역별 분석 (신경심리학적 표준 용어 기반)
+// ══════════════════════════════════════════════════════════════
+// 각 채점 항목(1~7번)의 인지기능 영역 매핑:
+//   ▶ 선택적 주의 및 양적 추론 (Selective Attention & Quantitative Reasoning)
+//     : 1번(칼로리 ≤ 1,800), 2번(음료 ≤ 1,700ml)
+//       — 메뉴의 수치 정보에 선택적으로 주의를 유지하며 누적 수치를 추적·계산
+//   ▶ 작업기억 (Working Memory)
+//     : 3번(아·점 음료 2개), 7번(간식 2개)
+//       — 다중 수량 규칙을 머릿속에 유지하며 일관 적용
+//   ▶ 인지적 전환 (Set-shifting / Cognitive Flexibility)
+//     : 4번(저녁 음료 1개로 전환)
+//       — 이전 규칙(2개)에서 새 규칙(1개)으로 유연한 전환
+//   ▶ 계획 및 조직화 (Planning & Organization)
+//     : 5번(아·점·저 식사 각 1개)
+//       — 시간대별 식사 구성을 누락 없이 조직화
+//   ▶ 목표 지향 행동 (Goal-directed Behavior)
+//     : 6번(♥ 심장에 좋은 메뉴 2개)
+//       — 특정 목표 속성(심장 건강)을 유지하며 목표 지향적 선택
+function renderCogAnalysis(scoreItems){
+  const domains = [
+    {
+      key:'attn_quant',
+      name:'선택적 주의 및 양적 추론',
+      eng:'Selective Attention & Quantitative Reasoning',
+      desc:'메뉴의 수치 정보에 선택적으로 주의를 유지하며 누적 수치를 추적·계산',
+      items:[1,2]
+    },
+    {
+      key:'wm',
+      name:'작업기억',
+      eng:'Working Memory',
+      desc:'다중 수량 규칙의 유지와 일관된 적용',
+      items:[3,7]
+    },
+    {
+      key:'flex',
+      name:'인지적 전환',
+      eng:'Set-shifting / Cognitive Flexibility',
+      desc:'기존 규칙에서 새 규칙으로의 유연한 전환',
+      items:[4]
+    },
+    {
+      key:'plan',
+      name:'계획 및 조직화',
+      eng:'Planning & Organization',
+      desc:'시간대별 과제 구성과 순차적 조직화',
+      items:[5]
+    },
+    {
+      key:'goal',
+      name:'목표 지향 행동',
+      eng:'Goal-directed Behavior',
+      desc:'특정 목표 속성을 유지하며 목표 지향적 선택',
+      items:[6]
+    },
+  ];
+
+  // 항목별 짧은 라벨 (실패 항목 표시용)
+  const shortLabels = {
+    1: '칼로리 총합 ≤ 1,800 kcal',
+    2: '음료 총량 ≤ 1,700 ml',
+    3: '아침·점심 음료 각 2개',
+    4: '저녁 음료 1개',
+    5: '식사 각 1개 (아·점·저)',
+    6: '심장에 좋은 메뉴 ≥ 2가지',
+    7: '간식 2개',
+  };
+
+  let html = `<table class="rpt-cog-table">
+    <thead>
+      <tr>
+        <th>인지기능 영역</th>
+        <th>관련 항목</th>
+        <th>판정</th>
+        <th>세부 소견</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  let totalFail = 0, totalDomainFail = 0;
+
+  domains.forEach(d=>{
+    const relevant = scoreItems.filter(s=>d.items.includes(s.n));
+    const failed   = relevant.filter(s=>!s.pass);
+    const allPass  = failed.length === 0;
+    if (!allPass) totalDomainFail++;
+    totalFail += failed.length;
+
+    const itemsStr = d.items.map(n=>`${n}번`).join(', ');
+    const resultClass = allPass ? 'pass' : 'fail';
+    const resultText = allPass ? '양호' : '저하 의심';
+
+    let detailHtml = `<span style="color:#555;">${d.desc}</span>`;
+    if (!allPass){
+      const failList = failed.map(s=>
+        `<div class="fail-line">└ ${s.n}번 실패 (${shortLabels[s.n]}): ${s.detail}</div>`
+      ).join('');
+      detailHtml += failList;
+    }
+
+    html += `<tr>
+      <td class="rpt-cog-domain">
+        ${d.name}
+        <span class="rpt-cog-domain-eng">${d.eng}</span>
+      </td>
+      <td class="rpt-cog-items-col">${itemsStr}</td>
+      <td class="rpt-cog-result-col ${resultClass}">${resultText}</td>
+      <td class="rpt-cog-detail">${detailHtml}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+
+  // 종합 코멘트
+  if (totalFail === 0){
+    html += `<div class="rpt-cog-summary-bar">
+      <b>종합:</b> 평가된 5개 인지기능 영역 모두에서 양호한 수행을 보였습니다.
+      (과제 오류 항목 7개 전체 통과)
+    </div>`;
+  } else {
+    const failedDomainNames = domains
+      .filter(d=>{
+        const fails = scoreItems.filter(s=>d.items.includes(s.n) && !s.pass);
+        return fails.length > 0;
+      })
+      .map(d=>d.name)
+      .join(' · ');
+    html += `<div class="rpt-cog-summary-bar">
+      <b>종합:</b> ${totalDomainFail}개 영역에서 저하 의심 소견이 관찰되었습니다 — ${failedDomainNames}.
+      해당 영역에서 총 ${totalFail}개 채점 항목이 기준에 미달하였으며, 임상 소견 작성 시 참고 자료로 활용 가능합니다.
+    </div>`;
+  }
+
+  document.getElementById('rpt-cog-analysis').innerHTML = html;
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// 결과 화면 - 훈련 모드 (해석 포함)
+// ══════════════════════════════════════════════════════════════
+function showResultCustom(){
+  const elapsed = Math.round((G.endTime-G.startTime)/1000);
+  const totalErrors = Object.values(G.custErrors).reduce((a,b)=>a+b,0);
+
+  // 게임 화면 숨기고 훈련 결과 화면 표시
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('feedback-overlay').classList.add('hidden');
+  document.getElementById('custom-result-screen').classList.remove('hidden');
+  document.body.classList.add('on-result-screen');
+
+  // 메뉴별 집계
+  const mealLabels = {breakfast:'🌅 아침', lunch:'☀️ 점심', dinner:'🌙 저녁'};
+  const mealKcals = {};
+  const mealItems = {};
+  ['breakfast','lunch','dinner'].forEach(k=>{
+    const pool = ALL_MENU[k];
+    const items = (G.custSel[k]||[]).map(id=>pool.find(i=>i.id===id)).filter(Boolean);
+    mealItems[k] = items;
+    mealKcals[k] = items.reduce((s,i)=>s+i.kcal,0);
+  });
+  const totalKcal = Object.values(mealKcals).reduce((a,b)=>a+b,0);
+  const violatedMeals = ['breakfast','lunch','dinner'].filter(k=>G.custErrors[k]>0).length;
+
+  // ─── 종합 박스 ───
+  let summaryClass, summaryText;
+  if (totalErrors === 0){
+    summaryText = `<div style="font-size:15px;font-weight:800;color:#2e7d32;margin-bottom:6px;">✓ 모든 조건을 충족하며 과제를 완료했습니다</div>
+      <div style="font-size:12.5px;color:#333;line-height:1.65;">3개 식사 모두에서 적용된 훈련 조건을 모두 지킨 우수한 수행입니다.</div>`;
+  } else if (totalErrors <= 2){
+    summaryText = `<div style="font-size:15px;font-weight:800;color:#e65100;margin-bottom:6px;">△ 일부 조건 위반이 관찰되었습니다</div>
+      <div style="font-size:12.5px;color:#333;line-height:1.65;">총 <b>${totalErrors}회</b>의 조건 위반이 ${violatedMeals}개 식사에서 발생했습니다. 위반 양상을 검토하여 추가 훈련 방향을 결정해 보세요.</div>`;
+  } else {
+    summaryText = `<div style="font-size:15px;font-weight:800;color:#c62828;margin-bottom:6px;">⚠ 다수의 조건 위반이 관찰되었습니다</div>
+      <div style="font-size:12.5px;color:#333;line-height:1.65;">총 <b>${totalErrors}회</b>의 조건 위반이 ${violatedMeals}개 식사에서 발생했습니다. 난이도 조정 또는 단계적 훈련을 고려해 보세요.</div>`;
+  }
+  summaryText += `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #d1c4e9;display:flex;gap:18px;flex-wrap:wrap;font-size:12px;">
+    <span><b style="color:#555;">소요 시간:</b> <b style="color:#4a148c;">${elapsed}초</b></span>
+    <span><b style="color:#555;">총 칼로리:</b> <b style="color:#4a148c;">${totalKcal} kcal</b></span>
+    <span><b style="color:#555;">조건 위반:</b> <b style="color:${totalErrors===0?'#2e7d32':'#c62828'};">${totalErrors}회</b></span>
+    <span><b style="color:#555;">난이도:</b> <b style="color:#4a148c;">${({easy:'쉬움',medium:'보통',hard:'어려움',expert:'전문가'})[G.difficulty]||'-'}</b></span>
+  </div>`;
+  document.getElementById('custom-summary-box').innerHTML = summaryText;
+
+  // ─── 식사별 수행 결과 ───
+  const mealRowsHtml = ['breakfast','lunch','dinner'].map(k=>{
+    const items = mealItems[k];
+    const itemsText = items.length>0
+      ? items.map(i=>i.name).join(', ')
+      : '<span style="color:#aaa;">미선택</span>';
+    const errCount = G.custErrors[k]||0;
+    const errCell = errCount===0
+      ? '<span style="color:#2e7d32;font-weight:700;">✓ 통과</span>'
+      : `<span style="color:#c62828;font-weight:700;">${errCount}회 위반</span>`;
+    return `<tr>
+      <td style="border:1px solid #999;padding:6px 8px;background:#fafafa;font-weight:600;text-align:center;white-space:nowrap;">${mealLabels[k]}</td>
+      <td style="border:1px solid #999;padding:6px 8px;line-height:1.55;word-break:keep-all;">${itemsText}</td>
+      <td style="border:1px solid #999;padding:6px 8px;text-align:center;font-weight:600;">${mealKcals[k]} kcal</td>
+      <td style="border:1px solid #999;padding:6px 8px;text-align:center;">${errCell}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('custom-meal-tbody').innerHTML = mealRowsHtml;
+
+  // ─── 인지기능 영역별 분석 ───
+  renderCustomCogAnalysis();
+
+  // ─── 훈련 해석 ───
+  let interp = '';
+  if (totalErrors === 0){
+    interp = `<b>훈련 효과:</b> 주어진 조건 내에서 식사를 구성하는 과제를 성공적으로 완료했습니다.
+      이는 <b>규칙 유지, 작업기억, 계획 수립</b>이 통합적으로 작동했음을 시사합니다.<br><br>
+      <b>다음 단계 제안:</b> 난이도를 한 단계 올리거나, 건강 상태 조건을 추가하여 도전 수준을 높여 보세요.`;
+  } else {
+    // 위반된 식사 분석
+    const violatedDetails = ['breakfast','lunch','dinner']
+      .filter(k=>G.custErrors[k]>0)
+      .map(k=>`${mealLabels[k]}에서 ${G.custErrors[k]}회 위반`)
+      .join(', ');
+    interp = `<b>관찰된 위반 양상:</b> ${violatedDetails}.<br><br>
+      <b>훈련 방향 제안:</b><br>
+      • 위반이 특정 식사에 집중된 경우 → 해당 식사를 반복 훈련하며 규칙을 단계적으로 내재화<br>
+      • 위반이 식사 전반에 분산된 경우 → 난이도를 낮춰 규칙 수를 줄인 뒤 점진적으로 늘리는 단계별 훈련 권장<br>
+      • 동일 조건 위반이 반복되는 경우 → 해당 조건만 단독으로 분리한 보조 훈련 고려`;
+  }
+  document.getElementById('custom-interpretation').innerHTML = interp;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 훈련 모드 — 인지기능 영역별 분석
+// ══════════════════════════════════════════════════════════════
+// 규칙 ID를 신경심리학적 인지기능 영역에 매핑:
+//   ▶ 선택적 주의 및 양적 추론 : 칼로리 수치 계산 관련 규칙
+//   ▶ 작업기억 : 다중 조건(건강 상태)을 동시 유지
+//   ▶ 인지적 전환 : 식사 간 다른 조건/상황 전환
+//   ▶ 계획 및 조직화 : 구조적 식사 구성 규칙
+//   ▶ 목표 지향 행동 : 특정 속성 포함/제외 규칙
+function renderCustomCogAnalysis(){
+  // 규칙 ID → 인지기능 영역 매핑
+  const RULE_TO_DOMAIN = {
+    // 계획 및 조직화 (수량/구성)
+    'rice':'plan', 'soup':'plan', 'drk1':'plan', 'dairy1':'plan', 'struct':'plan',
+    // 선택적 주의 및 양적 추론 (칼로리·음료 양 계산)
+    'k700':'attn_quant', 'k800':'attn_quant', 'krange':'attn_quant', 'hical1':'attn_quant',
+    'dvol500':'attn_quant', 'dvol600':'attn_quant',
+    // 목표 지향 행동 (특정 속성 포함/제외)
+    'prot':'goal', 'fiber':'goal', 'hot2':'goal', 'sod1':'goal', 'swt1':'goal',
+    // 작업기억 (건강 조건 — 다중 규칙 동시 유지)
+    'hp1':'wm', 'hp2':'wm',
+    'dm1':'wm', 'dm2':'wm',
+    'ht1':'wm', 'ht2':'wm', 'ht3':'wm',
+    'kd1':'wm', 'kd2':'wm',
+    'ca1':'wm', 'ca2':'wm', 'ca3':'wm',
+  };
+
+  const domains = [
+    {key:'attn_quant', name:'선택적 주의 및 양적 추론', eng:'Selective Attention & Quantitative Reasoning',
+     desc:'메뉴의 칼로리 수치를 추적·계산하며 메뉴 선택을 조절'},
+    {key:'wm', name:'작업기억', eng:'Working Memory',
+     desc:'다중 건강 조건 규칙을 머릿속에 유지하며 일관 적용'},
+    {key:'flex', name:'인지적 전환', eng:'Set-shifting / Cognitive Flexibility',
+     desc:'식사 간 동일 규칙을 유연하게 재적용 (반복 수행 일관성)'},
+    {key:'plan', name:'계획 및 조직화', eng:'Planning & Organization',
+     desc:'식사 구성(밥/국/반찬/음료 등)을 체계적으로 조직화'},
+    {key:'goal', name:'목표 지향 행동', eng:'Goal-directed Behavior',
+     desc:'특정 속성(단백질·섬유질·나트륨 등) 포함/제외 목표 유지'},
+  ];
+
+  // 각 도메인별로 활성화된 규칙(과제에 적용된 규칙) 중 위반된 규칙 집계
+  const activeRuleIds = (G.activeRules || []).map(r => r.id);
+  const allFailedIds = [
+    ...(G.custFailedRules?.breakfast || []),
+    ...(G.custFailedRules?.lunch || []),
+    ...(G.custFailedRules?.dinner || []),
+  ];
+
+  // 인지적 전환: 같은 규칙이 여러 식사에서 반복 위반 → 전환/일관성 결손으로 해석
+  const ruleFailCounts = {};
+  allFailedIds.forEach(rid => { ruleFailCounts[rid] = (ruleFailCounts[rid]||0) + 1; });
+  // 같은 규칙을 2회 이상 위반한 경우 인지적 전환 영역 결손으로 카운트
+  const flexFails = Object.entries(ruleFailCounts).filter(([rid,cnt]) => cnt >= 2).length;
+
+  // 각 도메인별 활성/위반 카운트
+  const domainStats = {};
+  domains.forEach(d => {
+    domainStats[d.key] = { active: 0, failedTotal: 0, failedRules: new Set() };
+  });
+
+  activeRuleIds.forEach(rid => {
+    const dk = RULE_TO_DOMAIN[rid];
+    if (dk && domainStats[dk]) domainStats[dk].active++;
+  });
+
+  // 위반 카운트는 전체 위반 발생 횟수 (3개 식사 합산)
+  allFailedIds.forEach(rid => {
+    const dk = RULE_TO_DOMAIN[rid];
+    if (dk && domainStats[dk]){
+      domainStats[dk].failedTotal++;
+      domainStats[dk].failedRules.add(rid);
+    }
+  });
+
+  // 인지적 전환은 식사 3개를 거치므로 항상 활성
+  domainStats['flex'].active = 1;
+  domainStats['flex'].failedTotal = flexFails;
+
+  // 규칙 텍스트 라벨 (위반 시 표시용)
+  const ruleLabels = {
+    'rice':'밥/빵 1가지', 'soup':'국 1가지', 'drk1':'음료 1가지', 'dairy1':'유제품 1가지', 'struct':'식사 구조 구성',
+    'k700':'칼로리 ≤ 700kcal', 'k800':'칼로리 ≤ 800kcal', 'krange':'칼로리 400~750kcal', 'hical1':'고칼로리 ≤ 1가지',
+    'dvol500':'음료 총량 ≤ 500ml', 'dvol600':'음료 총량 ≤ 600ml',
+    'prot':'단백질 포함', 'fiber':'고섬유질 포함', 'hot2':'뜨거운 음식 ≥ 2가지', 'sod1':'고나트륨 ≤ 1가지', 'swt1':'단 음식 ≤ 1가지',
+    'hp1':'고혈압 - 고나트륨 제한', 'hp2':'고혈압 - 중나트륨 제한',
+    'dm1':'당뇨 - 고GI 제한', 'dm2':'당뇨 - 단 음식 제한',
+    'ht1':'심장 - ♥ 메뉴 포함', 'ht2':'심장 - 고나트륨 제한', 'ht3':'심장 - 고칼로리 제한',
+    'kd1':'신장 - 고단백 제한', 'kd2':'신장 - 칼륨 제한',
+    'ca1':'항암 - 항산화 포함', 'ca2':'항암 - 고섬유질 포함', 'ca3':'항암 - 단 가공식품 제한',
+  };
+
+  // 표 렌더링
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:11.5px;">
+    <thead>
+      <tr style="background:#fafafa;">
+        <th style="border:1px solid #999;padding:6px 8px;text-align:center;width:30%;">인지기능 영역</th>
+        <th style="border:1px solid #999;padding:6px 8px;text-align:center;width:14%;">활성 / 위반</th>
+        <th style="border:1px solid #999;padding:6px 8px;text-align:center;width:14%;">판정</th>
+        <th style="border:1px solid #999;padding:6px 8px;text-align:left;">세부 소견</th>
+      </tr>
+    </thead><tbody>`;
+
+  let observedDomainFails = 0;
+  domains.forEach(d => {
+    const stat = domainStats[d.key];
+    let resultClass, resultText, detailHtml;
+
+    if (stat.active === 0){
+      // 해당 영역의 규칙이 과제에 활성화되지 않음
+      resultClass = 'na';
+      resultText = '해당 없음';
+      detailHtml = `<span style="color:#999;">현재 훈련 조건에서 평가되지 않음</span>`;
+    } else if (stat.failedTotal === 0){
+      resultClass = 'pass';
+      resultText = '양호';
+      detailHtml = `<span style="color:#555;">${d.desc}</span>`;
+    } else {
+      resultClass = 'fail';
+      resultText = '저하 의심';
+      observedDomainFails++;
+
+      if (d.key === 'flex'){
+        detailHtml = `<span style="color:#555;">${d.desc}</span>
+          <div style="color:#b71c1c;margin-top:3px;">└ 동일 규칙을 ${stat.failedTotal}건 반복 위반 — 식사 간 규칙 적용의 일관성 부족</div>`;
+      } else {
+        // 명시적 규칙 위반
+        const failedLabels = [...stat.failedRules].map(rid => ruleLabels[rid] || rid).join(', ');
+        detailHtml = `<span style="color:#555;">${d.desc}</span>
+          <div style="color:#b71c1c;margin-top:3px;">└ 위반 ${stat.failedTotal}회 (${failedLabels})</div>`;
+      }
+    }
+
+    let activeFailText;
+    if (stat.active === 0){
+      activeFailText = '<span style="color:#999;">—</span>';
+    } else {
+      activeFailText = `${stat.active} / <b style="color:${stat.failedTotal>0?'#b71c1c':'#1a5e1a'};">${stat.failedTotal}</b>`;
+    }
+    const resultColor = resultClass === 'pass' ? '#1a5e1a' :
+                        resultClass === 'fail' ? '#b71c1c' : '#999';
+
+    html += `<tr>
+      <td style="border:1px solid #999;padding:6px 8px;vertical-align:top;font-weight:700;">
+        ${d.name}
+        <div style="font-size:10px;color:#666;font-weight:400;margin-top:1px;">${d.eng}</div>
+      </td>
+      <td style="border:1px solid #999;padding:6px 8px;text-align:center;vertical-align:top;">${activeFailText}</td>
+      <td style="border:1px solid #999;padding:6px 8px;text-align:center;font-weight:700;color:${resultColor};vertical-align:top;white-space:nowrap;">${resultText}</td>
+      <td style="border:1px solid #999;padding:6px 8px;line-height:1.55;word-break:keep-all;">${detailHtml}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+
+  // 종합 코멘트
+  const totalActiveDomains = domains.filter(d => domainStats[d.key].active > 0).length;
+  if (observedDomainFails === 0){
+    html += `<div style="margin-top:8px;padding:8px 12px;background:#fafafa;border:1px solid #ddd;font-size:12px;line-height:1.6;color:#333;">
+      <b>종합:</b> 평가된 ${totalActiveDomains}개 인지기능 영역 모두에서 양호한 수행을 보였습니다.
+    </div>`;
+  } else {
+    const failedNames = domains
+      .filter(d => domainStats[d.key].failedTotal > 0)
+      .map(d => d.name)
+      .join(' · ');
+    html += `<div style="margin-top:8px;padding:8px 12px;background:#fafafa;border:1px solid #ddd;font-size:12px;line-height:1.6;color:#333;">
+      <b>종합:</b> ${observedDomainFails}개 영역에서 저하 의심 소견이 관찰되었습니다 — ${failedNames}. 임상 소견 작성 시 참고 자료로 활용 가능합니다.
+    </div>`;
+  }
+
+  document.getElementById('custom-cog-analysis').innerHTML = html;
+}
+
+// 훈련 결과 화면 버튼 핸들러
+document.getElementById('custom-restart-btn')?.addEventListener('click',()=>{
+  document.getElementById('custom-result-screen').classList.add('hidden');
+  document.getElementById('mode-screen').classList.remove('hidden');
+  document.getElementById('mode-screen').querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mode-next-btn').disabled = true;
+  G.mode = null;
+  document.body.classList.remove('on-result-screen');
+});
+document.getElementById('custom-retry-btn')?.addEventListener('click',()=>{
+  document.getElementById('custom-result-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  document.getElementById('std-setup').classList.add('hidden');
+  document.getElementById('custom-setup').classList.remove('hidden');
+  document.body.classList.remove('on-result-screen');
+});
+
+// 뒤로가기 (게임 → 설정)
+document.getElementById('home-btn').addEventListener('click',()=>{
+  if(!confirm('홈으로 돌아가면 현재 선택이 초기화됩니다. 계속하시겠습니까?')) return;
+  window.location.href='index.html';
+});
+
+document.getElementById('back-game-btn').addEventListener('click',()=>{
+  if(!confirm('설정 화면으로 돌아가면 현재 선택이 초기화됩니다. 계속하시겠습니까?')) return;
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('feedback-overlay').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+});
+
+// 처음으로
+document.getElementById('restart-btn').addEventListener('click',()=>{
+  document.getElementById('result-screen').classList.add('hidden');
+  document.getElementById('mode-screen').classList.remove('hidden');
+  document.getElementById('mode-screen').querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mode-next-btn').disabled=true;
+  G.mode=null;
+  document.body.classList.remove('on-result-screen');
+});
+
+// ══════════════════════════════════════════════════════════════
+// 환자별 평가지 저장 시스템 (localStorage)
+// ══════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'menu_task_records_v1';
+
+function loadAllRecords(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){
+    console.error('저장된 평가지 로드 실패', e);
+    return [];
+  }
+}
+
+function saveAllRecords(records){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    return true;
+  } catch(e){
+    console.error('저장 실패', e);
+    alert('저장에 실패했습니다. 브라우저 저장 공간을 확인하세요.');
+    return false;
+  }
+}
+
+// 현재 결과 화면의 모든 상태를 JSON으로 직렬화
+function captureCurrentReport(){
+  const get = id => (document.getElementById(id)?.value || '').trim();
+  const patientName = get('rpt-patient-name');
+  const patientDob  = get('rpt-patient-dob');
+  const patientAge  = get('rpt-patient-age');
+  const patientSex  = get('rpt-patient-sex');
+  const examiner    = get('rpt-examiner');
+  const institution = get('rpt-institution');
+  const clinicalNote = document.querySelector('#result-screen .rpt-textarea')?.value || '';
+
+  // 평가일·소요 시간
+  const rptDate = document.getElementById('rpt-date')?.textContent || '';
+  const rptTime = document.getElementById('rpt-time')?.textContent || '';
+
+  // 저장에 필요한 핵심 G 상태
+  return {
+    id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    savedAt: new Date().toISOString(),
+    patient: {
+      name: patientName,
+      dob: patientDob,
+      age: patientAge,
+      sex: patientSex,
+    },
+    examiner: examiner,
+    institution: institution,
+    clinicalNote: clinicalNote,
+    rptDate: rptDate,
+    rptTime: rptTime,
+    // 게임 상태
+    state: {
+      mode: G.mode,
+      stdSel: G.stdSel,
+      prePrediction: G.prePrediction,
+      postPerformance: G.postPerformance,
+      postErrorAware: G.errorAwareness,
+      postErrorDetail: G.errorDetail,
+      obsScores: G.obsScores,
+      startTime: G.startTime,
+      endTime: G.endTime,
+    }
+  };
+}
+
+// 저장 버튼
+document.getElementById('save-btn').addEventListener('click',()=>{
+  const name = document.getElementById('rpt-patient-name')?.value.trim();
+  if (!name){
+    alert('환자 성명을 먼저 입력해주세요.');
+    document.getElementById('rpt-patient-name')?.focus();
+    return;
+  }
+  const rec = captureCurrentReport();
+  const records = loadAllRecords();
+  records.push(rec);
+  if (saveAllRecords(records)){
+    alert(`평가지가 저장되었습니다.\n\n환자: ${name}\n저장 시각: ${new Date().toLocaleString('ko-KR')}`);
+  }
+});
+
+// 저장된 평가지 모달 열기
+function openRecordsModal(){
+  renderRecordsList('');
+  document.getElementById('records-overlay').classList.remove('hidden');
+}
+function closeRecordsModal(){
+  document.getElementById('records-overlay').classList.add('hidden');
+}
+
+document.getElementById('open-records-btn')?.addEventListener('click', openRecordsModal);
+document.getElementById('show-records-btn')?.addEventListener('click', openRecordsModal);
+document.getElementById('close-records-btn')?.addEventListener('click', closeRecordsModal);
+document.getElementById('records-overlay')?.addEventListener('click',(e)=>{
+  if (e.target.id === 'records-overlay') closeRecordsModal();
+});
+
+// 검색
+document.getElementById('records-search')?.addEventListener('input',(e)=>{
+  renderRecordsList(e.target.value.trim().toLowerCase());
+});
+
+// 목록 렌더링 (환자별 그룹)
+function renderRecordsList(filter){
+  const records = loadAllRecords();
+  const listEl  = document.getElementById('records-list');
+  const emptyEl = document.getElementById('records-empty');
+
+  if (records.length === 0){
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  // 환자별 그룹화 (성명+등록번호 키)
+  const groups = {};
+  records.forEach(r=>{
+    const name = r.patient?.name || '(이름 없음)';
+    const regId = r.patient?.regId || '';
+    if (filter){
+      const hay = (name + ' ' + regId).toLowerCase();
+      if (!hay.includes(filter)) return;
+    }
+    const key = name + '||' + regId;
+    if (!groups[key]) groups[key] = { name, regId, items: [] };
+    groups[key].items.push(r);
+  });
+
+  if (Object.keys(groups).length === 0){
+    listEl.innerHTML = `<div style="text-align:center;padding:30px;color:#999;font-size:13px;">
+      검색 결과가 없습니다.</div>`;
+    return;
+  }
+
+  // 각 그룹 내 최근 저장순
+  Object.values(groups).forEach(g=>{
+    g.items.sort((a,b)=> new Date(b.savedAt) - new Date(a.savedAt));
+  });
+
+  let html = '';
+  Object.values(groups)
+    .sort((a,b)=> (b.items[0]?.savedAt || '').localeCompare(a.items[0]?.savedAt || ''))
+    .forEach(g=>{
+      html += `<div style="border:1px solid #ddd;border-radius:10px;padding:10px 14px;background:#fafbfc;">
+        <div style="font-weight:800;font-size:14px;color:#1565c0;margin-bottom:6px;
+          display:flex;justify-content:space-between;align-items:center;">
+          <span>👤 ${escapeHtml(g.name)} ${g.regId ? `<span style="color:#888;font-size:12px;font-weight:600;">(${escapeHtml(g.regId)})</span>` : ''}</span>
+          <span style="font-size:11px;color:#888;font-weight:600;">총 ${g.items.length}건</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">`;
+      g.items.forEach(r=>{
+        const savedDate = new Date(r.savedAt);
+        const dateStr = savedDate.toLocaleString('ko-KR', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+        const totalScore = calcTotalScoreFromRecord(r);
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;
+          padding:7px 10px;background:#fff;border:1px solid #eee;border-radius:8px;font-size:12px;gap:8px;flex-wrap:wrap;">
+          <span style="flex:1;min-width:180px;">
+            <b style="color:#333;">${dateStr}</b>
+            <span style="color:#888;margin-left:8px;">소요 ${r.rptTime || '-'}</span>
+            <span style="margin-left:8px;padding:2px 8px;border-radius:999px;background:${totalScore<8?'#ffebee':'#e8f5e9'};color:${totalScore<8?'#c62828':'#2e7d32'};font-weight:700;">
+              ${totalScore}/12점
+            </span>
+          </span>
+          <span style="display:flex;gap:5px;">
+            <button data-rid="${r.id}" class="rec-load-btn" style="padding:5px 11px;border:1px solid #1976d2;background:#fff;color:#1976d2;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;">불러오기</button>
+            <button data-rid="${r.id}" class="rec-del-btn" style="padding:5px 11px;border:1px solid #ef5350;background:#fff;color:#c62828;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;">삭제</button>
+          </span>
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+  listEl.innerHTML = html;
+
+  // 이벤트 바인딩
+  listEl.querySelectorAll('.rec-load-btn').forEach(b=>{
+    b.addEventListener('click', ()=> loadRecord(b.dataset.rid));
+  });
+  listEl.querySelectorAll('.rec-del-btn').forEach(b=>{
+    b.addEventListener('click', ()=> deleteRecord(b.dataset.rid));
+  });
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function calcTotalScoreFromRecord(r){
+  // 빠르게 12점 만점 점수 계산
+  try {
+    // 과제 점수는 다시 채점해야 정확하나, obsScore와 G상태를 재구성하는 것은 비용이 큼
+    // 임시로 obsScores 합 + (간이) 과제 점수 계산
+    const obs = r.state?.obsScores || {};
+    const obsScore = Object.values(obs).filter(v=>v===1).length;
+    // 과제점수는 stdSel을 다시 평가해야 함 — 간단한 추정: 저장 시점에 stdSel/메뉴 정보가 같으므로
+    // 정확 계산을 위해 별도 헬퍼 호출
+    const taskScore = computeTaskScoreFromState(r.state);
+    return taskScore + obsScore;
+  } catch(e){
+    return 0;
+  }
+}
+
+// 저장 상태에서 과제 점수만 다시 계산 (1~7번)
+function computeTaskScoreFromState(state){
+  if (!state || !state.stdSel) return 0;
+  const stdSel = state.stdSel;
+  const allItems = STD_MEALS.flatMap(m=>m.cats.flatMap(c=>c.items));
+  let totalKcal=0, totalMl=0, heartCount=0;
+  let breakfastFood=0, lunchFood=0, dinnerFood=0;
+  let breakfastDrink=0, lunchDrink=0, dinnerDrink=0;
+  let snackCount=0;
+  const heartIds = new Set();
+  STD_MEALS.forEach(meal=>{
+    meal.cats.forEach(c=>{
+      const ids = stdSel[meal.key+'_'+c.type] || [];
+      ids.forEach(id=>{
+        const item = allItems.find(i=>i.id===id);
+        if(!item) return;
+        if (item.kcal) totalKcal += item.kcal;
+        if (item.ml) totalMl += item.ml;
+        if (item.heart) heartIds.add(id);
+        if (c.type === 'food'){
+          if (meal.key==='breakfast') breakfastFood++;
+          if (meal.key==='lunch') lunchFood++;
+          if (meal.key==='dinner') dinnerFood++;
+        }
+        if (c.type === 'drink'){
+          if (meal.key==='breakfast') breakfastDrink++;
+          if (meal.key==='lunch') lunchDrink++;
+          if (meal.key==='dinner') dinnerDrink++;
+        }
+        if (c.type === 'snack') snackCount++;
+      });
+    });
+  });
+  heartCount = heartIds.size;
+  let score = 0;
+  if (totalKcal <= 1800) score++;
+  if (totalMl <= 1700) score++;
+  if (breakfastDrink === 2 && lunchDrink === 2) score++;
+  if (dinnerDrink === 1) score++;
+  if (breakfastFood === 1 && lunchFood === 1 && dinnerFood === 1) score++;
+  if (heartCount >= 2) score++;
+  if (snackCount === 2) score++;
+  return score;
+}
+
+function loadRecord(id){
+  const records = loadAllRecords();
+  const r = records.find(x=>x.id===id);
+  if (!r){ alert('해당 평가지를 찾을 수 없습니다.'); return; }
+  if (!confirm(`이 평가지를 불러오시겠습니까?\n\n환자: ${r.patient?.name || '-'}\n저장 시각: ${new Date(r.savedAt).toLocaleString('ko-KR')}`)) return;
+
+  // G 상태 복원
+  G.mode = r.state.mode || 'standard';
+  G.stdSel = r.state.stdSel || {};
+  G.prePrediction = r.state.prePrediction;
+  G.postPerformance = r.state.postPerformance;
+  G.errorAwareness = r.state.postErrorAware;
+  G.errorDetail = r.state.postErrorDetail;
+  G.obsScores = r.state.obsScores || {};
+  G.startTime = r.state.startTime;
+  G.endTime = r.state.endTime;
+
+  // 결과 화면 표시
+  document.getElementById('mode-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.remove('hidden');
+  document.body.classList.add('on-result-screen');
+
+  // 복원 플래그 + 저장된 평가일 미리 세팅
+  G._restoring = true;
+  if (r.rptDate) document.getElementById('rpt-date').textContent = r.rptDate;
+
+  // 결과 다시 렌더
+  showResultStd();
+  G._restoring = false;
+
+  // 환자 정보 복원
+  setTimeout(()=>{
+    if (document.getElementById('rpt-patient-name'))
+      document.getElementById('rpt-patient-name').value = r.patient?.name || '';
+    if (document.getElementById('rpt-patient-dob'))
+      document.getElementById('rpt-patient-dob').value = r.patient?.dob || '';
+    if (document.getElementById('rpt-patient-age'))
+      document.getElementById('rpt-patient-age').value = r.patient?.age || '';
+    if (document.getElementById('rpt-patient-sex'))
+      document.getElementById('rpt-patient-sex').value = r.patient?.sex || '';
+    if (document.getElementById('rpt-examiner'))
+      document.getElementById('rpt-examiner').value = r.examiner || '';
+    if (document.getElementById('rpt-institution'))
+      document.getElementById('rpt-institution').value = r.institution || '광주365재활병원';
+    const ta = document.querySelector('#result-screen .rpt-textarea');
+    if (ta) ta.value = r.clinicalNote || '';
+  }, 50);
+
+  closeRecordsModal();
+}
+
+function deleteRecord(id){
+  const records = loadAllRecords();
+  const r = records.find(x=>x.id===id);
+  if (!r) return;
+  if (!confirm(`다음 평가지를 삭제하시겠습니까?\n\n환자: ${r.patient?.name || '-'}\n저장 시각: ${new Date(r.savedAt).toLocaleString('ko-KR')}\n\n※ 이 작업은 되돌릴 수 없습니다.`)) return;
+  const filtered = records.filter(x=>x.id!==id);
+  if (saveAllRecords(filtered)){
+    renderRecordsList(document.getElementById('records-search')?.value.trim().toLowerCase() || '');
+  }
+}
+
+// 전체 내보내기
+document.getElementById('records-export-btn')?.addEventListener('click',()=>{
+  const records = loadAllRecords();
+  if (records.length === 0){ alert('저장된 평가지가 없습니다.'); return; }
+  const blob = new Blob([JSON.stringify(records, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `menu_task_records_${today}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// 불러오기 (병합)
+document.getElementById('records-import-btn')?.addEventListener('click',()=>{
+  document.getElementById('records-import-file').click();
+});
+document.getElementById('records-import-file')?.addEventListener('change',(e)=>{
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!Array.isArray(imported)) throw new Error('형식 오류');
+      const current = loadAllRecords();
+      const existingIds = new Set(current.map(r=>r.id));
+      let added = 0, skipped = 0;
+      imported.forEach(r=>{
+        if (r.id && !existingIds.has(r.id)){
+          current.push(r);
+          added++;
+        } else {
+          skipped++;
+        }
+      });
+      saveAllRecords(current);
+      alert(`불러오기 완료\n\n추가: ${added}건\n중복(건너뜀): ${skipped}건`);
+      renderRecordsList('');
+    } catch(err){
+      alert('파일 형식이 올바르지 않습니다.\n' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // reset
+});
+</script>
+
+<button id="examiner-toggle-btn">👁 검사자 안내 보이기</button>
+<script>
+document.getElementById('examiner-toggle-btn').addEventListener('click',function(){
+  document.body.classList.toggle('hide-examiner');
+  this.textContent = document.body.classList.contains('hide-examiner')
+    ? '👁 검사자 안내 보이기' : '🙈 검사자 안내 숨기기';
+});
+</script>
+</body>
+</html>

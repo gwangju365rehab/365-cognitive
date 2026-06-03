@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>작업기억 훈련 2 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 16px 16px 80px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff; color: #222;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      min-height: 100vh;
+    }
+    h1 { margin: 0 0 2px; font-size: 1.9rem; font-weight: 800; text-align: center; }
+
+    #home-btn {
+      position: fixed; top: 14px; left: 14px; z-index: 100;
+      padding: 10px 18px; border-radius: 999px; border: none;
+      background: #eee; color: #333; font-weight: 600; font-size: 14px;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #home-btn:hover { background: #ddd; }
+
+    /* 탭 */
+    #tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; max-width: 720px; }
+    .tab-btn {
+      padding: 10px 20px; border-radius: 999px; border: 2px solid #ddd;
+      cursor: pointer; font-size: 0.95rem; font-weight: 700;
+      background: #fff; color: #555; transition: all .15s;
+    }
+    .tab-btn:hover { border-color: #1976d2; background: #e8f2ff; color: #1976d2; }
+    .tab-btn.active { background: #1976d2; border-color: #1976d2; color: #fff; }
+
+    .game-panel { display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%; max-width: 680px; }
+    .game-panel.active { display: flex; }
+
+    /* ── 규칙 박스 (크게, 항상 노출) ── */
+    .rule-box {
+      width: 100%; padding: 18px 20px; border-radius: 16px;
+      background: #e8f2ff; border: 2px solid #90bef5;
+      text-align: center;
+    }
+    .rule-title {
+      font-size: 1.5rem; font-weight: 900; color: #0d47a1; margin-bottom: 10px;
+    }
+    .rule-body {
+      font-size: 1.15rem; font-weight: 700; color: #1565c0; line-height: 1.9;
+    }
+    .rule-example {
+      margin-top: 10px; font-size: 1rem; color: #333;
+      background: #fff; border-radius: 10px; padding: 10px 14px;
+      display: inline-block; line-height: 2;
+    }
+    .rule-example .ex-seq { letter-spacing: 6px; font-size: 1.3rem; font-weight: 900; color: #1976d2; }
+    .rule-example .ex-hit { color: #2e7d32; font-weight: 900; }
+
+    /* 옵션 바 */
+    .opt-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; width: 100%; }
+    .opt-label { font-size: 1rem; font-weight: 800; color: #555; }
+    .opt-btn {
+      padding: 10px 20px; border-radius: 999px; border: 2px solid #ddd;
+      cursor: pointer; font-size: 1rem; font-weight: 700;
+      background: #fff; color: #444; transition: all .15s;
+    }
+    .opt-btn:hover { border-color: #1976d2; }
+    .opt-btn.active { background: #1976d2; border-color: #1976d2; color: #fff; }
+    .opt-sep { width: 1px; height: 28px; background: #ddd; }
+
+    /* 자극 영역 */
+    .stim-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+    /* 자극 박스 */
+    .stim-box {
+      width: 240px; height: 240px; border-radius: 24px;
+      border: 4px solid #dde3ec; background: #f7f9fc;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7rem; font-weight: 900; color: #1976d2;
+      transition: background .15s, border-color .15s;
+      position: relative;
+    }
+    .stim-box.phase-stim  { background: #fff;    border-color: #1976d2; }
+    .stim-box.phase-blank { background: #f0f4fa; border-color: #dde3ec; color: transparent; }
+    .stim-box.phase-resp  { background: #fffde7; border-color: #f9a825; color: transparent; }
+    .stim-box.flash-yes   { background: #e8f5e9; border-color: #388e3c; color: #388e3c; }
+    .stim-box.flash-no    { background: #ffebee; border-color: #d32f2f; color: #d32f2f; }
+
+    /* 타이밍 상태 표시 */
+    .phase-indicator {
+      font-size: 1.1rem; font-weight: 800; min-height: 1.5rem; text-align: center;
+    }
+    .phase-indicator.stim  { color: #1976d2; }
+    .phase-indicator.blank { color: #bbb; }
+    .phase-indicator.resp  { color: #f57c00; }
+
+    /* N번 전 힌트 */
+    
+
+    /* 위치 N-back 격자 */
+    .grid-wrap { display: grid; grid-template-columns: repeat(3, 110px); gap: 10px; }
+    .grid-cell {
+      width: 110px; height: 110px; border-radius: 16px;
+      border: 3px solid #dde3ec; background: #f0f4fa;
+      transition: background .15s, border-color .15s;
+    }
+    .grid-cell.lit      { background: #1976d2; border-color: #0d47a1; }
+    .grid-cell.lit-resp { background: #fffde7; border-color: #f9a825; }
+    .grid-cell.flash-yes{ background: #388e3c; border-color: #1b5e20; }
+    .grid-cell.flash-no { background: #d32f2f; border-color: #b71c1c; }
+
+    /* 히스토리 */
+    .history-bar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 30px; width: 100%; }
+    .hist-dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid #ddd; background: #f0f4fa;
+      font-size: 0.8rem; font-weight: 800; color: #888;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hist-dot.hit  { background: #e8f5e9; border-color: #388e3c; color: #2e7d32; }
+    .hist-dot.miss { background: #ffebee; border-color: #d32f2f; color: #c62828; }
+    .hist-dot.fa   { background: #fff8e1; border-color: #f57c00; color: #e65100; }
+    .hist-dot.cr   { background: #f5f5f5; border-color: #bbb;    color: #888; }
+
+    /* 응답 버튼 */
+    .resp-btn {
+      width: 100%; max-width: 360px; height: 88px;
+      border-radius: 18px; border: none; cursor: pointer;
+      font-size: 1.5rem; font-weight: 900; letter-spacing: 1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      transition: transform .08s, opacity .15s;
+    }
+    .resp-btn:active { transform: scale(0.96); }
+    .resp-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .resp-btn.same { background: #1976d2; color: #fff; }
+    .resp-btn.same:hover:not(:disabled) { background: #1565c0; }
+
+    /* 이중 N-back 응답 */
+    .dual-resp { display: flex; gap: 14px; width: 100%; max-width: 440px; }
+    .dual-btn {
+      flex: 1; height: 80px; border-radius: 16px; border: none; cursor: pointer;
+      font-size: 1.1rem; font-weight: 900;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.13); transition: transform .08s, opacity .15s;
+    }
+    .dual-btn:active { transform: scale(0.96); }
+    .dual-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .dual-btn.num-btn { background: #1976d2; color: #fff; }
+    .dual-btn.pos-btn { background: #7b1fa2; color: #fff; }
+
+    /* 숫자 범위 */
+    .digit-display {
+      width: 100%; max-width: 440px; min-height: 78px;
+      border-radius: 16px; border: 3px solid #dde3ec; background: #f7f9fc;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 900; color: #1976d2; letter-spacing: 10px;
+      padding: 10px;
+    }
+    .digit-display.input-mode { border-color: #1976d2; background: #fff; }
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 340px; }
+    .numpad-btn {
+      height: 70px; border-radius: 14px; border: 2px solid #dde3ec;
+      background: #fff; font-size: 1.6rem; font-weight: 800; color: #222;
+      cursor: pointer; transition: all .1s;
+    }
+    .numpad-btn:active { background: #e3f0ff; border-color: #1976d2; transform: scale(0.95); }
+    .numpad-btn.del { background: #fff0f0; border-color: #f5c4b3; color: #d32f2f; }
+    .numpad-btn.ok  { background: #1976d2; border-color: #1565c0; color: #fff; grid-column: span 3; font-size: 1.2rem; }
+
+    /* 진행바 */
+    .progress-bar-wrap { width: 100%; max-width: 440px; height: 10px; border-radius: 999px; background: #f0f4fa; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 999px; background: #1976d2; transition: width .3s; }
+
+    /* 상태 텍스트 */
+    .status-txt { font-size: 1rem; color: #666; text-align: center; }
+    .status-txt span { font-weight: 800; color: #222; }
+
+    /* 피드백 */
+    .feedback-msg { font-size: 1.3rem; font-weight: 800; text-align: center; min-height: 1.8rem; }
+    .feedback-msg.ok  { color: #2e7d32; }
+    .feedback-msg.err { color: #c62828; }
+    .feedback-msg.info { color: #1565c0; }
+
+    /* 컨트롤 */
+    .ctrl-wrap { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .ctrl-btn {
+      padding: 14px 32px; border-radius: 999px; border: none;
+      font-size: 1.05rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15); transition: transform .08s;
+    }
+    .ctrl-btn:active { transform: translateY(1px); }
+    .btn-start { background: #1976d2; color: #fff; }
+    .btn-start:hover { background: #1565c0; }
+    .btn-reset { background: #eee; color: #333; }
+    .btn-reset:hover { background: #ddd; }
+
+    /* 결과 */
+    .result-box {
+      display: none; width: 100%; max-width: 460px;
+      padding: 22px 26px; border-radius: 16px; border: 1px solid #ddd; background: #fafafa; text-align: center;
+    }
+    .result-box h2 { margin: 0 0 14px; font-size: 1.4rem; }
+    .r-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 1rem; }
+    .r-row:last-of-type { border: none; }
+    .r-val { font-weight: 800; color: #1976d2; }
+    .result-btns { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+
+    #hospital-logo {
+      position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666;
+      padding: 5px 10px; background: rgba(255,255,255,0.9); border-radius: 4px; font-weight: 500;
+    }
+    @media (max-width: 480px) {
+      .stim-box { width: 200px; height: 200px; font-size: 5.5rem; }
+      .grid-cell { width: 90px; height: 90px; }
+      .grid-wrap { grid-template-columns: repeat(3, 90px); gap: 8px; }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+
+<button id="home-btn" onclick="location.href='index.html'">← 홈</button>
+<h1>작업기억 훈련</h1>
+
+<div id="tabs">
+  <button class="tab-btn active" data-tab="nback-num">① 숫자 N-back</button>
+  <button class="tab-btn" data-tab="nback-pos">② 위치 N-back</button>
+  <button class="tab-btn" data-tab="digit-span">③ 숫자 범위</button>
+  <button class="tab-btn" data-tab="dual-nback">④ 이중 N-back</button>
+</div>
+
+<!-- ════════════════════════════════════
+     ① 숫자 N-back
+════════════════════════════════════ -->
+<div class="game-panel active" id="panel-nback-num">
+
+  <div class="rule-box" id="nn-rule">
+    <div class="rule-title" id="nn-rule-title">1-back 훈련</div>
+    <div class="rule-body" id="nn-rule-body">
+      숫자가 하나씩 나타납니다.<br>
+      <span style="color:#d32f2f">바로 전에 나온 숫자</span>와 지금 숫자가 <span style="color:#2e7d32">같으면</span><br>
+      숫자가 사라진 후 <span style="color:#f57c00">노란 화면</span>이 되었을 때 버튼을 누르세요!
+    </div>
+    <div class="rule-example" id="nn-rule-ex">
+      예시&nbsp;&nbsp;
+      <span class="ex-seq">3 → 7 → <span class="ex-hit">7</span></span>
+      &nbsp;&nbsp;→&nbsp; <span class="ex-hit">▶ 지금 누르세요!</span>
+    </div>
+  </div>
+
+  <div class="opt-bar">
+    <span class="opt-label">N-back 단계</span>
+    <button class="opt-btn active" data-group="nn-level" data-val="1">1-back</button>
+    <button class="opt-btn" data-group="nn-level" data-val="2">2-back</button>
+    <button class="opt-btn" data-group="nn-level" data-val="3">3-back</button>
+    <button class="opt-btn" data-group="nn-level" data-val="4">4-back</button>
+    <div class="opt-sep"></div>
+    <span class="opt-label">속도</span>
+    <button class="opt-btn" data-group="nn-speed" data-val="3000">느림</button>
+    <button class="opt-btn active" data-group="nn-speed" data-val="2000">보통</button>
+    <button class="opt-btn" data-group="nn-speed" data-val="1500">빠름</button>
+  </div>
+
+  <div class="stim-wrap">
+    <div class="phase-indicator blank" id="nn-phase">준비</div>
+    <div class="stim-box phase-blank" id="nn-stim">—</div>
+    <div class="history-bar" id="nn-history"></div>
+  </div>
+
+  <div class="feedback-msg" id="nn-feedback"></div>
+
+  <button class="resp-btn same" id="nn-resp" disabled onclick="NN.respond()">
+    같아요!
+  </button>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="nn-prog" style="width:0%"></div>
+  </div>
+  <div class="status-txt">
+    단계: <span id="nn-lv">1-back</span> &nbsp;|&nbsp;
+    진행: <span id="nn-cur">0</span> / <span id="nn-tot">20</span> &nbsp;|&nbsp;
+    히트: <span id="nn-hit">0</span> &nbsp;|&nbsp;
+    오경보: <span id="nn-fa">0</span>
+  </div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-start" id="nn-start" onclick="NN.start()">시작하기</button>
+    <button class="ctrl-btn btn-reset" onclick="NN.reset()">다시하기</button>
+  </div>
+  <div class="result-box" id="nn-result">
+    <h2>숫자 N-back 결과</h2>
+    <div class="r-row"><span>단계</span><span class="r-val" id="nn-r-lv"></span></div>
+    <div class="r-row"><span>총 자극 수</span><span class="r-val" id="nn-r-tot"></span></div>
+    <div class="r-row"><span>타겟 수</span><span class="r-val" id="nn-r-tgt"></span></div>
+    <div class="r-row"><span>히트율 (타겟 정답)</span><span class="r-val" id="nn-r-hit"></span></div>
+    <div class="r-row"><span>오경보율 (비타겟 오답)</span><span class="r-val" id="nn-r-fa"></span></div>
+    <div class="r-row"><span>종합 정확도</span><span class="r-val" id="nn-r-acc"></span></div>
+    <div class="result-btns">
+      <button class="ctrl-btn btn-start" onclick="NN.reset();NN.start()">다시 훈련</button>
+      <button class="ctrl-btn btn-reset" onclick="location.href='index.html'">홈으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     ② 위치 N-back
+════════════════════════════════════ -->
+<div class="game-panel" id="panel-nback-pos">
+
+  <div class="rule-box" id="pn-rule">
+    <div class="rule-title" id="pn-rule-title">1-back 훈련</div>
+    <div class="rule-body" id="pn-rule-body">
+      격자에서 불빛이 켜집니다.<br>
+      <span style="color:#d32f2f">바로 전에 켜졌던 위치</span>와 지금 위치가 <span style="color:#2e7d32">같으면</span><br>
+      불빛이 꺼진 후 <span style="color:#f57c00">노란 테두리</span>가 생겼을 때 버튼을 누르세요!
+    </div>
+  </div>
+
+  <div class="opt-bar">
+    <span class="opt-label">N-back 단계</span>
+    <button class="opt-btn active" data-group="pn-level" data-val="1">1-back</button>
+    <button class="opt-btn" data-group="pn-level" data-val="2">2-back</button>
+    <button class="opt-btn" data-group="pn-level" data-val="3">3-back</button>
+    <button class="opt-btn" data-group="pn-level" data-val="4">4-back</button>
+    <div class="opt-sep"></div>
+    <span class="opt-label">속도</span>
+    <button class="opt-btn" data-group="pn-speed" data-val="3000">느림</button>
+    <button class="opt-btn active" data-group="pn-speed" data-val="2000">보통</button>
+    <button class="opt-btn" data-group="pn-speed" data-val="1500">빠름</button>
+  </div>
+
+  <div class="stim-wrap">
+    <div class="phase-indicator blank" id="pn-phase">준비</div>
+    <div class="grid-wrap" id="pn-grid">
+      <div class="grid-cell" data-i="0"></div><div class="grid-cell" data-i="1"></div><div class="grid-cell" data-i="2"></div>
+      <div class="grid-cell" data-i="3"></div><div class="grid-cell" data-i="4"></div><div class="grid-cell" data-i="5"></div>
+      <div class="grid-cell" data-i="6"></div><div class="grid-cell" data-i="7"></div><div class="grid-cell" data-i="8"></div>
+    </div>
+    <div class="history-bar" id="pn-history"></div>
+  </div>
+
+  <div class="feedback-msg" id="pn-feedback"></div>
+  <button class="resp-btn same" id="pn-resp" disabled onclick="PN.respond()">같아요!</button>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="pn-prog" style="width:0%"></div>
+  </div>
+  <div class="status-txt">
+    단계: <span id="pn-lv">1-back</span> &nbsp;|&nbsp;
+    진행: <span id="pn-cur">0</span> / <span id="pn-tot">20</span> &nbsp;|&nbsp;
+    히트: <span id="pn-hit">0</span> &nbsp;|&nbsp;
+    오경보: <span id="pn-fa">0</span>
+  </div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-start" id="pn-start" onclick="PN.start()">시작하기</button>
+    <button class="ctrl-btn btn-reset" onclick="PN.reset()">다시하기</button>
+  </div>
+  <div class="result-box" id="pn-result">
+    <h2>위치 N-back 결과</h2>
+    <div class="r-row"><span>단계</span><span class="r-val" id="pn-r-lv"></span></div>
+    <div class="r-row"><span>히트율</span><span class="r-val" id="pn-r-hit"></span></div>
+    <div class="r-row"><span>오경보율</span><span class="r-val" id="pn-r-fa"></span></div>
+    <div class="r-row"><span>종합 정확도</span><span class="r-val" id="pn-r-acc"></span></div>
+    <div class="result-btns">
+      <button class="ctrl-btn btn-start" onclick="PN.reset();PN.start()">다시 훈련</button>
+      <button class="ctrl-btn btn-reset" onclick="location.href='index.html'">홈으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     ③ 숫자 범위 (Digit Span)
+════════════════════════════════════ -->
+<div class="game-panel" id="panel-digit-span">
+
+  <div class="rule-box">
+    <div class="rule-title">숫자 범위 훈련</div>
+    <div class="rule-body">
+      숫자가 하나씩 나타납니다. 모두 기억했다가<br>
+      숫자가 다 나온 후 <span style="color:#f57c00">입력 화면</span>이 나오면<br>
+      <span id="ds-rule-dir" style="color:#d32f2f">나온 순서대로</span> 버튼을 눌러 입력하세요!
+    </div>
+  </div>
+
+  <div class="opt-bar">
+    <span class="opt-label">방향</span>
+    <button class="opt-btn active" data-group="ds-dir" data-val="forward">순방향 →</button>
+    <button class="opt-btn" data-group="ds-dir" data-val="backward">역방향 ←</button>
+    <div class="opt-sep"></div>
+    <span class="opt-label">시작 자리수</span>
+    <button class="opt-btn active" data-group="ds-start" data-val="3">3자리</button>
+    <button class="opt-btn" data-group="ds-start" data-val="4">4자리</button>
+    <button class="opt-btn" data-group="ds-start" data-val="5">5자리</button>
+  </div>
+
+  <div class="stim-wrap">
+    <div class="phase-indicator blank" id="ds-phase">준비</div>
+    <div class="stim-box phase-blank" id="ds-stim">—</div>
+  </div>
+
+  <div class="digit-display" id="ds-answer" style="display:none"></div>
+  <div class="numpad" id="ds-numpad" style="display:none">
+    <button class="numpad-btn" onclick="DS.input('1')">1</button>
+    <button class="numpad-btn" onclick="DS.input('2')">2</button>
+    <button class="numpad-btn" onclick="DS.input('3')">3</button>
+    <button class="numpad-btn" onclick="DS.input('4')">4</button>
+    <button class="numpad-btn" onclick="DS.input('5')">5</button>
+    <button class="numpad-btn" onclick="DS.input('6')">6</button>
+    <button class="numpad-btn" onclick="DS.input('7')">7</button>
+    <button class="numpad-btn" onclick="DS.input('8')">8</button>
+    <button class="numpad-btn" onclick="DS.input('9')">9</button>
+    <button class="numpad-btn del" onclick="DS.del()">⌫</button>
+    <button class="numpad-btn" onclick="DS.input('0')">0</button>
+    <button class="numpad-btn ok" onclick="DS.confirm()">확인 ✓</button>
+  </div>
+
+  <div class="feedback-msg" id="ds-feedback"></div>
+  <div class="status-txt">
+    방향: <span id="ds-dir-lbl">순방향</span> &nbsp;|&nbsp;
+    현재: <span id="ds-span-lbl">3</span>자리 &nbsp;|&nbsp;
+    점수: <span id="ds-score">0</span>점
+  </div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-start" id="ds-start" onclick="DS.start()">시작하기</button>
+    <button class="ctrl-btn btn-reset" onclick="DS.reset()">다시하기</button>
+  </div>
+  <div class="result-box" id="ds-result">
+    <h2>숫자 범위 결과</h2>
+    <div class="r-row"><span>방향</span><span class="r-val" id="ds-r-dir"></span></div>
+    <div class="r-row"><span>최대 기억 자리수</span><span class="r-val" id="ds-r-span"></span></div>
+    <div class="r-row"><span>총 점수</span><span class="r-val" id="ds-r-score"></span></div>
+    <div class="result-btns">
+      <button class="ctrl-btn btn-start" onclick="DS.reset();DS.start()">다시 훈련</button>
+      <button class="ctrl-btn btn-reset" onclick="location.href='index.html'">홈으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     ④ 이중 N-back
+════════════════════════════════════ -->
+<div class="game-panel" id="panel-dual-nback">
+
+  <div class="rule-box" id="dn-rule">
+    <div class="rule-title" id="dn-rule-title">이중 1-back 훈련</div>
+    <div class="rule-body">
+      숫자와 위치를 <span style="color:#d32f2f">동시에</span> 기억하세요.<br>
+      불빛이 꺼진 후 노란 화면이 되면 응답하세요:<br>
+      <span style="color:#1565c0">숫자가 N번 전과 같으면</span> → <b>파란 버튼</b><br>
+      <span style="color:#6a1b9a">위치가 N번 전과 같으면</span> → <b>보라 버튼</b><br>
+      <span style="color:#555">둘 다 같으면 두 버튼 모두, 둘 다 다르면 안 눌러도 됩니다.</span>
+    </div>
+  </div>
+
+  <div class="opt-bar">
+    <span class="opt-label">N-back 단계</span>
+    <button class="opt-btn active" data-group="dn-level" data-val="1">1-back</button>
+    <button class="opt-btn" data-group="dn-level" data-val="2">2-back</button>
+    <button class="opt-btn" data-group="dn-level" data-val="3">3-back</button>
+    <button class="opt-btn" data-group="dn-level" data-val="4">4-back</button>
+    <div class="opt-sep"></div>
+    <span class="opt-label">속도</span>
+    <button class="opt-btn" data-group="dn-speed" data-val="3500">느림</button>
+    <button class="opt-btn active" data-group="dn-speed" data-val="2500">보통</button>
+    <button class="opt-btn" data-group="dn-speed" data-val="2000">빠름</button>
+  </div>
+
+  <div class="stim-wrap">
+    <div class="phase-indicator blank" id="dn-phase">준비</div>
+    <div style="position:relative; display:inline-block;">
+      <div class="grid-wrap" id="dn-grid">
+        <div class="grid-cell" data-i="0"></div><div class="grid-cell" data-i="1"></div><div class="grid-cell" data-i="2"></div>
+        <div class="grid-cell" data-i="3"></div><div class="grid-cell" data-i="4"></div><div class="grid-cell" data-i="5"></div>
+        <div class="grid-cell" data-i="6"></div><div class="grid-cell" data-i="7"></div><div class="grid-cell" data-i="8"></div>
+      </div>
+      <div id="dn-num-overlay" style="
+        position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+        font-size:4rem; font-weight:900; color:#1976d2; pointer-events:none;
+        text-shadow: 0 2px 8px rgba(255,255,255,0.95);
+      ">—</div>
+    </div>
+    <div class="history-bar" id="dn-history"></div>
+  </div>
+
+  <div class="feedback-msg" id="dn-feedback"></div>
+  <div class="dual-resp" id="dn-resp">
+    <button class="dual-btn num-btn" id="dn-num-btn" disabled onclick="DN.respond('num')">숫자 같아요!</button>
+    <button class="dual-btn pos-btn" id="dn-pos-btn" disabled onclick="DN.respond('pos')">위치 같아요!</button>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="dn-prog" style="width:0%"></div>
+  </div>
+  <div class="status-txt">
+    단계: <span id="dn-lv">1-back</span> &nbsp;|&nbsp;
+    진행: <span id="dn-cur">0</span>/<span id="dn-tot">20</span> &nbsp;|&nbsp;
+    숫자히트: <span id="dn-nhit">0</span> &nbsp;|&nbsp;
+    위치히트: <span id="dn-phit">0</span>
+  </div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-start" id="dn-start" onclick="DN.start()">시작하기</button>
+    <button class="ctrl-btn btn-reset" onclick="DN.reset()">다시하기</button>
+  </div>
+  <div class="result-box" id="dn-result">
+    <h2>이중 N-back 결과</h2>
+    <div class="r-row"><span>단계</span><span class="r-val" id="dn-r-lv"></span></div>
+    <div class="r-row"><span>숫자 히트율</span><span class="r-val" id="dn-r-nhit"></span></div>
+    <div class="r-row"><span>숫자 오경보율</span><span class="r-val" id="dn-r-nfa"></span></div>
+    <div class="r-row"><span>위치 히트율</span><span class="r-val" id="dn-r-phit"></span></div>
+    <div class="r-row"><span>위치 오경보율</span><span class="r-val" id="dn-r-pfa"></span></div>
+    <div class="r-row"><span>종합 정확도</span><span class="r-val" id="dn-r-acc"></span></div>
+    <div class="result-btns">
+      <button class="ctrl-btn btn-start" onclick="DN.reset();DN.start()">다시 훈련</button>
+      <button class="ctrl-btn btn-reset" onclick="location.href='index.html'">홈으로</button>
+    </div>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+const TOTAL = 20;
+const STIM_MS  = 800;   // 자극 표시 시간
+const BLANK_MS = 200;   // 자극→응답 사이 공백
+const RESP_MS  = 1500;  // 응답 대기 시간 (이 구간에 버튼 활성화)
+
+function rndInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function pct(n, d)    { return d === 0 ? 'N/A' : Math.round(n / d * 100) + '%'; }
+
+function addDot(bar, cls, txt) {
+  const d = document.createElement('div');
+  d.className = 'hist-dot ' + cls;
+  d.textContent = txt;
+  bar.appendChild(d);
+  bar.scrollLeft = bar.scrollWidth;
+}
+
+function genNbackSeq(n, len, maxVal) {
+  const arr = [];
+  for (let i = 0; i < len; i++) arr.push(rndInt(1, maxVal));
+  for (let i = n; i < len; i++) if (Math.random() < 0.3) arr[i] = arr[i - n];
+  return arr;
+}
+
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.game-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// 옵션 버튼
+document.querySelectorAll('.opt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const g = btn.dataset.group;
+    document.querySelectorAll(`.opt-btn[data-group="${g}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // 규칙 업데이트
+    if (g === 'nn-level') NN.updateRule(+btn.dataset.val);
+    if (g === 'pn-level') PN.updateRule(+btn.dataset.val);
+    if (g === 'dn-level') DN.updateRule(+btn.dataset.val);
+    if (g === 'ds-dir')   DS.updateRule(btn.dataset.val);
+  });
+});
+
+function getOpt(group) {
+  const el = document.querySelector(`.opt-btn.active[data-group="${group}"]`);
+  return el ? el.dataset.val : null;
+}
+
+// ══════════════════════════════════════════
+//  ① 숫자 N-back — 올바른 타이밍 구조
+//  [자극 800ms] → [공백 200ms] → [응답대기 1500ms] → 반복
+// ══════════════════════════════════════════
+const NN = (() => {
+  let seq=[], idx=0, level=1, speed=2000;
+  let hits=0, fas=0, targets=0, misses=0;
+  let t=null, responded=false, running=false, inRespWindow=false;
+
+  const stimEl   = document.getElementById('nn-stim');
+  const phaseEl  = document.getElementById('nn-phase');
+  const histEl   = document.getElementById('nn-history');
+  const fbEl     = document.getElementById('nn-feedback');
+  const respBtn  = document.getElementById('nn-resp');
+  const startBtn = document.getElementById('nn-start');
+  const progEl   = document.getElementById('nn-prog');
+  const resultEl = document.getElementById('nn-result');
+
+  function updateRule(lv) {
+    lv = lv || level;
+    document.getElementById('nn-rule-title').textContent = lv + '-back 훈련';
+    const prevText = lv === 1 ? '바로 전에 나온 숫자' : lv + '번 전에 나온 숫자';
+    document.getElementById('nn-rule-body').innerHTML =
+      '숫자가 하나씩 나타납니다.<br>' +
+      '<span style="color:#d32f2f">' + prevText + '</span>와 지금 숫자가 <span style="color:#2e7d32">같으면</span><br>' +
+      '숫자가 사라진 후 <span style="color:#f57c00">노란 화면</span>이 되었을 때 버튼을 누르세요!';
+    // 예시 업데이트
+    const exNums = [];
+    for (let i = 0; i < lv + 2; i++) exNums.push(rndInt(2, 9));
+    exNums[exNums.length - 1] = exNums[exNums.length - 1 - lv];
+    const exHtml = exNums.map((n, i) =>
+      i === exNums.length - 1
+        ? '<span class="ex-hit">' + n + '</span>'
+        : n
+    ).join(' → ');
+    document.getElementById('nn-rule-ex').innerHTML =
+      '예시&nbsp;&nbsp;<span class="ex-seq">' + exHtml + '</span>&nbsp;&nbsp;→&nbsp;<span class="ex-hit">▶ 지금 누르세요!</span>';
+  }
+
+  function start() {
+    level = parseInt(getOpt('nn-level')) || 1;
+    speed = parseInt(getOpt('nn-speed')) || 2000;
+    seq = genNbackSeq(level, TOTAL, 9);
+    idx=0; hits=0; fas=0; targets=0; misses=0; running=true;
+    histEl.innerHTML=''; fbEl.textContent='';
+    resultEl.style.display='none';
+    startBtn.textContent='훈련 중...'; startBtn.disabled=true;
+    document.getElementById('nn-lv').textContent  = level+'-back';
+    document.getElementById('nn-tot').textContent = TOTAL;
+    updateRule(level);
+    
+    next();
+  }
+
+  function next() {
+    if (idx >= TOTAL) { end(); return; }
+    responded = false; inRespWindow = false;
+    respBtn.disabled = true;
+    fbEl.textContent = '';
+
+    const isTarget = idx >= level && seq[idx] === seq[idx - level];
+    if (isTarget) targets++;
+
+    // 힌트: N번 전 자극 표시
+    if (idx >= level) {
+      
+      
+    } else {
+      
+      
+    }
+
+    // 자극 표시 + 버튼 즉시 활성화
+    stimEl.textContent = seq[idx];
+    stimEl.className = 'stim-box phase-stim';
+    phaseEl.textContent = idx >= level ? '같으면 누르세요!' : '기억하세요!';
+    phaseEl.className = 'phase-indicator stim';
+    document.getElementById('nn-cur').textContent = idx + 1;
+    progEl.style.width = ((idx + 1) / TOTAL * 100) + '%';
+    inRespWindow = true;
+    if (idx >= level) respBtn.disabled = false;
+
+    t = setTimeout(() => {
+      inRespWindow = false;
+      respBtn.disabled = true;
+      if (!responded) {
+        if (isTarget) {
+          misses++;
+          addDot(histEl, 'miss', '✗');
+          fbEl.textContent = '놓쳤어요 (같은 숫자였어요)';
+          fbEl.className = 'feedback-msg err';
+        } else {
+          addDot(histEl, 'cr', '○');
+        }
+      }
+      stimEl.className = 'stim-box phase-blank';
+      stimEl.textContent = '';
+      phaseEl.textContent = '...'; phaseEl.className = 'phase-indicator blank';
+      idx++;
+      document.getElementById('nn-hit').textContent = hits;
+      document.getElementById('nn-fa').textContent  = fas;
+      t = setTimeout(next, 400);
+    }, speed);
+  }
+
+  function respond() {
+    if (!running || !inRespWindow || responded) return;
+    responded = true;
+    clearTimeout(t);
+    respBtn.disabled = true;
+    inRespWindow = false;
+
+    const isTarget = idx >= level && seq[idx] === seq[idx - level];
+    if (isTarget) {
+      hits++;
+      stimEl.className = 'stim-box flash-yes';
+      stimEl.textContent = '✓';
+      fbEl.textContent = '정답! 맞게 기억했어요 👍'; fbEl.className = 'feedback-msg ok';
+      addDot(histEl, 'hit', '✓');
+    } else {
+      fas++;
+      stimEl.className = 'stim-box flash-no';
+      stimEl.textContent = '✗';
+      fbEl.textContent = '오경보 — 사실 달랐어요'; fbEl.className = 'feedback-msg err';
+      addDot(histEl, 'fa', '!');
+    }
+    document.getElementById('nn-hit').textContent = hits;
+    document.getElementById('nn-fa').textContent  = fas;
+    idx++;
+    t = setTimeout(() => {
+      stimEl.className = 'stim-box phase-blank';
+      stimEl.textContent = '';
+      phaseEl.textContent = '...'; phaseEl.className = 'phase-indicator blank';
+      next();
+    }, 500);
+  }
+
+  function end() {
+    running = false;
+    respBtn.disabled = true;
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    stimEl.textContent='완료'; stimEl.className='stim-box';
+    phaseEl.textContent='훈련 완료'; phaseEl.className='phase-indicator stim';
+
+    const nonTgt = TOTAL - targets;
+    const correct = hits + (nonTgt - fas);
+    document.getElementById('nn-r-lv').textContent  = level+'-back';
+    document.getElementById('nn-r-tot').textContent = TOTAL+'회';
+    document.getElementById('nn-r-tgt').textContent = targets+'회';
+    document.getElementById('nn-r-hit').textContent = pct(hits, targets) + ' ('+hits+'/'+targets+')';
+    document.getElementById('nn-r-fa').textContent  = pct(fas, nonTgt)   + ' ('+fas+'/'+nonTgt+')';
+    document.getElementById('nn-r-acc').textContent = pct(correct, TOTAL);
+    resultEl.style.display='block';
+  }
+
+  function reset() {
+    clearTimeout(t); running=false; idx=0; inRespWindow=false;
+    stimEl.textContent='—'; stimEl.className='stim-box phase-blank';
+    phaseEl.textContent='준비'; phaseEl.className='phase-indicator blank';
+    
+    histEl.innerHTML=''; fbEl.textContent='';
+    respBtn.disabled=true;
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    resultEl.style.display='none';
+    progEl.style.width='0%';
+    document.getElementById('nn-hit').textContent='0';
+    document.getElementById('nn-fa').textContent='0';
+    document.getElementById('nn-cur').textContent='0';
+  }
+
+  return { start, respond, reset, updateRule };
+})();
+
+// ══════════════════════════════════════════
+//  ② 위치 N-back — 동일한 타이밍 구조
+// ══════════════════════════════════════════
+const PN = (() => {
+  let seq=[], idx=0, level=1, speed=2000;
+  let hits=0, fas=0, targets=0;
+  let t=null, responded=false, running=false, inRespWindow=false;
+  let curCell=-1;
+
+  const cells    = document.querySelectorAll('#pn-grid .grid-cell');
+  const phaseEl  = document.getElementById('pn-phase');
+  const histEl   = document.getElementById('pn-history');
+  const fbEl     = document.getElementById('pn-feedback');
+  const respBtn  = document.getElementById('pn-resp');
+  const startBtn = document.getElementById('pn-start');
+  const progEl   = document.getElementById('pn-prog');
+  const resultEl = document.getElementById('pn-result');
+
+  const POS_NAMES = ['왼쪽위','가운데위','오른쪽위','왼쪽','중앙','오른쪽','왼쪽아래','가운데아래','오른쪽아래'];
+
+  function updateRule(lv) {
+    lv = lv || level;
+    document.getElementById('pn-rule-title').textContent = lv+'-back 훈련';
+    const prevText = lv === 1 ? '바로 전 위치' : lv+'번 전 위치';
+    document.getElementById('pn-rule-body').innerHTML =
+      '격자에서 불빛이 켜집니다.<br>' +
+      '<span style="color:#d32f2f">'+prevText+'</span>와 지금 위치가 <span style="color:#2e7d32">같으면</span><br>' +
+      '불빛이 꺼진 후 <span style="color:#f57c00">노란 테두리</span>가 생겼을 때 버튼을 누르세요!';
+  }
+
+  function clearCells() { cells.forEach(c => c.className = 'grid-cell'); }
+
+  function start() {
+    level = parseInt(getOpt('pn-level')) || 1;
+    speed = parseInt(getOpt('pn-speed')) || 2000;
+    seq = genNbackSeq(level, TOTAL, 8);
+    idx=0; hits=0; fas=0; targets=0; running=true;
+    histEl.innerHTML=''; fbEl.textContent='';
+    resultEl.style.display='none';
+    startBtn.textContent='훈련 중...'; startBtn.disabled=true;
+    document.getElementById('pn-lv').textContent  = level+'-back';
+    document.getElementById('pn-tot').textContent = TOTAL;
+    updateRule(level);
+    
+    next();
+  }
+
+  function next() {
+    if (idx >= TOTAL) { end(); return; }
+    responded=false; inRespWindow=false;
+    respBtn.disabled=true; fbEl.textContent='';
+    curCell = seq[idx];
+    const isTarget = idx >= level && seq[idx] === seq[idx-level];
+    if (isTarget) targets++;
+
+    if (idx >= level) {
+      
+    } else {
+      
+    }
+
+    document.getElementById('pn-cur').textContent = idx+1;
+    progEl.style.width = ((idx+1)/TOTAL*100)+'%';
+
+    // 자극 표시 + 버튼 즉시 활성화
+    clearCells();
+    cells[curCell].className='grid-cell lit';
+    phaseEl.textContent = idx >= level ? '같으면 누르세요!' : '기억하세요!';
+    phaseEl.className='phase-indicator stim';
+    inRespWindow = true;
+    if (idx >= level) respBtn.disabled = false;
+
+    t = setTimeout(() => {
+      inRespWindow=false; respBtn.disabled=true;
+      if (!responded) {
+        if (isTarget) { addDot(histEl,'miss','✗'); fbEl.textContent='놓쳤어요 (같은 위치였어요)'; fbEl.className='feedback-msg err'; }
+        else { addDot(histEl,'cr','○'); }
+      }
+      clearCells();
+      phaseEl.textContent='...'; phaseEl.className='phase-indicator blank';
+      idx++;
+      document.getElementById('pn-hit').textContent=hits;
+      document.getElementById('pn-fa').textContent=fas;
+      t = setTimeout(next, 400);
+    }, speed);
+  }
+
+  function respond() {
+    if (!running || !inRespWindow || responded) return;
+    responded=true; clearTimeout(t);
+    respBtn.disabled=true; inRespWindow=false;
+    const isTarget = idx >= level && seq[idx] === seq[idx-level];
+    if (isTarget) {
+      hits++;
+      cells[curCell].className='grid-cell flash-yes';
+      fbEl.textContent='정답! 맞게 기억했어요 👍'; fbEl.className='feedback-msg ok';
+      addDot(histEl,'hit','✓');
+    } else {
+      fas++;
+      cells[curCell].className='grid-cell flash-no';
+      fbEl.textContent='오경보 — 사실 다른 위치였어요'; fbEl.className='feedback-msg err';
+      addDot(histEl,'fa','!');
+    }
+    document.getElementById('pn-hit').textContent=hits;
+    document.getElementById('pn-fa').textContent=fas;
+    idx++;
+    t = setTimeout(() => { clearCells(); next(); }, 500);
+  }
+
+  function end() {
+    running=false; respBtn.disabled=true;
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    phaseEl.textContent='훈련 완료'; phaseEl.className='phase-indicator stim';
+    clearCells();
+    const nonTgt=TOTAL-targets, correct=hits+(nonTgt-fas);
+    document.getElementById('pn-r-lv').textContent  = level+'-back';
+    document.getElementById('pn-r-hit').textContent = pct(hits,targets)+' ('+hits+'/'+targets+')';
+    document.getElementById('pn-r-fa').textContent  = pct(fas,nonTgt)+' ('+fas+'/'+nonTgt+')';
+    document.getElementById('pn-r-acc').textContent = pct(correct,TOTAL);
+    resultEl.style.display='block';
+  }
+
+  function reset() {
+    clearTimeout(t); running=false; idx=0; inRespWindow=false;
+    clearCells();
+    phaseEl.textContent='준비'; phaseEl.className='phase-indicator blank';
+    
+    histEl.innerHTML=''; fbEl.textContent='';
+    respBtn.disabled=true;
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    resultEl.style.display='none'; progEl.style.width='0%';
+    document.getElementById('pn-hit').textContent='0';
+    document.getElementById('pn-fa').textContent='0';
+    document.getElementById('pn-cur').textContent='0';
+  }
+
+  return { start, respond, reset, updateRule };
+})();
+
+// ══════════════════════════════════════════
+//  ③ 숫자 범위 (Digit Span)
+// ══════════════════════════════════════════
+const DS = (() => {
+  let dir='forward', startSpan=3, curSpan=3, score=0, failCount=0, maxSpan=2;
+  let sequence=[], userInput='', phase='idle', t=null, stimIdx=0;
+
+  const stimEl   = document.getElementById('ds-stim');
+  const phaseEl  = document.getElementById('ds-phase');
+  const answerEl = document.getElementById('ds-answer');
+  const numpad   = document.getElementById('ds-numpad');
+  const fbEl     = document.getElementById('ds-feedback');
+  const startBtn = document.getElementById('ds-start');
+  const resultEl = document.getElementById('ds-result');
+
+  function updateRule(d) {
+    d = d || dir;
+    const el = document.getElementById('ds-rule-dir');
+    if (d === 'forward') { el.textContent='나온 순서대로'; document.getElementById('ds-dir-lbl').textContent='순방향'; }
+    else { el.textContent='거꾸로 (역순으로)'; document.getElementById('ds-dir-lbl').textContent='역방향'; }
+  }
+
+  function genSeq(len) {
+    const a=[]; let last=-1;
+    for (let i=0;i<len;i++) { let n; do { n=rndInt(1,9); } while(n===last); a.push(n); last=n; }
+    return a;
+  }
+
+  function start() {
+    dir=getOpt('ds-dir')||'forward';
+    startSpan=parseInt(getOpt('ds-start'))||3;
+    curSpan=startSpan; score=0; failCount=0; maxSpan=startSpan-1;
+    updateRule(dir);
+    document.getElementById('ds-span-lbl').textContent=curSpan;
+    document.getElementById('ds-score').textContent='0';
+    fbEl.textContent=''; resultEl.style.display='none';
+    startBtn.textContent='훈련 중...'; startBtn.disabled=true;
+    nextTrial();
+  }
+
+  function nextTrial() {
+    sequence=genSeq(curSpan); userInput=''; stimIdx=0;
+    answerEl.style.display='none'; numpad.style.display='none';
+    answerEl.textContent=''; fbEl.textContent='';
+    phaseEl.textContent='기억하세요!'; phaseEl.className='phase-indicator stim';
+    stimEl.className='stim-box phase-stim';
+    phase='showing'; showNext();
+  }
+
+  function showNext() {
+    if (stimIdx >= sequence.length) {
+      stimEl.textContent='—'; stimEl.className='stim-box phase-resp';
+      phaseEl.textContent=dir==='forward'?'순서대로 입력!':'거꾸로 입력!';
+      phaseEl.className='phase-indicator resp';
+      answerEl.style.display='flex'; answerEl.className='digit-display input-mode';
+      numpad.style.display='grid'; phase='input'; return;
+    }
+    stimEl.textContent=sequence[stimIdx];
+    stimEl.className='stim-box phase-stim';
+    stimIdx++;
+    t=setTimeout(()=>{
+      stimEl.textContent=''; stimEl.className='stim-box phase-blank';
+      t=setTimeout(showNext, 300);
+    }, 900);
+  }
+
+  function input(n) {
+    if (phase!=='input'||userInput.length>=curSpan) return;
+    userInput+=n;
+    answerEl.textContent=userInput.split('').join(' ');
+  }
+
+  function del() {
+    if (phase!=='input'||userInput.length===0) return;
+    userInput=userInput.slice(0,-1);
+    answerEl.textContent=userInput.split('').join(' ');
+  }
+
+  function confirm() {
+    if (phase!=='input') return;
+    if (userInput.length<curSpan) {
+      fbEl.textContent='⚠️ '+curSpan+'자리를 모두 입력해주세요';
+      fbEl.className='feedback-msg err'; return;
+    }
+    phase='result'; numpad.style.display='none';
+    const correct=dir==='forward'?sequence.join(''):[...sequence].reverse().join('');
+    if (userInput===correct) {
+      fbEl.textContent='✓ 정답! (정답: '+correct+')'; fbEl.className='feedback-msg ok';
+      score++; failCount=0;
+      if (curSpan>maxSpan) maxSpan=curSpan;
+      document.getElementById('ds-score').textContent=score;
+      curSpan++; if (curSpan>9) { end(); return; }
+      document.getElementById('ds-span-lbl').textContent=curSpan;
+      t=setTimeout(nextTrial,1600);
+    } else {
+      fbEl.textContent='✗ 틀렸어요. 정답: '+correct; fbEl.className='feedback-msg err';
+      failCount++; if (failCount>=2) { end(); return; }
+      t=setTimeout(nextTrial,1800);
+    }
+  }
+
+  function end() {
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    stimEl.textContent='완료'; stimEl.className='stim-box';
+    phaseEl.textContent='훈련 완료'; phaseEl.className='phase-indicator stim';
+    answerEl.style.display='none'; numpad.style.display='none';
+    document.getElementById('ds-r-dir').textContent  =dir==='forward'?'순방향':'역방향';
+    document.getElementById('ds-r-span').textContent =maxSpan+'자리';
+    document.getElementById('ds-r-score').textContent=score+'점';
+    resultEl.style.display='block';
+  }
+
+  function reset() {
+    clearTimeout(t); phase='idle';
+    stimEl.textContent='—'; stimEl.className='stim-box phase-blank';
+    phaseEl.textContent='준비'; phaseEl.className='phase-indicator blank';
+    answerEl.style.display='none'; answerEl.textContent='';
+    numpad.style.display='none'; fbEl.textContent='';
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    resultEl.style.display='none';
+    document.getElementById('ds-score').textContent='0';
+  }
+
+  return { start, input, del, confirm, reset, updateRule };
+})();
+
+// ══════════════════════════════════════════
+//  ④ 이중 N-back
+// ══════════════════════════════════════════
+const DN = (() => {
+  let numSeq=[], posSeq=[], idx=0, level=1, speed=2500;
+  let nHits=0,nFas=0,nTargets=0, pHits=0,pFas=0,pTargets=0;
+  let nResp=false, pResp=false;
+  let t=null, running=false, inRespWindow=false;
+
+  const cells    = document.querySelectorAll('#dn-grid .grid-cell');
+  const numOvEl  = document.getElementById('dn-num-overlay');
+  const phaseEl  = document.getElementById('dn-phase');
+  const histEl   = document.getElementById('dn-history');
+  const fbEl     = document.getElementById('dn-feedback');
+  const numBtn   = document.getElementById('dn-num-btn');
+  const posBtn   = document.getElementById('dn-pos-btn');
+  const startBtn = document.getElementById('dn-start');
+  const progEl   = document.getElementById('dn-prog');
+  const resultEl = document.getElementById('dn-result');
+
+  function updateRule(lv) {
+    lv=lv||level;
+    document.getElementById('dn-rule-title').textContent='이중 '+lv+'-back 훈련';
+  }
+
+  function clearCells() { cells.forEach(c=>c.className='grid-cell'); }
+
+  function start() {
+    level=parseInt(getOpt('dn-level'))||1;
+    speed=parseInt(getOpt('dn-speed'))||2500;
+    numSeq=genNbackSeq(level,TOTAL,9);
+    posSeq=genNbackSeq(level,TOTAL,8);
+    idx=0; nHits=0;nFas=0;nTargets=0; pHits=0;pFas=0;pTargets=0;
+    nResp=false; pResp=false; running=true; inRespWindow=false;
+    histEl.innerHTML=''; fbEl.textContent='';
+    resultEl.style.display='none';
+    numBtn.disabled=true; posBtn.disabled=true;
+    startBtn.textContent='훈련 중...'; startBtn.disabled=true;
+    document.getElementById('dn-lv').textContent=level+'-back';
+    document.getElementById('dn-tot').textContent=TOTAL;
+    updateRule(level);
+    
+    next();
+  }
+
+  function next() {
+    if (idx>=TOTAL) { end(); return; }
+    nResp=false; pResp=false; inRespWindow=false;
+    numBtn.disabled=true; posBtn.disabled=true;
+    fbEl.textContent='';
+
+    const nTarget=idx>=level&&numSeq[idx]===numSeq[idx-level];
+    const pTarget=idx>=level&&posSeq[idx]===posSeq[idx-level];
+    if(nTarget) nTargets++; if(pTarget) pTargets++;
+
+    if(idx>=level) {
+      
+    } else {  }
+
+    document.getElementById('dn-cur').textContent=idx+1;
+    progEl.style.width=((idx+1)/TOTAL*100)+'%';
+
+    // 자극 표시 + 버튼 즉시 활성화
+    clearCells();
+    cells[posSeq[idx]].className='grid-cell lit';
+    numOvEl.textContent=numSeq[idx];
+    phaseEl.textContent = idx >= level ? '같으면 누르세요!' : '기억하세요!';
+    phaseEl.className='phase-indicator stim';
+    inRespWindow=true;
+    if (idx >= level) { numBtn.disabled=false; posBtn.disabled=false; }
+
+    t=setTimeout(()=>{
+      inRespWindow=false;
+      numBtn.disabled=true; posBtn.disabled=true;
+      if(!nResp&&nTarget) { }
+      if(!pResp&&pTarget) { }
+      addDot(histEl, (!nResp&&!nTarget||nResp&&nTarget)?'cr':'miss','N');
+      clearCells(); numOvEl.textContent=''; idx++;
+      phaseEl.textContent='...'; phaseEl.className='phase-indicator blank';
+      document.getElementById('dn-nhit').textContent=nHits;
+      document.getElementById('dn-phit').textContent=pHits;
+      t=setTimeout(next,400);
+    }, speed);
+  }
+
+  function respond(type) {
+    if (!running||!inRespWindow) return;
+    const nTarget=idx>=level&&numSeq[idx]===numSeq[idx-level];
+    const pTarget=idx>=level&&posSeq[idx]===posSeq[idx-level];
+
+    if (type==='num'&&!nResp) {
+      nResp=true; numBtn.disabled=true;
+      if(nTarget){nHits++; document.getElementById('dn-nhit').textContent=nHits;}
+      else nFas++;
+      fbEl.textContent+=(nTarget?'숫자 ✓ ':'숫자 ✗ ');
+      fbEl.className='feedback-msg '+(nTarget?'ok':'err');
+    }
+    if (type==='pos'&&!pResp) {
+      pResp=true; posBtn.disabled=true;
+      if(pTarget){pHits++; document.getElementById('dn-phit').textContent=pHits;}
+      else pFas++;
+      fbEl.textContent+=(pTarget?'위치 ✓':'위치 ✗');
+      fbEl.className='feedback-msg '+(pTarget?'ok':'err');
+    }
+  }
+
+  function end() {
+    running=false;
+    numBtn.disabled=true; posBtn.disabled=true;
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    clearCells(); numOvEl.textContent='완료';
+    phaseEl.textContent='훈련 완료'; phaseEl.className='phase-indicator stim';
+
+    const nNT=TOTAL-nTargets, pNT=TOTAL-pTargets;
+    const nCorr=nHits+(nNT-nFas), pCorr=pHits+(pNT-pFas);
+    document.getElementById('dn-r-lv').textContent  =level+'-back';
+    document.getElementById('dn-r-nhit').textContent=pct(nHits,nTargets)+' ('+nHits+'/'+nTargets+')';
+    document.getElementById('dn-r-nfa').textContent =pct(nFas,nNT)+' ('+nFas+'/'+nNT+')';
+    document.getElementById('dn-r-phit').textContent=pct(pHits,pTargets)+' ('+pHits+'/'+pTargets+')';
+    document.getElementById('dn-r-pfa').textContent =pct(pFas,pNT)+' ('+pFas+'/'+pNT+')';
+    document.getElementById('dn-r-acc').textContent =pct(nCorr+pCorr,TOTAL*2);
+    resultEl.style.display='block';
+  }
+
+  function reset() {
+    clearTimeout(t); running=false; idx=0; inRespWindow=false;
+    clearCells(); numOvEl.textContent='—';
+    phaseEl.textContent='준비'; phaseEl.className='phase-indicator blank';
+    
+    histEl.innerHTML=''; fbEl.textContent='';
+    numBtn.disabled=true; posBtn.disabled=true;
+    startBtn.textContent='시작하기'; startBtn.disabled=false;
+    resultEl.style.display='none'; progEl.style.width='0%';
+    document.getElementById('dn-nhit').textContent='0';
+    document.getElementById('dn-phit').textContent='0';
+    document.getElementById('dn-cur').textContent='0';
+  }
+
+  return { start, respond, reset, updateRule };
+})();
+</script>
+</body>
+</html>

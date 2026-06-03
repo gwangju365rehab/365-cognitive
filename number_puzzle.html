@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>숫자 퍼즐 - 광주365재활병원</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #222;
+      text-align: center;
+    }
+
+    #description {
+      max-width: 720px;
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    #description b {
+      color: #000;
+    }
+
+    .settings-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      margin: 0 15px;
+    }
+
+    .setting-label {
+      font-size: 0.9rem;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .setting-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .setting-btn {
+      padding: 8px 15px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: #eeeeee;
+      color: #222;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.08s;
+    }
+
+    .setting-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .setting-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    .setting-btn.active {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    #game-container {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    #target-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #target-label {
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    #target-value {
+      font-size: 4rem; /* 목표값 크기 증가 */
+      font-weight: 800;
+      color: #1976d2;
+    }
+
+    #numbers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px; /* 간격 증가 */
+      justify-content: center;
+      margin: 15px 0;
+      min-height: 90px; /* 숫자가 사라져도 공간 유지 */
+    }
+
+    .number-btn {
+      width: 90px; /* 크기 증가 */
+      height: 90px; /* 크기 증가 */
+      border-radius: 15px;
+      border: none;
+      background-color: #f5f5f5;
+      color: #333;
+      font-size: 2.5rem; /* 글자 크기 증가 */
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      transition: transform 0.15s, background-color 0.15s, opacity 0.3s;
+    }
+
+    .number-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .number-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    .number-btn.used {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #operators-container {
+      display: flex;
+      gap: 15px; /* 간격 증가 */
+      margin: 15px 0;
+    }
+
+    .operator-btn {
+      width: 60px; /* 크기 증가 */
+      height: 60px; /* 크기 증가 */
+      border-radius: 50%;
+      border: none;
+      background-color: #ff9800;
+      color: white;
+      font-size: 2rem; /* 글자 크기 증가 */
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .operator-btn:hover {
+      background-color: #f57c00;
+    }
+
+    .operator-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    #expression-container {
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      width: 80%;
+      max-width: 500px;
+    }
+
+    #expression {
+      font-size: 2.2rem; /* 글자 크기 증가 */
+      font-weight: 600;
+      color: #333;
+      text-align: center;
+    }
+
+    #controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 15px 0;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #2196f3;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background-color 0.2s, transform 0.1s;
+      flex: 1;
+      text-align: center;
+      max-width: 150px; /* 모든 버튼의 최대 너비 제한 */
+    }
+
+    .control-btn:hover {
+      background-color: #1976d2;
+    }
+
+    .control-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    #start-btn {
+      background-color: #2196f3; /* 파란색 */
+    }
+
+    #start-btn:hover {
+      background-color: #1976d2;
+    }
+
+    #reset-btn {
+      background-color: #f44336; /* 빨간색 */
+    }
+
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    #clear-btn {
+      background-color: #f44336;
+    }
+
+    #clear-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    #next-btn {
+      background-color: #4caf50;
+    }
+
+    #next-btn:hover {
+      background-color: #388e3c;
+    }
+
+    #status {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 10px;
+      padding: 10px 15px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    #status div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #status span {
+      font-weight: 700;
+      color: #222;
+    }
+
+    .correct-count {
+      color: #2e7d32;
+    }
+
+    .wrong-count {
+      color: #d32f2f;
+    }
+
+    #timer-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #timer-bar {
+      width: 200px;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    #timer-progress {
+      height: 100%;
+      background-color: #4caf50;
+      width: 100%;
+      transition: width 0.1s linear;
+    }
+
+    #timer-progress.warning {
+      background-color: #ff9800;
+    }
+
+    #timer-progress.danger {
+      background-color: #f44336;
+    }
+
+    #timer-text {
+      font-weight: 700;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    #message {
+      margin-top: 10px;
+      min-height: 1.4rem;
+      font-size: 1.5rem;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #message.success {
+      color: #2e7d32;
+    }
+
+    #message.error {
+      color: #d84315;
+    }
+
+    #result-box {
+      margin-top: 18px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fafafa;
+      font-size: 0.98rem;
+      line-height: 1.7;
+      display: none;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      gap: 20px;
+      display: none;
+    }
+
+    #overlay-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+    }
+
+    /* 메인으로 돌아가는 버튼 스타일 */
+    #main-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid #bbb;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 13px;
+      z-index: 99999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    #main-button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    }
+
+    /* 병원 로고 스타일 */
+    #hospital-logo {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 12px;
+      color: #666;
+      padding: 5px 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 4px;
+      font-weight: 500;
+      z-index: 99999;
+    }
+
+    @media (max-width: 600px) {
+      .number-btn {
+        width: 75px;
+        height: 75px;
+        font-size: 2rem;
+      }
+      
+      .operator-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.7rem;
+      }
+      
+      #expression {
+        font-size: 1.8rem;
+      }
+      
+      #timer-bar {
+        width: 150px;
+      }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+  <!-- 메인으로 돌아가는 버튼 -->
+  <button id="main-button" onclick="window.location.href='index.html'">← 메인으로</button>
+
+  <h1>숫자 퍼즐</h1>
+
+  <div id="description">
+    <b>규칙:</b> 주어진 숫자들을 모두 사용하여 목표 값을 만드세요.<br>
+    <b>1.</b> 각 숫자는 한 번씩만 사용할 수 있습니다.<br>
+    <b>2.</b> 사칙연산(+, -, ×, ÷)만 사용 가능합니다.<br>
+    <b>3.</b> 제한 시간 내에 정답을 찾으세요!
+  </div>
+
+  <div class="settings-panel">
+    <div class="setting-group">
+      <div class="setting-label">난이도 선택</div>
+      <div class="setting-buttons">
+        <button class="setting-btn" data-setting="difficulty" data-value="easy">쉬움 (2개)</button>
+        <button class="setting-btn active" data-setting="difficulty" data-value="medium">중간 (3개)</button>
+        <button class="setting-btn" data-setting="difficulty" data-value="hard">어려움 (4개)</button>
+      </div>
+    </div>
+    
+    <div class="setting-group">
+      <div class="setting-label">제한 시간</div>
+      <div class="setting-buttons">
+        <button class="setting-btn" data-setting="time" data-value="60">1분</button>
+        <button class="setting-btn active" data-setting="time" data-value="120">2분</button>
+        <button class="setting-btn" data-setting="time" data-value="180">3분</button>
+        <button class="setting-btn" data-setting="time" data-value="0">무제한</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-container">
+    <div id="target-container">
+      <div id="target-label">목표 값</div>
+      <div id="target-value">?</div>
+    </div>
+
+    <div id="timer-container">
+      <div id="timer-bar">
+        <div id="timer-progress"></div>
+      </div>
+      <div id="timer-text">02:00</div>
+    </div>
+
+    <div id="numbers-container">
+      <!-- 숫자 버튼들이 여기에 동적으로 추가됩니다 -->
+    </div>
+
+    <div id="operators-container">
+      <button class="operator-btn" data-op="+">+</button>
+      <button class="operator-btn" data-op="-">−</button>
+      <button class="operator-btn" data-op="*">×</button>
+      <button class="operator-btn" data-op="/">÷</button>
+    </div>
+
+    <div id="expression-container">
+      <div id="expression"></div>
+    </div>
+
+    <div id="message"></div>
+
+    <div id="controls">
+      <div class="control-row">
+        <button id="start-btn" class="control-btn">시작하기</button>
+        <button id="reset-btn" class="control-btn" disabled>다시하기</button>
+      </div>
+      <div class="control-row">
+        <button id="clear-btn" class="control-btn" disabled>지우기</button>
+        <button id="next-btn" class="control-btn" disabled>다음 문제</button>
+      </div>
+    </div>
+
+    <div id="status">
+      <div>
+        난이도: <span id="level-text">중간</span>
+      </div>
+      <div>
+        정답: <span id="correct-count" class="correct-count">0</span>
+      </div>
+      <div>
+        오답: <span id="wrong-count" class="wrong-count">0</span>
+      </div>
+      <div>
+        소요 시간: <span id="elapsed-time">00:00</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="result-box"></div>
+
+  <!-- 일시정지 오버레이 -->
+  <div id="overlay">
+    <div id="overlay-text">
+      일시정지 되었습니다
+    </div>
+    <button id="resume-btn" class="control-btn">계속하기</button>
+  </div>
+
+  <!-- 병원 로고 -->
+  <div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+  <script>
+    // DOM 요소
+    const difficultyButtons = document.querySelectorAll('[data-setting="difficulty"]');
+    const timeButtons = document.querySelectorAll('[data-setting="time"]');
+    const targetValueEl = document.getElementById("target-value");
+    const numbersContainer = document.getElementById("numbers-container");
+    const operatorsContainer = document.getElementById("operators-container");
+    const expressionEl = document.getElementById("expression");
+    const startBtn = document.getElementById("start-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const resumeBtn = document.getElementById("resume-btn");
+    const overlay = document.getElementById("overlay");
+    const levelTextEl = document.getElementById("level-text");
+    const correctCountEl = document.getElementById("correct-count");
+    const wrongCountEl = document.getElementById("wrong-count");
+    const timerProgressEl = document.getElementById("timer-progress");
+    const timerTextEl = document.getElementById("timer-text");
+    const elapsedTimeSpan = document.getElementById("elapsed-time");
+    const messageEl = document.getElementById("message");
+    const resultBox = document.getElementById("result-box");
+
+    // 게임 상태
+    const state = {
+      difficulty: "medium", // "easy", "medium", "hard"
+      timeLimit: 120, // 초 단위, 0은 무제한
+      numbers: [],
+      targetValue: 0,
+      expressionTokens: [], // 표현식을 토큰으로 저장
+      usedNumbers: new Set(), // 사용된 숫자 인덱스를 Set으로 저장
+      correctCount: 0, // 맞힌 횟수
+      wrongCount: 0, // 틀린 횟수
+      totalProblems: 10,
+      remainingProblems: 10,
+      timerInterval: null,
+      timeLeft: 0,
+      totalTime: 0,
+      solvedProblems: 0,
+      startTime: null,
+      elapsedInterval: null,
+      elapsedSeconds: 0,
+      isGameStarted: false,
+      isPaused: false,
+      waitingForOperator: false, // 연산자 입력 대기 상태
+      lastNumberIndex: null, // 마지막으로 선택한 숫자 인덱스
+      isAnswerChecking: false // 정답 확인 중인지 여부
+    };
+
+    // 난이도별 설정 (숫자 개수 수정)
+    const DIFFICULTY_SETTINGS = {
+      easy: {
+        numCount: 2, // 쉬움: 2개
+        maxValue: 6,  // 최대값 낮춤
+        points: 5
+      },
+      medium: {
+        numCount: 3, // 중간: 3개
+        maxValue: 9,  // 최대값 낮춤
+        points: 10
+      },
+      hard: {
+        numCount: 4, // 어려움: 4개
+        maxValue: 9,  // 최대값 낮춤
+        points: 15
+      }
+    };
+
+    // 메시지 설정 함수
+    function setMessage(text, type = "") {
+      messageEl.textContent = text;
+      messageEl.className = "";
+      if (type) messageEl.classList.add(type);
+    }
+
+    // 시간 포맷팅 함수
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // 타이머 시작 함수
+    function startTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+      }
+      
+      state.timeLeft = state.timeLimit;
+      state.totalTime = state.timeLimit;
+      
+      updateTimerDisplay();
+      
+      // 무제한 시간이 아닌 경우에만 타이머 시작
+      if (state.timeLimit > 0) {
+        state.timerInterval = setInterval(() => {
+          state.timeLeft--;
+          updateTimerDisplay();
+          
+          if (state.timeLeft <= 0) {
+            clearInterval(state.timerInterval);
+            timeUp();
+          }
+        }, 1000);
+      } else {
+        // 무제한 모드에서는 타이머 바 숨기기
+        document.getElementById("timer-bar").style.display = "none";
+        timerTextEl.textContent = "무제한";
+      }
+    }
+
+    // 타이머 일시정지 함수
+    function pauseTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+      
+      if (state.elapsedInterval) {
+        clearInterval(state.elapsedInterval);
+        state.elapsedInterval = null;
+      }
+    }
+
+    // 타이머 재개 함수
+    function resumeTimer() {
+      if (state.timeLimit > 0 && !state.timerInterval) {
+        state.timerInterval = setInterval(() => {
+          state.timeLeft--;
+          updateTimerDisplay();
+          
+          if (state.timeLeft <= 0) {
+            clearInterval(state.timerInterval);
+            timeUp();
+          }
+        }, 1000);
+      }
+      
+      if (!state.elapsedInterval) {
+        state.elapsedInterval = setInterval(() => {
+          state.elapsedSeconds++;
+          elapsedTimeSpan.textContent = formatTime(state.elapsedSeconds);
+        }, 1000);
+      }
+    }
+
+    // 경과 시간 타이머 시작
+    function startElapsedTimer() {
+      if (state.elapsedInterval) {
+        clearInterval(state.elapsedInterval);
+      }
+      
+      state.startTime = new Date();
+      state.elapsedSeconds = 0;
+      elapsedTimeSpan.textContent = '00:00';
+      
+      state.elapsedInterval = setInterval(() => {
+        state.elapsedSeconds++;
+        elapsedTimeSpan.textContent = formatTime(state.elapsedSeconds);
+      }, 1000);
+    }
+
+    // 경과 시간 타이머 정지
+    function stopElapsedTimer() {
+      if (state.elapsedInterval) {
+        clearInterval(state.elapsedInterval);
+        state.elapsedInterval = null;
+      }
+    }
+
+    // 타이머 표시 업데이트
+    function updateTimerDisplay() {
+      if (state.timeLimit > 0) {
+        const percentage = (state.timeLeft / state.totalTime) * 100;
+        timerProgressEl.style.width = `${percentage}%`;
+        timerTextEl.textContent = formatTime(state.timeLeft);
+        
+        // 시간에 따라 색상 변경
+        timerProgressEl.classList.remove("warning", "danger");
+        if (percentage <= 25) {
+          timerProgressEl.classList.add("danger");
+        } else if (percentage <= 50) {
+          timerProgressEl.classList.add("warning");
+        }
+      }
+    }
+
+    // 시간 초과 처리
+    function timeUp() {
+      setMessage("시간이 초과되었습니다!", "error");
+      state.wrongCount++;
+      wrongCountEl.textContent = state.wrongCount;
+      disableGameInteraction();
+      nextBtn.disabled = false;
+    }
+
+    // 게임 상호작용 비활성화
+    function disableGameInteraction() {
+      const numberButtons = document.querySelectorAll(".number-btn");
+      const operatorButtons = document.querySelectorAll(".operator-btn");
+      
+      numberButtons.forEach(btn => btn.disabled = true);
+      operatorButtons.forEach(btn => btn.disabled = true);
+      clearBtn.disabled = true;
+    }
+
+    // 게임 상호작용 활성화
+    function enableGameInteraction() {
+      const numberButtons = document.querySelectorAll(".number-btn");
+      const operatorButtons = document.querySelectorAll(".operator-btn");
+      
+      // 초기에는 숫자 버튼만 활성화
+      numberButtons.forEach(btn => {
+        const index = parseInt(btn.dataset.index);
+        btn.disabled = !state.isGameStarted || state.isPaused || state.usedNumbers.has(index);
+      });
+      
+      // 연산자 버튼은 숫자가 선택된 후에만 활성화
+      operatorButtons.forEach(btn => {
+        btn.disabled = !state.waitingForOperator;
+      });
+      
+      clearBtn.disabled = false;
+    }
+
+    // 숫자 생성 함수 (더 쉬운 숫자로 생성)
+    function generateNumbers(count, maxValue) {
+      const numbers = [];
+      for (let i = 0; i < count; i++) {
+        // 1~maxValue 사이의 숫자 생성
+        numbers.push(Math.floor(Math.random() * maxValue) + 1);
+      }
+      return numbers;
+    }
+
+    // 목표값 계산 함수 (훨씬 더 단순한 계산)
+    function calculateTargetValue(numbers) {
+      // 괄호 없이 왼쪽→오른쪽 순서로만 계산 (evaluateExpression과 동일한 방식)
+      const ops = ['+', '-', '*', '/'];
+
+      function applyOp(a, op, b) {
+        if (op === '+') return a + b;
+        if (op === '-') return a - b;
+        if (op === '*') return a * b;
+        if (op === '/') return b !== 0 ? a / b : NaN;
+        return NaN;
+      }
+
+      // 숫자 배열을 순서대로 계산해 유효한 양의 정수 목표값 생성
+      // 최대 20번 시도
+      for (let attempt = 0; attempt < 20; attempt++) {
+        let result = numbers[0];
+        let valid = true;
+        for (let i = 1; i < numbers.length; i++) {
+          const op = ops[Math.floor(Math.random() * ops.length)];
+          const next = applyOp(result, op, numbers[i]);
+          if (isNaN(next) || !isFinite(next) || next < 0 || !Number.isInteger(next)) {
+            valid = false;
+            break;
+          }
+          result = next;
+        }
+        if (valid && result > 0) return result;
+      }
+      // 실패 시 단순 합 반환
+      return numbers.reduce((a, b) => a + b, 0);
+    }
+
+    // 숫자 버튼 생성 함수
+    function createNumberButtons() {
+      numbersContainer.innerHTML = "";
+      
+      state.numbers.forEach((num, index) => {
+        const btn = document.createElement("button");
+        btn.className = "number-btn";
+        btn.textContent = num;
+        btn.dataset.index = index;
+        btn.dataset.value = num;
+        btn.disabled = !state.isGameStarted || state.isPaused;
+        
+        btn.addEventListener("click", () => handleNumberClick(btn, index, num));
+        
+        numbersContainer.appendChild(btn);
+      });
+    }
+
+    // 숫자 버튼 클릭 핸들러
+    function handleNumberClick(button, index, value) {
+      // 이미 사용된 숫자는 무시
+      if (state.usedNumbers.has(index) || state.isAnswerChecking) return;
+      
+      // 숫자를 표현식에 추가
+      state.expressionTokens.push({ type: 'number', value: value, index: index });
+      state.usedNumbers.add(index);
+      button.classList.add("used"); // 숫자 버튼 사라지게 함
+      
+      // 표현식 업데이트
+      updateExpressionDisplay();
+      
+      // 연산자 입력 대기 상태로 변경
+      state.waitingForOperator = true;
+      state.lastNumberIndex = index;
+      
+      // 연산자 버튼 활성화
+      const operatorButtons = document.querySelectorAll(".operator-btn");
+      operatorButtons.forEach(btn => {
+        btn.disabled = false;
+      });
+      
+      // 모든 숫자를 사용했는지 확인
+      if (state.usedNumbers.size === state.numbers.length) {
+        // 모든 숫자를 사용했으면 연산자 버튼 비활성화
+        operatorButtons.forEach(btn => {
+          btn.disabled = true;
+        });
+        
+        // 자동으로 정답 확인
+        setTimeout(() => {
+          checkAnswer();
+        }, 500);
+      }
+    }
+
+    // 연산자 버튼 클릭 핸들러
+    function handleOperatorClick(button, operator) {
+      // 연산자 입력 대기 상태가 아니면 무시
+      if (!state.waitingForOperator || state.isAnswerChecking) return;
+      
+      // 연산자를 표현식에 추가
+      state.expressionTokens.push({ type: 'operator', value: operator });
+      
+      // 표현식 업데이트
+      updateExpressionDisplay();
+      
+      // 연산자 입력 대기 상태 해제
+      state.waitingForOperator = false;
+      
+      // 연산자 버튼 비활성화
+      const operatorButtons = document.querySelectorAll(".operator-btn");
+      operatorButtons.forEach(btn => {
+        btn.disabled = true;
+      });
+      
+      // 사용 가능한 숫자 버튼 활성화
+      const numberButtons = document.querySelectorAll(".number-btn");
+      numberButtons.forEach(btn => {
+        const index = parseInt(btn.dataset.index);
+        btn.disabled = state.usedNumbers.has(index);
+      });
+    }
+
+    // 표현식 표시 업데이트
+    function updateExpressionDisplay() {
+      let expressionText = "";
+      
+      state.expressionTokens.forEach(token => {
+        if (token.type === 'number') {
+          expressionText += token.value;
+        } else {
+          switch (token.value) {
+            case "+": expressionText += " + "; break;
+            case "-": expressionText += " − "; break;
+            case "*": expressionText += " × "; break;
+            case "/": expressionText += " ÷ "; break;
+          }
+        }
+      });
+      
+      expressionEl.textContent = expressionText;
+    }
+
+    // 표현식 평가
+    function evaluateExpression() {
+      if (state.expressionTokens.length === 0) return 0;
+
+      // 토큰을 숫자/연산자 배열로 변환
+      const tokens = state.expressionTokens.map(t => t.value);
+
+      // 왼쪽→오른쪽 순서 계산 (calculateTargetValue와 동일한 방식)
+      let result = tokens[0];
+      let i = 1;
+      while (i < tokens.length) {
+        const op = tokens[i];
+        const next = tokens[i + 1];
+        if (op === undefined || next === undefined) break;
+        if (op === '+') result += next;
+        else if (op === '-') result -= next;
+        else if (op === '*') result *= next;
+        else if (op === '/') {
+          if (next === 0) return NaN;
+          result /= next;
+        }
+        i += 2;
+      }
+      return result;
+    }
+
+    // 표현식 초기화
+    function clearExpression() {
+      if (state.isAnswerChecking) return;
+      
+      state.expressionTokens = [];
+      state.usedNumbers.clear();
+      state.waitingForOperator = false;
+      state.lastNumberIndex = null;
+      expressionEl.textContent = "";
+      
+      // 숫자 버튼 초기화
+      const numberButtons = document.querySelectorAll(".number-btn");
+      numberButtons.forEach(btn => {
+        btn.classList.remove("used");
+        btn.disabled = !state.isGameStarted || state.isPaused;
+      });
+      
+      // 연산자 버튼 비활성화
+      const operatorButtons = document.querySelectorAll(".operator-btn");
+      operatorButtons.forEach(btn => {
+        btn.disabled = true;
+      });
+      
+      // 메시지 초기화
+      setMessage("");
+    }
+
+    // 정답 확인
+    function checkAnswer() {
+      if (state.isAnswerChecking) return;
+      
+      // 정답 확인 중 상태로 설정
+      state.isAnswerChecking = true;
+      
+      // 모든 숫자를 사용했는지 확인
+      if (state.usedNumbers.size !== state.numbers.length) {
+        setMessage("모든 숫자를 사용해야 합니다!", "error");
+        state.isAnswerChecking = false;
+        return;
+      }
+      
+      // 마지막 토큰이 연산자인지 확인
+      const lastToken = state.expressionTokens[state.expressionTokens.length - 1];
+      if (lastToken && lastToken.type === 'operator') {
+        setMessage("계산식이 완성되지 않았습니다!", "error");
+        state.isAnswerChecking = false;
+        return;
+      }
+      
+      const result = evaluateExpression();
+      
+      // NaN 체크
+      if (isNaN(result)) {
+        setMessage("올바른 계산식이 아닙니다!", "error");
+        state.wrongCount++;
+        wrongCountEl.textContent = state.wrongCount;
+        state.isAnswerChecking = false;
+        return;
+      }
+      
+      // 정답 확인
+      if (Math.abs(result - state.targetValue) < 0.001) { // 부동소수점 오차 고려
+        // 타이머 정지
+        if (state.timerInterval) {
+          clearInterval(state.timerInterval);
+          state.timerInterval = null;
+        }
+        
+        // 정답 횟수 증가
+        state.correctCount++;
+        state.solvedProblems++;
+        
+        // UI 업데이트
+        correctCountEl.textContent = state.correctCount;
+        
+        setMessage("정답!", "success");
+        disableGameInteraction();
+        nextBtn.disabled = false;
+      } else {
+        setMessage("오답!", "error");
+        state.wrongCount++;
+        wrongCountEl.textContent = state.wrongCount;
+        
+        // 오답일 경우 잠시 후 다음 문제로 자동 이동
+        setTimeout(() => {
+          if (state.remainingProblems > 1) {
+            generateNextProblem();
+          } else {
+            finishGame();
+          }
+        }, 1500);
+      }
+    }
+
+    // 다음 문제 생성
+    function generateNextProblem() {
+      // 정답 확인 중 상태 해제
+      state.isAnswerChecking = false;
+      
+      // 남은 문제 확인
+      state.remainingProblems--;
+      
+      if (state.remainingProblems <= 0) {
+        finishGame();
+        return;
+      }
+      
+      // 표현식 초기화
+      clearExpression();
+      
+      // 설정 가져오기
+      const settings = DIFFICULTY_SETTINGS[state.difficulty];
+      
+      // 숫자 생성
+      state.numbers = generateNumbers(settings.numCount, settings.maxValue);
+      
+      // 목표값 계산
+      state.targetValue = calculateTargetValue(state.numbers);
+      targetValueEl.textContent = state.targetValue;
+      
+      // 숫자 버튼 생성
+      createNumberButtons();
+      
+      // 타이머 시작
+      startTimer();
+      
+      // 메시지 초기화
+      setMessage("");
+      
+      // 상태 초기화
+      state.expressionTokens = [];
+      state.usedNumbers.clear();
+      state.waitingForOperator = false;
+      state.lastNumberIndex = null;
+      
+      // 상호작용 활성화
+      enableGameInteraction();
+      nextBtn.disabled = true;
+    }
+
+    // 게임 종료
+    function finishGame() {
+      // 타이머 정지
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+      
+      // 경과 시간 타이머 정지
+      stopElapsedTimer();
+      
+      // 상호작용 비활성화
+      disableGameInteraction();
+      nextBtn.disabled = true;
+      
+      // 시작/다시하기 버튼 활성화
+      resetBtn.disabled = false;
+      
+      // 결과 표시
+      const accuracy = state.solvedProblems / state.totalProblems * 100;
+      
+      setMessage("모든 문제가 종료되었습니다!", "success");
+      
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+        <b>훈련 결과</b><br>
+        <b>난이도:</b> ${getDifficultyName(state.difficulty)}<br>
+        <b>제한 시간:</b> ${state.timeLimit > 0 ? formatTime(state.timeLimit) : "무제한"}<br>
+        <b>총 문제 수:</b> ${state.totalProblems}문제<br>
+        <b>정답 횟수:</b> ${state.correctCount}문제<br>
+        <b>오답 횟수:</b> ${state.wrongCount}문제<br>
+        <b>정확도:</b> ${accuracy.toFixed(1)}%<br>
+        <b>총 소요 시간:</b> ${formatTime(state.elapsedSeconds)}<br>
+      `;
+      
+      // 게임 상태 초기화
+      state.isGameStarted = false;
+      state.isAnswerChecking = false;
+    }
+
+    // 게임 초기화
+    function initGame() {
+      // 상태 초기화
+      state.correctCount = 0;
+      state.wrongCount = 0;
+      state.remainingProblems = state.totalProblems;
+      state.solvedProblems = 0;
+      state.elapsedSeconds = 0;
+      state.expressionTokens = [];
+      state.usedNumbers.clear();
+      state.waitingForOperator = false;
+      state.lastNumberIndex = null;
+      state.isAnswerChecking = false;
+      
+      // UI 초기화
+      correctCountEl.textContent = "0";
+      wrongCountEl.textContent = "0";
+      elapsedTimeSpan.textContent = "00:00";
+      expressionEl.textContent = "";
+      
+      // 난이도 텍스트 업데이트
+      levelTextEl.textContent = getDifficultyName(state.difficulty);
+      
+      // 타이머 바 표시 설정
+      document.getElementById("timer-bar").style.display = state.timeLimit > 0 ? "block" : "none";
+      timerTextEl.textContent = state.timeLimit > 0 ? formatTime(state.timeLimit) : "무제한";
+      
+      // 결과 박스 숨기기
+      resultBox.style.display = "none";
+      
+      // 메시지 초기화
+      setMessage("");
+    }
+
+    // 게임 시작
+    function startGame() {
+      state.isGameStarted = true;
+      state.isPaused = false;
+      
+      // 버튼 상태 업데이트
+      startBtn.disabled = true;
+      resetBtn.disabled = false;
+      
+      // 설정 버튼 비활성화
+      difficultyButtons.forEach(btn => btn.disabled = true);
+      timeButtons.forEach(btn => btn.disabled = true);
+      
+      initGame();
+      generateNextProblem();
+      startElapsedTimer();
+    }
+
+    // 게임 재시작
+    function resetGame() {
+      // 타이머 정지
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+      
+      // 경과 시간 타이머 정지
+      stopElapsedTimer();
+      
+      // 설정 버튼 활성화
+      difficultyButtons.forEach(btn => btn.disabled = false);
+      timeButtons.forEach(btn => btn.disabled = false);
+      
+      // 버튼 상태 초기화
+      startBtn.disabled = false;
+      resetBtn.disabled = true;
+      clearBtn.disabled = true;
+      nextBtn.disabled = true;
+      
+      // 게임 상태 초기화
+      state.isGameStarted = false;
+      state.isPaused = false;
+      state.expressionTokens = [];
+      state.usedNumbers.clear();
+      state.waitingForOperator = false;
+      state.lastNumberIndex = null;
+      state.isAnswerChecking = false;
+      
+      // UI 초기화
+      targetValueEl.textContent = "?";
+      numbersContainer.innerHTML = "<div style='font-size: 1.2rem; color: #666;'>시작 버튼을 눌러 게임을 시작하세요</div>";
+      expressionEl.textContent = "";
+      
+      // 결과 박스 숨기기
+      resultBox.style.display = "none";
+      
+      // 메시지 초기화
+      setMessage("");
+    }
+
+    // 게임 일시정지
+    function pauseGame() {
+      if (!state.isGameStarted) return;
+      
+      state.isPaused = true;
+      
+      pauseTimer();
+      disableGameInteraction();
+      
+      // 오버레이 표시
+      overlay.style.display = "flex";
+    }
+
+    // 게임 재개
+    function resumeGame() {
+      if (!state.isGameStarted) return;
+      
+      state.isPaused = false;
+      
+      resumeTimer();
+      enableGameInteraction();
+      
+      // 오버레이 숨기기
+      overlay.style.display = "none";
+    }
+
+    // 난이도 이름 가져오기
+    function getDifficultyName(difficulty) {
+      switch (difficulty) {
+        case "easy": return "쉬움";
+        case "hard": return "어려움";
+        default: return "중간";
+      }
+    }
+
+    // 설정 버튼 이벤트 리스너
+    difficultyButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        difficultyButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.difficulty = btn.dataset.value;
+        
+        // 난이도 텍스트 업데이트
+        levelTextEl.textContent = getDifficultyName(state.difficulty);
+      });
+    });
+
+    timeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        timeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.timeLimit = parseInt(btn.dataset.value);
+        
+        // 타이머 텍스트 업데이트
+        if (state.timeLimit > 0) {
+          document.getElementById("timer-bar").style.display = "block";
+          timerTextEl.textContent = formatTime(state.timeLimit);
+        } else {
+          document.getElementById("timer-bar").style.display = "none";
+          timerTextEl.textContent = "무제한";
+        }
+      });
+    });
+
+    // 연산자 버튼 이벤트 리스너
+    document.querySelectorAll(".operator-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleOperatorClick(btn, btn.dataset.op));
+    });
+
+    // 컨트롤 버튼 이벤트 리스너
+    startBtn.addEventListener("click", startGame);
+    resetBtn.addEventListener("click", resetGame);
+    resumeBtn.addEventListener("click", resumeGame);
+    clearBtn.addEventListener("click", clearExpression);
+    nextBtn.addEventListener("click", generateNextProblem);
+
+    // 키보드 이벤트 리스너 추가
+    document.addEventListener('keydown', (e) => {
+      if (!state.isGameStarted || state.isPaused) return;
+      
+      if (e.key === 'Escape' || e.key === 'Delete' || e.key === 'Backspace') {
+        // ESC, Delete, Backspace 키로 지우기
+        clearExpression();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        // Enter, Space 키로 다음 문제
+        if (!nextBtn.disabled) {
+          generateNextProblem();
+        }
+      }
+    });
+
+    // 초기 설정
+    initGame();
+    targetValueEl.textContent = "?";
+    numbersContainer.innerHTML = "<div style='font-size: 1.2rem; color: #666;'>시작 버튼을 눌러 게임을 시작하세요</div>";
+    
+    // 버튼 초기 상태 설정
+    clearBtn.disabled = true;
+    nextBtn.disabled = true;
+    resetBtn.disabled = true;
+  </script>
+</body>
+</html>

@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>하노이의 탑 - 광주365재활병원</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #222;
+    }
+
+    #description {
+      max-width: 720px;
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    #description b {
+      color: #000;
+    }
+
+    #level-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .level-btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #eeeeee;
+      color: #222;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.08s;
+    }
+
+    .level-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .level-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    .level-btn.active {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    #game-container {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    #towers-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      height: 350px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .tower {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      position: relative;
+      width: 30%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .tower::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      width: 14px;
+      height: 85%;
+      background-color: #8d6e63;
+      z-index: 1;
+      border-radius: 6px;
+    }
+
+    .tower::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      width: 70%;
+      height: 18px;
+      background-color: #a1887f;
+      border-radius: 5px;
+    }
+
+    /* 흔들림 애니메이션 추가 */
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0); }
+    }
+
+    .tower.shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    .disk {
+      width: 80%;
+      height: 40px;
+      margin-bottom: 5px;
+      border-radius: 15px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #2196f3;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .control-btn:hover {
+      background-color: #1976d2;
+    }
+
+    .control-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    #reset-btn {
+      background-color: #f44336;
+    }
+
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    #auto-solve-btn {
+      background-color: #4caf50;
+    }
+
+    #auto-solve-btn:hover {
+      background-color: #388e3c;
+    }
+
+    #start-btn {
+      background-color: #ff9800;
+      font-size: 1.1rem;
+      padding: 12px 24px;
+    }
+
+    #start-btn:hover {
+      background-color: #f57c00;
+    }
+
+    #status {
+      margin-top: 16px;
+      font-size: 1rem;
+      color: #555;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    #status span {
+      font-weight: 700;
+      color: #222;
+    }
+
+    #message {
+      margin-top: 10px;
+      min-height: 1.4rem;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    #message.success {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    #message.error {
+      color: #d84315;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      border-radius: 10px;
+    }
+
+    #overlay-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    /* 메인으로 돌아가는 버튼 스타일 */
+    #main-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid #bbb;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 13px;
+      z-index: 99999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    #main-button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    }
+
+    /* 병원 로고 스타일 */
+    #hospital-logo {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 12px;
+      color: #666;
+      padding: 5px 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 4px;
+      font-weight: 500;
+      z-index: 99999;
+    }
+
+    @media (max-width: 600px) {
+      #towers-container {
+        height: 300px;
+      }
+      
+      .disk {
+        height: 35px;
+        font-size: 1rem;
+      }
+      
+      .control-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+  <!-- 메인으로 돌아가는 버튼 -->
+  <button id="main-button" onclick="window.location.href='index.html'">← 메인으로</button>
+
+  <h1>하노이의 탑</h1>
+
+  <div id="description">
+    <b>규칙:</b> 왼쪽 기둥에 있는 모든 원반을 오른쪽 기둥으로 옮기세요.<br>
+    <b>1.</b> 한 번에 하나의 원반만 이동할 수 있습니다.<br>
+    <b>2.</b> 큰 원반 위에 작은 원반만 놓을 수 있습니다.<br>
+    <b>3.</b> 원반을 클릭하여 이동시킬 수 있습니다.
+  </div>
+
+  <div id="level-panel">
+    <button class="level-btn" data-level="easy">쉬움 (3개)</button>
+    <button class="level-btn active" data-level="medium">중간 (4개)</button>
+    <button class="level-btn" data-level="hard">어려움 (5개)</button>
+  </div>
+
+  <div id="game-container">
+    <div id="towers-container">
+      <div class="tower" id="tower-1"></div>
+      <div class="tower" id="tower-2"></div>
+      <div class="tower" id="tower-3"></div>
+      
+      <div id="overlay">
+        <div id="overlay-text">게임을 시작하려면 버튼을 누르세요</div>
+        <button id="start-btn" class="control-btn">시작하기</button>
+      </div>
+    </div>
+
+    <div id="controls">
+      <button id="reset-btn" class="control-btn">다시 시작</button>
+      <button id="auto-solve-btn" class="control-btn">자동 풀기</button>
+    </div>
+  </div>
+
+  <div id="status">
+    이동 횟수: <span id="move-count">0</span> / 
+    최소 이동 횟수: <span id="min-moves">15</span><br>
+    소요 시간: <span id="elapsed-time">00:00</span>
+  </div>
+
+  <div id="message"></div>
+
+  <!-- 병원 로고 -->
+  <div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+  <script>
+    // 게임 상태 관리
+    const state = {
+      disks: 4, // 기본 난이도: 중간
+      moves: 0,
+      selectedDisk: null,
+      selectedTower: null,
+      towers: [[], [], []],
+      isAutoSolving: false,
+      autoSolveInterval: null,
+      autoSolveMoves: [],
+      startTime: null,
+      timerInterval: null,
+      elapsedSeconds: 0,
+      gameStarted: false
+    };
+
+    // DOM 요소
+    const towers = [
+      document.getElementById('tower-1'),
+      document.getElementById('tower-2'),
+      document.getElementById('tower-3')
+    ];
+    const levelButtons = document.querySelectorAll('.level-btn');
+    const resetButton = document.getElementById('reset-btn');
+    const autoSolveButton = document.getElementById('auto-solve-btn');
+    const startButton = document.getElementById('start-btn');
+    const overlay = document.getElementById('overlay');
+    const moveCountSpan = document.getElementById('move-count');
+    const minMovesSpan = document.getElementById('min-moves');
+    const messageDiv = document.getElementById('message');
+    const elapsedTimeSpan = document.getElementById('elapsed-time');
+
+    // 색상 배열
+    const diskColors = [
+      '#f44336', // 빨강
+      '#2196f3', // 파랑
+      '#4caf50', // 초록
+      '#ff9800', // 주황
+      '#9c27b0', // 보라
+      '#795548', // 갈색
+      '#607d8b'  // 청회색
+    ];
+
+    // 메시지 설정 함수
+    function setMessage(text, type = '') {
+      messageDiv.textContent = text;
+      messageDiv.className = '';
+      if (type) messageDiv.classList.add(type);
+    }
+
+    // 타워 흔들기 애니메이션 함수
+    function shakeTower(towerIndex) {
+      const tower = towers[towerIndex];
+      tower.classList.add('shake');
+      setTimeout(() => {
+        tower.classList.remove('shake');
+      }, 500); // 애니메이션 시간 + 약간의 여유
+    }
+
+    // 최소 이동 횟수 계산
+    function calculateMinMoves(disks) {
+      return Math.pow(2, disks) - 1;
+    }
+
+    // 시간 포맷팅 함수
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // 타이머 시작 함수
+    function startTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+      }
+      
+      state.startTime = new Date();
+      state.elapsedSeconds = 0;
+      elapsedTimeSpan.textContent = '00:00';
+      
+      state.timerInterval = setInterval(() => {
+        state.elapsedSeconds++;
+        elapsedTimeSpan.textContent = formatTime(state.elapsedSeconds);
+      }, 1000);
+    }
+
+    // 타이머 정지 함수
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    // 게임 시작 함수
+    function startGame() {
+      overlay.style.display = 'none';
+      state.gameStarted = true;
+      startTimer();
+      setMessage('원반을 클릭하여 이동하세요.');
+    }
+
+    // 게임 초기화 함수
+    function initGame() {
+      // 상태 초기화
+      state.moves = 0;
+      state.selectedDisk = null;
+      state.selectedTower = null;
+      state.towers = [[], [], []];
+      state.isAutoSolving = false;
+      state.gameStarted = false;
+      
+      if (state.autoSolveInterval) {
+        clearInterval(state.autoSolveInterval);
+        state.autoSolveInterval = null;
+      }
+      
+      // 타이머 정지
+      stopTimer();
+      elapsedTimeSpan.textContent = '00:00';
+      
+      // 이동 횟수 업데이트
+      moveCountSpan.textContent = '0';
+      minMovesSpan.textContent = calculateMinMoves(state.disks);
+      
+      // 타워 초기화
+      towers.forEach(tower => {
+        tower.innerHTML = '';
+      });
+      
+      // 첫 번째 타워에 디스크 추가
+      for (let i = state.disks; i >= 1; i--) {
+        const disk = document.createElement('div');
+        disk.className = 'disk';
+        disk.dataset.size = i;
+        
+        // 디스크 크기에 따른 너비 설정 (작은 번호가 더 큰 디스크)
+        const width = 40 + (i * 12);
+        disk.style.width = `${width}%`;
+        disk.style.backgroundColor = diskColors[i - 1];
+        
+        // 디스크에 번호 표시
+        disk.textContent = i;
+        
+        // 첫 번째 타워에 추가
+        towers[0].appendChild(disk);
+        state.towers[0].push(i);
+      }
+      
+      setMessage('시작 버튼을 눌러 게임을 시작하세요.');
+      autoSolveButton.disabled = false;
+      autoSolveButton.textContent = '자동 풀기';
+      
+      // 오버레이 표시
+      overlay.style.display = 'flex';
+    }
+
+    // 디스크 이동 함수
+    function moveDisk(fromTower, toTower) {
+      if (!state.gameStarted && !state.isAutoSolving) return false;
+      if (fromTower === toTower) return false;
+      
+      const fromTowerDisks = state.towers[fromTower];
+      const toTowerDisks = state.towers[toTower];
+      
+      if (fromTowerDisks.length === 0) return false;
+      
+      const diskToMove = fromTowerDisks[fromTowerDisks.length - 1];
+      
+      if (toTowerDisks.length > 0 && diskToMove > toTowerDisks[toTowerDisks.length - 1]) {
+        // 잘못된 이동 시도 - 타워 흔들기 애니메이션 추가
+        shakeTower(toTower);
+        setMessage('큰 원반을 작은 원반 위에 놓을 수 없습니다!', 'error');
+        return false;
+      }
+      
+      // 디스크 이동 (상태 업데이트)
+      fromTowerDisks.pop();
+      toTowerDisks.push(diskToMove);
+      
+      // DOM 업데이트
+      const diskElement = towers[fromTower].lastChild;
+      towers[toTower].appendChild(diskElement);
+      
+      // 이동 횟수 증가
+      state.moves++;
+      moveCountSpan.textContent = state.moves;
+      
+      // 게임 클리어 확인
+      if (state.towers[2].length === state.disks) {
+        stopTimer(); // 타이머 정지
+        
+        setMessage(`축하합니다! ${state.moves}번 이동으로 완료했습니다!`, 'success');
+        
+        // 최소 이동 횟수로 클리어했는지 확인
+        const minMoves = calculateMinMoves(state.disks);
+        if (state.moves === minMoves) {
+          setMessage(`축하합니다! 최소 이동 횟수(${minMoves}번)로 완료했습니다! 소요 시간: ${formatTime(state.elapsedSeconds)}`, 'success');
+        }
+        
+        if (state.isAutoSolving) {
+          clearInterval(state.autoSolveInterval);
+          state.autoSolveInterval = null;
+          state.isAutoSolving = false;
+          autoSolveButton.textContent = '자동 풀기';
+        }
+      } else {
+        setMessage('');
+      }
+      
+      return true;
+    }
+
+    // 자동 풀이 알고리즘 (재귀)
+    function generateSolution(n, source, auxiliary, target) {
+      const moves = [];
+      
+      function hanoi(disks, from, aux, to) {
+        if (disks === 1) {
+          moves.push([from, to]);
+          return;
+        }
+        
+        hanoi(disks - 1, from, to, aux);
+        moves.push([from, to]);
+        hanoi(disks - 1, aux, from, to);
+      }
+      
+      hanoi(n, source, auxiliary, target);
+      return moves;
+    }
+
+    // 자동 풀이 시작
+    function startAutoSolve() {
+      if (state.isAutoSolving) {
+        clearInterval(state.autoSolveInterval);
+        state.autoSolveInterval = null;
+        state.isAutoSolving = false;
+        autoSolveButton.textContent = '자동 풀기';
+        return;
+      }
+      
+      // 게임 초기화
+      initGame();
+      
+      // 자동 풀이는 시작 버튼 없이 바로 시작
+      overlay.style.display = 'none';
+      state.gameStarted = true;
+      
+      state.isAutoSolving = true;
+      autoSolveButton.textContent = '중지';
+      
+      // 타이머 시작
+      startTimer();
+      
+      // 자동 풀이 경로 생성
+      state.autoSolveMoves = generateSolution(state.disks, 0, 1, 2);
+      let moveIndex = 0;
+      
+      // 일정 간격으로 이동 실행
+      state.autoSolveInterval = setInterval(() => {
+        if (moveIndex >= state.autoSolveMoves.length) {
+          clearInterval(state.autoSolveInterval);
+          state.autoSolveInterval = null;
+          state.isAutoSolving = false;
+          autoSolveButton.textContent = '자동 풀기';
+          return;
+        }
+        
+        const [fromTower, toTower] = state.autoSolveMoves[moveIndex];
+        moveDisk(fromTower, toTower);
+        moveIndex++;
+      }, 500); // 0.5초 간격
+    }
+
+    // 타워 클릭 이벤트
+    towers.forEach((tower, index) => {
+      tower.addEventListener('click', () => {
+        if (!state.gameStarted || state.isAutoSolving) return;
+        
+        // 디스크가 선택되지 않은 경우
+        if (state.selectedTower === null) {
+          // 빈 타워는 선택할 수 없음
+          if (state.towers[index].length === 0) {
+            shakeTower(index); // 빈 타워 클릭 시 흔들기
+            setMessage('이동할 원반이 없습니다!', 'error');
+            return;
+          }
+          
+          state.selectedTower = index;
+          tower.style.opacity = '0.7';
+          setMessage('원반을 놓을 기둥을 선택하세요.');
+        } 
+        // 디스크가 이미 선택된 경우
+        else {
+          const fromTower = state.selectedTower;
+          const toTower = index;
+          
+          // 선택 해제
+          towers[fromTower].style.opacity = '1';
+          state.selectedTower = null;
+          
+          // 이동 시도
+          const moveSuccess = moveDisk(fromTower, toTower);
+          
+          if (!moveSuccess && fromTower !== toTower) {
+            setMessage('이동할 수 없습니다!', 'error');
+          }
+        }
+      });
+    });
+
+    // 난이도 버튼 클릭 이벤트
+    levelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        levelButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        const level = button.dataset.level;
+        
+        if (level === 'easy') state.disks = 3;
+        else if (level === 'hard') state.disks = 5;
+        else state.disks = 4;
+        
+        initGame();
+      });
+    });
+
+    // 시작 버튼 클릭 이벤트
+    startButton.addEventListener('click', startGame);
+
+    // 리셋 버튼 클릭 이벤트
+    resetButton.addEventListener('click', initGame);
+
+    // 자동 풀기 버튼 클릭 이벤트
+    autoSolveButton.addEventListener('click', startAutoSolve);
+
+    // 게임 초기화
+    initGame();
+  </script>
+</body>
+</html>

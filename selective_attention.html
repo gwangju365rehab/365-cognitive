@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>선택적 주의력 훈련 - 광주365재활병원</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #222;
+      text-align: center;
+    }
+
+    #description {
+      max-width: 720px;
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    #description b {
+      color: #000;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    #game-board {
+      position: relative;
+      width: 100%;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .badge.found {
+      background-color: #e3f2fd;
+      border-color: #90caf9;
+    }
+
+    .badge.error {
+      background-color: #ffebee;
+      border-color: #ffcdd2;
+    }
+
+    #target-container {
+      text-align: center;
+      margin: 16px 0;
+      display: none;
+    }
+
+    #target-container p {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .target-fruit {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .target-fruit span.emoji {
+      font-size: 32px;
+    }
+
+    .target-fruit span.name {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    /* 피드백 표시 스타일 */
+    #feedback-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #feedback-overlay.show {
+      opacity: 1;
+    }
+
+    #feedback-symbol {
+      font-size: 150px;
+      font-weight: bold;
+      text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    #feedback-symbol.success {
+      color: #4CAF50;
+    }
+
+    #feedback-symbol.error {
+      color: #F44336;
+    }
+
+    #controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 15px 0;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background-color 0.2s, transform 0.1s;
+      flex: 1;
+      text-align: center;
+      max-width: 150px;
+    }
+
+    #start-btn {
+      background-color: #2196f3;
+    }
+
+    #start-btn:hover {
+      background-color: #1976d2;
+    }
+
+    #reset-btn {
+      background-color: #f44336;
+    }
+
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .fruits-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .fruit-button {
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .fruit-button:hover {
+      background-color: #f5f5f5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .fruit-button.correct {
+      opacity: 0.4;
+      background-color: #e5e5e5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 과일 이모티콘 스타일 */
+    .fruit-emoji {
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    /* 설정 패널 스타일 */
+    .settings-panel {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      width: 100%;
+    }
+
+    .settings-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .settings-label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      width: 100%;
+    }
+
+    .setting-option {
+      padding: 8px 12px;
+      background-color: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .setting-option:hover {
+      background-color: #e3f2fd;
+      border-color: #90caf9;
+    }
+
+    .setting-option.selected {
+      background-color: #2196f3;
+      color: white;
+      border-color: #1976d2;
+    }
+
+    /* 메인으로 돌아가는 버튼 스타일 */
+    #main-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid #bbb;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 13px;
+      z-index: 99999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    #main-button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    }
+
+    /* 병원 로고 스타일 */
+    #hospital-logo {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 12px;
+      color: #666;
+      padding: 5px 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 4px;
+      font-weight: 500;
+      z-index: 99999;
+    }
+
+    /* 진행 상황 표시 */
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #2196f3;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* 완료 표시 애니메이션 */
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-pulse {
+      animation: pulse 0.5s ease-out;
+    }
+
+    @media (max-width: 640px) {
+      .fruits-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .fruits-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .stats-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .badge {
+        text-align: center;
+      }
+      
+      .settings-row {
+        flex-direction: column;
+      }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+  <!-- 메인으로 돌아가는 버튼 -->
+  <button id="main-button" onclick="goBack()">← 메인으로</button>
+
+  <h1>선택적 집중력 훈련</h1>
+
+  <div id="description">
+    <b>선택적 집중력 훈련</b>은 화면에 나타난 여러 과일 중에서 목표 과일을 모두 찾는 훈련입니다.<br>
+    제한 시간 내에 모든 문제를 클리어하세요. 정확한 과일을 찾고 오류를 최소화하세요.
+  </div>
+
+  <!-- 피드백 오버레이 -->
+  <div id="feedback-overlay">
+    <div id="feedback-symbol"></div>
+  </div>
+
+  <div id="game-container">
+    <!-- 설정 패널 -->
+    <div class="settings-panel" id="settings-panel">
+      <div class="settings-title">훈련 설정</div>
+      
+      <div class="settings-row">
+        <div class="settings-label">난이도</div>
+        <div class="setting-option selected" data-difficulty="easy">쉬움</div>
+        <div class="setting-option" data-difficulty="medium">중간</div>
+        <div class="setting-option" data-difficulty="hard">어려움</div>
+      </div>
+      
+      <div class="settings-row">
+        <div class="settings-label">문제 수</div>
+        <div class="setting-option selected" data-questions="10">10문제</div>
+        <div class="setting-option" data-questions="20">20문제</div>
+      </div>
+      
+      <div class="settings-row">
+        <div class="settings-label">문제당 제한 시간</div>
+        <div class="setting-option selected" data-time="30">30초</div>
+        <div class="setting-option" data-time="60">1분</div>
+        <div class="setting-option" data-time="120">2분</div>
+        <div class="setting-option" data-time="180">3분</div>
+        <div class="setting-option" data-time="-1">무제한</div>
+      </div>
+    </div>
+
+    <div id="game-board">
+      <div class="stats-container">
+        <div class="badge found" id="found-badge">찾은 개수: 0/0</div>
+        <div class="badge" id="time-badge">시간: 30초</div>
+        <div class="badge error" id="error-badge">틀린 횟수: 0</div>
+        <div class="badge" id="progress-badge">진행: 1/10</div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      
+      <div id="target-container">
+        <p>다음 과일을 모두 찾으세요:</p>
+        <div class="target-fruit">
+          <span id="target-icon" class="emoji"></span>
+          <span id="target-name" class="name"></span>
+        </div>
+      </div>
+
+      <div id="fruits-container" class="fruits-grid"></div>
+    </div>
+
+    <div id="controls">
+      <div class="control-row">
+        <button id="start-btn" class="control-btn">시작하기</button>
+        <button id="reset-btn" class="control-btn" disabled>다시하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 병원 로고 -->
+  <div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+  <script>
+    // DOM 요소
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const foundBadge = document.getElementById('found-badge');
+    const timeBadge = document.getElementById('time-badge');
+    const errorBadge = document.getElementById('error-badge');
+    const progressBadge = document.getElementById('progress-badge');
+    const progressBar = document.getElementById('progress-bar');
+    const targetContainer = document.getElementById('target-container');
+    const targetIcon = document.getElementById('target-icon');
+    const targetName = document.getElementById('target-name');
+    const fruitsContainer = document.getElementById('fruits-container');
+    const settingsPanel = document.getElementById('settings-panel');
+    const difficultyOptions = document.querySelectorAll('[data-difficulty]');
+    const questionOptions = document.querySelectorAll('[data-questions]');
+    const timeOptions = document.querySelectorAll('[data-time]');
+    const feedbackOverlay = document.getElementById('feedback-overlay');
+    const feedbackSymbol = document.getElementById('feedback-symbol');
+
+    // 메인으로 돌아가는 함수
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+
+    // 게임 상태
+    const state = {
+      fruits: [],
+      targetFruit: '',
+      found: 0,
+      totalTargets: 0,
+      errors: 0,
+      time: 30,
+      maxTime: 30,
+      gameActive: false,
+      currentQuestion: 1,
+      totalQuestions: 10,
+      clickedFruits: [],
+      correctFruits: [], // 정답인 과일만 추적
+      targetFruitIndices: [], // 목표 과일의 인덱스를 저장
+      timerInterval: null,
+      difficulty: 'easy',
+      isUnlimitedTime: false
+    };
+
+    // 과일 종류와 이모티콘
+    const fruitTypes = [
+      { name: '사과', emoji: '🍎' },
+      { name: '복숭아', emoji: '🍑' },
+      { name: '파인애플', emoji: '🍍' },
+      { name: '토마토', emoji: '🍅' },
+      { name: '오렌지', emoji: '🍊' },
+      { name: '레몬', emoji: '🍋' },
+      { name: '수박', emoji: '🍉' },
+      { name: '포도', emoji: '🍇' },
+      { name: '딸기', emoji: '🍓' },
+      { name: '메론', emoji: '🍈' },
+      { name: '체리', emoji: '🍒' },
+      { name: '키위', emoji: '🥝' }
+    ];
+
+    // 난이도별 과일 개수 설정
+    const difficultySettings = {
+      easy: {
+        baseCount: 15,
+        targetCount: 3 // 고정된 목표 과일 개수
+      },
+      medium: {
+        baseCount: 25,
+        targetCount: 5 // 고정된 목표 과일 개수
+      },
+      hard: {
+        baseCount: 40,
+        targetCount: 8 // 고정된 목표 과일 개수
+      }
+    };
+
+    // 설정 옵션 이벤트 리스너 설정
+    difficultyOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // 기존 선택 해제
+        difficultyOptions.forEach(opt => opt.classList.remove('selected'));
+        // 새로운 선택 적용
+        option.classList.add('selected');
+        // 난이도 상태 업데이트
+        state.difficulty = option.dataset.difficulty;
+      });
+    });
+
+    questionOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // 기존 선택 해제
+        questionOptions.forEach(opt => opt.classList.remove('selected'));
+        // 새로운 선택 적용
+        option.classList.add('selected');
+        // 문제 수 상태 업데이트
+        state.totalQuestions = parseInt(option.dataset.questions);
+        progressBadge.textContent = `진행: 1/${state.totalQuestions}`;
+      });
+    });
+
+    timeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // 기존 선택 해제
+        timeOptions.forEach(opt => opt.classList.remove('selected'));
+        // 새로운 선택 적용
+        option.classList.add('selected');
+        // 시간 상태 업데이트
+        const timeValue = parseInt(option.dataset.time);
+        state.maxTime = timeValue;
+        state.isUnlimitedTime = (timeValue === -1);
+        
+        // 시간 표시 업데이트
+        if (state.isUnlimitedTime) {
+          timeBadge.textContent = '시간: 무제한';
+        } else {
+          const minutes = Math.floor(timeValue / 60);
+          const seconds = timeValue % 60;
+          if (minutes > 0) {
+            timeBadge.textContent = `시간: ${minutes}분 ${seconds}초`;
+          } else {
+            timeBadge.textContent = `시간: ${seconds}초`;
+          }
+        }
+      });
+    });
+
+    // 피드백 표시 함수
+    function showFeedback(type) {
+      // 피드백 내용 설정
+      if (type === 'success') {
+        feedbackSymbol.textContent = 'O';
+        feedbackSymbol.className = 'success animate-pulse';
+      } else if (type === 'error') {
+        feedbackSymbol.textContent = 'X';
+        feedbackSymbol.className = 'error animate-pulse';
+      } else if (type === 'complete') {
+        feedbackSymbol.textContent = '✓';
+        feedbackSymbol.className = 'success animate-pulse';
+      }
+      
+      // 피드백 표시
+      feedbackOverlay.classList.add('show');
+      
+      // 일정 시간 후 피드백 숨김
+      setTimeout(() => {
+        feedbackOverlay.classList.remove('show');
+      }, 800);
+    }
+
+    // 타이머 관련 함수
+    function startTimer() {
+      if (state.isUnlimitedTime) {
+        timeBadge.textContent = '시간: 무제한';
+        return;
+      }
+      
+      // 각 문제마다 시간을 새로 설정
+      state.time = state.maxTime;
+      updateTimerDisplay();
+      
+      state.timerInterval = setInterval(() => {
+        state.time--;
+        updateTimerDisplay();
+        
+        if (state.time <= 0) {
+          // 시간이 종료되면 다음 문제로 넘어감
+          if (state.currentQuestion < state.totalQuestions) {
+            state.currentQuestion++;
+            showFeedback('error');
+            
+            setTimeout(() => {
+              nextQuestion();
+            }, 1000);
+          } else {
+            endGame('complete');
+          }
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function updateTimerDisplay() {
+      if (state.isUnlimitedTime) {
+        timeBadge.textContent = '시간: 무제한';
+        return;
+      }
+      
+      const minutes = Math.floor(state.time / 60);
+      const seconds = state.time % 60;
+      
+      if (minutes > 0) {
+        timeBadge.textContent = `시간: ${minutes}분 ${seconds}초`;
+      } else {
+        timeBadge.textContent = `시간: ${seconds}초`;
+      }
+    }
+
+    // 다음 문제로 넘어가는 함수
+    function nextQuestion() {
+      // 타이머 재설정
+      stopTimer();
+      
+      // 진행 상황 업데이트
+      updateProgressDisplay();
+      
+      // 새 문제 생성
+      generateFruits();
+      
+      // 타이머 시작
+      startTimer();
+    }
+
+    // 과일 생성 함수
+    function generateFruits() {
+      // 난이도에 따라 과일 수 결정
+      const settings = difficultySettings[state.difficulty];
+      const fruitCount = settings.baseCount;
+      const targetCount = settings.targetCount; // 고정된 목표 과일 개수
+      
+      // 목표 과일 선택
+      const targetIndex = Math.floor(Math.random() * fruitTypes.length);
+      const targetFruitObj = fruitTypes[targetIndex];
+      state.targetFruit = targetFruitObj.name;
+      
+      // 과일 배열 초기화
+      const randomFruits = [];
+      state.targetFruitIndices = []; // 목표 과일 인덱스 초기화
+      
+      // 먼저 목표 과일을 정확히 targetCount만큼 추가
+      for (let i = 0; i < targetCount; i++) {
+        randomFruits.push(targetFruitObj);
+        state.targetFruitIndices.push(i); // 목표 과일의 초기 인덱스 저장
+      }
+      
+      // 나머지 칸을 다른 과일로 채우기
+      const remainingCount = fruitCount - targetCount;
+      for (let i = 0; i < remainingCount; i++) {
+        let randomFruitObj;
+        do {
+          const randomIndex = Math.floor(Math.random() * fruitTypes.length);
+          randomFruitObj = fruitTypes[randomIndex];
+        } while (randomFruitObj.name === state.targetFruit); // 목표 과일이 아닌 것으로 선택
+        
+        randomFruits.push(randomFruitObj);
+      }
+      
+      // 배열 섞기 (Fisher-Yates 알고리즘)
+      state.targetFruitIndices = []; // 섞기 전에 인덱스 초기화
+      
+      for (let i = randomFruits.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [randomFruits[i], randomFruits[j]] = [randomFruits[j], randomFruits[i]];
+      }
+      
+      // 섞은 후 목표 과일의 인덱스 다시 찾기
+      for (let i = 0; i < randomFruits.length; i++) {
+        if (randomFruits[i].name === state.targetFruit) {
+          state.targetFruitIndices.push(i);
+        }
+      }
+      
+      // 디버깅: 목표 과일 개수 확인
+      console.log(`목표 과일(${state.targetFruit}) 개수: ${state.targetFruitIndices.length}`);
+      console.log("목표 과일 위치:", state.targetFruitIndices);
+      
+      state.fruits = randomFruits;
+      state.clickedFruits = Array(randomFruits.length).fill(false);
+      state.correctFruits = Array(randomFruits.length).fill(false);
+      state.found = 0;
+      state.totalTargets = state.targetFruitIndices.length; // 실제 목표 과일 개수로 설정
+      
+      renderFruits();
+      updateTargetFruit();
+      updateFoundDisplay();
+    }
+
+    // 과일 렌더링 함수
+    function renderFruits() {
+      fruitsContainer.innerHTML = '';
+      
+      state.fruits.forEach((fruit, index) => {
+        const button = document.createElement('button');
+        button.className = 'fruit-button';
+        button.innerHTML = `<span class="fruit-emoji">${fruit.emoji}</span>`;
+        
+        if (state.correctFruits[index]) {
+          button.classList.add('correct');
+          button.disabled = true;
+        } else {
+          button.addEventListener('click', () => handleFruitClick(fruit, index));
+        }
+        
+        fruitsContainer.appendChild(button);
+      });
+    }
+
+    // 목표 과일 업데이트 함수
+    function updateTargetFruit() {
+      targetContainer.style.display = 'block';
+      const targetFruitObj = fruitTypes.find(f => f.name === state.targetFruit);
+      targetIcon.textContent = targetFruitObj.emoji;
+      targetName.textContent = targetFruitObj.name;
+    }
+
+    // 찾은 개수 업데이트 함수
+    function updateFoundDisplay() {
+      foundBadge.textContent = `찾은 개수: ${state.found}/${state.totalTargets}`;
+    }
+
+    // 진행 상황 업데이트 함수
+    function updateProgressDisplay() {
+      progressBadge.textContent = `진행: ${state.currentQuestion}/${state.totalQuestions}`;
+      const progressPercent = (state.currentQuestion - 1) / state.totalQuestions * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // 과일 클릭 처리 함수
+    function handleFruitClick(fruit, index) {
+      if (!state.gameActive || state.clickedFruits[index]) return;
+      
+      state.clickedFruits[index] = true;
+      
+      if (fruit.name === state.targetFruit) {
+        // 정답인 경우에만 시각적으로 표시
+        state.correctFruits[index] = true;
+        const buttons = document.querySelectorAll('.fruit-button');
+        buttons[index].classList.add('correct');
+        buttons[index].disabled = true;
+        
+        state.found++;
+        updateFoundDisplay();
+        
+        // 모든 목표 과일을 찾았는지 확인
+        if (state.found >= state.totalTargets) {
+          // 성공 피드백 표시
+          showFeedback('success');
+          
+          if (state.currentQuestion < state.totalQuestions) {
+            state.currentQuestion++;
+            
+            setTimeout(() => {
+              nextQuestion();
+            }, 1000);
+          } else {
+            endGame('complete');
+          }
+        }
+      } else {
+        // 오답인 경우 시각적으로 표시하지 않음
+        // 단, 클릭은 비활성화
+        state.errors++;
+        errorBadge.textContent = `틀린 횟수: ${state.errors}`;
+        
+        // 실패 피드백 표시
+        showFeedback('error');
+      }
+    }
+
+    // 게임 시작 함수
+    function startGame() {
+      state.found = 0;
+      state.totalTargets = 0;
+      state.errors = 0;
+      state.currentQuestion = 1;
+      state.gameActive = true;
+      state.clickedFruits = [];
+      state.correctFruits = [];
+      state.targetFruitIndices = [];
+      
+      // 설정 패널 숨기기
+      settingsPanel.style.display = 'none';
+      
+      // 버튼 상태 업데이트
+      startBtn.disabled = true;
+      resetBtn.disabled = false;
+      
+      // 진행 상황 초기화
+      updateProgressDisplay();
+      
+      // 게임 시작
+      generateFruits();
+      startTimer();
+      errorBadge.textContent = `틀린 횟수: 0`;
+    }
+
+    // 게임 재설정 함수
+    function resetGame() {
+      // 타이머 중지
+      stopTimer();
+      
+      // 게임 상태 초기화
+      state.gameActive = false;
+      
+      // 과일 컨테이너 초기화
+      fruitsContainer.innerHTML = '';
+      
+      // 목표 과일 숨기기
+      targetContainer.style.display = 'none';
+      
+      // 설정 패널 표시
+      settingsPanel.style.display = 'block';
+      
+      // 버튼 상태 업데이트
+      startBtn.disabled = false;
+      resetBtn.disabled = true;
+      
+      // 진행 상황 초기화
+      progressBar.style.width = '0%';
+    }
+
+    // 게임 종료 함수
+    function endGame(type) {
+      state.gameActive = false;
+      stopTimer();
+      
+      if (type === 'complete') {
+        showFeedback('complete');
+      }
+      
+      // 버튼 상태 업데이트
+      setTimeout(() => {
+        startBtn.disabled = false;
+        resetBtn.disabled = true;
+        
+        // 설정 패널 표시
+        settingsPanel.style.display = 'block';
+      }, 1000);
+    }
+
+    // 이벤트 리스너 설정
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', resetGame);
+  </script>
+</body>
+</html>

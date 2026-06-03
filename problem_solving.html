@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>문제해결력 훈련 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 16px 16px 80px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff; color: #222;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      min-height: 100vh;
+    }
+    h1 { margin: 0 0 2px; font-size: 1.9rem; font-weight: 800; text-align: center; }
+    #home-btn {
+      position: fixed; top: 14px; left: 14px; z-index: 100;
+      padding: 10px 18px; border-radius: 999px; border: none;
+      background: #eee; color: #333; font-weight: 600; font-size: 14px;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* 탭 - 번호 없음 */
+    #tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; max-width: 720px; }
+    .tab-btn {
+      padding: 10px 18px; border-radius: 999px; border: 2px solid #ddd;
+      cursor: pointer; font-size: 0.9rem; font-weight: 700;
+      background: #fff; color: #555; transition: all .15s;
+    }
+    .tab-btn:hover { border-color: #1976d2; background: #e8f2ff; color: #1976d2; }
+    .tab-btn.active { background: #1976d2; border-color: #1976d2; color: #fff; }
+
+    .game-panel { display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%; max-width: 680px; }
+    .game-panel.active { display: flex; }
+
+    /* 입력 모드 + 난이도 바 */
+    .opt-bar {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      padding: 10px 14px; border-radius: 12px; background: #f0f4fa;
+      border: 1px solid #d0ddf0; font-size: 0.9rem; font-weight: 700; color: #555;
+      flex-wrap: wrap;
+    }
+    .opt-sep { width: 1px; height: 22px; background: #ccc; margin: 0 4px; }
+    .seg-btn {
+      padding: 6px 16px; border-radius: 999px; border: 2px solid #ddd;
+      cursor: pointer; font-size: 0.88rem; font-weight: 700;
+      background: #fff; color: #555; transition: all .15s;
+    }
+    .seg-btn:hover { border-color: #1976d2; }
+    .seg-btn.active { background: #1976d2; border-color: #1976d2; color: #fff; }
+
+    /* 진행바 */
+    .prog-wrap { width: 100%; }
+    .prog-bg { width: 100%; height: 10px; border-radius: 999px; background: #f0f4fa; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 999px; background: #1976d2; transition: width .4s; }
+    .prog-txt { font-size: 0.92rem; color: #666; text-align: center; margin-top: 4px; }
+    .prog-txt span { font-weight: 800; color: #222; }
+
+    /* 문제 카드 - 이모지 영역 없음 */
+    .q-card { width: 100%; border-radius: 18px; border: 2px solid #e0e8f8; background: #f7f9ff; overflow: hidden; }
+    .q-card-hd { padding: 10px 20px; font-size: 0.88rem; font-weight: 800; }
+    .q-card-bd { padding: 22px 22px 8px; font-size: 1.2rem; font-weight: 700; line-height: 1.75; color: #1a1a2e; }
+    .q-card-q  { padding: 4px 22px 18px; font-size: 1rem; font-weight: 700; color: #1976d2; }
+
+    /* 4지선다 */
+    .choices { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      width: 100%; padding: 16px 18px; border-radius: 14px;
+      border: 2.5px solid #dde3ec; background: #fff;
+      text-align: left; font-size: 1.05rem; font-weight: 600; color: #222;
+      line-height: 1.5; cursor: pointer; transition: all .15s;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: #1976d2; background: #e8f2ff; }
+    .choice-btn:disabled { cursor: default; }
+    .clbl { min-width: 30px; height: 30px; border-radius: 50%; background: #eee; color: #555; font-size: 0.9rem; font-weight: 800; text-align: center; line-height: 30px; flex-shrink: 0; }
+    .choice-btn.correct { border-color: #388e3c; background: #f0fff4; }
+    .choice-btn.correct .clbl { background: #388e3c; color: #fff; }
+    .choice-btn.wrong   { border-color: #d32f2f; background: #fff5f5; }
+    .choice-btn.wrong   .clbl { background: #d32f2f; color: #fff; }
+
+    /* 주관식 */
+    .subj-wrap { width: 100%; }
+    .subj-submit {
+      width: 100%; padding: 20px; border-radius: 14px; border: none;
+      background: #1976d2; color: #fff; font-size: 1.15rem; font-weight: 800;
+      cursor: pointer; transition: background .15s;
+    }
+    .subj-submit:hover { background: #1565c0; }
+    .subj-submit:disabled { background: #90bef5; cursor: default; }
+
+    /* 수열 */
+    .seq-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 16px; background: #f0f4fa; border-radius: 14px; width: 100%; }
+    .seq-box { width: 58px; height: 58px; border-radius: 12px; background: #fff; border: 2.5px solid #90bef5; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; color: #1976d2; }
+    .seq-box.blank { background: #fffde7; border: 3px dashed #f9a825; }
+    .seq-arr { font-size: 1.1rem; color: #aaa; }
+    .opt-row-seq { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+    .opt-btn { width: 72px; height: 72px; border-radius: 14px; border: 2.5px solid #dde3ec; background: #fff; font-size: 1.5rem; font-weight: 900; color: #222; cursor: pointer; transition: all .15s; }
+    .opt-btn:hover:not(:disabled) { border-color: #1976d2; background: #e8f2ff; }
+    .opt-btn:disabled { cursor: default; }
+    .opt-btn.correct { border-color: #388e3c; background: #f0fff4; color: #2e7d32; }
+    .opt-btn.wrong   { border-color: #d32f2f; background: #fff5f5; color: #c62828; }
+
+    /* IADL 맥락 */
+    .ctx-box { width: 100%; padding: 14px 18px; border-radius: 14px; background: #f0f4fa; border: 2px solid #d0ddf0; font-size: 1rem; font-weight: 600; color: #333; line-height: 1.6; }
+    .step-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #1976d2; color: #fff; font-size: 0.82rem; font-weight: 800; margin-bottom: 6px; }
+
+    /* 피드백 */
+    .fb-box { display: none; width: 100%; border-radius: 14px; padding: 16px 20px; border: 2px solid #ddd; }
+    .fb-box.ok   { border-color: #388e3c; background: #f0fff4; }
+    .fb-box.err  { border-color: #d32f2f; background: #fff5f5; }
+    .fb-box.info { border-color: #1976d2; background: #e3f0ff; }
+    .fb-res { font-size: 1.2rem; font-weight: 900; margin-bottom: 6px; }
+    .fb-res.ok   { color: #2e7d32; }
+    .fb-res.err  { color: #c62828; }
+    .fb-res.info { color: #0d47a1; }
+    .fb-exp { font-size: 0.97rem; color: #333; line-height: 1.8; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 6px; }
+    .fb-exp b { color: #1565c0; }
+    .answer-box { background: #fff; border: 1.5px solid #90bef5; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; font-size: 1rem; font-weight: 700; color: #0d47a1; }
+
+    /* 컨트롤 */
+    .ctrl-wrap { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
+    .ctrl-btn { padding: 13px 30px; border-radius: 999px; border: none; font-size: 1rem; font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.14); transition: transform .08s; }
+    .ctrl-btn:active { transform: translateY(1px); }
+    .btn-s { background: #1976d2; color: #fff; }
+    .btn-n { background: #388e3c; color: #fff; display: none; }
+    .btn-r { background: #eee; color: #333; }
+
+    /* 결과 */
+    .res-box { display: none; width: 100%; max-width: 460px; padding: 22px 26px; border-radius: 18px; border: 1px solid #ddd; background: #fafafa; text-align: center; }
+    .res-box h2 { margin: 0 0 14px; font-size: 1.4rem; }
+    .r-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; font-size: 1rem; }
+    .r-row:last-of-type { border: none; }
+    .r-val { font-weight: 800; color: #1976d2; }
+    .res-btns { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+
+    #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background: rgba(255,255,255,0.9); border-radius: 4px; font-weight: 500; }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">← 홈</button>
+<h1>문제해결력 훈련</h1>
+<div style="font-size:0.95rem;color:#666;text-align:center">원인을 파악하고, 올바른 해결책을 찾아보세요.</div>
+
+<!-- 탭: 번호 없음 -->
+<div id="tabs">
+  <button class="tab-btn active" data-tab="seq">수열·패턴</button>
+  <button class="tab-btn" data-tab="causal">원인과 해결</button>
+  <button class="tab-btn" data-tab="pri">우선순위</button>
+  <button class="tab-btn" data-tab="iadl">생활 시나리오</button>
+</div>
+
+<!-- 수열 패턴 -->
+<div class="game-panel active" id="panel-seq">
+  <div class="opt-bar">
+    <span>난이도</span>
+    <button class="seg-btn active" data-sg="seq-lv" data-val="easy">하</button>
+    <button class="seg-btn"        data-sg="seq-lv" data-val="mid">중</button>
+    <button class="seg-btn"        data-sg="seq-lv" data-val="hard">상</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bg"><div class="prog-fill" id="seq-prog" style="width:0%"></div></div>
+    <div class="prog-txt">문제 <span id="seq-cur">0</span>/<span id="seq-tot">0</span> &nbsp;|&nbsp; 정답 <span id="seq-score">0</span></div></div>
+  <div class="q-card" id="seq-card" style="display:none">
+    <div class="q-card-hd" style="background:#e8f5e9;color:#1b5e20;border-bottom:3px solid #4caf50">수열 · 패턴 추론</div>
+    <div class="q-card-bd">아래 수열의 규칙을 찾아 빈칸에 알맞은 숫자를 고르세요.</div>
+    <div class="q-card-q">□ 안에 들어갈 숫자는?</div>
+  </div>
+  <div id="seq-row-wrap" style="display:none;width:100%;flex-direction:column;align-items:center;gap:12px">
+    <div class="seq-row" id="seq-row"></div>
+    <div class="opt-row-seq" id="seq-opts"></div>
+  </div>
+  <div class="fb-box" id="seq-fb"><div class="fb-res" id="seq-fb-res"></div><div class="fb-exp" id="seq-fb-exp"></div></div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-s" id="seq-start" onclick="SEQ.start()">시작하기</button>
+    <button class="ctrl-btn btn-n" id="seq-next"  onclick="SEQ.next()">다음 →</button>
+    <button class="ctrl-btn btn-r" onclick="SEQ.reset()">다시하기</button>
+  </div>
+  <div class="res-box" id="seq-res"><h2>완료!</h2>
+    <div class="r-row"><span>총 문제</span><span class="r-val" id="seq-r-tot"></span></div>
+    <div class="r-row"><span>정답 수</span><span class="r-val" id="seq-r-cor"></span></div>
+    <div class="r-row"><span>정확도</span><span class="r-val" id="seq-r-acc"></span></div>
+    <div class="res-btns"><button class="ctrl-btn btn-s" onclick="SEQ.reset();SEQ.start()">다시 훈련</button><button class="ctrl-btn btn-r" onclick="location.href='index.html'">홈으로</button></div>
+  </div>
+</div>
+
+<!-- 원인과 해결 (2단계) -->
+<div class="game-panel" id="panel-causal">
+  <div class="prog-wrap"><div class="prog-bg"><div class="prog-fill" id="csl-prog" style="width:0%"></div></div>
+    <div class="prog-txt">문제 <span id="csl-cur">0</span>/<span id="csl-tot">0</span> &nbsp;|&nbsp; 정답 <span id="csl-score">0</span></div></div>
+
+  <!-- 1단계: 원인 찾기 -->
+  <div class="q-card" id="csl-card1" style="display:none">
+    <div class="q-card-hd" style="background:#e8eaf6;color:#283593;border-bottom:3px solid #3f51b5">원인과 해결 · 1단계: 원인 찾기</div>
+    <div class="q-card-bd" id="csl-bd"></div>
+    <div class="q-card-q"  id="csl-q1"></div>
+  </div>
+  <div class="choices" id="csl-choices1"></div>
+  <div class="fb-box"  id="csl-fb1"><div class="fb-res" id="csl-fb1-res"></div><div class="fb-exp" id="csl-fb1-exp"></div></div>
+
+  <!-- 2단계: 해결책 찾기 -->
+  <div class="q-card" id="csl-card2" style="display:none">
+    <div class="q-card-hd" style="background:#e8f5e9;color:#1b5e20;border-bottom:3px solid #4caf50">원인과 해결 · 2단계: 해결책 찾기</div>
+    <div class="q-card-q"  id="csl-q2"></div>
+  </div>
+  <div class="choices" id="csl-choices2"></div>
+  <div class="fb-box"  id="csl-fb2"><div class="fb-res" id="csl-fb2-res"></div><div class="fb-exp" id="csl-fb2-exp"></div></div>
+
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-s" id="csl-start" onclick="CSL.start()">시작하기</button>
+    <button class="ctrl-btn btn-n" id="csl-next"  onclick="CSL.next()">다음 →</button>
+    <button class="ctrl-btn btn-r" onclick="CSL.reset()">다시하기</button>
+  </div>
+  <div class="res-box" id="csl-res"><h2>완료!</h2>
+    <div class="r-row"><span>총 문제</span><span class="r-val" id="csl-r-tot"></span></div>
+    <div class="r-row"><span>정답 수</span><span class="r-val" id="csl-r-cor"></span></div>
+    <div class="r-row"><span>정확도</span><span class="r-val" id="csl-r-acc"></span></div>
+    <div class="res-btns"><button class="ctrl-btn btn-s" onclick="CSL.reset();CSL.start()">다시 훈련</button><button class="ctrl-btn btn-r" onclick="location.href='index.html'">홈으로</button></div>
+  </div>
+</div>
+
+<!-- 우선순위 -->
+<div class="game-panel" id="panel-pri">
+  <div class="opt-bar">
+    <span>입력 방식</span>
+    <button class="seg-btn active" data-sg="pri-mode" data-val="mc">객관식</button>
+    <button class="seg-btn"        data-sg="pri-mode" data-val="sub">주관식</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bg"><div class="prog-fill" id="pri-prog" style="width:0%"></div></div>
+    <div class="prog-txt">문제 <span id="pri-cur">0</span>/<span id="pri-tot">0</span> &nbsp;|&nbsp; 정답 <span id="pri-score">0</span></div></div>
+  <div class="q-card" id="pri-card" style="display:none">
+    <div class="q-card-hd" style="background:#f3e5f5;color:#4a148c;border-bottom:3px solid #9c27b0">우선순위 결정</div>
+    <div class="q-card-bd" id="pri-bd"></div>
+    <div class="q-card-q">가장 먼저 해야 할 것을 고르세요.</div>
+  </div>
+  <div class="choices"   id="pri-choices"></div>
+  <div class="subj-wrap" id="pri-subj" style="display:none">
+        <button class="subj-submit" id="pri-subj-btn" onclick="priSubmitSubj()">정답 보기</button>
+  </div>
+  <div class="fb-box" id="pri-fb"><div class="fb-res" id="pri-fb-res"></div><div class="fb-exp" id="pri-fb-exp"></div></div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-s" id="pri-start" onclick="PRI.start()">시작하기</button>
+    <button class="ctrl-btn btn-n" id="pri-next"  onclick="PRI.next()">다음 →</button>
+    <button class="ctrl-btn btn-r" onclick="PRI.reset()">다시하기</button>
+  </div>
+  <div class="res-box" id="pri-res"><h2>완료!</h2>
+    <div class="r-row"><span>총 문제</span><span class="r-val" id="pri-r-tot"></span></div>
+    <div class="r-row"><span>정답 수</span><span class="r-val" id="pri-r-cor"></span></div>
+    <div class="r-row"><span>정확도</span><span class="r-val" id="pri-r-acc"></span></div>
+    <div class="res-btns"><button class="ctrl-btn btn-s" onclick="PRI.reset();PRI.start()">다시 훈련</button><button class="ctrl-btn btn-r" onclick="location.href='index.html'">홈으로</button></div>
+  </div>
+</div>
+
+<!-- IADL -->
+<div class="game-panel" id="panel-iadl">
+  <div class="opt-bar">
+    <span>입력 방식</span>
+    <button class="seg-btn active" data-sg="iadl-mode" data-val="mc">객관식</button>
+    <button class="seg-btn"        data-sg="iadl-mode" data-val="sub">주관식</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-bg"><div class="prog-fill" id="iadl-prog" style="width:0%"></div></div>
+    <div class="prog-txt">시나리오 <span id="iadl-sn">1</span> · 단계 <span id="iadl-st">1</span>/<span id="iadl-stot">3</span> &nbsp;|&nbsp; 정답 <span id="iadl-score">0</span></div></div>
+  <div class="ctx-box" id="iadl-ctx" style="display:none"></div>
+  <div class="q-card" id="iadl-card" style="display:none">
+    <div class="q-card-hd" style="background:#e3f2fd;color:#0d47a1;border-bottom:3px solid #2196f3">생활 시나리오</div>
+    <div class="q-card-bd" id="iadl-bd"></div>
+  </div>
+  <div class="choices"   id="iadl-choices"></div>
+  <div class="subj-wrap" id="iadl-subj" style="display:none">
+        <button class="subj-submit" id="iadl-subj-btn" onclick="iadlSubmitSubj()">정답 보기</button>
+  </div>
+  <div class="fb-box" id="iadl-fb"><div class="fb-res" id="iadl-fb-res"></div><div class="fb-exp" id="iadl-fb-exp"></div></div>
+  <div class="ctrl-wrap">
+    <button class="ctrl-btn btn-s" id="iadl-start" onclick="IADL.start()">시작하기</button>
+    <button class="ctrl-btn btn-n" id="iadl-next"  onclick="IADL.next()">다음 →</button>
+    <button class="ctrl-btn btn-r" onclick="IADL.reset()">다시하기</button>
+  </div>
+  <div class="res-box" id="iadl-res"><h2>완료!</h2>
+    <div class="r-row"><span>총 판단</span><span class="r-val"  id="iadl-r-tot"></span></div>
+    <div class="r-row"><span>정답 수</span><span class="r-val"  id="iadl-r-cor"></span></div>
+    <div class="r-row"><span>정확도</span><span class="r-val"   id="iadl-r-acc"></span></div>
+    <div class="res-btns"><button class="ctrl-btn btn-s" onclick="IADL.reset();IADL.start()">다시 훈련</button><button class="ctrl-btn btn-r" onclick="location.href='index.html'">홈으로</button></div>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ── 공통 ──────────────────────────────────────
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[rnd(0,arr.length-1)];}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pct(c,t){return t===0?'0%':Math.round(c/t*100)+'%';}
+
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.game-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// 세그먼트 버튼 공통
+document.querySelectorAll('.seg-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const g=btn.dataset.sg;
+    document.querySelectorAll(`.seg-btn[data-sg="${g}"]`).forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+function getOpt(sg){ return document.querySelector(`.seg-btn.active[data-sg="${sg}"]`)?.dataset.val; }
+
+// 객관식 렌더
+function renderMC(cid, choices, correctIdx, onDone){
+  const el=document.getElementById(cid); el.innerHTML='';
+  ['①','②','③','④'].forEach((lbl,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.innerHTML=`<span class="clbl">${lbl}</span>${choices[i]}`;
+    btn.onclick=()=>{
+      document.querySelectorAll('#'+cid+' .choice-btn').forEach(b=>b.disabled=true);
+      const ok=i===correctIdx;
+      document.querySelectorAll('#'+cid+' .choice-btn').forEach((b,j)=>{
+        if(j===correctIdx)b.classList.add('correct');
+        else if(j===i&&!ok)b.classList.add('wrong');
+      });
+      onDone(ok);
+    };
+    el.appendChild(btn);
+  });
+}
+
+// 주관식 정답 공개 공통
+function showAnswer(fbId,resId,expId,nextId,correctText,explain,isLast){
+  const fb=document.getElementById(fbId);
+  fb.style.display='block'; fb.className='fb-box info';
+  document.getElementById(resId).textContent='정답 확인';
+  document.getElementById(resId).className='fb-res info';
+  document.getElementById(expId).innerHTML=
+    `<div class="answer-box">정답: ${correctText}</div>${explain}`;
+  const nb=document.getElementById(nextId);
+  nb.style.display='inline-block';
+  nb.textContent=isLast?'결과 보기 →':'다음 →';
+}
+
+function showMCFb(fbId,resId,expId,nextId,ok,explain,isLast){
+  const fb=document.getElementById(fbId);
+  fb.style.display='block'; fb.className='fb-box '+(ok?'ok':'err');
+  document.getElementById(resId).textContent=ok?'✓ 정답!':'✗ 틀렸어요.';
+  document.getElementById(resId).className='fb-res '+(ok?'ok':'err');
+  document.getElementById(expId).innerHTML=explain;
+  const nb=document.getElementById(nextId); nb.style.display='inline-block';
+  nb.textContent=isLast?'결과 보기 →':'다음 →';
+}
+
+// ══ 수열 ══════════════════════════════════════
+// 난이도별 규칙 풀
+// 하: +1~3 단순 증가/감소, 2~10단위 (가장 기본)
+const SEQ_EASY=[
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push(s+d*i);return a;},makeD:()=>rnd(1,3),makeS:()=>rnd(1,5),exp:(s,d)=>`<b>+${d}씩 증가</b>하는 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push(s-d*i);return a;},makeD:()=>rnd(1,3),makeS:()=>rnd(10,20),exp:(s,d)=>`<b>-${d}씩 감소</b>하는 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push(s+d*i);return a;},makeD:()=>pick([2,5,10]),makeS:()=>pick([2,5,10]),exp:(s,d)=>`<b>+${d}씩 증가</b>하는 수열입니다.`},
+];
+// 중: +4~7, ×2, 짝수/홀수
+const SEQ_MID=[
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push(s+d*i);return a;},makeD:()=>rnd(4,7),makeS:()=>rnd(1,8),exp:(s,d)=>`<b>+${d}씩 증가</b>하는 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push(s-d*i);return a;},makeD:()=>rnd(3,6),makeS:()=>rnd(20,40),exp:(s,d)=>`<b>-${d}씩 감소</b>하는 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[s];for(let i=1;i<l;i++)a.push(a[i-1]*2);return a;},makeD:()=>2,makeS:()=>rnd(1,4),exp:()=>`<b>×2씩 곱하는</b> 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push((s+i)*2);return a;},makeD:()=>1,makeS:()=>rnd(1,6),exp:()=>`<b>연속 짝수</b> 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[];for(let i=0;i<l;i++)a.push((s+i)*2-1);return a;},makeD:()=>1,makeS:()=>rnd(1,6),exp:()=>`<b>연속 홀수</b> 수열입니다.`},
+];
+// 상: ×3, 피보나치형, ÷2
+const SEQ_HARD=[
+  {gen:(s,d,l)=>{const a=[s];for(let i=1;i<l;i++)a.push(a[i-1]*3);return a;},makeD:()=>3,makeS:()=>rnd(1,3),exp:()=>`<b>×3씩 곱하는</b> 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[s,d];for(let i=2;i<l;i++)a.push(a[i-1]+a[i-2]);return a;},makeD:()=>rnd(1,3),makeS:()=>rnd(1,3),exp:()=>`<b>앞 두 수를 더한</b> 수열입니다.`},
+  {gen:(s,d,l)=>{const a=[s];for(let i=1;i<l;i++)a.push(a[i-1]/2);return a;},makeD:()=>2,makeS:()=>pick([16,32,48,64]),exp:()=>`<b>÷2씩 나누는</b> 수열입니다.`},
+];
+
+function makeSeqQ(level){
+  const pool = level==='easy'?SEQ_EASY : level==='hard'?SEQ_HARD : SEQ_MID;
+  const r=pick(pool), d=r.makeD(), s=r.makeS(), len=5;
+  const seq=r.gen(s,d,len);
+  if(seq.some(v=>!Number.isInteger(v)||v<0||v>9999)) return makeSeqQ(level);
+  const answer=seq[len-1];
+  const wrongs=new Set();
+  const deltas=[-5,-4,-3,-2,-1,1,2,3,4,5,6,-6,7,-7,8,-8];
+  for(let i=0;i<deltas.length&&wrongs.size<3;i++){
+    const w=answer+deltas[i]; if(w!==answer&&w>=0) wrongs.add(w);
+  }
+  const opts=shuffle([answer,...wrongs]);
+  return{seq:seq.slice(0,len-1),answer,opts:opts.map(String),correctOpt:String(answer),exp:r.exp(s,d,len)};
+}
+
+const SEQ=(()=>{
+  let qs=[],idx=0,score=0,total=12;
+  function start(){
+    const lv=getOpt('seq-lv')||'easy';
+    qs=[];for(let i=0;i<total;i++)qs.push(makeSeqQ(lv));
+    idx=0;score=0;
+    document.getElementById('seq-card').style.display='block';
+    document.getElementById('seq-row-wrap').style.display='flex';
+    document.getElementById('seq-res').style.display='none';
+    document.getElementById('seq-start').style.display='none';
+    document.getElementById('seq-next').style.display='none';
+    document.getElementById('seq-tot').textContent=total;
+    loadQ();
+  }
+  function loadQ(){
+    document.getElementById('seq-fb').style.display='none';
+    document.getElementById('seq-next').style.display='none';
+    const q=qs[idx];
+    // 수열 표시
+    const row=document.getElementById('seq-row'); row.innerHTML='';
+    q.seq.forEach((v,i)=>{
+      if(i>0){const a=document.createElement('span');a.className='seq-arr';a.textContent='→';row.appendChild(a);}
+      const b=document.createElement('div');b.className='seq-box';b.textContent=v;row.appendChild(b);
+    });
+    const arr=document.createElement('span');arr.className='seq-arr';arr.textContent='→';row.appendChild(arr);
+    const blank=document.createElement('div');blank.className='seq-box blank';blank.id='seq-blank';row.appendChild(blank);
+    // 보기
+    const opts=document.getElementById('seq-opts'); opts.innerHTML='';
+    q.opts.forEach(o=>{
+      const btn=document.createElement('button');btn.className='opt-btn';btn.textContent=o;
+      btn.onclick=()=>{
+        document.querySelectorAll('#seq-opts .opt-btn').forEach(b=>b.disabled=true);
+        const ok=o===q.correctOpt; if(ok)score++;
+        btn.classList.add(ok?'correct':'wrong');
+        if(!ok) document.querySelectorAll('#seq-opts .opt-btn').forEach(b=>{if(b.textContent===q.correctOpt)b.classList.add('correct');});
+        const bl=document.getElementById('seq-blank');
+        bl.textContent=q.answer; bl.classList.remove('blank');
+        bl.style.borderColor=ok?'#388e3c':'#d32f2f'; bl.style.color=ok?'#2e7d32':'#c62828';
+        const fb=document.getElementById('seq-fb');
+        fb.style.display='block'; fb.className='fb-box '+(ok?'ok':'err');
+        document.getElementById('seq-fb-res').textContent=ok?'✓ 정답!':'✗ 틀렸어요.';
+        document.getElementById('seq-fb-res').className='fb-res '+(ok?'ok':'err');
+        document.getElementById('seq-fb-exp').innerHTML=q.exp+'<br>정답: <b>'+q.answer+'</b>';
+        document.getElementById('seq-score').textContent=score;
+        document.getElementById('seq-prog').style.width=((idx+1)/total*100)+'%';
+        const nb=document.getElementById('seq-next'); nb.style.display='inline-block';
+        nb.textContent=idx+1>=total?'결과 보기 →':'다음 →';
+      };
+      opts.appendChild(btn);
+    });
+    document.getElementById('seq-prog').style.width=(idx/total*100)+'%';
+    document.getElementById('seq-cur').textContent=idx+1;
+    document.getElementById('seq-score').textContent=score;
+  }
+  function next(){idx++;if(idx>=total){end();return;}loadQ();}
+  function end(){
+    document.getElementById('seq-card').style.display='none';
+    document.getElementById('seq-row-wrap').style.display='none';
+    document.getElementById('seq-fb').style.display='none';
+    document.getElementById('seq-next').style.display='none';
+    const r=document.getElementById('seq-res'); r.style.display='block';
+    document.getElementById('seq-r-tot').textContent=total+'문제';
+    document.getElementById('seq-r-cor').textContent=score+'문제';
+    document.getElementById('seq-r-acc').textContent=pct(score,total);
+  }
+  function reset(){
+    idx=0;score=0;
+    document.getElementById('seq-card').style.display='none';
+    document.getElementById('seq-row-wrap').style.display='none';
+    document.getElementById('seq-fb').style.display='none';
+    document.getElementById('seq-next').style.display='none';
+    document.getElementById('seq-start').style.display='inline-block';
+    document.getElementById('seq-res').style.display='none';
+    document.getElementById('seq-prog').style.width='0%';
+  }
+  return{start,next,reset};
+})();
+
+// ══ 우선순위 ════════════════════════════════════
+// 상황 설명에 정답 절대 미포함
+const PRI_LIST=[
+  {body:'오늘 할 일이 겹쳤습니다. 아래 네 가지 중 가장 먼저 해야 할 것은?',
+   choices:['갑자기 생긴 가슴 통증으로 119에 신고한다.','청소기를 돌린다.','오래된 사진을 정리한다.','친구에게 안부 문자를 보낸다.'],
+   correct:0,explain:'<b>갑작스러운 가슴 통증</b>은 응급 상황일 수 있습니다. 다른 모든 일보다 <b>즉각적인 도움 요청이 최우선</b>입니다.'},
+  {body:'집에 있는데 동시에 여러 상황이 발생했습니다. 가장 먼저 해야 할 것은?',
+   choices:['부엌에서 연기가 나서 즉시 대피하고 119에 신고한다.','손님 맞을 준비를 한다.','TV를 끈다.','창문을 열어 환기한다.'],
+   correct:0,explain:'<b>연기 발생은 화재 위험 신호</b>입니다. 귀중품보다 <b>내 안전이 먼저</b>이며, 즉시 대피 후 119 신고가 최우선입니다.'},
+  {body:'오늘 해야 할 일이 여러 가지 있습니다. 아래 중 가장 먼저 해야 할 것은?',
+   choices:['의사가 지시한 정해진 시간에 맞춰 약을 복용한다.','청소를 한다.','전화 통화를 한다.','TV를 본다.'],
+   correct:0,explain:'<b>의사가 지정한 복약 시간</b>을 지키는 것은 치료 효과와 직결됩니다. 건강 관련 일은 다른 일보다 먼저입니다.'},
+  {body:'이번 달 생활비가 부족해서 지출을 줄여야 합니다. 가장 먼저 확보해야 할 것은?',
+   choices:['식비와 꼭 필요한 의약품 구입비','외식비와 배달 음식비','취미·오락 활동비','불필요한 생활용품 구입비'],
+   correct:0,explain:'생활비가 부족할 때는 <b>먹는 것과 건강(식비·의약품)이 최우선</b>입니다. 외식·오락은 먼저 줄여야 합니다.'},
+  {body:'오늘 해야 할 일이 겹쳤습니다. 아래 중 가장 먼저 처리해야 할 것은?',
+   choices:['오늘 오전에 예약된 병원 진료에 맞춰 출발한다.','서랍 속 오래된 영수증을 정리한다.','좋아하는 TV 프로그램을 본다.','안 급한 심부름을 한다.'],
+   correct:0,explain:'<b>시간이 정해진 병원 예약</b>은 미루면 재예약이 어렵고 건강에도 영향을 줍니다. 기한 있는 건강 관련 일이 최우선입니다.'},
+  {body:'갑자기 비가 내리기 시작했습니다. 집 안에서 동시에 여러 상황이 생겼습니다. 가장 먼저 할 것은?',
+   choices:['열려 있는 창문을 먼저 닫아 빗물이 들어오지 않게 한다.','밖에 있는 빨래를 걷는다.','우산을 찾아둔다.','비 오는 소리를 듣는다.'],
+   correct:0,explain:'창문이 열려 있으면 <b>빗물이 실내로 들어와 바닥·가구가 손상</b>됩니다. 창문을 먼저 닫은 후 빨래를 걷으세요.'},
+  {body:'집 안에서 동시에 여러 상황이 발생했습니다. 가장 먼저 해야 할 것은?',
+   choices:['배수관에서 물이 새서 수도 밸브를 잠근다.','거실 청소를 한다.','책을 읽는다.','장을 보러 나간다.'],
+   correct:0,explain:'물이 새고 있을 때 <b>수도 밸브를 먼저 잠가야</b> 피해가 더 커지는 것을 막을 수 있습니다.'},
+  {body:'오늘 오후에 해야 할 일이 겹쳤습니다. 아래 중 가장 먼저 해야 할 것은?',
+   choices:['넘어져서 생긴 무릎 상처를 소독하고 처치한다.','책상 위를 정리한다.','인터넷을 본다.','전화를 기다린다.'],
+   correct:0,explain:'<b>상처를 방치하면 감염</b>으로 이어질 수 있습니다. 신체 건강 처치는 다른 일보다 먼저 해야 합니다.'},
+  {body:'외출 준비를 하는데 여러 가지가 겹쳤습니다. 가장 먼저 해야 할 것은?',
+   choices:['가스 밸브가 잠겼는지 확인하고 나간다.','신발을 닦는다.','가방을 정리한다.','음악을 듣는다.'],
+   correct:0,explain:'외출 전 <b>가스 밸브 확인</b>은 화재·폭발 예방을 위한 필수 안전 점검입니다. 외관 정리보다 안전 확인이 먼저입니다.'},
+  {body:'식사 후 해야 할 일이 여러 가지 있습니다. 가장 먼저 해야 할 것은?',
+   choices:['처방받은 식후 약을 제때 복용한다.','그릇을 씻는다.','소파에서 쉰다.','TV를 켠다.'],
+   correct:0,explain:'<b>식후 처방약은 정해진 시간에 복용</b>해야 효과가 있습니다. 설거지보다 복약이 먼저입니다.'},
+];
+
+let _priQ=null, _priAnswered=false, _priIdx=0, _priQueue=[];
+const PRI=(()=>{
+  let score=0;
+  function start(){
+    _priQueue=shuffle([...PRI_LIST]);
+    _priIdx=0; score=0; _priAnswered=false;
+    document.getElementById('pri-card').style.display='block';
+    document.getElementById('pri-res').style.display='none';
+    document.getElementById('pri-start').style.display='none';
+    document.getElementById('pri-next').style.display='none';
+    document.getElementById('pri-tot').textContent=_priQueue.length;
+    loadQ();
+  }
+  function loadQ(){
+    _priAnswered=false;
+    document.getElementById('pri-fb').style.display='none';
+    document.getElementById('pri-next').style.display='none';
+    document.getElementById('pri-choices').innerHTML='';
+    document.getElementById('pri-subj').style.display='none';
+    
+    document.getElementById('pri-subj-btn').disabled=false;
+    const q=_priQueue[_priIdx]; _priQ=q;
+    document.getElementById('pri-bd').textContent=q.body;
+    // 보기 랜덤
+    const sh=shuffle(q.choices.map((t,i)=>({t,isC:i===q.correct})));
+    const cidx=sh.findIndex(c=>c.isC);
+    const mode=getOpt('pri-mode')||'mc';
+    if(mode==='mc'){
+      document.getElementById('pri-choices').style.display='flex';
+      renderMC('pri-choices',sh.map(c=>c.t),cidx,(ok)=>{
+        if(_priAnswered)return; _priAnswered=true;
+        if(ok)score++;
+        document.getElementById('pri-score').textContent=score;
+        showMCFb('pri-fb','pri-fb-res','pri-fb-exp','pri-next',ok,q.explain,_priIdx+1>=_priQueue.length);
+        document.getElementById('pri-prog').style.width=((_priIdx+1)/_priQueue.length*100)+'%';
+      });
+    } else {
+      document.getElementById('pri-choices').style.display='none';
+      document.getElementById('pri-subj').style.display='flex';
+    }
+    document.getElementById('pri-prog').style.width=(_priIdx/_priQueue.length*100)+'%';
+    document.getElementById('pri-cur').textContent=_priIdx+1;
+    document.getElementById('pri-score').textContent=score;
+  }
+  function next(){_priIdx++;if(_priIdx>=_priQueue.length){end();return;}loadQ();}
+  function end(){
+    document.getElementById('pri-card').style.display='none';
+    document.getElementById('pri-choices').innerHTML='';
+    document.getElementById('pri-subj').style.display='none';
+    document.getElementById('pri-fb').style.display='none';
+    document.getElementById('pri-next').style.display='none';
+    const r=document.getElementById('pri-res'); r.style.display='block';
+    document.getElementById('pri-r-tot').textContent=_priQueue.length+'문제';
+    document.getElementById('pri-r-cor').textContent=score+'문제';
+    document.getElementById('pri-r-acc').textContent=pct(score,_priQueue.length);
+  }
+  function reset(){
+    _priIdx=0;score=0;_priAnswered=false;
+    document.getElementById('pri-card').style.display='none';
+    document.getElementById('pri-choices').innerHTML='';
+    document.getElementById('pri-subj').style.display='none';
+    document.getElementById('pri-fb').style.display='none';
+    document.getElementById('pri-next').style.display='none';
+    document.getElementById('pri-start').style.display='inline-block';
+    document.getElementById('pri-res').style.display='none';
+    document.getElementById('pri-prog').style.width='0%';
+  }
+  return{start,next,reset};
+})();
+function priSubmitSubj(){
+  if(_priAnswered)return; _priAnswered=true;
+  document.getElementById('pri-subj-btn').disabled=true;
+  const isLast=_priIdx+1>=_priQueue.length;
+  showAnswer('pri-fb','pri-fb-res','pri-fb-exp','pri-next',_priQ.choices[_priQ.correct],_priQ.explain,isLast);
+  document.getElementById('pri-prog').style.width=((_priIdx+1)/_priQueue.length*100)+'%';
+}
+
+// ══ IADL 시나리오 ════════════════════════════
+const HOSPITALS=['내과','정형외과','신경과','피부과','안과','재활의학과','이비인후과'];
+const MEDS=['혈압약','당뇨약','소화제','관절약','수면제','위장약','골다공증약'];
+const MARTS=['이마트','홈플러스','롯데마트','하나로마트','농협마트'];
+const WEEKDAYS=['월요일','화요일','수요일','목요일','금요일'];
+const APPT_HRS=['오전 9시','오전 10시','오전 11시','오후 1시','오후 2시','오후 3시'];
+const SYMPTOMS=['무릎 통증','허리 통증','소화 불량','두통','어지럼증','피부 발진'];
+
+function makeIadlScenarios(){
+  const hosp=pick(HOSPITALS),med=pick(MEDS),mart=pick(MARTS),wday=pick(WEEKDAYS),hour=pick(APPT_HRS),sym=pick(SYMPTOMS);
+  return shuffle([
+    {title:`${hosp} 진료 시나리오`,steps:[
+      {ctx:`최근 ${sym}이(가) 있어서 ${hosp}에 처음 가보려 합니다.`,tag:`${hosp} 진료 — 1단계`,
+       body:'병원에 가기 전 가장 먼저 해야 할 준비는 무엇인가요?',
+       choices:['전화로 진료 예약 가능 여부와 시간을 확인한다.','그냥 바로 병원에 간다.','아무 시간이나 가도 된다.','인터넷만 검색한다.'],
+       correct:0,explain:`처음 방문하는 병원은 <b>전화로 예약 여부와 가능 시간을 먼저 확인</b>해야 기다리지 않고 진료받을 수 있습니다.`},
+      {ctx:`${wday} ${hour}로 예약이 완료됐습니다.`,tag:`${hosp} 진료 — 2단계`,
+       body:'예약 완료 후 바로 해야 할 행동은 무엇인가요?',
+       choices:['예약 날짜·시간·병원 위치를 메모해 둔다.','그냥 기다린다.','당일에 기억하면 된다.','가족에게만 말해둔다.'],
+       correct:0,explain:`예약 후 <b>날짜·시간·위치를 즉시 메모</b>하면 잊어버리는 것을 예방합니다.`},
+      {ctx:`${hosp} 방문 당일 아침입니다. ${sym} 증상이 있습니다.`,tag:`${hosp} 진료 — 3단계`,
+       body:'출발 전 반드시 챙겨야 할 것은 무엇인가요?',
+       choices:['신분증·보험증과 복용 중인 약 목록을 챙긴다.','빈 손으로 간다.','지갑만 챙긴다.','병원에서 다 해결된다.'],
+       correct:0,explain:`병원 방문 시 <b>신분증·보험증과 복용 중인 약 목록</b>을 챙기면 진료가 원활해집니다.`},
+    ]},
+    {title:`${med} 복용 관리 시나리오`,steps:[
+      {ctx:`의사에게 ${med}을(를) 새로 처방받았습니다.`,tag:`약 관리 — 1단계`,
+       body:'약을 받은 후 가장 먼저 해야 할 것은 무엇인가요?',
+       choices:['약봉투의 복용 방법·횟수·주의사항을 꼼꼼히 읽는다.','그냥 집에 가서 먹는다.','나중에 읽어본다.','알아서 먹는다.'],
+       correct:0,explain:`새로운 약은 <b>복용 방법과 주의사항을 먼저 확인</b>하는 것이 안전한 첫 단계입니다.`},
+      {ctx:`매일 아침 ${med}을(를) 복용해야 하는데, 오늘 깜빡 잊었습니다.`,tag:`약 관리 — 2단계`,
+       body:'복용을 잊었을 때 어떻게 해야 할까요?',
+       choices:['처방전·설명서를 확인하고 의사·약사에게 문의한다.','잊은 만큼 두 배로 먹는다.','그냥 오늘은 건너뛴다.','임의로 아무 때나 먹는다.'],
+       correct:0,explain:`복용을 잊었을 때는 <b>처방전 확인 또는 의사·약사에게 문의</b>해야 합니다.`},
+      {ctx:`${med}을(를) 먹고 나서 두드러기와 가려움증이 생겼습니다.`,tag:`약 관리 — 3단계`,
+       body:'어떻게 해야 할까요?',
+       choices:['즉시 복용을 중단하고 의사·약사에게 연락한다.','계속 먹으며 지켜본다.','다른 약을 추가로 먹는다.','그냥 참는다.'],
+       correct:0,explain:`약 복용 후 이상 반응은 <b>즉시 중단 후 의료진에게 연락</b>해야 합니다.`},
+    ]},
+    {title:`${mart} 장보기 시나리오`,steps:[
+      {ctx:`${mart}에 장을 보러 가려 합니다.`,tag:`장보기 — 1단계`,
+       body:'출발 전 가장 먼저 해야 할 준비는 무엇인가요?',
+       choices:['냉장고를 확인하고 필요한 것을 목록으로 적는다.','그냥 가서 생각나는 것을 산다.','마트에서 필요한 것을 찾는다.','지난번과 똑같이 산다.'],
+       correct:0,explain:`마트 방문 전 <b>냉장고 확인 후 구매 목록 작성</b>은 불필요한 구매와 누락을 막아줍니다.`},
+      {ctx:`${mart}에 도착했는데 목록에 없는 세일 상품이 눈에 띕니다.`,tag:`장보기 — 2단계`,
+       body:'어떻게 하는 것이 가장 현명한가요?',
+       choices:['정말 필요한 것인지 생각한 후 구매 여부를 결정한다.','세일이니까 무조건 산다.','보이는 것은 모두 담는다.','세일 상품은 절대 안 산다.'],
+       correct:0,explain:`충동구매를 막으려면 <b>세일 상품도 정말 필요한지 먼저 생각</b>한 후 결정해야 합니다.`},
+      {ctx:`${mart}에서 계산을 마쳤습니다.`,tag:`장보기 — 3단계`,
+       body:'계산 후 반드시 확인해야 할 것은 무엇인가요?',
+       choices:['영수증을 확인하여 금액이 맞는지 살펴본다.','그냥 나온다.','계산원을 믿고 확인 안 한다.','다음에 확인한다.'],
+       correct:0,explain:`계산 후 <b>영수증 확인</b>으로 오류 발견과 지출 파악이 가능합니다.`},
+    ]},
+  ]);
+}
+
+let _iadlScenarios=[], _sIdx=0, _stIdx=0, _iadlTotalSteps=0, _iadlScore=0, _iadlAnswered=false;
+function getCurrentStep(){return _iadlScenarios[_sIdx]?.steps[_stIdx];}
+function isIadlLast(){return _sIdx>=_iadlScenarios.length-1&&_stIdx>=_iadlScenarios[_sIdx].steps.length-1;}
+function calcIadlProg(offset){
+  const done=_iadlScenarios.slice(0,_sIdx).reduce((a,s)=>a+s.steps.length,0)+_stIdx+(offset||0);
+  return done/_iadlTotalSteps*100;
+}
+
+const IADL=(()=>{
+  function start(){
+    _iadlScenarios=makeIadlScenarios();_sIdx=0;_stIdx=0;_iadlScore=0;_iadlAnswered=false;
+    _iadlTotalSteps=_iadlScenarios.reduce((a,s)=>a+s.steps.length,0);
+    document.getElementById('iadl-card').style.display='block';
+    document.getElementById('iadl-res').style.display='none';
+    document.getElementById('iadl-start').style.display='none';
+    document.getElementById('iadl-next').style.display='none';
+    loadStep();
+  }
+  function loadStep(){
+    _iadlAnswered=false;
+    document.getElementById('iadl-fb').style.display='none';
+    document.getElementById('iadl-next').style.display='none';
+    document.getElementById('iadl-choices').innerHTML='';
+    document.getElementById('iadl-subj').style.display='none';
+    
+    document.getElementById('iadl-subj-btn').disabled=false;
+    const sc=_iadlScenarios[_sIdx],st=sc.steps[_stIdx];
+    document.getElementById('iadl-sn').textContent=_sIdx+1;
+    document.getElementById('iadl-st').textContent=_stIdx+1;
+    document.getElementById('iadl-stot').textContent=sc.steps.length;
+    const ctx=document.getElementById('iadl-ctx');
+    ctx.style.display='block';
+    ctx.innerHTML=`<span class="step-tag">${st.tag}</span><br>${st.ctx}`;
+    document.getElementById('iadl-bd').textContent=st.body;
+    const sh=shuffle(st.choices.map((c,i)=>({c,isC:i===st.correct})));
+    const cidx=sh.findIndex(x=>x.isC);
+    const mode=getOpt('iadl-mode')||'mc';
+    const last=isIadlLast();
+    if(mode==='mc'){
+      document.getElementById('iadl-choices').style.display='flex';
+      renderMC('iadl-choices',sh.map(x=>x.c),cidx,(ok)=>{
+        if(_iadlAnswered)return;_iadlAnswered=true;
+        if(ok)_iadlScore++;
+        document.getElementById('iadl-score').textContent=_iadlScore;
+        showMCFb('iadl-fb','iadl-fb-res','iadl-fb-exp','iadl-next',ok,st.explain,last);
+        document.getElementById('iadl-prog').style.width=calcIadlProg(1)+'%';
+      });
+    } else {
+      document.getElementById('iadl-choices').style.display='none';
+      document.getElementById('iadl-subj').style.display='flex';
+    }
+    document.getElementById('iadl-prog').style.width=calcIadlProg(0)+'%';
+    document.getElementById('iadl-score').textContent=_iadlScore;
+  }
+  function next(){
+    _stIdx++;
+    if(_stIdx>=_iadlScenarios[_sIdx].steps.length){_sIdx++;_stIdx=0;}
+    if(_sIdx>=_iadlScenarios.length){end();return;}
+    loadStep();
+  }
+  function end(){
+    document.getElementById('iadl-card').style.display='none';
+    document.getElementById('iadl-ctx').style.display='none';
+    document.getElementById('iadl-choices').innerHTML='';
+    document.getElementById('iadl-subj').style.display='none';
+    document.getElementById('iadl-fb').style.display='none';
+    document.getElementById('iadl-next').style.display='none';
+    const r=document.getElementById('iadl-res');r.style.display='block';
+    document.getElementById('iadl-r-tot').textContent=_iadlTotalSteps+'회';
+    document.getElementById('iadl-r-cor').textContent=_iadlScore+'회';
+    document.getElementById('iadl-r-acc').textContent=pct(_iadlScore,_iadlTotalSteps);
+  }
+  function reset(){
+    _sIdx=0;_stIdx=0;_iadlScore=0;_iadlAnswered=false;
+    document.getElementById('iadl-card').style.display='none';
+    document.getElementById('iadl-ctx').style.display='none';
+    document.getElementById('iadl-choices').innerHTML='';
+    document.getElementById('iadl-subj').style.display='none';
+    document.getElementById('iadl-fb').style.display='none';
+    document.getElementById('iadl-next').style.display='none';
+    document.getElementById('iadl-start').style.display='inline-block';
+    document.getElementById('iadl-res').style.display='none';
+    document.getElementById('iadl-prog').style.width='0%';
+  }
+  return{start,next,reset};
+})();
+function iadlSubmitSubj(){
+  if(_iadlAnswered)return;_iadlAnswered=true;
+  document.getElementById('iadl-subj-btn').disabled=true;
+  const st=getCurrentStep();
+  showAnswer('iadl-fb','iadl-fb-res','iadl-fb-exp','iadl-next',st.choices[st.correct],st.explain,isIadlLast());
+  document.getElementById('iadl-prog').style.width=calcIadlProg(1)+'%';
+}
+
+// ══ 원인과 해결 (2단계) ══════════════════════
+const CAUSAL_LIST = [
+  { body: '아침에 일어났더니 방 안이 너무 춥습니다. 보일러를 틀었는데 한참이 지나도 따뜻해지지 않습니다.',
+    causeQ: '보일러를 켰는데도 방이 따뜻해지지 않는 가장 흔한 원인은?',
+    causeChoices: [
+      '보일러 설정 온도가 현재 실내 온도보다 낮게 설정되어 있다.',
+      '보일러 연료(가스·기름)가 부족해 가동이 멈춘 상태다.',
+      '창문이 열려 있어 찬 공기가 계속 들어오고 있다.',
+      '라디에이터나 온수 배관 밸브가 잠겨 있다.'],
+    causeCorrect: 0,
+    causeExp: '보일러는 <b>설정 온도가 현재 실내 온도보다 높아야만 가동</b>됩니다. 설정값이 실내 온도와 같거나 낮으면 켜져 있어도 열이 나오지 않습니다. 연료 부족·창문 열림·밸브 잠금은 다른 증상이 함께 나타납니다.',
+    solveQ: '이 문제를 해결하기 위해 가장 먼저 해야 할 행동은?',
+    solveChoices: [
+      '보일러 온도 설정을 현재 실내 온도보다 2~3도 높게 올린다.',
+      '보일러를 껐다가 10분 후 다시 켠다.',
+      '창문을 모두 닫고 두꺼운 커튼을 친다.',
+      '보일러 연료 잔량을 먼저 확인한다.'],
+    solveCorrect: 0,
+    solveExp: '원인이 <b>설정 온도 문제</b>이므로 설정값을 실내 온도보다 높게 올리는 것이 먼저입니다. 그래도 안 되면 다른 원인(연료·배관)을 순서대로 확인합니다.' },
+
+  { body: '세탁기 돌리고 나서 빨래를 2시간 넘게 꺼내지 않았더니 퀴퀴한 냄새가 납니다.',
+    causeQ: '이 상황에서 냄새가 난 직접적인 원인은?',
+    causeChoices: [
+      '젖은 빨래를 오래 방치해 세균이 번식했다.',
+      '세제를 너무 적게 넣어 세탁이 불충분했다.',
+      '헹굼 횟수가 부족해 세제 성분이 남았다.',
+      '세탁기 드럼 내부에 곰팡이가 피어 있다.'],
+    causeCorrect: 0,
+    causeExp: '문제의 핵심 단서는 <b>"2시간 넘게 꺼내지 않았다"</b>는 것입니다. 젖은 상태로 방치하면 세균이 빠르게 번식해 냄새가 납니다. 세제 부족·헹굼 불충분·곰팡이는 이 상황과 직접 관련이 없습니다.',
+    solveQ: '이미 냄새가 난 빨래를 처리하는 가장 좋은 방법은?',
+    solveChoices: [
+      '식초나 베이킹소다를 넣고 다시 한 번 세탁한 뒤 바로 꺼내 건조한다.',
+      '세제를 평소보다 두 배 넣고 다시 세탁한다.',
+      '뜨거운 햇볕에 오래 말리면 냄새가 사라진다.',
+      '섬유 유연제를 충분히 뿌리고 바람이 잘 통하는 곳에 넌다.'],
+    solveCorrect: 0,
+    solveExp: '<b>식초·베이킹소다는 세균을 제거하고 냄새를 중화</b>합니다. 재세탁 후 즉시 꺼내 건조해야 같은 문제가 반복되지 않습니다. 세제 추가나 유연제는 냄새 원인(세균)을 제거하지 못합니다.' },
+
+  { body: '충전기를 콘센트에 꽂고 휴대폰에 연결했는데 충전 표시가 전혀 뜨지 않습니다.',
+    causeQ: '충전이 안 될 때 가장 먼저 확인해야 할 원인은?',
+    causeChoices: [
+      '충전 케이블이 끊어졌거나 단자에 제대로 꽂히지 않았다.',
+      '휴대폰 배터리 자체가 완전히 망가졌다.',
+      '콘센트에 전기가 들어오지 않는다.',
+      '휴대폰 운영체제 오류로 충전 감지를 못 하고 있다.'],
+    causeCorrect: 0,
+    causeExp: '충전 불량의 <b>가장 흔한 원인은 케이블 불량 또는 연결 불량</b>입니다. 배터리 완전 고장·콘센트 단전·OS 오류는 드문 경우이고, 케이블 점검으로 대부분 해결됩니다.',
+    solveQ: '케이블을 다시 꽂아봐도 충전이 안 된다면 다음 단계는?',
+    solveChoices: [
+      '다른 케이블로 교체하거나 다른 콘센트에 꽂아본다.',
+      '휴대폰을 껐다가 켜서 재부팅한 후 다시 충전한다.',
+      '충전 중 휴대폰 사용을 완전히 멈추고 기다린다.',
+      '절전 모드를 켜서 배터리 소모를 줄인다.'],
+    solveCorrect: 0,
+    solveExp: '<b>다른 케이블·다른 콘센트로 바꿔보면</b> 케이블 문제인지 기기 문제인지 쉽게 구분할 수 있습니다. 재부팅·절전은 연결 문제 해결에 효과가 없습니다.' },
+
+  { body: '아침에 냉장고를 열었더니 이상한 냄새가 나고, 넣어둔 음식 일부가 상해 있었습니다.',
+    causeQ: '냉장고 안 음식이 상한 원인으로 가장 가능성 높은 것은?',
+    causeChoices: [
+      '냉장고 문이 완전히 닫히지 않아 냉기가 새어나갔다.',
+      '음식을 너무 가득 채워 냉기 순환이 방해됐다.',
+      '냉장고 온도 설정이 높아져 냉각 기능이 떨어졌다.',
+      '유통기한이 지난 음식이 오래 있어 다른 음식에도 영향을 줬다.'],
+    causeCorrect: 0,
+    causeExp: '<b>냉장고 문이 열린 채로 있으면 냉기가 빠져나가 내부 온도가 급격히 올라</b>가 음식이 상합니다. 가득 채움·온도 설정 변경·유통기한 초과는 발생 가능하지만, 여러 음식이 동시에 상한 상황에서는 냉기 누출이 가장 유력합니다.',
+    solveQ: '상한 음식을 처리하고 냉장고를 올바르게 관리하는 방법은?',
+    solveChoices: [
+      '상한 음식을 모두 버리고 내부를 닦은 뒤 문이 잘 닫히는지 확인한다.',
+      '냉장고 온도를 최대한 낮춰 남은 음식이 더 상하지 않게 한다.',
+      '냄새 제거를 위해 베이킹소다만 넣어두고 기다린다.',
+      '상한 음식만 골라 버리고 나머지는 그대로 보관한다.'],
+    solveCorrect: 0,
+    solveExp: '<b>상한 음식 전부 제거 → 내부 청소 → 문 닫힘 확인</b> 순서가 올바릅니다. 온도만 낮추거나 베이킹소다만 넣으면 오염된 환경이 그대로 남습니다.' },
+
+  { body: '거실 형광등 스위치를 올렸더니 켜지지 않고, 다시 켜도 잠깐 깜빡이다가 바로 꺼집니다.',
+    causeQ: '이 상황에서 형광등이 깜빡이다 꺼지는 가장 흔한 원인은?',
+    causeChoices: [
+      '형광등 수명이 다 돼서 교체 시기가 됐다.',
+      '형광등 안정기(전자식 제어장치)가 고장났다.',
+      '스위치 내부 접촉 불량으로 전류가 끊기고 있다.',
+      '집 전체 전압이 낮아져 형광등이 제대로 켜지지 않는다.'],
+    causeCorrect: 0,
+    causeExp: '형광등이 <b>켜졌다 꺼지기를 반복하는 것은 수명이 다했을 때 나타나는 전형적인 증상</b>입니다. 안정기·스위치 불량이라면 아예 켜지지 않거나 다른 조명도 영향받고, 전압 문제라면 집 전체 조명이 흔들립니다.',
+    solveQ: '이 문제를 해결하기 위한 가장 먼저 해야 할 행동은?',
+    solveChoices: [
+      '같은 규격의 새 형광등으로 교체한다.',
+      '스위치를 여러 번 껐다 켜서 접촉을 안정시킨다.',
+      '전기 기사를 불러 배선 전체를 점검받는다.',
+      '형광등 대신 스탠드 조명을 임시로 사용한다.'],
+    solveCorrect: 0,
+    solveExp: '수명이 다한 것이 원인이므로 <b>같은 규격의 형광등으로 교체</b>하면 됩니다. 스위치 조작은 효과 없고, 전기 기사 호출은 교체 시도 후에도 안 될 때 하는 것이 순서입니다.' },
+
+  { body: '요리 중 가스레인지를 켜둔 채로 화장실에 다녀왔더니 냄비 속 음식이 모두 타버렸습니다.',
+    causeQ: '음식이 타버린 직접적인 원인은?',
+    causeChoices: [
+      '불을 켜둔 채 자리를 비워 아무도 불을 줄이거나 끄지 못했다.',
+      '냄비 두께가 얇아 열이 너무 빠르게 전달됐다.',
+      '불 세기를 처음부터 강불로 설정해 놓았다.',
+      '냄비에 물이 원래 너무 적게 들어 있었다.'],
+    causeCorrect: 0,
+    causeExp: '문제의 핵심은 <b>"불을 켜둔 채 자리를 비운 것"</b>입니다. 냄비 두께·불 세기·물의 양은 부차적 조건이며, 누군가 옆에 있었다면 모두 조절 가능했습니다. 자리를 비운 것이 직접 원인입니다.',
+    solveQ: '앞으로 이런 상황을 예방하는 가장 확실한 방법은?',
+    solveChoices: [
+      '자리를 떠야 할 때는 반드시 불을 끄거나 가족에게 부탁한다.',
+      '타이머를 설정해두면 잠깐 자리를 비워도 괜찮다.',
+      '약불로 줄여두면 타지 않으므로 잠깐 자리를 비워도 된다.',
+      '뚜껑을 덮어두면 타는 것을 막을 수 있다.'],
+    solveCorrect: 0,
+    solveExp: '<b>자리를 비울 때 반드시 불을 끄는 것</b>이 유일한 완전 예방책입니다. 타이머·약불·뚜껑은 화재를 완전히 막지 못합니다.' },
+
+  { body: '욕실 바닥이 항상 물에 젖어 있습니다. 오늘 가족이 샤워 후 미끄러져 넘어질 뻔했습니다.',
+    causeQ: '이 상황에서 낙상 위험이 높아진 근본 원인은?',
+    causeChoices: [
+      '젖은 바닥에서 미끄러지지 않도록 해주는 안전 장치가 없다.',
+      '샤워 후 바닥 물기를 닦지 않고 그냥 나왔다.',
+      '욕실 조명이 어두워 바닥 상태를 잘 보지 못했다.',
+      '슬리퍼 없이 맨발로 욕실에 들어갔다.'],
+    causeCorrect: 0,
+    causeExp: '문제는 <b>"항상 젖어 있다"</b>는 것입니다. 물기를 닦지 않은 것·조명·슬리퍼는 그날의 상황이지만, <b>미끄럼 방지 장치 부재는 항상 위험을 만드는 구조적 원인</b>입니다. 근본 원인을 해결해야 반복을 막을 수 있습니다.',
+    solveQ: '욕실 낙상을 지속적으로 예방하는 가장 효과적인 방법은?',
+    solveChoices: [
+      '욕실 바닥에 미끄럼 방지 매트나 스티커를 부착한다.',
+      '샤워 후 항상 걸레로 바닥 물기를 닦는 습관을 만든다.',
+      '욕실 조명을 더 밝은 것으로 교체한다.',
+      '항상 미끄럼 방지 슬리퍼를 신고 들어간다.'],
+    solveCorrect: 0,
+    solveExp: '<b>미끄럼 방지 매트·스티커</b>는 신경 쓰지 않아도 항상 작동하는 구조적 예방책입니다. 물기 닦기·슬리퍼는 깜빡하면 효과가 없습니다.' },
+
+  { body: '전자레인지에 음식을 넣고 시간을 설정한 뒤 버튼을 눌렀는데 전혀 작동하지 않습니다.',
+    causeQ: '전자레인지가 버튼을 눌러도 작동하지 않을 때 가장 먼저 확인해야 할 것은?',
+    causeChoices: [
+      '전자레인지 문이 완전히 닫혀 있지 않다.',
+      '전자레인지가 너무 오래 써서 수명이 다됐다.',
+      '설정 시간이 너무 짧게 입력됐다.',
+      '콘센트에 전기가 들어오지 않는다.'],
+    causeCorrect: 0,
+    causeExp: '전자레인지는 <b>문이 완전히 닫혀야만 안전 잠금이 해제되어 작동</b>합니다. 수명 문제는 드물고 다른 증상이 동반되며, 시간 설정·콘센트 문제는 전원 표시 등으로 먼저 확인 가능합니다.',
+    solveQ: '문을 다시 닫아봐도 작동하지 않는다면 다음으로 해야 할 것은?',
+    solveChoices: [
+      '전원 플러그를 뽑았다가 30초 후 다시 꽂고 재시도한다.',
+      '시간 설정을 더 길게 다시 입력해본다.',
+      '전자레인지 내부를 깨끗이 닦고 다시 시도한다.',
+      '다른 음식으로 바꿔 넣고 다시 눌러본다.'],
+    solveCorrect: 0,
+    solveExp: '<b>플러그를 뽑았다 꽂으면(재부팅)</b> 전자 기기의 일시적 오류가 초기화됩니다. 시간 재입력·청소·음식 교체는 작동 불량과 관련이 없습니다.' },
+];
+
+let _cslQ=null, _cslPhase=1, _cslAnswered=false;
+const CSL=(()=>{
+  let qs=[],idx=0,score=0,total=8;
+  function start(){
+    qs=shuffle([...CAUSAL_LIST]).slice(0,total);
+    idx=0;score=0;_cslPhase=1;_cslAnswered=false;
+    document.getElementById('csl-tot').textContent=total;
+    document.getElementById('csl-start').style.display='none';
+    document.getElementById('csl-res').style.display='none';
+    document.getElementById('csl-prog').style.width='0%';
+    loadQ();
+  }
+  function loadQ(){
+    _cslQ=qs[idx]; _cslPhase=1; _cslAnswered=false;
+    document.getElementById('csl-cur').textContent=idx+1;
+    document.getElementById('csl-prog').style.width=(idx/total*100)+'%';
+
+    // 1단계 표시
+    document.getElementById('csl-choices1').style.display='';
+    document.getElementById('csl-choices2').innerHTML='';
+    document.getElementById('csl-choices2').style.display='';
+    document.getElementById('csl-bd').innerHTML=_cslQ.body;
+    document.getElementById('csl-q1').textContent=_cslQ.causeQ;
+    document.getElementById('csl-card1').style.display='block';
+    document.getElementById('csl-card2').style.display='none';
+    document.getElementById('csl-fb1').style.display='none';
+    document.getElementById('csl-fb2').style.display='none';
+    document.getElementById('csl-next').style.display='none';
+
+    // 1단계 선택지
+    const sh1=shuffle(_cslQ.causeChoices.map((t,i)=>({t,isC:i===_cslQ.causeCorrect})));
+    const c1=document.getElementById('csl-choices1');
+    c1.innerHTML='';
+    sh1.forEach(opt=>{
+      const btn=document.createElement('button');
+      btn.className='choice-btn'; btn.textContent=opt.t;
+      btn.onclick=()=>cslAnswer1(opt.isC,btn,sh1);
+      c1.appendChild(btn);
+    });
+  }
+  function next(){idx++;if(idx>=qs.length){end();return;}loadQ();}
+  function end(){
+    document.getElementById('csl-card1').style.display='none';
+    document.getElementById('csl-card2').style.display='none';
+    document.getElementById('csl-choices1').innerHTML='';
+    document.getElementById('csl-choices2').innerHTML='';
+    document.getElementById('csl-fb1').style.display='none';
+    document.getElementById('csl-fb2').style.display='none';
+    document.getElementById('csl-next').style.display='none';
+    const r=document.getElementById('csl-res');r.style.display='block';
+    document.getElementById('csl-r-tot').textContent=total+'문제';
+    document.getElementById('csl-r-cor').textContent=score+'점 (2점 만점×'+total+'문제)';
+    document.getElementById('csl-r-acc').textContent=pct(score,total*2);
+  }
+  function reset(){
+    idx=0;score=0;_cslPhase=1;_cslAnswered=false;
+    ['csl-card1','csl-card2'].forEach(id=>document.getElementById(id).style.display='none');
+    ['csl-choices1','csl-choices2'].forEach(id=>{
+      const el=document.getElementById(id);
+      el.innerHTML=''; el.style.display='';
+    });
+    ['csl-fb1','csl-fb2'].forEach(id=>document.getElementById(id).style.display='none');
+    document.getElementById('csl-next').style.display='none';
+    document.getElementById('csl-start').style.display='inline-block';
+    document.getElementById('csl-res').style.display='none';
+    document.getElementById('csl-prog').style.width='0%';
+    document.getElementById('csl-score').textContent='0';
+  }
+  function addScore(n){score+=n;document.getElementById('csl-score').textContent=score;}
+  return{start,next,reset,addScore,getIdx:()=>idx+1,getIsLast:()=>idx+1>=qs.length};
+})();
+
+function cslAnswer1(isCorrect, clickedBtn, opts){
+  if(_cslAnswered||_cslPhase!==1)return;
+  _cslAnswered=true;
+  const btns=document.querySelectorAll('#csl-choices1 .choice-btn');
+  btns.forEach(b=>b.disabled=true);
+
+  // 정답/오답 표시
+  opts.forEach((opt,i)=>{
+    if(opt.isC) btns[i].classList.add('correct');
+  });
+  if(!isCorrect) clickedBtn.classList.add('wrong');
+  if(isCorrect) CSL.addScore(1);
+
+  // 1단계 피드백
+  const fb1=document.getElementById('csl-fb1');
+  fb1.style.display='block';
+  fb1.className='fb-box '+(isCorrect?'ok':'err');
+  document.getElementById('csl-fb1-res').textContent=isCorrect?'✓ 정답!':'✗ 틀렸어요.';
+  document.getElementById('csl-fb1-res').className='fb-res '+(isCorrect?'ok':'err');
+  document.getElementById('csl-fb1-exp').innerHTML=_cslQ.causeExp;
+
+  // 2단계로 전환
+  setTimeout(()=>{
+    _cslPhase=2; _cslAnswered=false;
+    // 1단계 선택지 숨기기
+    document.getElementById('csl-choices1').style.display='none';
+    document.getElementById('csl-q2').textContent=_cslQ.solveQ;
+    document.getElementById('csl-card2').style.display='block';
+    const sh2=shuffle(_cslQ.solveChoices.map((t,i)=>({t,isC:i===_cslQ.solveCorrect})));
+    const c2=document.getElementById('csl-choices2');
+    c2.innerHTML='';
+    sh2.forEach(opt=>{
+      const btn=document.createElement('button');
+      btn.className='choice-btn'; btn.textContent=opt.t;
+      btn.onclick=()=>cslAnswer2(opt.isC,btn,sh2);
+      c2.appendChild(btn);
+    });
+  },600);
+}
+
+function cslAnswer2(isCorrect, clickedBtn, opts){
+  if(_cslAnswered||_cslPhase!==2)return;
+  _cslAnswered=true;
+  const btns=document.querySelectorAll('#csl-choices2 .choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  opts.forEach((opt,i)=>{if(opt.isC)btns[i].classList.add('correct');});
+  if(!isCorrect) clickedBtn.classList.add('wrong');
+  if(isCorrect) CSL.addScore(1);
+
+  const fb2=document.getElementById('csl-fb2');
+  fb2.style.display='block';
+  fb2.className='fb-box '+(isCorrect?'ok':'err');
+  document.getElementById('csl-fb2-res').textContent=isCorrect?'✓ 정답!':'✗ 틀렸어요.';
+  document.getElementById('csl-fb2-res').className='fb-res '+(isCorrect?'ok':'err');
+  document.getElementById('csl-fb2-exp').innerHTML=_cslQ.solveExp;
+
+  const nb=document.getElementById('csl-next');
+  nb.style.display='inline-block';
+  nb.textContent=CSL.getIsLast()?'결과 보기 →':'다음 →';
+  document.getElementById('csl-prog').style.width=(CSL.getIdx()/8*100)+'%';
+}
+</script>
+</body>
+</html>

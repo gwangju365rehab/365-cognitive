@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>리듬-타겟 훈련 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 16px 16px 80px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f5f7fa;
+      color: #222;
+      gap: 12px;
+    }
+
+    h1 {
+      margin: 0 0 2px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      text-align: center;
+      color: #1a237e;
+    }
+    .subtitle {
+      font-size: 0.92rem;
+      color: #666;
+      text-align: center;
+      margin: 0;
+    }
+
+    #home-btn {
+      position: fixed; top: 14px; left: 14px; z-index: 100;
+      padding: 10px 18px; border-radius: 999px; border: none;
+      background: #eee; color: #333; font-weight: 600; font-size: 14px;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #home-btn:hover { background: #ddd; }
+
+    #description {
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #666;
+      max-width: 720px;
+      background: #fff;
+      border: 1px solid #e0e4f0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      width: 100%;
+    }
+
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #e0e4f0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      width: 100%;
+      max-width: 900px;
+      font-size: 14px;
+    }
+
+    #controls label {
+      font-weight: 600;
+      color: #444;
+    }
+
+    #controls select {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #f7f9fc;
+      cursor: pointer;
+    }
+
+    #controls button {
+      padding: 8px 18px;
+      font-size: 14px;
+      border-radius: 999px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #controls button:hover { background: #1565c0; }
+
+    #status {
+      font-size: 13px;
+      color: #555;
+      background: #fff;
+      border: 1px solid #e0e4f0;
+      border-radius: 10px;
+      padding: 8px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+    #status span { font-weight: 700; color: #1976d2; }
+
+    /* 타겟 + 스트룹 규칙 상단 패널 */
+    #top-panel {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 900px;
+      flex-wrap: wrap;
+    }
+
+    #target-visual {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      background: #fff;
+      border: 2px solid #c5cae9;
+      border-radius: 16px;
+      padding: 14px 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      min-width: 260px;
+    }
+
+    #target-visual-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #target-visual-shape {
+      font-size: 72px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+      transition: all 0.2s;
+    }
+
+    #target-visual-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    #target-visual-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a237e;
+    }
+
+    #target-visual-sub {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* 스트룹 규칙 패널 */
+    #stroop-rule-panel {
+      display: none;
+      padding: 14px 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #283593, #1565c0);
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(40,53,147,0.3);
+      min-width: 240px;
+    }
+
+    #stroop-rule-title {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    #stroop-rule-text {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    #stroop-rule-sub {
+      font-size: 12px;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    #game-area {
+      width: min(1000px, 98vw);
+      height: 600px;
+      border: 2px solid #c5cae9;
+      border-radius: 14px;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      margin-bottom: 6px;
+      touch-action: manipulation;
+    }
+
+    .shape {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* 실수 피드백: 도형 흔들리는 애니메이션 */
+    @keyframes shake {
+      0%   { transform: translateX(0); }
+      25%  { transform: translateX(-6px); }
+      50%  { transform: translateX(6px); }
+      75%  { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
+    }
+    .shape.shake {
+      animation: shake 0.2s;
+    }
+
+    #message {
+      min-height: 28px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    /* 스트룹 규칙 전환 큰 알림 */
+    #stroop-alert {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+      z-index: 9999;
+      transition: opacity 0.3s ease;
+      white-space: pre-line;
+    }
+
+    /* 정답/오답 피드백 큰 글씨 */
+    #feedback-alert {
+      position: fixed;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 16px 32px;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+      z-index: 9998;
+      transition: opacity 0.2s ease;
+    }
+
+    /* 5라운드 총점 알림 (계속 유지) */
+    #result-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 24px 48px;
+      background: rgba(33, 33, 33, 0.9);
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      border-radius: 16px;
+      text-align: center;
+      display: none;
+      z-index: 10000;
+      white-space: pre-line;
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">← 홈</button>
+<h1>리듬-타겟 훈련</h1>
+<p class="subtitle">박자에 맞춰 타겟만 정확하게 터치하는 지속주의·반응속도 훈련</p>
+
+<div id="description">
+  1) 위에서 <b>모드·레벨</b>을 선택합니다.<br>
+  2) <b>기본 모드</b>일 때만 BPM·도형 개수·제한시간을 조절합니다.<br>
+  3) <b>타겟 모양·색</b>을 확인하고 [게임 시작] 후 타겟만 터치합니다.<br>
+  ※ 스트룹 모드: 현재 기준(모양/색)에 맞는 타겟을 모두 맞추면 다음 라운드로 넘어가는 모드입니다.<br>
+  └ LEVEL 3: 모양/색 기준만 전환 (어려움)<br>
+  └ LEVEL 4: 타겟 모양·색 + 기준 모두 무작위 전환
+</div>
+
+<div id="controls">
+  <label>모드:</label>
+  <select id="mode-select">
+    <option value="basic" selected>기본</option>
+    <option value="stroop">스트룹</option>
+  </select>
+
+  <label>레벨:</label>
+  <select id="level-select">
+    <option value="custom" selected>직접 설정</option>
+    <option value="L1">LEVEL 1 (쉬움)</option>
+    <option value="L2">LEVEL 2 (중간)</option>
+    <option value="L3">LEVEL 3 (어려움)</option>
+    <option value="L4">LEVEL 4 (무작위 타겟)</option>
+  </select>
+
+  <span id="bpm-control">
+    <label>BPM:</label>
+    <select id="bpm-select">
+      <option value="none">없음</option>
+      <option value="40">40</option>
+      <option value="60" selected>60</option>
+      <option value="80">80</option>
+      <option value="100">100</option>
+    </select>
+  </span>
+
+  <label>도형 개수:</label>
+  <select id="count-select">
+    <option value="8">8개</option>
+    <option value="12" selected>12개</option>
+    <option value="16">16개</option>
+    <option value="20">20개</option>
+  </select>
+
+  <label>제한시간:</label>
+  <select id="time-select">
+    <option value="none" selected>제한 없음</option>
+    <option value="10">10초</option>
+    <option value="20">20초</option>
+    <option value="30">30초</option>
+    <option value="40">40초</option>
+    <option value="50">50초</option>
+    <option value="60">60초</option>
+  </select>
+
+  <label>타겟 모양:</label>
+  <select id="target-shape-select"></select>
+
+  <label>타겟 색:</label>
+  <select id="target-color-select"></select>
+
+  <button id="start-btn">게임 시작 / 다시하기</button>
+</div>
+
+<div id="status">
+  모드: <span id="mode-label">기본</span> /
+  BPM: <span id="bpm-label">60</span> /
+  박자: <span id="beat-count">0</span> / <span id="max-beats-label">50</span> /
+  정타: <span id="hits">0</span> /
+  실수: <span id="misses">0</span> /
+  시간: <span id="time-remaining">-</span>초
+</div>
+
+<div id="top-panel">
+  <div id="target-visual">
+    <div id="target-visual-shape">★</div>
+    <div id="target-visual-info">
+      <div id="target-visual-label">🎯 타겟 자극</div>
+      <div id="target-visual-text">노랑 별</div>
+      <div id="target-visual-sub">이 자극만 터치하세요</div>
+    </div>
+  </div>
+
+  <div id="stroop-rule-panel">
+    <div id="stroop-rule-title">스트룹 모드 · 현재 기준</div>
+    <div id="stroop-rule-text">모양 기준</div>
+    <div id="stroop-rule-sub">
+      타겟을 모두 맞추면 기준이 전환됩니다.<br>(5라운드 묶음 점수)
+    </div>
+  </div>
+</div>
+
+<div id="game-area"></div>
+
+<div id="message"></div>
+
+<!-- 스트룹 규칙 전환 큰 알림 -->
+<div id="stroop-alert"></div>
+
+<!-- 정답/오답 큰 피드백 -->
+<div id="feedback-alert"></div>
+
+<!-- 5라운드 총점 / 시간 종료 점수 알림 -->
+<div id="result-alert"></div>
+
+<script>
+  const AREA_WIDTH = 1000;
+  const AREA_HEIGHT = 600;
+  const SHAPE_SIZE = 120;
+
+  const SHAPES = [
+    { id: "circle",  name: "동그라미", symbol: "●" },
+    { id: "square",  name: "네모",     symbol: "■" },
+    { id: "triangle",name: "세모",     symbol: "▲" },
+    { id: "star",    name: "별",       symbol: "★" }
+  ];
+
+  const COLORS = [
+    { id: "red",   name: "빨강", css: "#e53935" },
+    { id: "blue",  name: "파랑", css: "#1e88e5" },
+    { id: "green", name: "초록", css: "#43a047" },
+    { id: "yellow",name: "노랑", css: "#fdd835" }
+  ];
+
+  const modeSelect        = document.getElementById("mode-select");
+  const levelSelect       = document.getElementById("level-select");
+  const bpmSelect         = document.getElementById("bpm-select");
+  const bpmControl        = document.getElementById("bpm-control");
+  const countSelect       = document.getElementById("count-select");
+  const timeSelect        = document.getElementById("time-select");
+  const targetShapeSel    = document.getElementById("target-shape-select");
+  const targetColorSel    = document.getElementById("target-color-select");
+  const startBtn          = document.getElementById("start-btn");
+
+  const modeLabel         = document.getElementById("mode-label");
+  const bpmLabel          = document.getElementById("bpm-label");
+  const beatCountSpan     = document.getElementById("beat-count");
+  const maxBeatsLabel     = document.getElementById("max-beats-label");
+  const hitsSpan          = document.getElementById("hits");
+  const missesSpan        = document.getElementById("misses");
+  const timeRemainingSpan = document.getElementById("time-remaining");
+  const messageDiv        = document.getElementById("message");
+  const gameArea          = document.getElementById("game-area");
+
+  const targetShapeView   = document.getElementById("target-visual-shape");
+  const targetTextView    = document.getElementById("target-visual-text");
+  const stroopRulePanel   = document.getElementById("stroop-rule-panel");
+  const stroopRuleText    = document.getElementById("stroop-rule-text");
+  const resultAlertBox    = document.getElementById("result-alert");
+
+  let audioCtx = null;
+  let animId = null;
+  let beatTimerId = null;
+  let timeTimerId = null;
+
+  let mode = "basic";           // "basic" or "stroop"
+  let stroopRule = "shape";     // "shape" or "color"
+
+  let useBeat = true;           // 기본 모드에서만 true 가능
+  let bpm = 60;
+  let maxBeats = 50;
+  let speed = 0.7;              // 이동속도
+  let timingWindow = 360;       // BPM에 따라 timingFromBpm으로 결정
+  let numShapes = 12;
+  let targetRatio = 0.3;        // 무박 모드에서 타겟 비율
+
+  let hits = 0;
+  let misses = 0;
+  let beatCount = 0;
+  let lastBeatTime = null;
+  let clickedThisBeat = false;
+  let running = false;
+
+  let timeLimitSec = 0;
+  let remainingTime = 0;
+
+  let targetShapeType = null; // {id,name,symbol} 또는 null
+  let targetColor = null;     // {id,name,css} 또는 null
+
+  let shapes = [];
+
+  // 스트룹 모드: 라운드(한 화면) 단위 카운트
+  let stroopRoundHits = 0;
+  let stroopRoundMisses = 0;
+
+  // 스트룹 모드: 5라운드 묶음 총점용
+  let stroopGroupHits = 0;
+  let stroopGroupMisses = 0;
+  let stroopGroupRounds = 0;  // 0~5
+
+  // LEVEL 4용: 타겟/규칙 자동 무작위 전환 플래그
+  let autoRandomTarget = false;
+
+  // 🔧 정타 판정 오차범위: 넉넉하게 (±700~1000ms 수준)
+  function timingFromBpm(b) {
+    if (b <= 50) return 1000;  // ±1000ms
+    if (b <= 70) return 900;   // ±900ms
+    if (b <= 90) return 800;   // ±800ms
+    return 700;                // ±700ms
+  }
+
+  function updateBpmVisibility() {
+    if (mode === "stroop") {
+      bpmControl.style.display = "none";
+      bpmLabel.textContent = "-";
+      beatCountSpan.textContent = "-";
+      maxBeatsLabel.textContent = "-";
+    } else {
+      bpmControl.style.display = "inline-flex";
+      if (bpmSelect.value === "none") {
+        bpmLabel.textContent = "-";
+        beatCountSpan.textContent = "-";
+        maxBeatsLabel.textContent = "-";
+      } else {
+        bpmLabel.textContent = bpmSelect.value;
+        maxBeatsLabel.textContent = "50";
+      }
+    }
+  }
+
+  function initSelectors() {
+    modeSelect.value = "basic";
+    mode = "basic";
+    modeLabel.textContent = "기본";
+
+    // 모양 셀렉트: 없음 + SHAPES
+    targetShapeSel.innerHTML = "";
+    const optNoneShape = document.createElement("option");
+    optNoneShape.value = "none";
+    optNoneShape.textContent = "없음 (모양 무시)";
+    targetShapeSel.appendChild(optNoneShape);
+    SHAPES.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = `${s.name} (${s.symbol})`;
+      targetShapeSel.appendChild(opt);
+    });
+
+    // 색 셀렉트: 없음 + COLORS
+    targetColorSel.innerHTML = "";
+    const optNoneColor = document.createElement("option");
+    optNoneColor.value = "none";
+    optNoneColor.textContent = "없음 (색 무시)";
+    targetColorSel.appendChild(optNoneColor);
+    COLORS.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.name;
+      targetColorSel.appendChild(opt);
+    });
+
+    // 기본값
+    targetShapeSel.value = "star";
+    targetColorSel.value = "yellow";
+    bpmSelect.value = "60";
+    countSelect.value = "12";
+    timeSelect.value = "none";
+    speed = 0.7;
+    targetRatio = 0.3;
+
+    maxBeatsLabel.textContent = "50";
+    timeRemainingSpan.textContent = "-";
+
+    updateTargetObjects();
+    updateTargetVisual();
+    updateStroopPanel();
+    updateBpmVisibility();
+  }
+
+  function updateTargetObjects() {
+    const shapeVal = targetShapeSel.value;
+    const colorVal = targetColorSel.value;
+
+    targetShapeType = (shapeVal === "none")
+      ? null
+      : SHAPES.find(s => s.id === shapeVal) || null;
+
+    targetColor = (colorVal === "none")
+      ? null
+      : COLORS.find(c => c.id === colorVal) || null;
+  }
+
+  function getTargetDescription() {
+    if (targetShapeType && targetColor) {
+      return `${targetColor.name} ${targetShapeType.name}`;
+    } else if (targetShapeType && !targetColor) {
+      return `${targetShapeType.name} (색 상관 없음)`;
+    } else if (!targetShapeType && targetColor) {
+      return `${targetColor.name} (모양 상관 없음)`;
+    } else {
+      return "타겟 없음";
+    }
+  }
+
+  function updateTargetVisual() {
+    if (!targetShapeType && !targetColor) {
+      targetShapeView.textContent = "?";
+      targetShapeView.style.color = "#333";
+      targetTextView.textContent = "타겟 없음\n(모양 또는 색을 선택하세요)";
+      return;
+    }
+
+    const symbol = targetShapeType ? targetShapeType.symbol : "?";
+    const colorCss = targetColor ? targetColor.css : "#333";
+
+    targetShapeView.textContent = symbol;
+    targetShapeView.style.color = colorCss;
+    targetTextView.textContent = getTargetDescription();
+  }
+
+  function updateStroopPanel() {
+    if (mode !== "stroop") {
+      stroopRulePanel.style.display = "none";
+      return;
+    }
+    stroopRulePanel.style.display = "block";
+    stroopRuleText.textContent =
+      stroopRule === "shape" ? "모양 기준" : "색 기준";
+  }
+
+  // LEVEL 4: 타겟 모양·색 & 규칙 무작위 설정
+  function setRandomTargetAndRuleForStroop() {
+    // 타겟 모양/색 랜덤
+    targetShapeType = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    targetColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    // 셀렉트 박스도 같이 갱신 (치료사 확인용)
+    targetShapeSel.value = targetShapeType.id;
+    targetColorSel.value = targetColor.id;
+
+    // 규칙도 랜덤 (모양/색 기준)
+    stroopRule = Math.random() < 0.5 ? "shape" : "color";
+
+    updateTargetVisual();
+    updateStroopPanel();
+
+    const ruleText = (stroopRule === "shape") ? "모양 기준" : "색 기준";
+    const targetText = `${targetColor.name} ${targetShapeType.name}`;
+
+    showStroopAlert(`새 라운드 시작\n타겟: ${targetText}\n기준: ${ruleText}`);
+
+    messageDiv.textContent =
+      `새 라운드 시작! (현재 ${stroopGroupRounds + 1}/5라운드)\n` +
+      `타겟: ${targetText}, 기준: ${ruleText}`;
+  }
+
+  // 레벨 프리셋
+  function applyLevelPreset(level) {
+    autoRandomTarget = false;
+
+    if (level === "L1") {
+      modeSelect.value = "basic";
+      mode = "basic";
+      bpmSelect.value = "none";
+      countSelect.value = "8";
+      speed = 0.4;
+      targetRatio = 0.5;
+    } else if (level === "L2") {
+      modeSelect.value = "basic";
+      mode = "basic";
+      bpmSelect.value = "60";
+      countSelect.value = "12";
+      speed = 0.7;
+      targetRatio = 0.3;
+    } else if (level === "L3") {
+      modeSelect.value = "stroop";
+      mode = "stroop";
+      bpmSelect.value = "none";
+      countSelect.value = "16";
+      speed = 1.0;
+      targetRatio = 0.3;
+      autoRandomTarget = false;
+    } else if (level === "L4") {
+      modeSelect.value = "stroop";
+      mode = "stroop";
+      bpmSelect.value = "none";
+      countSelect.value = "16";
+      speed = 1.0;
+      targetRatio = 0.3;
+      autoRandomTarget = true;
+    } else {
+      return;
+    }
+
+    modeLabel.textContent = (mode === "basic") ? "기본" : "스트룹";
+    updateBpmVisibility();
+    updateStroopPanel();
+  }
+
+  levelSelect.addEventListener("change", () => {
+    const level = levelSelect.value;
+    if (level === "custom") {
+      autoRandomTarget = false;
+      return;
+    }
+    applyLevelPreset(level);
+  });
+
+  modeSelect.addEventListener("change", () => {
+    mode = modeSelect.value;
+    modeLabel.textContent = mode === "basic" ? "기본" : "스트룹";
+    updateBpmVisibility();
+    updateStroopPanel();
+  });
+
+  targetShapeSel.addEventListener("change", () => {
+    updateTargetObjects();
+    updateTargetVisual();
+  });
+
+  targetColorSel.addEventListener("change", () => {
+    updateTargetObjects();
+    updateTargetVisual();
+  });
+
+  function randomPos() {
+    return {
+      x: Math.random() * (AREA_WIDTH - SHAPE_SIZE),
+      y: Math.random() * (AREA_HEIGHT - SHAPE_SIZE)
+    };
+  }
+
+  // 다른 도형들과 겹치지 않도록 위치 뽑기
+  function randomNonOverlapPos() {
+    let tries = 0;
+    while (true) {
+      const pos = randomPos();
+      let overlap = false;
+      for (const s of shapes) {
+        if (Math.abs(pos.x - s.x) < SHAPE_SIZE &&
+            Math.abs(pos.y - s.y) < SHAPE_SIZE) {
+          overlap = true;
+          break;
+        }
+      }
+      if (!overlap || tries > 100) return pos;
+      tries++;
+    }
+  }
+
+  function randomVel() {
+    const ang = Math.random() * Math.PI * 2;
+    return {
+      dx: Math.cos(ang) * speed,
+      dy: Math.sin(ang) * speed
+    };
+  }
+
+  function randomColorObj() {
+    return COLORS[Math.floor(Math.random() * COLORS.length)];
+  }
+
+  function showStroopAlert(text) {
+    const alertBox = document.getElementById("stroop-alert");
+    alertBox.textContent = text;
+    alertBox.style.display = "block";
+    alertBox.style.opacity = "1";
+
+    setTimeout(() => {
+      alertBox.style.opacity = "0";
+    }, 900);
+
+    setTimeout(() => {
+      alertBox.style.display = "none";
+    }, 1200);
+  }
+
+  function showFeedback(text, type) {
+    const box = document.getElementById("feedback-alert");
+    box.textContent = text;
+    box.style.background =
+      type === "hit" ? "rgba(46, 204, 113, 0.9)" : "rgba(231, 76, 60, 0.9)";
+    box.style.display = "block";
+    box.style.opacity = "1";
+
+    setTimeout(() => {
+      box.style.opacity = "0";
+    }, 500);
+
+    setTimeout(() => {
+      box.style.display = "none";
+    }, 800);
+  }
+
+  // 5라운드 총점 / 시간 종료 점수 표시 (사라지지 않음)
+  function showResultAlert(text) {
+    resultAlertBox.textContent = text;
+    resultAlertBox.style.display = "block";
+    resultAlertBox.style.opacity = "1";
+  }
+
+  function toggleStroopRule() {
+    stroopRule = (stroopRule === "shape") ? "color" : "shape";
+    const ruleText = stroopRule === "shape" ? "모양 기준" : "색 기준";
+    messageDiv.textContent =
+      `규칙 전환: 이제 '${ruleText}'으로 선택하세요! (현재 ${stroopGroupRounds + 1}/5라운드)`;
+    showStroopAlert(ruleText);
+    updateStroopPanel();
+  }
+
+  function isTargetMatch(shapeId, colorId) {
+    const requireShape = !!targetShapeType;
+    const requireColor = !!targetColor;
+
+    if (!requireShape && !requireColor) return false;
+
+    if (mode === "basic") {
+      const shapeOK = !requireShape || (shapeId === targetShapeType.id);
+      const colorOK = !requireColor || (colorId === targetColor.id);
+      return shapeOK && colorOK;
+    } else {
+      // 스트룹 모드: 현재 stroopRule에 따라 하나만 기준
+      if (stroopRule === "shape") {
+        if (!targetShapeType) return false;
+        return shapeId === targetShapeType.id;
+      } else {
+        if (!targetColor) return false;
+        return colorId === targetColor.id;
+      }
+    }
+  }
+
+  function shakeElement(elem) {
+    if (!elem) return;
+    elem.classList.add("shake");
+    setTimeout(() => {
+      elem.classList.remove("shake");
+    }, 200);
+  }
+
+  function createTargetShape() {
+    let shapeType = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    let colorObj  = randomColorObj();
+
+    if (mode === "basic") {
+      if (targetShapeType) shapeType = targetShapeType;
+      if (targetColor)     colorObj  = targetColor;
+    } else {
+      // 스트룹 모드: 현재 규칙 기준으로만 맞게, 나머지 속성은 conflict 유발
+      if (stroopRule === "shape") {
+        shapeType = targetShapeType;
+        colorObj = randomColorObj();
+        if (targetColor && colorObj.id === targetColor.id) {
+          const others = COLORS.filter(c => c.id !== targetColor.id);
+          colorObj = others[Math.floor(Math.random() * others.length)];
+        }
+      } else {
+        colorObj = targetColor;
+        shapeType = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        if (targetShapeType && shapeType.id === targetShapeType.id) {
+          const others = SHAPES.filter(s => s.id !== targetShapeType.id);
+          shapeType = others[Math.floor(Math.random() * others.length)];
+        }
+      }
+    }
+
+    const elem = document.createElement("div");
+    elem.className = "shape";
+    elem.textContent = shapeType.symbol;
+    elem.style.color = colorObj.css;
+
+    const pos = randomNonOverlapPos();
+    const vel = randomVel();
+
+    elem.style.left = pos.x + "px";
+    elem.style.top  = pos.y + "px";
+
+    elem.addEventListener("click", () =>
+      handleShapeClick(shapeType, colorObj.id, elem)
+    );
+
+    gameArea.appendChild(elem);
+
+    shapes.push({
+      elem,
+      type: shapeType,
+      colorId: colorObj.id,
+      x: pos.x,
+      y: pos.y,
+      dx: vel.dx,
+      dy: vel.dy
+    });
+  }
+
+  function createDistractorShape() {
+    let shapeType = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    let colorObj  = randomColorObj();
+
+    if (mode === "basic") {
+      // 기본 모드: 아예 타겟 조건과 겹치지 않도록 조정
+      let tries = 0;
+      while (isTargetMatch(shapeType.id, colorObj.id) && tries < 20) {
+        shapeType = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        colorObj  = randomColorObj();
+        tries++;
+      }
+    } else {
+      // 스트룹 모드: Stroop conflict 유발
+      const requireShape = !!targetShapeType;
+      const requireColor = !!targetColor;
+
+      const r = Math.random();
+      if (stroopRule === "shape") {
+        if (requireShape) {
+          const otherShapes = SHAPES.filter(s => s.id !== targetShapeType.id);
+          shapeType = otherShapes[Math.floor(Math.random() * otherShapes.length)];
+        }
+        if (requireColor && r < 0.5) {
+          colorObj = targetColor;
+        } else {
+          if (requireColor && colorObj.id === targetColor.id && r >= 0.5) {
+            const otherColors = COLORS.filter(c => c.id !== targetColor.id);
+            colorObj = otherColors[Math.floor(Math.random() * otherColors.length)];
+          }
+        }
+      } else {
+        if (requireColor) {
+          const otherColors = COLORS.filter(c => c.id !== targetColor.id);
+          colorObj = otherColors[Math.floor(Math.random() * otherColors.length)];
+        }
+        if (requireShape && r < 0.5) {
+          shapeType = targetShapeType;
+        } else {
+          if (requireShape && shapeType.id === targetShapeType.id && r >= 0.5) {
+            const otherShapes = SHAPES.filter(s => s.id !== targetShapeType.id);
+            shapeType = otherShapes[Math.floor(Math.random() * otherShapes.length)];
+          }
+        }
+      }
+    }
+
+    const elem = document.createElement("div");
+    elem.className = "shape";
+    elem.textContent = shapeType.symbol;
+    elem.style.color = colorObj.css;
+
+    const pos = randomNonOverlapPos();
+    const vel = randomVel();
+
+    elem.style.left = pos.x + "px";
+    elem.style.top  = pos.y + "px";
+
+    elem.addEventListener("click", () =>
+      handleShapeClick(shapeType, colorObj.id, elem)
+    );
+
+    gameArea.appendChild(elem);
+
+    shapes.push({
+      elem,
+      type: shapeType,
+      colorId: colorObj.id,
+      x: pos.x,
+      y: pos.y,
+      dx: vel.dx,
+      dy: vel.dy
+    });
+  }
+
+  function createShapes() {
+    gameArea.innerHTML = "";
+    shapes = [];
+
+    let targetCount;
+    if (useBeat) {
+      targetCount = 1; // 기본 + BPM 있을 때는 타겟 1개
+    } else {
+      // 무박 모드 (기본 무박 / 스트룹): 타겟 비율 사용
+      targetCount = Math.round(numShapes * targetRatio);
+      targetCount = Math.max(2, targetCount);
+      targetCount = Math.min(numShapes - 1, targetCount);
+    }
+
+    for (let i = 0; i < targetCount; i++) {
+      createTargetShape();
+    }
+
+    const remaining = Math.max(0, numShapes - targetCount);
+    for (let i = 0; i < remaining; i++) {
+      createDistractorShape();
+    }
+  }
+
+  // 도형들끼리 겹치면 서로 밀어내기
+  function resolveCollisions() {
+    const minDist = SHAPE_SIZE;
+    for (let i = 0; i < shapes.length; i++) {
+      for (let j = i + 1; j < shapes.length; j++) {
+        const s1 = shapes[i];
+        const s2 = shapes[j];
+        const dx = s2.x - s1.x;
+        const dy = s2.y - s1.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0 && dist < minDist) {
+          const overlap = minDist - dist;
+          const nx = dx / dist;
+          const ny = dy / dist;
+          s1.x -= nx * overlap / 2;
+          s1.y -= ny * overlap / 2;
+          s2.x += nx * overlap / 2;
+          s2.y += ny * overlap / 2;
+
+          // 벽 안으로 밀려난 경우 다시 클램프
+          s1.x = Math.min(Math.max(0, s1.x), AREA_WIDTH - SHAPE_SIZE);
+          s1.y = Math.min(Math.max(0, s1.y), AREA_HEIGHT - SHAPE_SIZE);
+          s2.x = Math.min(Math.max(0, s2.x), AREA_WIDTH - SHAPE_SIZE);
+          s2.y = Math.min(Math.max(0, s2.y), AREA_HEIGHT - SHAPE_SIZE);
+        }
+      }
+    }
+  }
+
+  function animate() {
+    shapes.forEach(s => {
+      s.x += s.dx;
+      s.y += s.dy;
+
+      if (s.x <= 0 || s.x >= AREA_WIDTH - SHAPE_SIZE) s.dx *= -1;
+      if (s.y <= 0 || s.y >= AREA_HEIGHT - SHAPE_SIZE) s.dy *= -1;
+
+      s.elem.style.left = s.x + "px";
+      s.elem.style.top  = s.y + "px";
+    });
+
+    // 위치 업데이트 후, 서로 겹치는 도형 밀어내기
+    resolveCollisions();
+    shapes.forEach(s => {
+      s.elem.style.left = s.x + "px";
+      s.elem.style.top  = s.y + "px";
+    });
+
+    if (running) {
+      animId = requestAnimationFrame(animate);
+    }
+  }
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } else if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+  }
+
+  function playBeep() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+    osc.start(now);
+    osc.stop(now + 0.25);
+  }
+
+  // 제한시간 종료 시 공통 처리
+  function endGameByTime() {
+    if (!running) return;
+    running = false;
+
+    if (beatTimerId) {
+      clearInterval(beatTimerId);
+      beatTimerId = null;
+    }
+    if (animId) {
+      cancelAnimationFrame(animId);
+      animId = null;
+    }
+
+    if (mode === "stroop") {
+      const totalHits = stroopGroupHits + stroopRoundHits;
+      const totalMisses = stroopGroupMisses + stroopRoundMisses;
+      const total = totalHits + totalMisses;
+      const acc = total > 0 ? (totalHits / total * 100).toFixed(1) : "0.0";
+      showResultAlert(`시간 종료\n전체 정확도 ${acc}%`);
+      messageDiv.textContent =
+        `시간 종료! (진행 라운드: ${stroopGroupRounds}라운드 + 진행 중 1라운드)\n전체 정확도: ${acc}%`;
+    } else {
+      const total = hits + misses;
+      const acc = total > 0 ? (hits / total * 100).toFixed(1) : "0.0";
+      showResultAlert(`시간 종료\n전체 정확도 ${acc}%`);
+      messageDiv.innerHTML =
+        `시간 종료! 정답: ${hits} / 실수: ${misses} (정확도 ${acc}%)`;
+    }
+  }
+
+  // 기본 + BPM 모드 박자 타이머
+  function doBeat() {
+    if (!running || !useBeat || mode !== "basic") return;
+
+    lastBeatTime = performance.now();
+    clickedThisBeat = false;
+    beatCount++;
+    beatCountSpan.textContent = beatCount;
+
+    playBeep();
+
+    if (beatCount >= maxBeats) {
+      running = false;
+      if (beatTimerId) {
+        clearInterval(beatTimerId);
+        beatTimerId = null;
+      }
+      const total = hits + misses;
+      const accuracy = total > 0 ? (hits / total * 100).toFixed(1) : 0;
+      const onBeatAcc = maxBeats > 0 ? (hits / maxBeats * 100).toFixed(1) : 0;
+
+      messageDiv.innerHTML =
+        `게임 종료!<br>
+         총 박자: ${beatCount} / ${maxBeats}<br>
+         정타: ${hits}회 / 실수: ${misses}회<br>
+         전체 정확도: ${accuracy}%<br>
+         박자 내 정타율(이론상): ${onBeatAcc}%`;
+    }
+  }
+
+  function handleShapeClick(shapeType, colorId, elem) {
+    if (!running) return;
+
+    // 타겟이 아닌 경우
+    if (!isTargetMatch(shapeType.id, colorId)) {
+      misses++;
+      missesSpan.textContent = misses;
+      messageDiv.textContent = "타겟이 아닙니다 (실수)";
+      shakeElement(elem);
+      showFeedback("오답!", "miss");
+      if (mode === "stroop") {
+        stroopRoundMisses++;
+      }
+      return;
+    }
+
+    // 스트룹 모드
+    if (mode === "stroop") {
+      hits++;
+      hitsSpan.textContent = hits;
+      stroopRoundHits++;
+      showFeedback("정답!", "hit");
+
+      // 현재 타겟 도형 제거
+      if (elem && elem.parentNode === gameArea) {
+        gameArea.removeChild(elem);
+      }
+      shapes = shapes.filter(s => s.elem !== elem);
+
+      // 남아 있는 도형 중 현재 규칙 기준 타겟이 하나도 없으면 → 라운드 종료
+      const anyTargetLeft = shapes.some(s => isTargetMatch(s.type.id, s.colorId));
+      if (!anyTargetLeft) {
+        const roundTotal = stroopRoundHits + stroopRoundMisses;
+        const roundAcc = roundTotal > 0
+          ? (stroopRoundHits / roundTotal * 100).toFixed(1)
+          : "100.0";
+
+        if (stroopGroupRounds < 5) {
+          stroopGroupHits += stroopRoundHits;
+          stroopGroupMisses += stroopRoundMisses;
+          stroopGroupRounds++;
+
+          messageDiv.textContent =
+            `라운드 ${stroopGroupRounds} 완료 (이번 정확도 ${roundAcc}%)` +
+            (stroopGroupRounds < 5
+              ? ` / 다음 라운드 준비 (총 ${stroopGroupRounds}/5라운드)`
+              : " / 5라운드 완료!");
+
+          if (stroopGroupRounds === 5) {
+            const total = stroopGroupHits + stroopGroupMisses;
+            const totalAcc = total > 0
+              ? (stroopGroupHits / total * 100).toFixed(1)
+              : "100.0";
+            showResultAlert(`5라운드 총 정확도\n${totalAcc}%`);
+          }
+        }
+
+        // 다음 라운드 준비
+        stroopRoundHits = 0;
+        stroopRoundMisses = 0;
+
+        if (autoRandomTarget) {
+          setRandomTargetAndRuleForStroop();
+        } else {
+          toggleStroopRule();
+        }
+        createShapes();
+      }
+      return;
+    }
+
+    // 기본 모드 + 무박: 타이밍 평가 X
+    if (!useBeat) {
+      hits++;
+      hitsSpan.textContent = hits;
+      messageDiv.textContent = "정답! (무박 모드)";
+      showFeedback("정답!", "hit");
+      return;
+    }
+
+    // 기본 + BPM 모드
+    if (lastBeatTime === null) return;
+
+    const now = performance.now();
+    const diff = Math.abs(now - lastBeatTime);
+
+    if (clickedThisBeat) {
+      misses++;
+      missesSpan.textContent = misses;
+      messageDiv.textContent = "같은 박자에 여러 번 클릭했습니다 (실수)";
+      shakeElement(elem);
+      showFeedback("오답!", "miss");
+      return;
+    }
+
+    clickedThisBeat = true;
+
+    if (diff <= timingWindow) {
+      hits++;
+      hitsSpan.textContent = hits;
+      messageDiv.textContent =
+        `정타! (오차: ${Math.round(diff)}ms, 기준: ±${timingWindow}ms)`;
+      showFeedback("정타!", "hit");
+    } else {
+      misses++;
+      missesSpan.textContent = misses;
+      messageDiv.textContent =
+        now < lastBeatTime ? "너무 빠르게 클릭했습니다 (실수)"
+                           : "너무 늦게 클릭했습니다 (실수)";
+      shakeElement(elem);
+      showFeedback("오답!", "miss");
+    }
+  }
+
+  startBtn.addEventListener("click", () => {
+    initAudio();
+
+    // 새 게임 시작 → 이전 5라운드/시간 점수 숨기기
+    resultAlertBox.style.display = "none";
+    resultAlertBox.style.opacity = "0";
+
+    // 기존 타이머 정리
+    if (beatTimerId) {
+      clearInterval(beatTimerId);
+      beatTimerId = null;
+    }
+    if (timeTimerId) {
+      clearInterval(timeTimerId);
+      timeTimerId = null;
+    }
+    if (animId) {
+      cancelAnimationFrame(animId);
+      animId = null;
+    }
+
+    // 스트룹 + LEVEL 4 (자동 랜덤 타겟)인 경우: 타겟/규칙을 코드에서 설정
+    if (mode === "stroop" && autoRandomTarget) {
+      setRandomTargetAndRuleForStroop();
+    } else {
+      updateTargetObjects();
+      if (mode === "stroop" && (!targetShapeType || !targetColor)) {
+        messageDiv.textContent = "스트룹 모드에서는 타겟 모양과 색을 모두 선택해주세요.";
+        return;
+      }
+    }
+
+    // 모드별 박자 사용 설정
+    if (mode === "stroop") {
+      useBeat = false;
+      bpmLabel.textContent = "-";
+      beatCountSpan.textContent = "-";
+      maxBeatsLabel.textContent = "-";
+    } else {
+      if (bpmSelect.value === "none") {
+        useBeat = false;
+        bpmLabel.textContent = "-";
+        beatCountSpan.textContent = "-";
+        maxBeatsLabel.textContent = "-";
+      } else {
+        useBeat = true;
+        bpm = Number(bpmSelect.value);
+        bpmLabel.textContent = bpm.toString();
+        timingWindow = timingFromBpm(bpm);
+        maxBeats = 50;
+        maxBeatsLabel.textContent = "50";
+        beatCountSpan.textContent = "0";
+      }
+    }
+
+    // 제한시간 설정
+    if (timeSelect.value === "none") {
+      timeLimitSec = 0;
+      remainingTime = 0;
+      timeRemainingSpan.textContent = "-";
+    } else {
+      timeLimitSec = Number(timeSelect.value);
+      remainingTime = timeLimitSec;
+      timeRemainingSpan.textContent = remainingTime.toString();
+
+      timeTimerId = setInterval(() => {
+        if (!running) {
+          clearInterval(timeTimerId);
+          timeTimerId = null;
+          return;
+        }
+        remainingTime--;
+        timeRemainingSpan.textContent =
+          remainingTime >= 0 ? remainingTime.toString() : "0";
+        if (remainingTime <= 0) {
+          clearInterval(timeTimerId);
+          timeTimerId = null;
+          endGameByTime();
+        }
+      }, 1000);
+    }
+
+    numShapes = Number(countSelect.value);
+
+    // 카운터 초기화
+    hits = 0;
+    misses = 0;
+    beatCount = 0;
+    hitsSpan.textContent = hits;
+    missesSpan.textContent = misses;
+    if (useBeat) beatCountSpan.textContent = "0";
+
+    // 스트룹 라운드·5라운드 묶음 카운트 초기화
+    stroopRoundHits = 0;
+    stroopRoundMisses = 0;
+    stroopGroupHits = 0;
+    stroopGroupMisses = 0;
+    stroopGroupRounds = 0;
+
+    // 스트룹 모드 시작 메시지
+    if (mode === "stroop") {
+      if (autoRandomTarget) {
+        messageDiv.textContent =
+          "LEVEL 4 시작! (무작위 타겟 전환)\n첫 라운드 준비 중...";
+      } else {
+        stroopRule = "shape";
+        showStroopAlert("모양 기준");
+        updateStroopPanel();
+        messageDiv.textContent =
+          "LEVEL 3 시작! (어려움)\n" +
+          "화면의 타겟을 모두 맞추면 모양/색 기준이 바뀝니다. (5라운드 묶음)";
+      }
+    } else if (!useBeat) {
+      messageDiv.textContent =
+        "기본 모드(무박) 시작! 타겟 조건에 해당하는 도형들을 찾아 터치하세요.";
+      updateStroopPanel();
+    } else {
+      messageDiv.textContent =
+        "기본 모드(박자 있음) 시작! 박자 소리에 맞춰 타겟만 터치하세요.";
+      updateStroopPanel();
+    }
+
+    updateTargetVisual();
+
+    createShapes();
+
+    running = true;
+    lastBeatTime = null;
+    clickedThisBeat = false;
+
+    animId = requestAnimationFrame(animate);
+
+    if (useBeat && mode === "basic") {
+      doBeat();
+      beatTimerId = setInterval(doBeat, 60000 / bpm);
+    }
+  });
+
+  // 초기 셋업
+  initSelectors();
+</script>
+
+<a href="index.html"><button style="position: absolute; top: 20px; left: 20px; padding: 8px 16px; border-radius: 999px; border: 1px solid #bbb; background: #fafafa; cursor: pointer; font-size: 13px;">← 메인으로</button></a>
+
+<div style="position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background-color: rgba(255, 255, 255, 0.8); border-radius: 4px; font-weight: 500; z-index: 9999;">광주365재활병원_인지연하팀</div>
+
+<div id="hospital-logo" style="position:fixed;bottom:10px;right:10px;font-size:12px;color:#666;padding:5px 10px;background:rgba(255,255,255,0.9);border-radius:4px;font-weight:500;">광주365재활병원_인지연하팀</div>
+</body>
+</html>

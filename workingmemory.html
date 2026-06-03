@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공간지각 / 작업기억 - 광주365재활병원</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 3rem;
+      font-weight: 800;
+      color: #222;
+      text-align: center;
+    }
+
+    #description {
+      max-width: 900px;
+      font-size: 1.4rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #description b {
+      color: #000;
+    }
+
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    #arrow-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+      background-color: #f0f8ff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 800px;
+    }
+
+    .arrow {
+      width: 80px;
+      height: 80px;
+      background-color: #ffb6c1;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+
+    #grid-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      gap: 25px;
+      background-color: #e6f2ff;
+      padding: 35px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .grid-cell {
+      width: 90px;
+      height: 90px;
+      background-color: #a0d2eb;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      font-size: 60px;
+    }
+
+    .grid-cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .grid-cell.selected {
+      background-color: #ffb74d;
+      box-shadow: 0 0 0 4px #ff9800;
+    }
+
+    .grid-cell.correct {
+      background-color: #81c784;
+      box-shadow: 0 0 0 4px #4caf50;
+    }
+
+    .grid-cell.incorrect {
+      background-color: #e57373;
+      box-shadow: 0 0 0 4px #f44336;
+    }
+
+    .grid-cell.character {
+      background-color: transparent;
+    }
+
+    #result {
+      font-size: 1.6rem;
+      font-weight: 600;
+      text-align: center;
+      min-height: 40px;
+      margin-top: 15px;
+    }
+
+    #result.correct {
+      color: #4caf50;
+    }
+
+    #result.incorrect {
+      color: #f44336;
+    }
+
+    #level-select {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    #level-select label {
+      font-size: 1.2rem;
+    }
+
+    #level-select select {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1.2rem;
+    }
+
+    #controls {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .control-btn {
+      padding: 15px 30px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+
+    #start-btn {
+      background-color: #4caf50;
+    }
+
+    #start-btn:hover {
+      background-color: #388e3c;
+    }
+
+    #reset-btn {
+      background-color: #f44336;
+    }
+
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .control-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    #stats {
+      margin-top: 20px;
+      padding: 15px 25px;
+      background-color: #f5f5f5;
+      border-radius: 999px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      font-size: 1.2rem;
+    }
+
+    #stats span {
+      font-weight: bold;
+      margin: 0 5px;
+    }
+
+    .feedback-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 40px;
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .feedback-overlay.show {
+      opacity: 1;
+    }
+
+    .feedback-overlay.correct {
+      background-color: rgba(76, 175, 80, 0.7);
+    }
+
+    .feedback-overlay.incorrect {
+      background-color: rgba(244, 67, 54, 0.7);
+    }
+
+    #progress-bar {
+      width: 100%;
+      max-width: 600px;
+      height: 10px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    #progress-fill {
+      height: 100%;
+      background-color: #4caf50;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    #question-counter {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    /* 메인으로 돌아가는 버튼 스타일 */
+    #main-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid #bbb;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 13px;
+      z-index: 99999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    #main-button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    }
+
+    /* 병원 로고 스타일 */
+    #hospital-logo {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 12px;
+      color: #666;
+      padding: 5px 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 4px;
+      font-weight: 500;
+      z-index: 99999;
+    }
+
+    @media (max-width: 768px) {
+      .grid-cell {
+        width: 70px;
+        height: 70px;
+        font-size: 45px;
+      }
+
+      .arrow {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+      }
+      
+      #description {
+        font-size: 1.2rem;
+      }
+      
+      .control-btn {
+        padding: 12px 24px;
+        font-size: 1.2rem;
+      }
+      
+      #grid-container {
+        gap: 15px;
+      }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+  <h1>공간지각 및 작업기억 훈련</h1>
+
+  <div id="description">
+    <b>게임 방법:</b> 강아지가 마지막에 도착할 위치를 찾는 게임입니다.<br>
+    상단에 있는 화살표 방향대로 강아지를 이동시켜 최종 도착 위치를 찾아주세요.<br>
+    강아지의 시작 위치에서 화살표를 순서대로 따라가 최종 위치를 클릭하세요.
+  </div>
+
+  <div id="level-select">
+    <label for="difficulty">난이도:</label>
+    <select id="difficulty">
+      <option value="easy">쉬움 (3x3 그리드, 5개 화살표)</option>
+      <option value="medium" selected>중간 (5x5 그리드, 7개 화살표)</option>
+      <option value="hard">어려움 (7x7 그리드, 10개 화살표)</option>
+    </select>
+  </div>
+
+  <div id="stats">
+    정답: <span id="correct-count">0</span> / 
+    오답: <span id="wrong-count">0</span>
+  </div>
+
+  <div id="question-counter">문제 <span id="current-question">1</span> / <span id="total-questions">10</span></div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+
+  <div id="game-container">
+    <div id="arrow-container">
+      <!-- 화살표들이 여기에 동적으로 추가됩니다 -->
+    </div>
+
+    <div id="grid-container">
+      <!-- 그리드 셀들이 여기에 동적으로 추가됩니다 -->
+    </div>
+  </div>
+
+  <div id="result"></div>
+
+  <div id="controls">
+    <button id="start-btn" class="control-btn">게임 시작</button>
+    <button id="reset-btn" class="control-btn">다시 시작</button>
+  </div>
+
+  <!-- 메인으로 돌아가는 버튼 -->
+  <button id="main-button" onclick="goBack()">← 메인으로</button>
+
+  <!-- 병원 로고 -->
+  <div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+  <script>
+    // 메인으로 돌아가는 함수
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+
+    // DOM 요소
+    const arrowContainer = document.getElementById('arrow-container');
+    const gridContainer = document.getElementById('grid-container');
+    const resultDiv = document.getElementById('result');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const difficultySelect = document.getElementById('difficulty');
+    const correctCountEl = document.getElementById('correct-count');
+    const wrongCountEl = document.getElementById('wrong-count');
+    const currentQuestionEl = document.getElementById('current-question');
+    const totalQuestionsEl = document.getElementById('total-questions');
+    const progressFill = document.getElementById('progress-fill');
+
+    // 게임 상태
+    let gameActive = false;
+    let gridSize = 5; // 기본 5x5 그리드
+    let arrowCount = 7; // 기본 7개 화살표 (중간 난이도)
+    let characterPosition = { row: 0, col: 0 };
+    let finalPosition = { row: 0, col: 0 };
+    let correctCount = 0;
+    let wrongCount = 0;
+    let currentQuestion = 1;
+    let totalQuestions = 10; // 기본 10문제
+    let arrows = [];
+    let maxAttempts = 100; // 유효한 화살표 경로 생성을 위한 최대 시도 횟수
+
+    // 난이도별 문제 수 설정
+    const questionsByDifficulty = {
+      easy: 5,
+      medium: 7,
+      hard: 10
+    };
+
+    // 방향 정의 (확장된 방향 세트)
+    const directions = [
+      { name: '←', rowChange: 0, colChange: -1, symbol: '←' },
+      { name: '→', rowChange: 0, colChange: 1, symbol: '→' },
+      { name: '↑', rowChange: -1, colChange: 0, symbol: '↑' },
+      { name: '↓', rowChange: 1, colChange: 0, symbol: '↓' },
+      { name: '↗', rowChange: -1, colChange: 1, symbol: '↗' },
+      { name: '↙', rowChange: 1, colChange: -1, symbol: '↙' },
+      { name: '↖', rowChange: -1, colChange: -1, symbol: '↖' },
+      { name: '↘', rowChange: 1, colChange: 1, symbol: '↘' }
+    ];
+
+    // 난이도 설정
+    difficultySelect.addEventListener('change', function() {
+      const difficulty = this.value;
+      if (difficulty === 'easy') {
+        gridSize = 3;
+        arrowCount = 5;
+        totalQuestions = questionsByDifficulty.easy;
+      } else if (difficulty === 'medium') {
+        gridSize = 5;
+        arrowCount = 7;
+        totalQuestions = questionsByDifficulty.medium;
+      } else if (difficulty === 'hard') {
+        gridSize = 7;
+        arrowCount = 10;
+        totalQuestions = questionsByDifficulty.hard;
+      }
+      
+      totalQuestionsEl.textContent = totalQuestions;
+      resetGame();
+    });
+
+    // 게임 초기화
+    function initializeGame() {
+      // 그리드 생성
+      gridContainer.innerHTML = '';
+      gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+      gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+          
+          // 피드백 오버레이 추가
+          const feedbackOverlay = document.createElement('div');
+          feedbackOverlay.className = 'feedback-overlay';
+          cell.appendChild(feedbackOverlay);
+          
+          cell.addEventListener('click', () => {
+            if (!gameActive) return;
+            
+            // 정답 확인 즉시 처리
+            checkAnswer(cell, row, col);
+          });
+          
+          gridContainer.appendChild(cell);
+        }
+      }
+      
+      // 진행 상황 업데이트
+      updateProgress();
+    }
+
+    // 게임 시작
+    function startGame() {
+      gameActive = true;
+      startBtn.disabled = true;
+      difficultySelect.disabled = true;
+      resultDiv.textContent = '';
+      resultDiv.className = '';
+      
+      // 모든 셀 초기화
+      const cells = document.querySelectorAll('.grid-cell');
+      cells.forEach(cell => {
+        cell.classList.remove('selected', 'correct', 'incorrect');
+        cell.innerHTML = '';
+        
+        // 피드백 오버레이 추가
+        const feedbackOverlay = document.createElement('div');
+        feedbackOverlay.className = 'feedback-overlay';
+        cell.appendChild(feedbackOverlay);
+      });
+      
+      // 화살표 생성
+      generateValidArrows();
+      
+      // 캐릭터 초기 위치 설정 (중앙)
+      characterPosition = {
+        row: Math.floor(gridSize / 2),
+        col: Math.floor(gridSize / 2)
+      };
+      
+      // 최종 위치 계산
+      calculateFinalPosition();
+      
+      // 캐릭터 배치
+      placeCharacter();
+    }
+
+    // 유효한 화살표 생성 (그리드를 벗어나지 않는 경로 생성)
+    function generateValidArrows() {
+      arrowContainer.innerHTML = '';
+      
+      let validArrows = false;
+      let attempts = 0;
+      
+      while (!validArrows && attempts < maxAttempts) {
+        attempts++;
+        
+        // 화살표 배열 초기화
+        arrows = [];
+        
+        // 화살표 랜덤 생성
+        for (let i = 0; i < arrowCount; i++) {
+          const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+          arrows.push(randomDirection);
+        }
+        
+        // 경로가 유효한지 확인
+        validArrows = isPathValid();
+      }
+      
+      if (!validArrows) {
+
+        // 기본 경로 생성 (상하좌우만 사용)
+        arrows = [];
+        for (let i = 0; i < arrowCount; i++) {
+          const safeDirections = directions.slice(0, 4); // 상하좌우만 사용
+          const randomDirection = safeDirections[Math.floor(Math.random() * safeDirections.length)];
+          arrows.push(randomDirection);
+        }
+      }
+      
+      // 화살표 UI 생성
+      for (const arrow of arrows) {
+        const arrowDiv = document.createElement('div');
+        arrowDiv.className = 'arrow';
+        arrowDiv.textContent = arrow.symbol;
+        arrowContainer.appendChild(arrowDiv);
+      }
+    }
+
+    // 경로가 유효한지 확인 (그리드를 벗어나지 않는지)
+    function isPathValid() {
+      let row = Math.floor(gridSize / 2); // 시작 위치 (중앙)
+      let col = Math.floor(gridSize / 2);
+      
+      for (const arrow of arrows) {
+        row += arrow.rowChange;
+        col += arrow.colChange;
+        
+        // 그리드 경계 확인
+        if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) {
+          return false;
+        }
+      }
+      
+      return true;
+    }
+
+    // 최종 위치 계산
+    function calculateFinalPosition() {
+      let row = characterPosition.row;
+      let col = characterPosition.col;
+      
+      for (const arrow of arrows) {
+        row += arrow.rowChange;
+        col += arrow.colChange;
+      }
+      
+      finalPosition = { row, col };
+
+    }
+
+    // 캐릭터 배치
+    function placeCharacter() {
+      // 모든 셀에서 캐릭터 클래스 제거
+      const cells = document.querySelectorAll('.grid-cell');
+      cells.forEach(cell => {
+        cell.classList.remove('character');
+        // 이전 이모지 제거
+        if (cell.childNodes.length > 1) {
+          cell.removeChild(cell.childNodes[0]);
+        }
+      });
+      
+      // 캐릭터 위치에 강아지 이모지 추가
+      const characterCell = document.querySelector(`.grid-cell[data-row="${characterPosition.row}"][data-col="${characterPosition.col}"]`);
+      if (characterCell) {
+        characterCell.classList.add('character');
+        
+        // 이모지 추가
+        const dogEmoji = document.createElement('span');
+        dogEmoji.textContent = '🐩';
+        dogEmoji.style.fontSize = '60px';
+        
+        // 피드백 오버레이 앞에 이모지 추가
+        characterCell.insertBefore(dogEmoji, characterCell.firstChild);
+      }
+    }
+
+    // 정답 확인
+    function checkAnswer(cell, row, col) {
+      if (!gameActive) return;
+      
+      const isCorrect = (row === finalPosition.row && col === finalPosition.col);
+      const feedbackOverlay = cell.querySelector('.feedback-overlay');
+      
+      if (isCorrect) {
+        // 정답
+        cell.classList.add('correct');
+        feedbackOverlay.textContent = '✓';
+        feedbackOverlay.classList.add('correct', 'show');
+        resultDiv.textContent = '정답입니다! 🎉';
+        resultDiv.className = 'correct';
+        correctCount++;
+        correctCountEl.textContent = correctCount;
+        
+        // 게임 종료 및 다음 라운드 준비
+        gameActive = false;
+        
+        // 다음 문제로 자동 진행
+        if (currentQuestion < totalQuestions) {
+          currentQuestion++;
+          updateProgress();
+          
+          // 잠시 후 다음 문제 시작
+          setTimeout(() => {
+            startGame();
+          }, 1000);
+        } else {
+          // 모든 문제 완료
+          setTimeout(() => {
+            alert(`게임 완료! 정답: ${correctCount}, 오답: ${wrongCount}`);
+            resetGame();
+          }, 1000);
+        }
+      } else {
+        // 오답
+        cell.classList.add('incorrect');
+        feedbackOverlay.textContent = '✗';
+        feedbackOverlay.classList.add('incorrect', 'show');
+        resultDiv.textContent = '오답입니다.';
+        resultDiv.className = 'incorrect';
+        wrongCount++;
+        wrongCountEl.textContent = wrongCount;
+        
+        // 정답 표시
+        const correctCell = document.querySelector(`.grid-cell[data-row="${finalPosition.row}"][data-col="${finalPosition.col}"]`);
+        if (correctCell) {
+          const correctFeedback = correctCell.querySelector('.feedback-overlay');
+          correctFeedback.textContent = '✓';
+          correctFeedback.classList.add('correct', 'show');
+        }
+        
+        // 게임 종료 및 다음 라운드 준비
+        gameActive = false;
+        
+        // 다음 문제로 자동 진행
+        if (currentQuestion < totalQuestions) {
+          currentQuestion++;
+          updateProgress();
+          
+          // 잠시 후 다음 문제 시작
+          setTimeout(() => {
+            startGame();
+          }, 1500);
+        } else {
+          // 모든 문제 완료
+          setTimeout(() => {
+            alert(`게임 완료! 정답: ${correctCount}, 오답: ${wrongCount}`);
+            resetGame();
+          }, 1500);
+        }
+      }
+    }
+
+    // 진행 상황 업데이트
+    function updateProgress() {
+      currentQuestionEl.textContent = currentQuestion;
+      totalQuestionsEl.textContent = totalQuestions;
+      
+      const progressPercentage = (currentQuestion - 1) / totalQuestions * 100;
+      progressFill.style.width = `${progressPercentage}%`;
+    }
+
+    // 게임 리셋
+    function resetGame() {
+      gameActive = false;
+      startBtn.disabled = false;
+      difficultySelect.disabled = false;
+      resultDiv.textContent = '';
+      resultDiv.className = '';
+      correctCount = 0;
+      wrongCount = 0;
+      currentQuestion = 1;
+      correctCountEl.textContent = '0';
+      wrongCountEl.textContent = '0';
+      
+      arrowContainer.innerHTML = '';
+      initializeGame();
+    }
+
+    // 이벤트 리스너
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', resetGame);
+
+    // 초기화
+    initializeGame();
+  </script>
+</body>
+</html>

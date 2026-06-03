@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>판단력 훈련 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 16px 16px 80px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff; color: #222;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      min-height: 100vh;
+    }
+    h1 { margin: 0 0 2px; font-size: 1.9rem; font-weight: 800; text-align: center; }
+    #home-btn {
+      position: fixed; top: 14px; left: 14px; z-index: 100;
+      padding: 10px 18px; border-radius: 999px; border: none;
+      background: #eee; color: #333; font-weight: 600; font-size: 14px;
+      cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    #home-btn:hover { background: #ddd; }
+
+    #cat-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; max-width: 720px; }
+    .cat-tab {
+      padding: 10px 18px; border-radius: 999px; border: 2px solid #ddd;
+      cursor: pointer; font-size: 0.95rem; font-weight: 700;
+      background: #fff; color: #555; transition: all .15s;
+    }
+    .cat-tab:hover { border-color: #1976d2; background: #e8f2ff; color: #1976d2; }
+    .cat-tab.active { background: #1976d2; border-color: #1976d2; color: #fff; }
+
+    .progress-wrap { width: 100%; max-width: 680px; }
+    .progress-bar-bg { width: 100%; height: 10px; border-radius: 999px; background: #f0f4fa; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 999px; background: #1976d2; transition: width .4s; }
+    .progress-txt { font-size: 0.95rem; color: #666; text-align: center; margin-top: 4px; }
+    .progress-txt span { font-weight: 800; color: #222; }
+
+    #situation-card {
+      width: 100%; max-width: 680px;
+      border-radius: 20px; border: 2px solid #e0e8f8;
+      background: #f7f9ff; overflow: hidden;
+    }
+    .card-category { padding: 10px 20px; font-size: 0.88rem; font-weight: 800; letter-spacing: 1px; }
+    .card-emoji { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; font-size: 5rem; background: #eef2ff; }
+    .card-text { padding: 20px 22px 8px; font-size: 1.2rem; font-weight: 700; line-height: 1.7; color: #1a1a2e; }
+    .card-question { padding: 0 22px 18px; font-size: 1rem; font-weight: 600; color: #1976d2; }
+
+    #choices { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 12px; }
+    .choice-btn {
+      width: 100%; padding: 16px 18px;
+      border-radius: 14px; border: 2.5px solid #dde3ec;
+      background: #fff; text-align: left;
+      font-size: 1.05rem; font-weight: 600; color: #222; line-height: 1.5;
+      cursor: pointer; transition: all .15s; display: flex; align-items: flex-start; gap: 10px;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: #1976d2; background: #e8f2ff; }
+    .choice-btn:active:not(:disabled) { transform: scale(0.99); }
+    .choice-btn:disabled { cursor: default; }
+    .choice-label {
+      min-width: 30px; height: 30px; border-radius: 50%;
+      background: #eee; color: #555;
+      font-size: 0.9rem; font-weight: 800; text-align: center; line-height: 30px;
+      flex-shrink: 0;
+    }
+    .choice-btn.correct { border-color: #388e3c; background: #f0fff4; }
+    .choice-btn.correct .choice-label { background: #388e3c; color: #fff; }
+    .choice-btn.wrong   { border-color: #d32f2f; background: #fff5f5; }
+    .choice-btn.wrong .choice-label   { background: #d32f2f; color: #fff; }
+
+    #feedback-box {
+      display: none; width: 100%; max-width: 680px;
+      border-radius: 16px; padding: 18px 22px;
+      border: 2px solid #ddd; background: #fafafa;
+    }
+    #feedback-box.correct { border-color: #388e3c; background: #f0fff4; }
+    #feedback-box.wrong   { border-color: #d32f2f; background: #fff5f5; }
+    .feedback-result { font-size: 1.3rem; font-weight: 900; margin-bottom: 8px; }
+    .feedback-result.ok  { color: #2e7d32; }
+    .feedback-result.err { color: #c62828; }
+    .feedback-explain {
+      font-size: 1rem; color: #333; line-height: 1.8;
+      border-top: 1px solid #ddd; padding-top: 10px; margin-top: 8px;
+    }
+    .feedback-explain b { color: #1565c0; }
+
+    .ctrl-wrap { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 680px; }
+    .ctrl-btn {
+      padding: 14px 34px; border-radius: 999px; border: none;
+      font-size: 1.05rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15); transition: transform .08s;
+    }
+    .ctrl-btn:active { transform: translateY(1px); }
+    .btn-start { background: #1976d2; color: #fff; }
+    .btn-start:hover { background: #1565c0; }
+    .btn-next  { background: #388e3c; color: #fff; display: none; }
+    .btn-next:hover { background: #2e7d32; }
+    .btn-reset { background: #eee; color: #333; }
+    .btn-reset:hover { background: #ddd; }
+
+    #result-box {
+      display: none; width: 100%; max-width: 500px;
+      padding: 24px 28px; border-radius: 20px;
+      border: 1px solid #ddd; background: #fafafa; text-align: center;
+    }
+    #result-box h2 { margin: 0 0 16px; font-size: 1.5rem; }
+    .r-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 1rem; }
+    .r-row:last-of-type { border: none; }
+    .r-val { font-weight: 800; color: #1976d2; }
+    .result-btns { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+
+    .cat-safety  { background: #fff3e0; color: #e65100; border-bottom: 3px solid #ff9800; }
+    .cat-cooking { background: #fce4ec; color: #880e4f; border-bottom: 3px solid #e91e63; }
+    .cat-public  { background: #e8f5e9; color: #1b5e20; border-bottom: 3px solid #4caf50; }
+
+    #hospital-logo {
+      position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666;
+      padding: 5px 10px; background: rgba(255,255,255,0.9); border-radius: 4px; font-weight: 500;
+    }
+    @media (max-width: 480px) {
+      .card-text { font-size: 1.05rem; }
+      .choice-btn { font-size: 0.97rem; padding: 14px 14px; }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">← 홈</button>
+<h1>판단력 훈련</h1>
+<div style="font-size:0.95rem;color:#666;text-align:center">상황을 읽고 가장 적절한 행동을 선택하세요.</div>
+
+<div id="cat-tabs">
+  <button class="cat-tab active" data-cat="all">전체</button>
+  <button class="cat-tab" data-cat="safety">일상 안전</button>
+  <button class="cat-tab" data-cat="cooking">요리 / 음식</button>
+  <button class="cat-tab" data-cat="public">공공장소</button>
+</div>
+
+<div class="progress-wrap" id="progress-wrap" style="display:none">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="progress-txt">문제 <span id="prog-cur">1</span> / <span id="prog-tot">10</span> &nbsp;|&nbsp; 정답 <span id="prog-score">0</span>개</div>
+</div>
+
+<div id="situation-card" style="display:none">
+  <div class="card-category" id="card-cat"></div>
+  <div class="card-emoji"    id="card-img"></div>
+  <div class="card-text"     id="card-text"></div>
+  <div class="card-question" id="card-question"></div>
+</div>
+
+<div id="choices"></div>
+
+<div id="feedback-box">
+  <div class="feedback-result"  id="fb-result"></div>
+  <div class="feedback-explain" id="fb-explain"></div>
+</div>
+
+<div class="ctrl-wrap">
+  <button class="ctrl-btn btn-start" id="btn-start" onclick="G.start()">훈련 시작</button>
+  <button class="ctrl-btn btn-next"  id="btn-next"  onclick="G.next()">다음 문제 →</button>
+  <button class="ctrl-btn btn-reset" onclick="G.reset()">다시하기</button>
+</div>
+
+<div id="result-box">
+  <h2>🎉 훈련 완료!</h2>
+  <div class="r-row"><span>카테고리</span><span class="r-val" id="r-cat"></span></div>
+  <div class="r-row"><span>총 문제</span><span class="r-val"  id="r-total"></span></div>
+  <div class="r-row"><span>정답 수</span><span class="r-val"  id="r-correct"></span></div>
+  <div class="r-row"><span>정확도</span><span class="r-val"   id="r-acc"></span></div>
+  <div class="result-btns">
+    <button class="ctrl-btn btn-start" onclick="G.reset();G.start()">다시 훈련</button>
+    <button class="ctrl-btn btn-reset" onclick="location.href='index.html'">홈으로</button>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  문항 데이터  (choices 배열의 첫 번째 항목이 항상 정답)
+//  → 화면에 표시할 때 랜덤 섞기 처리
+// ─────────────────────────────────────────────────────────────
+const Q = [
+
+  // ══ 일상 안전 (12문항) ════════════════════════════════════
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🍳',
+    text:'가스레인지에 냄비를 올리고 끓이는 도중 전화가 왔습니다.',
+    question:'지금 가장 안전한 행동은 무엇인가요?',
+    choices:['불을 끄거나 약불로 줄이고 전화를 받는다.','빨리 전화를 받고 바로 돌아온다.','냄비 뚜껑을 덮고 전화를 받는다.','전화를 무시하고 계속 지켜본다.'],
+    explain:'가스레인지를 켠 채 자리를 비우면 화재·화상 위험이 있습니다. <b>불을 끄거나 약불로 줄인 후</b> 전화를 받는 것이 가장 안전합니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🛁',
+    text:'욕실 바닥에 비누 거품이 남아 있고 바닥이 젖어 있습니다.',
+    question:'욕실에 들어갈 때 가장 안전한 행동은 무엇인가요?',
+    choices:['미끄럼 방지 슬리퍼를 신고 천천히 들어간다.','빠르게 들어가고 빨리 나온다.','맨발로 조심하며 들어간다.','문을 잡고 한 발씩 들어간다.'],
+    explain:'젖은 욕실 바닥은 낙상 위험이 높습니다. <b>미끄럼 방지 슬리퍼를 신고 천천히</b> 이동하는 것이 가장 안전합니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'💊',
+    text:'약봉지가 두 개 있는데 어느 것을 먹어야 할지 헷갈립니다.',
+    question:'이 상황에서 어떻게 하는 것이 가장 좋은가요?',
+    choices:['처방전·약봉투를 확인하거나 가족·간호사에게 묻는다.','아무거나 하나를 골라 먹는다.','둘 다 먹는다.','그냥 안 먹고 넘어간다.'],
+    explain:'약을 잘못 복용하면 부작용이 생길 수 있습니다. <b>처방전을 확인</b>하거나 <b>의료진·가족에게 물어보는 것</b>이 올바른 대처입니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🔌',
+    text:'콘센트에서 연기가 피어오르고 있습니다.',
+    question:'가장 먼저 해야 할 행동은 무엇인가요?',
+    choices:['차단기를 내리거나 플러그를 뽑고 119에 신고한다.','콘센트에 물을 뿌린다.','창문을 열어 환기한다.','선풍기로 연기를 날린다.'],
+    explain:'전기화재에 <b>절대 물을 뿌리면 안 됩니다.</b> 먼저 <b>전기를 차단</b>하고 즉시 <b>119에 신고</b>하세요.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🚶',
+    text:'신호가 초록불로 바뀌었지만 저 멀리서 차가 빠르게 달려오고 있습니다.',
+    question:'어떻게 하는 것이 가장 안전한가요?',
+    choices:['차가 완전히 멈춘 것을 확인한 후 좌우를 살피며 건넌다.','초록불이므로 바로 건넌다.','뛰어서 빨리 건넌다.','차가 지나갈 때까지 기다린다.'],
+    explain:'초록불이라도 <b>차가 완전히 멈춘 것을 눈으로 확인</b>한 후 건너야 합니다. 서두르지 말고 천천히 이동하세요.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🌡️',
+    text:'한여름 야외에서 어지럼증과 두통이 느껴집니다.',
+    question:'이 증상에 대처하는 가장 올바른 방법은 무엇인가요?',
+    choices:['시원한 곳으로 이동해 쉬면서 물을 마신다.','더 활발히 움직여 땀을 뺀다.','뜨거운 음식을 먹어 체온을 맞춘다.','그냥 외출을 계속한다.'],
+    explain:'이 증상은 <b>열사병·탈수</b> 초기 신호입니다. 즉시 <b>그늘·에어컨</b>이 있는 곳으로 이동하고 <b>물을 충분히 마셔야</b> 합니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🧹',
+    text:'높은 선반의 물건을 꺼내려는데 발판이 없습니다.',
+    question:'어떻게 하는 것이 가장 안전한가요?',
+    choices:['안전한 발판이나 사다리를 준비한 후 꺼낸다.','의자 위에 올라가서 꺼낸다.','높이 뛰어서 꺼낸다.','무리하게 팔을 뻗어 꺼낸다.'],
+    explain:'의자 위에 서거나 무리하게 몸을 뻗으면 <b>낙상</b> 위험이 큽니다. <b>안전한 발판이나 사다리</b>를 준비하거나 다른 사람에게 도움을 요청하세요.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🌧️',
+    text:'빗길에 길이 미끄럽습니다.',
+    question:'안전하게 이동하는 방법은 무엇인가요?',
+    choices:['미끄럼 방지 신발을 신고 보폭을 줄여 천천히 걷는다.','서둘러 빠르게 걷는다.','뛰어서 빨리 목적지에 도착한다.','평소와 똑같이 걷는다.'],
+    explain:'빗길은 낙상 위험이 높습니다. <b>미끄럼 방지 신발</b>을 신고 <b>보폭을 좁게, 속도를 줄여</b> 걷는 것이 안전합니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🔒',
+    text:'외출 후 집에 돌아왔더니 현관문이 열려 있습니다.',
+    question:'어떻게 하는 것이 가장 안전한가요?',
+    choices:['집 안에 들어가지 말고 안전한 곳에서 112에 신고한다.','바로 집 안으로 들어간다.','문을 닫고 그냥 들어간다.','이웃집에 혼자 들어가 달라고 부탁한다.'],
+    explain:'문이 열려 있으면 침입자가 있을 수 있습니다. <b>집 안에 들어가지 말고</b> 즉시 <b>112에 신고</b>하는 것이 가장 안전합니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🩺',
+    text:'평소에 먹던 약인데 오늘은 먹고 나서 두드러기가 생겼습니다.',
+    question:'어떻게 해야 할까요?',
+    choices:['약 복용을 중단하고 의사·약사에게 즉시 연락한다.','두드러기가 없어질 때까지 계속 약을 먹는다.','다른 약을 추가로 먹는다.','그냥 며칠 참아본다.'],
+    explain:'약 복용 후 이상 증상이 생기면 <b>즉시 복용을 중단</b>하고 <b>의사나 약사에게 연락</b>해야 합니다. 알레르기 반응이 심해질 수 있습니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🛏️',
+    text:'밤에 자다가 갑자기 화장실이 급합니다. 방이 어둡습니다.',
+    question:'가장 안전하게 화장실에 가는 방법은 무엇인가요?',
+    choices:['조명을 켜고 천천히 이동한다.','어둠 속에서 서둘러 이동한다.','침대에서 뛰어내린다.','바닥을 손으로 더듬으며 빠르게 이동한다.'],
+    explain:'어두운 곳에서의 갑작스러운 이동은 낙상 위험이 큽니다. <b>조명을 먼저 켜고</b> 잠시 앉아 있다가 <b>천천히 이동</b>하는 것이 안전합니다.' },
+
+  { cat:'safety', catLabel:'일상 안전', catClass:'cat-safety', emoji:'🚪',
+    text:'모르는 사람이 집에 찾아와 "수도 점검을 나왔다"고 합니다.',
+    question:'어떻게 하는 것이 가장 안전한가요?',
+    choices:['문을 열기 전에 관련 기관에 전화해 사실을 확인한다.','친절해 보이니 바로 문을 열어준다.','그냥 들어오라고 한다.','집 안에 혼자 있으면 들어오라고 한다.'],
+    explain:'신원 불명의 방문자를 함부로 들이면 범죄 피해를 당할 수 있습니다. <b>먼저 관련 기관에 전화로 확인</b>하고, 확인되지 않으면 문을 열지 않아야 합니다.' },
+
+  // ══ 요리 / 음식 (13문항) ══════════════════════════════════
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🥩',
+    text:'냉장고에서 꺼낸 고기 색깔이 변하고 냄새가 좋지 않습니다.',
+    question:'이 고기를 어떻게 처리해야 할까요?',
+    choices:['먹지 않고 버린다.','잘 익히면 괜찮으니까 요리해 먹는다.','물로 씻어서 요리한다.','신선한 야채와 같이 먹는다.'],
+    explain:'색이 변하고 이상한 냄새가 나는 고기는 <b>부패가 시작된 것</b>입니다. 가열해도 식중독균이 완전히 제거되지 않으므로 <b>반드시 버려야</b> 합니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🫙',
+    text:'통조림 뚜껑이 부풀어 있고, 열자마자 이상한 냄새가 납니다.',
+    question:'이 통조림을 어떻게 해야 할까요?',
+    choices:['먹지 말고 즉시 버린다.','윗부분만 걷어내고 먹는다.','환기시킨 후 먹는다.','전자레인지에 데워서 먹는다.'],
+    explain:'뚜껑이 부풀거나 이상한 냄새가 나면 <b>심각한 식중독균</b>이 번식한 것입니다. 절대 먹지 말고 즉시 버리세요.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🔥',
+    text:'요리 중 기름이 과열되어 연기가 납니다.',
+    question:'가장 먼저 해야 할 행동은 무엇인가요?',
+    choices:['불을 끄고 뚜껑으로 덮어 산소를 차단한다.','물을 부어 온도를 낮춘다.','창문을 열고 계속 요리한다.','선풍기로 연기를 날린다.'],
+    explain:'뜨거운 기름에 <b>절대 물을 부으면 안 됩니다.</b> 기름이 사방으로 튀어 화상을 입을 수 있습니다. <b>불을 끄고 뚜껑으로 산소를 차단</b>하세요.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🧊',
+    text:'냉동 음식을 빠르게 해동하려 합니다.',
+    question:'가장 안전한 해동 방법은 어느 것인가요?',
+    choices:['냉장실에서 서서히 해동하거나 밀봉한 채 흐르는 찬물에 해동한다.','햇볕이 잘 드는 창가에서 해동한다.','따뜻한 물에 담가 빨리 해동한다.','실온에 3~4시간 방치한다.'],
+    explain:'실온·따뜻한 물 해동은 <b>세균이 급속히 번식</b>합니다. 가장 안전한 방법은 <b>냉장실 해동</b>이고, 급할 땐 <b>밀봉 후 흐르는 찬물</b>을 이용하세요.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🍱',
+    text:'도시락을 만들었는데 여름이라 더운 날씨입니다. 몇 시간 후에 먹을 예정입니다.',
+    question:'도시락을 어떻게 보관하는 것이 가장 안전한가요?',
+    choices:['서늘한 곳이나 아이스팩과 함께 냉장 보관한다.','그냥 가방 안에 넣어둔다.','전자레인지 옆에 보관한다.','봉지에 넣어 직사광선을 피한다.'],
+    explain:'여름철 도시락은 상온에 두면 <b>세균이 빠르게 번식</b>합니다. <b>냉장 보관</b>하거나 <b>아이스팩</b>을 함께 넣어 10°C 이하로 유지해야 합니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🧼',
+    text:'날 닭고기를 손질한 후 같은 도마와 칼로 채소를 썰려고 합니다.',
+    question:'어떻게 하는 것이 안전한가요?',
+    choices:['도마와 칼을 깨끗이 세척·소독한 후 채소를 썬다.','물로 한 번 헹구고 바로 채소를 썬다.','닭기름만 닦아내고 바로 사용한다.','괜찮으니 그냥 채소를 썬다.'],
+    explain:'날 닭고기에는 <b>살모넬라균</b>이 있을 수 있습니다. 같은 도구를 사용하면 <b>교차 오염</b>이 발생합니다. <b>세척·소독 후</b> 사용하거나 별도의 도구를 사용하세요.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🌿',
+    text:'산에서 나물을 채취했는데 독초인지 구별이 안 됩니다.',
+    question:'어떻게 해야 할까요?',
+    choices:['확실히 알 수 없으면 먹지 않는다.','조금만 맛보아 이상이 없으면 먹는다.','삶으면 독이 없어지므로 먹는다.','모양이 비슷한 나물과 같이 먹는다.'],
+    explain:'독초 섭취는 <b>심각한 중독·사망</b>으로 이어질 수 있습니다. <b>확실히 알 수 없는 식물은 절대 먹으면 안 됩니다.</b> 전문가가 확인하기 전에는 섭취를 금하세요.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🍳',
+    text:'프라이팬을 가스레인지에 올려놓고 가스를 켰는데 불꽃이 노랗습니다.',
+    question:'어떻게 해야 하나요?',
+    choices:['불을 끄고 버너가 막혔는지 확인하거나 전문가에게 점검받는다.','그냥 계속 요리한다.','가스 불을 더 세게 올린다.','창문을 열면 괜찮다.'],
+    explain:'정상적인 가스 불꽃은 파란색입니다. <b>노란 불꽃은 불완전 연소</b>를 의미하며 일산화탄소 발생 위험이 있습니다. 즉시 불을 끄고 <b>점검</b>을 받아야 합니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🥄',
+    text:'요리 중 뜨거운 냄비 손잡이를 잡으려고 합니다.',
+    question:'어떻게 해야 안전한가요?',
+    choices:['마른 행주나 냄비 장갑을 사용하여 잡는다.','맨손으로 빠르게 잡는다.','젖은 행주로 잡는다.','냄비를 기울여 잡는다.'],
+    explain:'뜨거운 손잡이는 <b>화상</b>의 위험이 있습니다. <b>마른 행주나 냄비 장갑</b>을 사용하세요. 젖은 행주는 열이 더 잘 전달되어 오히려 위험합니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🧂',
+    text:'맛을 보니 너무 짭니다. 더 맛있게 먹고 싶습니다.',
+    question:'짠 음식을 조절하는 가장 올바른 방법은 무엇인가요?',
+    choices:['물이나 재료를 추가하여 농도를 묽게 한다.','설탕을 많이 넣어 단맛으로 덮는다.','그냥 많이 먹는다.','소금을 더 넣어 균형을 맞춘다.'],
+    explain:'짠 음식은 <b>물이나 재료를 추가</b>하여 농도를 희석시키는 것이 좋습니다. 짠 음식을 그냥 먹으면 나트륨 과다 섭취로 건강에 해롭습니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🍄',
+    text:'버섯을 구입했는데 유통기한이 이틀 지났습니다.',
+    question:'어떻게 하는 것이 좋을까요?',
+    choices:['냄새·색·질감을 확인하여 상했으면 버리고, 이상 없으면 빨리 조리해 먹는다.','유통기한이 조금 지났으니 그냥 먹는다.','일단 냉동시켜 나중에 먹는다.','물에 담가 보관하다가 먹는다.'],
+    explain:'유통기한이 지난 식품은 <b>신선도를 반드시 확인</b>해야 합니다. 이상한 냄새·색·끈적임이 있으면 버리고, 이상 없으면 즉시 조리해 먹는 것이 좋습니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🫗',
+    text:'요리 중 끓는 물이 옷에 튀어 화상을 입었습니다.',
+    question:'가장 먼저 해야 할 응급처치는 무엇인가요?',
+    choices:['옷을 벗기고 시원한 흐르는 물로 15~20분 이상 식힌다.','버터나 치약을 바른다.','얼음을 직접 댄다.','수건으로 세게 문지른다.'],
+    explain:'화상 응급처치는 <b>흐르는 시원한 물로 15~20분 식히기</b>입니다. 얼음 직접 사용, 버터·치약 도포는 오히려 상처를 악화시킵니다.' },
+
+  { cat:'cooking', catLabel:'요리 / 음식', catClass:'cat-cooking', emoji:'🍚',
+    text:'밥을 해놓고 깜빡하고 오래 뒀더니 냄새가 이상합니다.',
+    question:'이 밥을 어떻게 처리해야 할까요?',
+    choices:['먹지 말고 버린다.','전자레인지에 다시 데워 먹는다.','냄새나는 부분만 골라내고 먹는다.','간장을 뿌려 볶음밥을 만든다.'],
+    explain:'이상한 냄새가 나는 밥은 <b>이미 부패가 시작된 것</b>입니다. 다시 가열해도 이미 생성된 독소는 제거되지 않으므로 <b>반드시 버려야</b> 합니다.' },
+
+  // ══ 공공장소 (13문항) ════════════════════════════════════
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🏥',
+    text:'병원 대기실에서 기다리는데 옆 사람이 갑자기 바닥에 쓰러졌습니다.',
+    question:'가장 먼저 해야 할 행동은 무엇인가요?',
+    choices:['큰 소리로 주변에 알리고 즉시 간호사실이나 119에 신고한다.','당황하지 말고 조용히 지켜본다.','혼자 일으켜 세우려 한다.','물을 가져다 준다.'],
+    explain:'쓰러진 사람을 발견하면 <b>즉시 주변에 알리고 119에 신고</b>하는 것이 최우선입니다. 혼자 이동시키면 상태가 악화될 수 있습니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🚌',
+    text:'버스 노약자석에 앉아 있는데 할머니가 타셨습니다.',
+    question:'어떻게 하는 것이 올바른 행동인가요?',
+    choices:['자리에서 일어나 할머니에게 자리를 양보한다.','창 밖을 보며 모른 척한다.','피곤해서 그냥 앉아 있는다.','다른 사람이 먼저 일어날 때까지 기다린다.'],
+    explain:'노약자석은 <b>거동이 불편한 분들을 위한 자리</b>입니다. 노인·임산부·장애인이 탑승하면 <b>반드시 양보</b>해야 합니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🏦',
+    text:'ATM 사용 중 모르는 사람이 "비밀번호를 알려주면 대신 해드릴게요"라고 합니다.',
+    question:'어떻게 하는 것이 가장 안전한가요?',
+    choices:['절대 알려주지 않고 거절한 뒤 필요시 은행 직원에게 도움을 요청한다.','친절해 보이니 믿고 알려준다.','잠깐만 알려준다.','고령이라 어렵다며 부탁한다.'],
+    explain:'비밀번호는 절대 타인에게 알려줘선 안 됩니다. 이는 <b>금융 사기</b>의 전형적인 수법입니다. <b>은행 직원</b>에게만 도움을 요청하세요.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🚇',
+    text:'지하철 문이 닫히기 시작하는데 아직 완전히 탑승하지 못했습니다.',
+    question:'이 상황에서 어떻게 하는 것이 안전한가요?',
+    choices:['다음 열차를 기다린다.','억지로 뛰어서 탄다.','문을 손으로 막아 억지로 들어간다.','소리를 질러 문을 다시 열게 한다.'],
+    explain:'닫히는 문을 막거나 뛰어드는 것은 <b>끼임·낙상 사고</b>로 이어질 수 있습니다. 안전을 위해 <b>다음 열차를 기다리는 것</b>이 올바른 판단입니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'📱',
+    text:'"당신 자녀가 사고 났다, 지금 바로 돈을 보내야 한다"는 전화가 왔습니다.',
+    question:'어떻게 하는 것이 가장 올바른가요?',
+    choices:['전화를 끊고 자녀에게 직접 연락하여 사실을 확인한다.','당황해서 바로 돈을 보낸다.','전화기 너머로 자녀 목소리를 들려달라고 한다.','112에 바로 신고한다.'],
+    explain:'이것은 전형적인 <b>보이스피싱</b>입니다. 절대 바로 송금하지 말고, <b>전화를 끊은 후 자녀의 실제 번호로 직접 연락</b>하여 확인하세요.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🚑',
+    text:'길을 걷다가 교통사고 현장을 목격했습니다. 부상자가 있는 것 같습니다.',
+    question:'가장 먼저 해야 할 행동은 무엇인가요?',
+    choices:['119·112에 신고하고 안전한 곳에서 구급대원을 기다린다.','직접 부상자를 차에서 꺼낸다.','사고 차량에 다가가 상태를 확인한다.','그냥 지나친다.'],
+    explain:'교통사고 부상자를 <b>함부로 이동시키면 척추 손상</b> 등을 악화시킬 수 있습니다. <b>119·112에 신고</b>하고 전문 구급대원이 처치할 때까지 기다리세요.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🔞',
+    text:'마트에서 계산 중 점원이 거스름돈을 적게 줬습니다.',
+    question:'어떻게 하는 것이 가장 적절한가요?',
+    choices:['영수증을 확인하고 차분하게 점원에게 다시 계산해 달라고 요청한다.','소리를 지르며 화를 낸다.','그냥 나온다.','다음에 더 받겠다며 그냥 넘어간다.'],
+    explain:'<b>영수증을 먼저 확인</b>하고, 차분하게 정정을 요청하는 것이 올바른 방법입니다. 감정적으로 반응하면 상황이 악화될 수 있습니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🎟️',
+    text:'병원에 갔더니 대기 번호가 이미 지나갔습니다.',
+    question:'어떻게 하는 것이 가장 좋은가요?',
+    choices:['접수 창구에 정중하게 상황을 설명하고 안내를 받는다.','그냥 진료실로 들어간다.','화를 내며 큰 소리로 항의한다.','그냥 집에 돌아간다.'],
+    explain:'대기 번호가 지난 경우 <b>접수 창구에 정중하게 설명</b>하면 재발급 또는 다음 순서로 안내받을 수 있습니다. 무단 진입은 다른 환자에게 피해를 줍니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🚻',
+    text:'공중화장실에서 용무를 마쳤습니다.',
+    question:'나가기 전에 반드시 해야 할 행동은 무엇인가요?',
+    choices:['물을 내리고 손을 깨끗이 씻는다.','물만 내리고 나간다.','손만 씻고 나간다.','그냥 나간다.'],
+    explain:'공중 위생을 위해 <b>변기 물을 내리고</b>, 감염 예방을 위해 반드시 <b>손을 깨끗이 씻어야</b> 합니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🍽️',
+    text:'식당에서 음식을 주문했는데 나온 음식에서 이물질이 발견됐습니다.',
+    question:'어떻게 하는 것이 가장 적절한가요?',
+    choices:['직원을 불러 차분하게 이물질을 보여주고 교환이나 환불을 요청한다.','그냥 이물질을 빼고 먹는다.','SNS에 바로 올린다.','크게 소리를 지른다.'],
+    explain:'<b>직원에게 차분하게 상황을 알리고</b> 교환이나 환불을 요청하는 것이 올바른 방법입니다. 이물질 섭취 시 건강에 해롭습니다.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🌩️',
+    text:'야외에 있는데 갑자기 천둥·번개가 심하게 칩니다.',
+    question:'가장 안전한 행동은 무엇인가요?',
+    choices:['즉시 건물 안이나 자동차 안으로 대피한다.','나무 아래에서 비를 피한다.','우산을 들고 그대로 있는다.','높은 곳으로 올라가 상황을 살핀다.'],
+    explain:'번개는 높은 곳이나 나무를 먼저 칩니다. <b>나무 아래와 개방된 공간은 위험</b>합니다. 즉시 <b>건물 안이나 자동차 안</b>으로 대피하세요.' },
+
+  { cat:'public', catLabel:'공공장소', catClass:'cat-public', emoji:'🏪',
+    text:'편의점에서 물건을 계산하려는데 카드가 결제되지 않습니다.',
+    question:'어떻게 하는 것이 가장 적절한가요?',
+    choices:['카드사에 전화하거나 다른 결제 수단을 사용한다.','점원에게 화를 낸다.','물건을 가져가고 나중에 갚겠다고 한다.','그냥 물건을 놔두고 나간다.'],
+    explain:'카드 결제 오류 시 먼저 <b>카드사에 문의</b>하거나 <b>다른 결제 수단(현금, 다른 카드)을 사용</b>하는 것이 올바른 대처입니다.' },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  게임 로직
+// ─────────────────────────────────────────────────────────────
+const G = (() => {
+  let queue=[], idx=0, score=0, answered=false, currentCat='all';
+  // 각 문항의 셔플된 보기 순서 저장
+  let shuffledChoices=[], correctIdxInShuffled=0;
+
+  const catCard   = document.getElementById('card-cat');
+  const imgEl     = document.getElementById('card-img');
+  const textEl    = document.getElementById('card-text');
+  const qEl       = document.getElementById('card-question');
+  const choicesEl = document.getElementById('choices');
+  const fbBox     = document.getElementById('feedback-box');
+  const fbResult  = document.getElementById('fb-result');
+  const fbExplain = document.getElementById('fb-explain');
+  const card      = document.getElementById('situation-card');
+  const progWrap  = document.getElementById('progress-wrap');
+  const progFill  = document.getElementById('prog-fill');
+  const startBtn  = document.getElementById('btn-start');
+  const nextBtn   = document.getElementById('btn-next');
+  const resultBox = document.getElementById('result-box');
+
+  const CAT_LABELS = { all:'전체', safety:'일상 안전', cooking:'요리 / 음식', public:'공공장소' };
+
+  function shuffle(arr) {
+    const a=[...arr];
+    for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function start() {
+    const filtered = currentCat==='all' ? [...Q] : Q.filter(q=>q.cat===currentCat);
+    queue = shuffle(filtered);
+    idx=0; score=0; answered=false;
+    card.style.display='block';
+    progWrap.style.display='block';
+    resultBox.style.display='none';
+    fbBox.style.display='none';
+    startBtn.style.display='none';
+    nextBtn.style.display='none';
+    document.getElementById('prog-tot').textContent=queue.length;
+    loadQ();
+  }
+
+  function loadQ() {
+    answered=false;
+    fbBox.style.display='none';
+    nextBtn.style.display='none';
+
+    const q = queue[idx];
+
+    // 보기 순서 랜덤 섞기 (정답은 항상 index 0)
+    const choiceObjs = q.choices.map((text,i)=>({ text, isCorrect: i===0 }));
+    shuffledChoices = shuffle(choiceObjs);
+    correctIdxInShuffled = shuffledChoices.findIndex(c=>c.isCorrect);
+
+    catCard.textContent  = q.catLabel;
+    catCard.className    = 'card-category '+q.catClass;
+    imgEl.textContent    = q.emoji;
+    textEl.textContent   = q.text;
+    qEl.textContent      = q.question;
+
+    choicesEl.innerHTML='';
+    const labels=['①','②','③','④'];
+    shuffledChoices.forEach((c,i)=>{
+      const btn=document.createElement('button');
+      btn.className='choice-btn';
+      btn.innerHTML=`<span class="choice-label">${labels[i]}</span>${c.text}`;
+      btn.onclick=()=>answer(i);
+      choicesEl.appendChild(btn);
+    });
+
+    progFill.style.width=(idx/queue.length*100)+'%';
+    document.getElementById('prog-cur').textContent=idx+1;
+    document.getElementById('prog-score').textContent=score;
+  }
+
+  function answer(chosen) {
+    if (answered) return;
+    answered=true;
+
+    const q=queue[idx];
+    const btns=choicesEl.querySelectorAll('.choice-btn');
+    btns.forEach(b=>b.disabled=true);
+
+    const isCorrect=chosen===correctIdxInShuffled;
+    if (isCorrect) score++;
+
+    btns.forEach((b,i)=>{
+      if (i===correctIdxInShuffled) b.classList.add('correct');
+      else if (i===chosen&&!isCorrect) b.classList.add('wrong');
+    });
+
+    fbBox.style.display='block';
+    fbBox.className=isCorrect?'correct':'wrong';
+    fbResult.textContent=isCorrect?'✓ 정답입니다!':'✗ 틀렸어요.';
+    fbResult.className='feedback-result '+(isCorrect?'ok':'err');
+    fbExplain.innerHTML=q.explain;
+
+    progFill.style.width=((idx+1)/queue.length*100)+'%';
+    document.getElementById('prog-score').textContent=score;
+    nextBtn.textContent=idx+1>=queue.length?'결과 보기 →':'다음 문제 →';
+    nextBtn.style.display='inline-block';
+  }
+
+  function next() {
+    idx++;
+    if (idx>=queue.length) { end(); return; }
+    loadQ();
+  }
+
+  function end() {
+    card.style.display='none';
+    choicesEl.innerHTML='';
+    fbBox.style.display='none';
+    nextBtn.style.display='none';
+    progFill.style.width='100%';
+
+    document.getElementById('r-cat').textContent    =CAT_LABELS[currentCat];
+    document.getElementById('r-total').textContent  =queue.length+'문제';
+    document.getElementById('r-correct').textContent=score+'문제';
+    document.getElementById('r-acc').textContent    =Math.round(score/queue.length*100)+'%';
+    resultBox.style.display='block';
+  }
+
+  function reset() {
+    idx=0; score=0; answered=false;
+    card.style.display='none';
+    choicesEl.innerHTML='';
+    fbBox.style.display='none';
+    progWrap.style.display='none';
+    nextBtn.style.display='none';
+    startBtn.style.display='inline-block';
+    resultBox.style.display='none';
+    progFill.style.width='0%';
+  }
+
+  document.querySelectorAll('.cat-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      currentCat=tab.dataset.cat;
+    });
+  });
+
+  return { start, next, reset };
+})();
+</script>
+</body>
+</html>

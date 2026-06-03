@@ -1,0 +1,794 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>뉴스 읽기 훈련 - 광주365재활병원</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: rgba(0,0,0,0.06); touch-action: manipulation; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f8; color: #222;
+      display: flex; flex-direction: column; align-items: center; padding: 20px 16px 80px; gap: 16px; min-height: 100vh; }
+    #home-btn { position: fixed; top: 14px; left: 14px; z-index: 100; padding: 10px 18px;
+      border-radius: 999px; border: none; background: #eee; color: #333; font-weight: 600;
+      font-size: 14px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    h1 { font-size: 1.8rem; font-weight: 900; text-align: center; color: #1a237e; margin-top: 6px; }
+    .subtitle { font-size: 13px; color: #888; text-align: center; }
+    .wrap { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* API 박스 */
+    .api-box { background: #fffde7; border: 1.5px solid #f9a825; border-radius: 14px; padding: 14px 18px; }
+    .api-box h3 { font-size: 0.88rem; font-weight: 800; color: #e65100; margin-bottom: 8px; }
+    .api-box p { font-size: 12px; color: #777; line-height: 1.7; margin-bottom: 10px; }
+    .api-row { display: flex; gap: 8px; }
+    .api-row input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #ddd; font-size: 14px; outline: none; }
+    .api-row input:focus { border-color: #1976d2; }
+    .api-save-btn { padding: 10px 18px; border-radius: 10px; border: none; background: #388e3c; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+    #api-status { font-size: 12px; margin-top: 6px; color: #aaa; }
+
+    /* 소스 탭 */
+    .src-tabs { display: flex; border-radius: 12px; overflow: hidden; border: 2px solid #1976d2; }
+    .src-tab { flex: 1; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700;
+      cursor: pointer; background: #fff; color: #1976d2; border: none; transition: all .15s; }
+    .src-tab.active { background: #1976d2; color: #fff; }
+
+    /* 설정 박스 */
+    .setup-box { background: #fff; border: 1.5px solid #e0e4f0; border-radius: 14px;
+      padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .setup-box h3 { font-size: 0.88rem; font-weight: 800; color: #333; margin-bottom: 12px; }
+    .field-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 7px; }
+
+    /* 붙여넣기 */
+    #paste-text { width: 100%; height: 180px; padding: 12px 14px; border-radius: 10px;
+      border: 1.5px solid #ddd; font-size: 13px; line-height: 1.8; resize: vertical; outline: none; font-family: inherit; }
+    #paste-text:focus { border-color: #1976d2; }
+    #char-count { font-size: 12px; color: #aaa; text-align: right; margin-top: 3px; }
+    .paste-hint { font-size: 12px; color: #777; line-height: 1.7; margin-bottom: 10px; }
+
+    /* 주제 그리드 */
+    .topic-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .topic-card { border: 2px solid #ddd; border-radius: 12px; padding: 12px 8px;
+      cursor: pointer; text-align: center; background: #fff; transition: all .15s;
+      display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .topic-card:hover { border-color: #90caf9; background: #f0f7ff; }
+    .topic-card.selected { border-color: #1976d2; background: #e3f2fd; }
+    .topic-icon { font-size: 1.7rem; }
+    .topic-name { font-size: 12px; font-weight: 700; color: #333; }
+    .topic-card.selected .topic-name { color: #1565c0; }
+
+    /* 과제 탭 */
+    .task-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .task-tab { padding: 8px 14px; border-radius: 999px; border: 2px solid #ddd;
+      font-size: 13px; font-weight: 700; cursor: pointer; background: #fff; color: #555;
+      transition: all .15s; min-height: 40px; }
+    .task-tab:hover { border-color: #1976d2; color: #1976d2; }
+    .task-tab.active { background: #1976d2; border-color: #1976d2; color: #fff; }
+
+    /* 옵션 버튼 */
+    .opt-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .opt-btn { padding: 7px 16px; border-radius: 999px; border: 2px solid #ddd;
+      background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; min-height: 40px; }
+    .opt-btn.selected { border-color: #1976d2; background: #1976d2; color: #fff; }
+    #level-desc { font-size: 12px; color: #666; margin-top: 8px; padding: 8px 12px;
+      background: #f7f9fc; border-radius: 8px; border: 1px solid #eee; line-height: 1.7; }
+
+    /* 실행 버튼 */
+    .main-btn { width: 100%; padding: 15px; border-radius: 12px; border: none;
+      background: #1976d2; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer;
+      min-height: 52px; box-shadow: 0 3px 10px rgba(25,118,210,0.3); transition: background .12s; }
+    .main-btn:hover { background: #1565c0; }
+    .main-btn:disabled { background: #aaa; cursor: default; box-shadow: none; }
+
+    /* 로딩 */
+    #loading { display: none; flex-direction: column; align-items: center;
+      gap: 14px; padding: 50px 20px; width: 100%; max-width: 680px; }
+    .spinner { width: 48px; height: 48px; border: 4px solid #eee;
+      border-top-color: #1976d2; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-msg { font-size: 14px; color: #666; text-align: center; line-height: 1.8; }
+
+    /* 에러 */
+    #error-msg { display: none; color: #c62828; font-size: 13px; background: #ffebee;
+      border-radius: 10px; padding: 12px 16px; width: 100%; max-width: 680px;
+      border: 1.5px solid #ef9a9a; line-height: 1.7; }
+
+    /* 화면별 컨테이너 */
+    #screen-setup, #screen-task { width: 100%; max-width: 680px; display: none; flex-direction: column; gap: 14px; }
+
+    /* 기사 카드 */
+    #article-card { background: #fff; border: 1.5px solid #90caf9; border-radius: 16px;
+      padding: 20px 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+    .article-header { cursor: pointer; user-select: none; }
+    .article-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .a-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #fff; }
+    .a-badge-ai { background: #1976d2; }
+    .a-badge-real { background: #2e7d32; }
+    #article-date { font-size: 12px; color: #bbb; }
+    #article-title { font-size: 1.1rem; font-weight: 900; color: #1a237e; line-height: 1.55; }
+    .article-toggle-row { display: flex; justify-content: space-between; align-items: center;
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid #e3f2fd; }
+    #toggle-label { font-size: 12px; color: #1976d2; font-weight: 700; }
+    #toggle-icon  { font-size: 14px; color: #1976d2; }
+    #article-body-wrap { margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee; }
+    #article-body { font-size: 14px; color: #333; line-height: 2.0; white-space: pre-line; }
+    #article-notice { margin-top: 10px; font-size: 11px; color: #bbb; padding-top: 10px; border-top: 1px solid #eee; }
+
+    .result-label { font-size: 0.95rem; font-weight: 900; color: #333; }
+
+    /* 객관식 */
+    .quiz-card { background: #fff; border: 1.5px solid #e0e4f0; border-radius: 14px;
+      padding: 16px 18px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+    .quiz-card.ans-ok { border-color: #43a047; }
+    .quiz-card.ans-ng { border-color: #e53935; }
+    .quiz-header { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+    .q-num { font-size: 11px; font-weight: 800; color: #1976d2; background: #e3f2fd; border-radius: 999px; padding: 3px 11px; }
+    .q-type { font-size: 11px; color: #aaa; font-weight: 600; }
+    .quiz-q { font-size: 14px; font-weight: 700; color: #222; margin-bottom: 11px; line-height: 1.7; }
+    .quiz-options { display: flex; flex-direction: column; gap: 7px; }
+    .quiz-opt { padding: 11px 14px; border-radius: 10px; border: 2px solid #e0e4f0; background: #fff;
+      font-size: 14px; cursor: pointer; text-align: left; transition: all .12s; line-height: 1.5; width: 100%; min-height: 48px; }
+    .quiz-opt:hover:not(:disabled) { border-color: #1976d2; background: #e3f2fd; }
+    .quiz-opt.correct  { border-color: #43a047 !important; background: #e8f5e9 !important; color: #1b5e20; font-weight: 700; }
+    .quiz-opt.wrong    { border-color: #c62828 !important; background: #ffebee !important; color: #c62828; }
+    .quiz-opt.show-ans { border-color: #43a047 !important; background: #e8f5e9 !important; color: #1b5e20; font-weight: 700; }
+    .quiz-fb { margin-top: 9px; font-size: 13px; line-height: 1.7; padding: 10px 13px; border-radius: 9px; display: none; }
+    .quiz-fb.ok { background: #e8f5e9; color: #2e7d32; }
+    .quiz-fb.ng { background: #ffebee; color: #c62828; }
+
+
+    /* 빈칸 */
+    .blank-card { background: #fff; border: 1.5px solid #e0e4f0; border-radius: 14px; padding: 16px 18px; }
+    .blank-q { font-size: 14px; line-height: 2.0; margin-bottom: 12px; color: #222; }
+    .blank-q .blank-slot { display: inline-block; min-width: 80px; border-bottom: 2px solid #1976d2;
+      text-align: center; font-weight: 700; color: #1976d2; padding: 0 4px; vertical-align: bottom; }
+    .blank-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+    .blank-opt { padding: 8px 16px; border-radius: 999px; border: 2px solid #ddd; background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px; transition: all .12s; }
+    .blank-opt:hover:not(:disabled) { border-color: #1976d2; background: #e3f2fd; }
+    .blank-opt.b-correct { border-color: #43a047; background: #e8f5e9; color: #1b5e20; font-weight: 800; }
+    .blank-opt.b-wrong   { border-color: #e53935; background: #ffebee; color: #c62828; }
+    .blank-fb { margin-top: 9px; font-size: 13px; padding: 8px 12px; border-radius: 8px; display: none; line-height: 1.6; }
+    .blank-fb.ok { background: #e8f5e9; color: #2e7d32; }
+    .blank-fb.ng { background: #ffebee; color: #c62828; }
+
+    /* 사실 vs 의견 */
+    .fact-card { background: #fff; border: 1.5px solid #e0e4f0; border-radius: 14px; padding: 16px 18px; }
+    .fact-sentence { font-size: 14px; line-height: 1.8; color: #222; margin-bottom: 12px; font-weight: 600; }
+    .fact-btns { display: flex; gap: 10px; }
+    .fact-btn { flex: 1; padding: 11px 0; border-radius: 10px; border: 2px solid #ddd;
+      font-size: 14px; font-weight: 700; cursor: pointer; background: #fff; transition: all .12s; min-height: 48px; }
+    .fact-btn:hover:not(:disabled) { border-color: #1976d2; background: #e3f2fd; color: #1976d2; }
+    .fact-btn.f-correct { border-color: #43a047; background: #e8f5e9; color: #2e7d32; }
+    .fact-btn.f-wrong   { border-color: #e53935; background: #ffebee; color: #c62828; }
+    .fact-btn.f-show    { border-color: #43a047; background: #e8f5e9; color: #2e7d32; }
+    .fact-fb { margin-top: 9px; font-size: 13px; padding: 8px 12px; border-radius: 8px; display: none; line-height: 1.6; }
+    .fact-fb.ok { background: #e8f5e9; color: #2e7d32; }
+    .fact-fb.ng { background: #ffebee; color: #c62828; }
+
+    /* 제목 고르기 */
+    .title-opt { padding: 14px 16px; border-radius: 12px; border: 2px solid #e0e4f0;
+      background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left;
+      line-height: 1.6; transition: all .12s; min-height: 52px; width: 100%; margin-bottom: 8px; }
+    .title-opt:hover:not(:disabled) { border-color: #1976d2; background: #e3f2fd; }
+    .title-opt.t-correct { border-color: #43a047; background: #e8f5e9; color: #1b5e20; font-weight: 800; }
+    .title-opt.t-wrong   { border-color: #e53935; background: #ffebee; color: #c62828; }
+    .title-opt.t-show    { border-color: #43a047; background: #e8f5e9; color: #1b5e20; font-weight: 800; }
+
+    /* 점수 */
+    #score-box { border-radius: 14px; padding: 22px 20px; text-align: center; display: none; }
+    .score-num { font-size: 2.8rem; font-weight: 900; line-height: 1; }
+    .score-label { font-size: 14px; color: #555; margin-top: 8px; }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .btn-secondary { padding: 12px 28px; border-radius: 999px; border: 2px solid #ddd;
+      background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; color: #555; min-height: 48px; }
+    .btn-secondary:hover { background: #f5f5f5; }
+
+    #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666;
+      padding: 5px 10px; background: rgba(255,255,255,0.85); border-radius: 4px; font-weight: 500; }
+
+    @media(max-width:480px) { .topic-grid { grid-template-columns: repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+<button id="home-btn" onclick="goHome()">← 홈</button>
+<h1>뉴스 읽기 훈련</h1>
+<p class="subtitle" id="page-subtitle">기사를 입력하고 다양한 과제를 풀어보세요</p>
+
+<!-- ═══════════════════════════ -->
+<!-- 화면 1: 기사 준비 (입력)        -->
+<!-- ═══════════════════════════ -->
+<div id="screen-setup">
+
+
+
+  <!-- 소스 탭 -->
+  <div class="src-tabs">
+    <button class="src-tab active" id="tab-paste" onclick="setSrc('paste')">✂️ 텍스트 붙여넣기</button>
+    <button class="src-tab" id="tab-auto" onclick="setSrc('auto')">✨ AI 자동 생성</button>
+  </div>
+
+  <!-- 붙여넣기 -->
+  <div id="src-paste">
+    <div class="setup-box">
+      <h3>✂️ 기사 본문 붙여넣기</h3>
+      <p class="paste-hint">뉴스 사이트에서 기사 본문을 복사(Ctrl+A → Ctrl+C)해서 아래에 붙여넣어 주세요.</p>
+      <textarea id="paste-text" placeholder="기사 본문 내용을 여기에 붙여넣으세요..."></textarea>
+      <div id="char-count">0자</div>
+    </div>
+  </div>
+
+  <!-- AI 자동 생성 -->
+  <div id="src-auto" style="display:none;">
+    <div class="setup-box">
+      <h3>📰 기사 주제 선택</h3>
+      <div class="topic-grid">
+        <div class="topic-card selected" data-topic="건강·의료" data-prompt="건강, 질병 예방, 의료 서비스, 운동, 영양, 노인 건강">
+          <span class="topic-icon">🏥</span><span class="topic-name">건강·의료</span></div>
+        <div class="topic-card" data-topic="날씨·계절" data-prompt="날씨, 계절 변화, 기후, 자연 환경">
+          <span class="topic-icon">🌤️</span><span class="topic-name">날씨·계절</span></div>
+        <div class="topic-card" data-topic="사회·생활" data-prompt="지역 사회 소식, 일상생활, 복지, 이웃, 공동체">
+          <span class="topic-icon">🏘️</span><span class="topic-name">사회·생활</span></div>
+        <div class="topic-card" data-topic="경제·물가" data-prompt="물가, 장보기, 생활비, 경제 소식, 시장">
+          <span class="topic-icon">🛒</span><span class="topic-name">경제·물가</span></div>
+        <div class="topic-card" data-topic="문화·여가" data-prompt="축제, 공연, 여행, 취미, 음식, 문화 행사">
+          <span class="topic-icon">🎭</span><span class="topic-name">문화·여가</span></div>
+        <div class="topic-card" data-topic="전통·역사" data-prompt="한국 전통문화, 역사, 명절, 풍습, 유적지">
+          <span class="topic-icon">🏯</span><span class="topic-name">전통·역사</span></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="main-btn" onclick="prepareArticle()">📰 기사 준비하기</button>
+</div>
+
+<!-- ═══════════════════════════ -->
+<!-- 화면 2: 과제 풀이              -->
+<!-- ═══════════════════════════ -->
+<div id="screen-task">
+
+  <!-- 뒤로가기 버튼 (새 기사 입력) -->
+  <button onclick="goToScreen('setup')" style="align-self:flex-start;padding:9px 16px;
+    border-radius:999px;border:2px solid #1976d2;background:#fff;color:#1976d2;
+    font-weight:700;font-size:13px;cursor:pointer;min-height:42px;">
+    ← 다른 기사로 시작하기
+  </button>
+
+  <!-- 기사 카드 -->
+  <div id="article-card">
+    <div class="article-header" onclick="toggleArticle()">
+      <div class="article-meta">
+        <span class="a-badge" id="topic-badge"></span>
+        <span id="article-date"></span>
+      </div>
+      <div id="article-title"></div>
+      <div class="article-toggle-row">
+        <span id="toggle-label">📕 기사 접기</span>
+        <span id="toggle-icon">▲</span>
+      </div>
+    </div>
+    <div id="article-body-wrap">
+      <div id="article-body"></div>
+      <div id="article-notice"></div>
+    </div>
+  </div>
+
+  <!-- 과제 선택 -->
+  <div class="setup-box">
+    <h3>🎯 과제 유형 선택</h3>
+    <div class="task-tabs">
+      <button class="task-tab active" data-task="quiz" onclick="selectTask(this)">❓ 객관식 퀴즈</button>
+      <button class="task-tab" data-task="blank" onclick="selectTask(this)">✏️ 빈칸 채우기</button>
+      <button class="task-tab" data-task="fact" onclick="selectTask(this)">🔍 사실 vs 의견</button>
+      <button class="task-tab" data-task="title" onclick="selectTask(this)">📌 제목 고르기</button>
+    </div>
+  </div>
+
+  <!-- 난이도/문제수 -->
+  <div class="setup-box">
+    <h3>⚙️ 설정</h3>
+    <div style="margin-bottom:14px;">
+      <div class="field-label">난이도</div>
+      <div class="opt-row" id="level-opts">
+        <button class="opt-btn selected" data-val="easy">🟢 쉬움</button>
+        <button class="opt-btn" data-val="medium">🟡 보통</button>
+        <button class="opt-btn" data-val="hard">🔴 어려움</button>
+      </div>
+      <div id="level-desc">사실 확인 위주 · 기사에서 직접 찾을 수 있는 문제</div>
+    </div>
+    <div id="count-wrap">
+      <div class="field-label">문제 수</div>
+      <div class="opt-row" id="count-opts">
+        <button class="opt-btn" data-val="3">3문제</button>
+        <button class="opt-btn selected" data-val="5">5문제</button>
+        <button class="opt-btn" data-val="7">7문제</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="main-btn" onclick="generateAndShowTask()">▶ 과제 시작하기</button>
+
+  <!-- 과제 풀이 영역 -->
+  <div id="task-area-wrap" style="display:none;">
+    <div class="result-label" id="task-label" style="margin-top:6px;"></div>
+    <div id="task-area"></div>
+    <div id="score-box"></div>
+  </div>
+</div>
+
+<!-- 로딩 -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div id="loading-msg">분석 중입니다...<br>잠시만 기다려 주세요.</div>
+</div>
+
+<!-- 에러 -->
+<div id="error-msg"></div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ══════════════════════════════════
+// API 키는 절대 코드에 하드코딩하지 마세요. 화면에서 입력 → localStorage 저장.
+// ══════════════════════════════════
+
+const levelDescs = {
+  easy:   '사실 확인 위주 · 기사에서 직접 찾을 수 있는 문제 · 쉬운 어휘',
+  medium: '사실 확인 + 주제 파악 + 추론 혼합 · 그럴듯한 오답 포함',
+  hard:   '추론 + 비판적 사고 위주 · 함의·의도 파악 · 복잡한 선택지'
+};
+
+let S = {
+  src: 'paste',
+  topic: '건강·의료', topicPrompt: '건강, 질병 예방, 의료 서비스, 운동, 영양, 노인 건강',
+  level: 'easy', count: 5, task: 'quiz',
+  // 준비된 기사
+  articleTitle: '', articleBody: '', articleDate: '', isReal: true,
+  // 과제 데이터
+  taskData: null, answers: {},
+};
+
+/* ═══ 화면 전환 + 뒤로가기 ═══ */
+function goToScreen(name, pushHistory=true) {
+  document.getElementById('screen-setup').style.display = name==='setup' ? 'flex' : 'none';
+  document.getElementById('screen-task').style.display  = name==='task'  ? 'flex' : 'none';
+  document.getElementById('page-subtitle').textContent = name==='setup'
+    ? '기사를 입력하고 다양한 과제를 풀어보세요'
+    : '기사를 읽고 과제를 선택해 풀어보세요';
+  if (pushHistory) {
+    try { history.pushState({ screen: name }, ''); } catch(e) { /* iframe 환경에서 실패 가능 */ }
+  }
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function goHome() { location.href = 'index.html'; }
+
+// 뒤로가기: task → setup, setup → index
+window.addEventListener('popstate', (e) => {
+  const st = e.state;
+  if (st && st.screen === 'setup') {
+    goToScreen('setup', false);
+  } else if (st && st.screen === 'task') {
+    goToScreen('task', false);
+  } else {
+    // 초기 상태 → 인덱스
+    location.href = 'index.html';
+  }
+});
+
+/* ═══ API 키 ═══ */
+function getKey() {
+  return localStorage.getItem('anthropic_api_key') || '';
+}
+/* ═══ 초기화 ═══ */
+window.addEventListener('load', () => {
+  document.getElementById('paste-text').addEventListener('input', e => {
+    document.getElementById('char-count').textContent = e.target.value.length + '자';
+  });
+  // 초기 화면
+  try { history.replaceState({ screen: 'setup' }, ''); } catch(e) {}
+  goToScreen('setup', false);
+});
+
+/* ═══ 소스 탭 ═══ */
+function setSrc(s) {
+  S.src = s;
+  ['paste','auto'].forEach(x => {
+    document.getElementById(`tab-${x}`).classList.toggle('active', x===s);
+    document.getElementById(`src-${x}`).style.display = x===s ? 'block' : 'none';
+  });
+}
+
+/* ═══ 주제 카드 ═══ */
+document.querySelectorAll('.topic-card').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.topic-card').forEach(x => x.classList.remove('selected'));
+    c.classList.add('selected');
+    S.topic = c.dataset.topic; S.topicPrompt = c.dataset.prompt;
+  });
+});
+
+/* ═══ 과제 탭 ═══ */
+function selectTask(btn) {
+  document.querySelectorAll('.task-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  S.task = btn.dataset.task;
+  document.getElementById('count-wrap').style.display =
+    (S.task==='title') ? 'none' : 'block';
+  // 새 과제 선택하면 기존 과제 영역 숨김
+  document.getElementById('task-area-wrap').style.display = 'none';
+}
+
+/* ═══ 난이도/문제수 ═══ */
+document.querySelectorAll('#level-opts .opt-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#level-opts .opt-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected'); S.level = b.dataset.val;
+    document.getElementById('level-desc').textContent = levelDescs[S.level];
+  });
+});
+document.querySelectorAll('#count-opts .opt-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#count-opts .opt-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected'); S.count = parseInt(b.dataset.val);
+  });
+});
+
+/* ═══ API 호출 ═══ */
+async function callAPI(prompt, maxTokens=1500) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-api-key': getKey(),
+      'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens: maxTokens,
+      messages:[{ role:'user', content: prompt }] })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+}
+
+/* ═══ 견고한 JSON 추출/복구 ═══ */
+function extractJSON(raw) {
+  if (!raw) throw new Error('빈 응답');
+  // 1) 코드 펜스 제거
+  let s = raw.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '').trim();
+  // 2) 첫 { 부터 시작
+  const start = s.indexOf('{');
+  if (start < 0) throw new Error('JSON 시작 { 없음');
+  s = s.slice(start);
+  // 3) 그대로 파싱 시도
+  try { return JSON.parse(s); } catch(e) { /* 계속 */ }
+  // 4) 마지막 } 까지 자르고 시도
+  const lastClose = s.lastIndexOf('}');
+  if (lastClose > 0) {
+    try { return JSON.parse(s.slice(0, lastClose + 1)); } catch(e) { /* 계속 */ }
+  }
+  // 5) 잘린 JSON 복구: 괄호 매칭 - 문자열/escape 인식
+  let depth = 0, sqDepth = 0, inStr = false, esc = false, lastGood = -1;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (esc) { esc = false; continue; }
+    if (c === '\\') { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0 && sqDepth === 0) lastGood = i; }
+    else if (c === '[') sqDepth++;
+    else if (c === ']') sqDepth--;
+  }
+  if (lastGood > 0) {
+    try { return JSON.parse(s.slice(0, lastGood + 1)); } catch(e) { /* 계속 */ }
+  }
+  // 6) 끝까지 닫아주기 (마지막 시도)
+  let attempt = s;
+  // trailing comma 제거
+  attempt = attempt.replace(/,\s*$/, '');
+  // 열린 문자열 닫기
+  if (inStr) attempt += '"';
+  // 남은 배열·객체 닫기
+  while (sqDepth-- > 0) attempt += ']';
+  while (depth-- > 0) attempt += '}';
+  try { return JSON.parse(attempt); } catch(e) {
+    throw new Error('JSON 복구 실패 (응답이 심하게 잘렸을 수 있음)');
+  }
+}
+
+/* ═══ 1단계: 기사 준비하기 ═══ */
+async function prepareArticle() {
+  hideErr();
+  if (!getKey()) { showErr('API 키를 먼저 설정해 주세요.'); return; }
+
+  let prompt, isReal;
+  const today = new Date();
+  const ds = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+
+  if (S.src === 'paste') {
+    const txt = document.getElementById('paste-text').value.trim();
+    if (txt.length < 50) { showErr('기사 본문을 좀 더 입력해 주세요. (최소 50자)'); return; }
+    isReal = true;
+    prompt = `노인용 기사 정리. JSON만 출력.
+
+[원문]
+${txt}
+
+{
+  "title": "기사 제목",
+  "body": "댓글·광고·기자명 제외, 60~80대 경어체로 3~5문단, 숫자·장소·이름은 유지"
+}`;
+  } else {
+    isReal = false;
+    prompt = `노인용 가상 뉴스 기사 작성. JSON만 출력.
+
+주제: ${S.topic} (${S.topicPrompt})
+날짜: ${ds}
+
+{
+  "title": "기사 제목",
+  "body": "60~80대 경어체, 3~5문단, 구체적 숫자·장소·이름, 300~500자"
+}`;
+  }
+
+  showLoading('기사를 준비하는 중...');
+  try {
+    const raw = await callAPI(prompt, 2000);
+    const parsed = extractJSON(raw);
+    if (!parsed.title || !parsed.body) throw new Error('기사 생성 실패 (필드 누락)');
+
+    S.articleTitle = parsed.title;
+    S.articleBody  = parsed.body;
+    S.articleDate  = ds;
+    S.isReal       = isReal;
+    hideLoading();
+    renderPreparedArticle();
+    goToScreen('task');
+  } catch(e) {
+    hideLoading();
+    showErr('기사 준비 실패: ' + e.message);
+  }
+}
+
+function renderPreparedArticle() {
+  document.getElementById('topic-badge').textContent = S.isReal ? '실제 기사' : S.topic;
+  document.getElementById('topic-badge').className   = 'a-badge ' + (S.isReal ? 'a-badge-real' : 'a-badge-ai');
+  document.getElementById('article-date').textContent = S.articleDate;
+  document.getElementById('article-title').textContent = S.articleTitle;
+  document.getElementById('article-body').textContent  = S.articleBody;
+  document.getElementById('article-notice').textContent = S.isReal
+    ? '※ 원문 기사를 어르신이 읽기 쉽게 AI가 정리한 내용입니다.'
+    : '※ AI가 생성한 가상의 기사입니다.';
+  // 기사 펼침
+  document.getElementById('article-body-wrap').style.display = 'block';
+  document.getElementById('toggle-label').textContent = '📕 기사 접기';
+  document.getElementById('toggle-icon').textContent  = '▲';
+  // 과제 영역 초기화
+  document.getElementById('task-area-wrap').style.display = 'none';
+}
+
+/* ═══ 기사 토글 ═══ */
+function toggleArticle() {
+  const wrap = document.getElementById('article-body-wrap');
+  const open = wrap.style.display !== 'none';
+  wrap.style.display = open ? 'none' : 'block';
+  document.getElementById('toggle-label').textContent = open ? '📖 기사 펼치기' : '📕 기사 접기';
+  document.getElementById('toggle-icon').textContent  = open ? '▼' : '▲';
+}
+
+/* ═══ 2단계: 과제 생성 ═══ */
+async function generateAndShowTask() {
+  hideErr();
+  if (!S.articleBody) { showErr('먼저 기사를 준비해 주세요.'); return; }
+
+  showLoading('과제를 만드는 중...');
+  S.answers = {};
+
+  const taskInstructions = {
+    quiz:  `"quizzes": [{ "type":"사실확인|주제파악|추론|비판적사고", "question":"질문", "options":["① A","② B","③ C","④ D"], "answer":0, "explanation":"해설" }]  // ${S.count}개`,
+    blank: `"blanks": [{ "sentence":"문장 (핵심단어를 ___로 표시)", "answer":"정답단어", "distractors":["오답1","오답2","오답3"], "hint":"힌트" }]  // ${S.count}개`,
+    fact:  `"statements": [{ "text":"문장", "type":"사실|의견", "explanation":"해설" }]  // ${S.count}개, 사실·의견 혼합`,
+    title: `"titleOptions": ["제목1","제목2","제목3","제목4"], "correctTitle": 0  // 정답 인덱스 0~3`
+  };
+
+  const prompt = `기사 내용으로 노인 인지훈련 과제 만들기. JSON만 출력.
+
+[기사] ${S.articleTitle}
+${S.articleBody}
+
+{ ${taskInstructions[S.task]} }
+
+- 기사 내용에서만 출제
+- 난이도 ${S.level}: ${S.level==='easy'?'사실확인 위주':S.level==='medium'?'사실+추론':'추론·비판'}
+- 경어체`;
+
+  try {
+    const raw = await callAPI(prompt, 2500);
+    const parsed = extractJSON(raw);
+    hideLoading();
+
+    const taskLabels = { quiz:'❓ 객관식 퀴즈', blank:'✏️ 빈칸 채우기',
+      fact:'🔍 사실 vs 의견 구분', title:'📌 제목 고르기' };
+    document.getElementById('task-label').textContent = taskLabels[S.task];
+    document.getElementById('task-area-wrap').style.display = 'block';
+    document.getElementById('score-box').style.display = 'none';
+
+    const area = document.getElementById('task-area');
+    area.innerHTML = '';
+    if      (S.task==='quiz')  renderQuiz(parsed, area);
+    else if (S.task==='blank') renderBlank(parsed, area);
+    else if (S.task==='fact')  renderFact(parsed, area);
+    else if (S.task==='title') renderTitle(parsed, area);
+
+    document.getElementById('task-area-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
+  } catch(e) {
+    hideLoading();
+    showErr('과제 생성 실패: ' + e.message);
+  }
+}
+
+/* ═══ 객관식 ═══ */
+function renderQuiz(parsed, area) {
+  S.taskData = parsed.quizzes || [];
+  const sec = document.createElement('div'); sec.style.cssText='display:flex;flex-direction:column;gap:14px;';
+  S.taskData.forEach((q, qi) => {
+    const typeLabel = {'사실확인':'📌 사실 확인','주제파악':'🎯 주제 파악','추론':'💡 추론','비판적사고':'🔍 비판적 사고'};
+    const card = document.createElement('div'); card.className='quiz-card'; card.id=`qc-${qi}`;
+    card.innerHTML = `<div class="quiz-header"><span class="q-num">문제 ${qi+1}</span><span class="q-type">${typeLabel[q.type]||q.type}</span></div>
+      <div class="quiz-q">${q.question}</div>
+      <div class="quiz-options">${q.options.map((o,oi)=>`<button class="quiz-opt" onclick="answerQuiz(${qi},${oi},this)">${o}</button>`).join('')}</div>
+      <div class="quiz-fb" id="qfb-${qi}"></div>`;
+    sec.appendChild(card);
+  });
+  area.appendChild(sec);
+}
+function answerQuiz(qi, oi, btn) {
+  if (S.answers[qi]!==undefined) return;
+  S.answers[qi]=oi;
+  const q=S.taskData[qi];
+  const opts=btn.closest('.quiz-options').querySelectorAll('.quiz-opt');
+  opts.forEach(b=>b.disabled=true);
+  const ok=oi===q.answer;
+  btn.classList.add(ok?'correct':'wrong');
+  if(!ok) opts[q.answer].classList.add('show-ans');
+  document.getElementById(`qc-${qi}`).classList.add(ok?'ans-ok':'ans-ng');
+  const fb=document.getElementById(`qfb-${qi}`);
+  fb.style.display='block'; fb.className=`quiz-fb ${ok?'ok':'ng'}`;
+  fb.innerHTML=(ok?'✅ 정답! ':'❌ 오답. ')+q.explanation;
+  if(Object.keys(S.answers).length===S.taskData.length) setTimeout(showScore,400);
+}
+
+/* ═══ 빈칸 ═══/* ═══ 빈칸 ═══ */
+function renderBlank(parsed, area) {
+  S.taskData=parsed.blanks||[];
+  const sec=document.createElement('div'); sec.style.cssText='display:flex;flex-direction:column;gap:14px;';
+  S.taskData.forEach((b,bi)=>{
+    const opts=[b.answer,...b.distractors].sort(()=>Math.random()-.5);
+    const card=document.createElement('div'); card.className='blank-card';
+    const sh=b.sentence.replace('___',`<span class="blank-slot" id="bs-${bi}">　　　　</span>`);
+    card.innerHTML=`<div class="blank-q">${sh}</div>
+      <div class="blank-opts" id="bo-${bi}">${opts.map(o=>`<button class="blank-opt" onclick="answerBlank(${bi},'${o.replace(/'/g,"\\'")}',this)">${o}</button>`).join('')}</div>
+      <div class="blank-fb" id="bfb-${bi}"></div>`;
+    sec.appendChild(card);
+  });
+  area.appendChild(sec);
+}
+function answerBlank(bi,val,btn) {
+  if(S.answers[bi]!==undefined)return;
+  S.answers[bi]=val;
+  const b=S.taskData[bi];
+  document.querySelectorAll(`#bo-${bi} .blank-opt`).forEach(x=>x.disabled=true);
+  const ok=val===b.answer;
+  btn.classList.add(ok?'b-correct':'b-wrong');
+  const bs=document.getElementById(`bs-${bi}`);
+  bs.textContent=b.answer; bs.style.color=ok?'#2e7d32':'#c62828';
+  const fb=document.getElementById(`bfb-${bi}`);
+  fb.style.display='block'; fb.className=`blank-fb ${ok?'ok':'ng'}`;
+  fb.textContent=ok?`✅ 정답! 💡 ${b.hint||''}`:`❌ 정답: "${b.answer}" — ${b.hint||''}`;
+  if(Object.keys(S.answers).length===S.taskData.length)setTimeout(showScore,400);
+}
+
+/* ═══ 사실vs의견 ═══ */
+function renderFact(parsed, area) {
+  S.taskData=parsed.statements||[];
+  const sec=document.createElement('div'); sec.style.cssText='display:flex;flex-direction:column;gap:12px;';
+  S.taskData.forEach((st,si)=>{
+    const card=document.createElement('div'); card.className='fact-card';
+    card.innerHTML=`<div class="fact-sentence">"${st.text}"</div>
+      <div class="fact-btns">
+        <button class="fact-btn" onclick="answerFact(${si},'사실',this)">📰 사실</button>
+        <button class="fact-btn" onclick="answerFact(${si},'의견',this)">💬 의견</button>
+      </div>
+      <div class="fact-fb" id="ffb-${si}"></div>`;
+    sec.appendChild(card);
+  });
+  area.appendChild(sec);
+}
+function answerFact(si,val,btn) {
+  if(S.answers[si]!==undefined)return;
+  S.answers[si]=val;
+  const st=S.taskData[si];
+  const btns=btn.closest('.fact-btns').querySelectorAll('.fact-btn');
+  btns.forEach(b=>b.disabled=true);
+  const ok=val===st.type;
+  btn.classList.add(ok?'f-correct':'f-wrong');
+  if(!ok)btns[st.type==='사실'?0:1].classList.add('f-show');
+  const fb=document.getElementById(`ffb-${si}`);
+  fb.style.display='block'; fb.className=`fact-fb ${ok?'ok':'ng'}`;
+  fb.innerHTML=(ok?`✅ 정답! 이 문장은 <b>${st.type}</b>입니다. `:`❌ 오답. 이 문장은 <b>${st.type}</b>입니다. `)+st.explanation;
+  if(Object.keys(S.answers).length===S.taskData.length)setTimeout(showScore,400);
+}
+
+/* ═══ 제목 고르기 ═══ */
+function renderTitle(parsed, area) {
+  S.taskData=parsed;
+  const opts=parsed.titleOptions||[]; const correct=parsed.correctTitle||0;
+  const sec=document.createElement('div'); sec.style.cssText='display:flex;flex-direction:column;gap:8px;';
+  const hint=document.createElement('p');
+  hint.style.cssText='font-size:13px;color:#555;line-height:1.7;padding:10px 14px;background:#f7f9fc;border-radius:10px;border:1px solid #eee;margin-bottom:4px;';
+  hint.textContent='위 기사에 가장 어울리는 제목을 골라주세요.'; sec.appendChild(hint);
+  opts.forEach((o,oi)=>{
+    const btn=document.createElement('button'); btn.className='title-opt';
+    btn.innerHTML=`<b style="color:#888;margin-right:8px;">${['①','②','③','④'][oi]}</b>${o}`;
+    btn.onclick=()=>{
+      if(S.answers[0]!==undefined)return;
+      S.answers[0]=oi;
+      sec.querySelectorAll('.title-opt').forEach(b=>b.disabled=true);
+      const ok=oi===correct;
+      btn.classList.add(ok?'t-correct':'t-wrong');
+      if(!ok)sec.querySelectorAll('.title-opt')[correct].classList.add('t-show');
+      const fb=document.createElement('div');
+      fb.style.cssText=`margin-top:8px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.7;${ok?'background:#e8f5e9;color:#2e7d32;':'background:#ffebee;color:#c62828;'}`;
+      fb.innerHTML=ok?`✅ 정답입니다! "<b>${opts[correct]}</b>"이 이 기사의 핵심을 잘 담고 있어요.`:`❌ 오답입니다. 정답은 <b>"${opts[correct]}"</b>입니다.`;
+      sec.appendChild(fb);
+      setTimeout(()=>showScoreRaw(ok?1:0,1,ok?100:0),400);
+    };
+    sec.appendChild(btn);
+  });
+  area.appendChild(sec);
+}
+
+/* ═══ 점수 ═══ */
+function showScore() {
+  const correct=S.taskData.filter((_,i)=>{
+    if(S.task==='quiz') return S.answers[i]===S.taskData[i].answer;
+    if(S.task==='blank') return S.answers[i]===S.taskData[i].answer;
+    if(S.task==='fact') return S.answers[i]===S.taskData[i].type;
+    return false;
+  }).length;
+  showScoreRaw(correct,S.taskData.length,Math.round(correct/S.taskData.length*100));
+}
+function showScoreRaw(correct,total,pct) {
+  const color=pct>=80?'#2e7d32':pct>=60?'#e65100':'#c62828';
+  const bg=pct>=80?'#e8f5e9':pct>=60?'#fff9c4':'#ffebee';
+  const border=pct>=80?'#43a047':pct>=60?'#f9a825':'#c62828';
+  const msg=pct>=80?'훌륭해요! 기사 내용을 잘 이해하셨습니다 😊':pct>=60?'잘 하셨어요! 조금 더 꼼꼼히 읽어보세요.':'다시 한번 기사를 읽고 도전해 보세요!';
+  const sb=document.getElementById('score-box');
+  sb.style.cssText=`display:block;border:2px solid ${border};background:${bg};border-radius:14px;padding:22px 20px;text-align:center;`;
+  sb.innerHTML=`<div class="score-num" style="color:${color}">${correct} / ${total}</div>
+    <div class="score-label">${msg}</div>
+    <div style="margin-top:14px;font-size:12px;color:#555;">💡 위에서 다른 과제 유형을 선택해 같은 기사로 계속 풀 수 있어요</div>`;
+  sb.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function showLoading(msg) {
+  document.getElementById('loading-msg').innerHTML=(msg||'처리 중...')+'<br>잠시만 기다려 주세요.';
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('screen-setup').style.display='none';
+  document.getElementById('screen-task').style.display='none';
+  hideErr();
+}
+function hideLoading() {
+  document.getElementById('loading').style.display='none';
+  // 현재 화면 복원
+  const cur = (history.state && history.state.screen) || 'setup';
+  document.getElementById('screen-setup').style.display = cur==='setup' ? 'flex' : 'none';
+  document.getElementById('screen-task').style.display  = cur==='task'  ? 'flex' : 'none';
+}
+function showErr(msg) {
+  const el=document.getElementById('error-msg'); el.style.display='block'; el.innerHTML=msg;
+  // 현재 화면 유지 (history.state 사용)
+  const cur = (history.state && history.state.screen) || 'setup';
+  document.getElementById('screen-setup').style.display = cur==='setup' ? 'flex' : 'none';
+  document.getElementById('screen-task').style.display  = cur==='task'  ? 'flex' : 'none';
+}
+function hideErr() { document.getElementById('error-msg').style.display='none'; }
+</script>
+</body>
+</html>

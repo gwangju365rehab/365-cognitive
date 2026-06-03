@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMT 선잇기 - 광주365재활병원</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    #description {
+      max-width: 720px;
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    #description b {
+      color: #000;
+    }
+
+    #test-category-panel {
+      display: flex;
+      gap: 15px;
+      margin: 10px 0;
+    }
+
+    .category-btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: #eeeeee;
+      color: #222;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.08s;
+    }
+
+    .category-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .category-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    .category-btn.active {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    #level-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .level-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: #eeeeee;
+      color: #222;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.08s;
+    }
+
+    .level-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .level-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    .level-btn.active {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    #controls {
+      display: flex;
+      gap: 15px;
+      margin: 10px 0;
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #2196f3;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .control-btn:hover {
+      background-color: #1976d2;
+    }
+
+    .control-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    #reset-btn {
+      background-color: #f44336;
+    }
+
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    #test-container {
+      position: relative;
+      width: 95vw; /* 화면 너비의 95%로 확장 */
+      height: 80vh; /* 화면 높이의 80%로 확장 */
+      border: 2px solid #333;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      overflow: hidden;
+      margin: 10px 0;
+      touch-action: manipulation;
+      max-width: 1600px; /* 최대 너비 설정 */
+      min-height: 600px; /* 최소 높이 설정 */
+    }
+
+    .stimulus {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      z-index: 2;
+    }
+
+    .stimulus.correct {
+      background-color: #4caf50;
+      color: white;
+      border-color: #2e7d32;
+    }
+
+    .stimulus.current {
+      background-color: #ffeb3b;
+      border-color: #fbc02d;
+    }
+
+    .stimulus.shake {
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    .line {
+      position: absolute;
+      background-color: rgba(33, 150, 243, 0.7);
+      height: 4px;
+      transform-origin: 0 0;
+      z-index: 1;
+    }
+
+    #status {
+      margin-top: 16px;
+      font-size: 1rem;
+      color: #555;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    #status span {
+      font-weight: 700;
+      color: #222;
+    }
+
+    #message {
+      margin-top: 10px;
+      min-height: 1.4rem;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    #message.success {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    #message.error {
+      color: #d84315;
+    }
+
+    #result-box {
+      margin-top: 18px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fafafa;
+      font-size: 0.98rem;
+      line-height: 1.7;
+      display: none;
+    }
+
+    @media (max-width: 950px) {
+      #test-container {
+        width: 95%;
+        height: 70vh;
+      }
+      
+      .stimulus {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+      }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+  <h1>TMT 선잇기</h1>
+
+  <div id="description">
+    <b>규칙:</b> 순서대로 자극을 클릭하여 선을 연결하세요.<br>
+    <span id="test-specific-desc">숫자 순서대로(1→2→3...) 클릭하세요.</span>
+  </div>
+
+  <div id="test-category-panel">
+    <button class="category-btn active" data-category="number">숫자 선잇기</button>
+    <button class="category-btn" data-category="char">문자 선잇기</button>
+    <button class="category-btn" data-category="mixed">숫자-문자 교대</button>
+  </div>
+
+  <div id="level-panel">
+    <!-- 동적으로 채워질 예정 -->
+  </div>
+
+  <div id="controls">
+    <button id="start-btn" class="control-btn">시작하기</button>
+    <button id="reset-btn" class="control-btn">다시하기</button>
+  </div>
+
+  <div id="status">
+    진행: <span id="progress">0</span> / <span id="total">10</span> |
+    소요 시간: <span id="elapsed-time">00:00.0</span> |
+    오답: <span id="error-count">0</span>회
+  </div>
+
+  <div id="test-container"></div>
+
+  <div id="message"></div>
+
+  <div id="result-box"></div>
+
+  <script>
+    // 상수 정의
+    const CONTAINER_WIDTH = document.getElementById('test-container').clientWidth; // 동적으로 컨테이너 너비 가져오기
+    const CONTAINER_HEIGHT = document.getElementById('test-container').clientHeight; // 동적으로 컨테이너 높이 가져오기
+    const STIMULUS_SIZE = 54; // 50px + 2px 테두리 양쪽
+    const PADDING = 60; // 테두리에서 최소 여백 (증가)
+
+    // 문자 배열 (가~하)
+    const KOREAN_CHARS = [
+      '가', '나', '다', '라', '마', 
+      '바', '사', '아', '자', '차',
+      '카', '타', '파', '하'
+    ];
+
+    // 테스트 설정
+    const TEST_CONFIGS = {
+      number: [
+        { id: 'num-10', name: '쉬움 (1~10)' },
+        { id: 'num-15', name: '중간 (1~15)' },
+        { id: 'num-20', name: '어려움 (1~20)' }
+      ],
+      char: [
+        { id: 'char-9', name: '쉬움 (가~아)' },
+        { id: 'char-14', name: '어려움 (가~하)' }
+      ],
+      mixed: [
+        { id: 'mixed-16', name: '쉬움 (16개)' },
+        { id: 'mixed-20', name: '중간 (20개)' },
+        { id: 'mixed-28', name: '어려움 (28개)' }
+      ]
+    };
+
+    // 카테고리별 규칙 설명
+    const CATEGORY_DESCRIPTIONS = {
+      number: "숫자 순서대로(1→2→3...) 클릭하세요.",
+      char: "문자 순서대로(가→나→다...) 클릭하세요.",
+      mixed: "숫자와 문자를 교대로(1→가→2→나...) 클릭하세요."
+    };
+
+    // DOM 요소
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const levelPanel = document.getElementById('level-panel');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const testContainer = document.getElementById('test-container');
+    const progressSpan = document.getElementById('progress');
+    const totalSpan = document.getElementById('total');
+    const elapsedTimeSpan = document.getElementById('elapsed-time');
+    const errorCountSpan = document.getElementById('error-count');
+    const messageDiv = document.getElementById('message');
+    const resultBox = document.getElementById('result-box');
+    const testSpecificDesc = document.getElementById('test-specific-desc');
+
+    // 게임 상태
+    const state = {
+      category: 'number',
+      testType: 'num-10',
+      stimuli: [],
+      currentIndex: -1,
+      isRunning: false,
+      startTime: null,
+      timerInterval: null,
+      elapsedMs: 0,
+      lines: [],
+      errorCount: 0
+    };
+
+    // 메시지 설정 함수
+    function setMessage(text, type = '') {
+      messageDiv.textContent = text;
+      messageDiv.className = '';
+      if (type) messageDiv.classList.add(type);
+    }
+
+    // 시간 포맷팅 함수
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const tenths = Math.floor((ms % 1000) / 100);
+      
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+    }
+
+    // 타이머 시작 함수
+    function startTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+      }
+      
+      state.startTime = new Date();
+      state.elapsedMs = 0;
+      elapsedTimeSpan.textContent = '00:00.0';
+      
+      state.timerInterval = setInterval(() => {
+        const now = new Date();
+        state.elapsedMs = now - state.startTime;
+        elapsedTimeSpan.textContent = formatTime(state.elapsedMs);
+      }, 100);
+    }
+
+    // 타이머 정지 함수
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    // 무작위 위치 생성 함수 (수정됨)
+    function generateRandomPositions(count) {
+      const positions = [];
+      const containerWidth = testContainer.clientWidth; // 현재 컨테이너 너비
+      const containerHeight = testContainer.clientHeight; // 현재 컨테이너 높이
+      
+      const minX = PADDING;
+      const maxX = containerWidth - STIMULUS_SIZE - PADDING;
+      const minY = PADDING;
+      const maxY = containerHeight - STIMULUS_SIZE - PADDING;
+      
+      // 안전 검사: 공간이 충분한지 확인
+      const availableArea = (maxX - minX) * (maxY - minY);
+      const requiredArea = count * (STIMULUS_SIZE * 2) * (STIMULUS_SIZE * 2); // 각 자극이 차지하는 공간의 2배 여유
+      
+      if (requiredArea > availableArea) {
+        console.warn("Warning: Too many stimuli for the container size. Some may overlap.");
+      }
+      
+      for (let i = 0; i < count; i++) {
+        let overlapping;
+        let newPos;
+        let attempts = 0;
+        const maxAttempts = 100; // 최대 시도 횟수 제한
+        
+        do {
+          overlapping = false;
+          // 실제 위치 계산 (자극의 왼쪽 위 모서리 기준)
+          newPos = {
+            x: Math.floor(Math.random() * (maxX - minX)) + minX,
+            y: Math.floor(Math.random() * (maxY - minY)) + minY
+          };
+          
+          // 기존 위치들과 겹치는지 확인 (더 넓은 간격으로)
+          for (const pos of positions) {
+            const distance = Math.hypot(newPos.x - pos.x, newPos.y - pos.y);
+            if (distance < STIMULUS_SIZE * 2) { // 간격을 더 넓게 설정
+              overlapping = true;
+              break;
+            }
+          }
+          
+          attempts++;
+          if (attempts >= maxAttempts) {
+            // 너무 많은 시도 후에도 적절한 위치를 찾지 못하면 그냥 현재 위치 사용
+            console.warn(`Could not find non-overlapping position for stimulus ${i} after ${maxAttempts} attempts.`);
+            break;
+          }
+        } while (overlapping);
+        
+        positions.push(newPos);
+      }
+      
+      return positions;
+    }
+
+    // 자극 생성 함수
+    function createStimuli() {
+      testContainer.innerHTML = '';
+      state.stimuli = [];
+      state.lines = [];
+      state.currentIndex = -1;
+      state.errorCount = 0;
+      errorCountSpan.textContent = '0';
+      
+      let count = 10; // 기본값
+      let items = [];
+      let description = '';
+      
+      // 테스트 유형에 따른 자극 생성
+      const [type, size] = state.testType.split('-');
+      
+      if (type === 'num') {
+        count = parseInt(size);
+        items = Array.from({length: count}, (_, i) => (i + 1).toString());
+        description = `숫자 순서대로(1→2→3...) ${count}까지 클릭하세요.`;
+      } 
+      else if (type === 'char') {
+        count = parseInt(size);
+        items = KOREAN_CHARS.slice(0, count);
+        description = `문자 순서대로(가→나→다...) ${items[count-1]}까지 클릭하세요.`;
+      } 
+      else if (type === 'mixed') {
+        count = parseInt(size);
+        const halfCount = Math.floor(count / 2);
+        
+        const numbers = Array.from({length: halfCount}, (_, i) => (i + 1).toString());
+        const chars = KOREAN_CHARS.slice(0, halfCount);
+        
+        // 숫자와 문자 교대로 배열 (1→가→2→나→...)
+        for (let i = 0; i < halfCount; i++) {
+          items.push(numbers[i]);
+          if (i < chars.length) {
+            items.push(chars[i]);
+          }
+        }
+        
+        // 필요한 개수만큼 자르기
+        items = items.slice(0, count);
+        
+        description = `숫자와 문자를 교대로(1→가→2→나...) ${items[count-1]}까지 클릭하세요.`;
+      }
+      
+      testSpecificDesc.textContent = description;
+      
+      // 무작위 위치 생성
+      const positions = generateRandomPositions(count);
+      
+      // 자극 요소 생성
+      for (let i = 0; i < count; i++) {
+        const stimulus = document.createElement('div');
+        stimulus.className = 'stimulus';
+        stimulus.textContent = items[i];
+        stimulus.style.left = `${positions[i].x}px`;
+        stimulus.style.top = `${positions[i].y}px`;
+        stimulus.dataset.index = i;
+        
+        stimulus.addEventListener('click', handleStimulusClick);
+        
+        testContainer.appendChild(stimulus);
+        
+        state.stimuli.push({
+          element: stimulus,
+          value: items[i],
+          x: positions[i].x + STIMULUS_SIZE / 2,
+          y: positions[i].y + STIMULUS_SIZE / 2,
+          isCorrect: false
+        });
+      }
+      
+      totalSpan.textContent = count.toString();
+      progressSpan.textContent = '0';
+    }
+
+    // 선 그리기 함수
+    function drawLine(x1, y1, x2, y2) {
+      const length = Math.hypot(x2 - x1, y2 - y1);
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      
+      const line = document.createElement('div');
+      line.className = 'line';
+      line.style.width = `${length}px`;
+      line.style.left = `${x1}px`;
+      line.style.top = `${y1}px`;
+      line.style.transform = `rotate(${angle}rad)`;
+      
+      testContainer.appendChild(line);
+      state.lines.push(line);
+    }
+
+    // 자극 클릭 핸들러
+    function handleStimulusClick(event) {
+      if (!state.isRunning) return;
+      
+      const clickedIndex = parseInt(event.currentTarget.dataset.index);
+      const expectedIndex = state.currentIndex + 1;
+      
+      if (clickedIndex === expectedIndex) {
+        // 정답 처리
+        const currentStimulus = state.stimuli[clickedIndex];
+        currentStimulus.isCorrect = true;
+        currentStimulus.element.classList.add('correct');
+        
+        // 이전 자극이 있으면 연결선 그리기
+        if (state.currentIndex >= 0) {
+          const prevStimulus = state.stimuli[state.currentIndex];
+          drawLine(
+            prevStimulus.x, 
+            prevStimulus.y, 
+            currentStimulus.x, 
+            currentStimulus.y
+          );
+          
+          // 이전 자극의 current 클래스 제거
+          prevStimulus.element.classList.remove('current');
+        }
+        
+        // 현재 자극에 current 클래스 추가
+        currentStimulus.element.classList.add('current');
+        
+        // 현재 인덱스 업데이트
+        state.currentIndex = clickedIndex;
+        
+        // 진행 상태 업데이트
+        progressSpan.textContent = (state.currentIndex + 1).toString();
+        
+        // 모든 자극을 클릭했는지 확인
+        if (state.currentIndex === state.stimuli.length - 1) {
+          finishTest();
+        }
+      } else {
+        // 오답 처리
+        state.errorCount++;
+        errorCountSpan.textContent = state.errorCount;
+        
+        setMessage('순서가 잘못되었습니다. 다음 순서를 클릭하세요.', 'error');
+        
+        // 오답 효과 (흔들림)
+        const wrongStimulus = state.stimuli[clickedIndex].element;
+        wrongStimulus.classList.add('shake');
+        setTimeout(() => {
+          wrongStimulus.classList.remove('shake');
+        }, 300);
+      }
+    }
+
+    // 테스트 시작 함수
+    function startTest() {
+      if (state.isRunning) return;
+      
+      createStimuli();
+      state.isRunning = true;
+      startTimer();
+      
+      startBtn.textContent = '진행 중...';
+      startBtn.disabled = true;
+      
+      resultBox.style.display = 'none';
+      setMessage('순서대로 자극을 클릭하세요.');
+    }
+
+    // 테스트 종료 함수
+    function finishTest() {
+      state.isRunning = false;
+      stopTimer();
+      
+      startBtn.textContent = '시작하기';
+      startBtn.disabled = false;
+      
+      const timeInSeconds = (state.elapsedMs / 1000).toFixed(1);
+      
+      setMessage('테스트 완료!', 'success');
+      
+      // 결과 표시
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = `
+        <b>테스트 결과</b><br>
+        테스트 유형: ${getTestTypeName()}<br>
+        자극 개수: ${state.stimuli.length}개<br>
+        소요 시간: ${formatTime(state.elapsedMs)} (${timeInSeconds}초)<br>
+        오답 횟수: ${state.errorCount}회<br>
+        평균 반응 시간: ${(timeInSeconds / state.stimuli.length).toFixed(2)}초/개
+      `;
+    }
+
+    // 테스트 유형 이름 가져오기
+    function getTestTypeName() {
+      const [type, size] = state.testType.split('-');
+      
+      if (type === 'num') {
+        return `숫자 선잇기 (1~${size})`;
+      } else if (type === 'char') {
+        if (size === '9') {
+          return '문자 선잇기 (가~아)';
+        } else {
+          return '문자 선잇기 (가~하)';
+        }
+      } else if (type === 'mixed') {
+        return `숫자-문자 교대 (${size}개)`;
+      }
+      
+      return state.testType;
+    }
+
+    // 테스트 리셋 함수
+    function resetTest() {
+      stopTimer();
+      state.isRunning = false;
+      state.currentIndex = -1;
+      state.stimuli = [];
+      state.lines = [];
+      state.errorCount = 0;
+      
+      testContainer.innerHTML = '';
+      startBtn.textContent = '시작하기';
+      startBtn.disabled = false;
+      
+      progressSpan.textContent = '0';
+      elapsedTimeSpan.textContent = '00:00.0';
+      errorCountSpan.textContent = '0';
+      
+      resultBox.style.display = 'none';
+      setMessage('');
+    }
+
+    // 카테고리 변경 시 규칙 설명 업데이트
+    function updateCategoryDescription() {
+      testSpecificDesc.textContent = CATEGORY_DESCRIPTIONS[state.category];
+    }
+
+    // 레벨 버튼 생성 함수
+    function createLevelButtons() {
+      levelPanel.innerHTML = '';
+      
+      const configs = TEST_CONFIGS[state.category];
+      if (!configs) return;
+      
+      configs.forEach((config, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'level-btn';
+        btn.textContent = config.name;
+        btn.dataset.testType = config.id;
+        
+        if (index === 0) {
+          btn.classList.add('active');
+          state.testType = config.id;
+        }
+        
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.testType = config.id;
+          resetTest();
+        });
+        
+        levelPanel.appendChild(btn);
+      });
+    }
+
+    // 이벤트 리스너
+    categoryButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        categoryButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        state.category = btn.dataset.category;
+        updateCategoryDescription();
+        createLevelButtons();
+        resetTest();
+      });
+    });
+
+    startBtn.addEventListener('click', startTest);
+    resetBtn.addEventListener('click', resetTest);
+
+    // 창 크기 변경 감지
+    window.addEventListener('resize', function() {
+      if (!state.isRunning) {
+        // 실행 중이 아닐 때만 자극 재배치
+        if (state.stimuli.length > 0) {
+          createStimuli();
+        }
+      }
+    });
+
+    // 초기화
+    updateCategoryDescription();
+    createLevelButtons();
+    resetTest();
+  </script>
+  
+<a href="index.html"><button style="position: absolute; top: 20px; left: 20px; padding: 8px 16px; border-radius: 999px; border: 1px solid #bbb; background: #fafafa; cursor: pointer; font-size: 13px;">← 메인으로</button></a>
+
+  <div style="position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background-color: rgba(255, 255, 255, 0.8); border-radius: 4px; font-weight: 500; z-index: 9999;">광주365재활병원_인지연하팀</div>
+<div id="hospital-logo" style="position:fixed;bottom:10px;right:10px;font-size:12px;color:#666;padding:5px 10px;background:rgba(255,255,255,0.9);border-radius:4px;font-weight:500;">광주365재활병원_인지연하팀</div>
+</body>
+</html>

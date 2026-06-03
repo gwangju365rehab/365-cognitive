@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>광주365재활병원 인지훈련 프로그램</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: rgba(0,0,0,0.06); touch-action: manipulation; }
+    body {
+      margin: 0; padding: 20px 20px 60px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f2f8; color: #222;
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
+    }
+
+    h1 { margin: 10px 0 0; font-size: 1.9rem; font-weight: 900; text-align: center; color: #1a237e; }
+    .sub { font-size: 0.9rem; color: #888; text-align: center; margin-top: 2px; }
+
+    /* 섹션 */
+    .section { width: 100%; max-width: 960px; }
+    .section-title {
+      font-size: 0.95rem; font-weight: 800; color: #fff;
+      padding: 7px 18px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-bottom: 12px; letter-spacing: 0.4px;
+    }
+    .cat-attention  { background: #0277bd; }
+    .cat-memory     { background: #6a1b9a; }
+    .cat-exec       { background: #2e7d32; }
+    .cat-functional { background: #00695c; }
+    .cat-calc       { background: #e65100; }
+    .cat-etc        { background: #546e7a; }
+
+    /* 카드 그리드 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    /* 카드 */
+    .menu-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 2px solid #e4e8f0;
+      padding: 16px 14px 14px;
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: transform .12s, box-shadow .12s;
+      text-decoration: none; color: inherit;
+    }
+    .menu-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+    .menu-card:active { transform: scale(0.97); opacity: 0.9; }
+
+    .badge-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .card-badge {
+      font-size: 0.68rem; font-weight: 800;
+      padding: 2px 8px; border-radius: 999px; color: #fff;
+    }
+    .badge-attention { background: #0277bd; }
+    .badge-memory    { background: #6a1b9a; }
+    .badge-exec      { background: #2e7d32; }
+    .badge-functional{ background: #00695c; }
+    .badge-calc     { background: #e65100; }
+    .badge-etc      { background: #546e7a; }
+    .badge-new       { background: #d32f2f; }
+
+    .card-title {
+      font-size: 1rem; font-weight: 800;
+      color: #1a1a2e; line-height: 1.3;
+      margin-top: 2px;
+    }
+    .card-sub {
+      font-size: 0.75rem; color: #888;
+      line-height: 1.5; flex: 1;
+    }
+    .card-btn {
+      width: 100%; margin-top: 6px;
+      padding: 11px 0; border-radius: 10px;
+      border: none; background: #1a237e;
+      color: #fff; font-weight: 700;
+      font-size: 0.88rem; cursor: pointer;
+      min-height: 44px;
+      transition: background .12s;
+    }
+    .card-btn:hover { background: #283593; }
+    .card-btn.attention { background: #0277bd; }
+    .card-btn.attention:hover { background: #01579b; }
+    .card-btn.memory    { background: #6a1b9a; }
+    .card-btn.memory:hover { background: #4a148c; }
+    .card-btn.exec      { background: #2e7d32; }
+    .card-btn.exec:hover { background: #1b5e20; }
+    .card-btn.functional{ background: #00695c; }
+    .card-btn.functional:hover { background: #004d40; }
+    .card-btn.calc      { background: #e65100; }
+    .card-btn.calc:hover{ background: #bf360c; }
+    .card-btn.etc       { background: #546e7a; }
+    .card-btn.etc:hover { background: #37474f; }
+
+    .divider {
+      width: 100%; max-width: 960px;
+      border: none; border-top: 2px dashed #dde0ea; margin: 2px 0;
+    }
+
+    #hospital-logo {
+      position: fixed; bottom: 10px; right: 12px;
+      font-size: 11px; color: #aaa;
+      background: rgba(255,255,255,0.9);
+      padding: 4px 10px; border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>광주365재활병원</h1>
+<div class="sub">인지재활 훈련 프로그램</div>
+
+<!-- 주의력 -->
+<div class="section">
+  <div class="section-title cat-attention">🎯 주의력 Attention</div>
+  <div class="card-grid">
+    <a class="menu-card" href="rhythm_target.html">
+      <div class="badge-row"><span class="card-badge badge-attention">지속주의</span></div>
+      <div class="card-title">리듬-타겟 훈련</div>
+      <div class="card-sub">박자에 맞춰 타겟만 터치</div>
+      <button class="card-btn attention">시작하기</button>
+    </a>
+    <a class="menu-card" href="selective_attention.html">
+      <div class="badge-row"><span class="card-badge badge-attention">선택주의</span></div>
+      <div class="card-title">선택적 주의력 훈련</div>
+      <div class="card-sub">목표 자극만 찾아내기</div>
+      <button class="card-btn attention">시작하기</button>
+    </a>
+    <a class="menu-card" href="tmt_test.html">
+      <div class="badge-row"><span class="card-badge badge-attention">교대주의</span></div>
+      <div class="card-title">TMT 선잇기</div>
+      <div class="card-sub">숫자·문자 순서대로 연결</div>
+      <button class="card-btn attention">시작하기</button>
+    </a>
+    <a class="menu-card" href="dynavision.html">
+      <div class="badge-row"><span class="card-badge badge-attention">시각탐색</span></div>
+      <div class="card-title">Dynavision</div>
+      <div class="card-sub">주변 자극에 반응하기</div>
+      <button class="card-btn attention">시작하기</button>
+    </a>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- 작업기억 -->
+<div class="section">
+  <div class="section-title cat-memory">🧠 작업기억 Working Memory</div>
+  <div class="card-grid">
+    <a class="menu-card" href="workingmemory.html">
+      <div class="badge-row"><span class="card-badge badge-memory">공간작업기억</span></div>
+      <div class="card-title">공간지각 / 작업기억</div>
+      <div class="card-sub">화살표 방향으로 위치 추적</div>
+      <button class="card-btn memory">시작하기</button>
+    </a>
+    <a class="menu-card" href="workingmemory2.html">
+      <div class="badge-row"><span class="card-badge badge-memory">언어·시공간</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">작업기억 훈련 2</div>
+      <div class="card-sub">Digit Span · N-back · 이중 N-back</div>
+      <button class="card-btn memory">시작하기</button>
+    </a>
+
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- 집행기능 -->
+<div class="section">
+  <div class="section-title cat-exec">⚙️ 집행기능 Executive Function</div>
+  <div class="card-grid">
+    <a class="menu-card" href="go_nogo.html">
+      <div class="badge-row"><span class="card-badge badge-exec">반응억제</span></div>
+      <div class="card-title">Go/No-Go 훈련</div>
+      <div class="card-sub">목표 자극에만 반응하기</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="stroop_game.html">
+      <div class="badge-row"><span class="card-badge badge-exec">억제·유연성</span></div>
+      <div class="card-title">스트룹 훈련</div>
+      <div class="card-sub">우세 반응 억제하기</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="sequencing_badl.html">
+      <div class="badge-row"><span class="card-badge badge-exec">계획·순서화</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">BADL 순서화 훈련</div>
+      <div class="card-sub">손씻기·이닦기·세면·옷입기·샤워·화장실</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="sequencing_iadl.html">
+      <div class="badge-row"><span class="card-badge badge-exec">계획·순서화</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">IADL 순서화 훈련</div>
+      <div class="card-sub">요리·마트·병원·은행·버스 순서 배열</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="hanoi_tower.html">
+      <div class="badge-row"><span class="card-badge badge-exec">계획·문제해결</span></div>
+      <div class="card-title">하노이의 탑</div>
+      <div class="card-sub">규칙에 따라 원반 이동</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="wcst.html">
+      <div class="badge-row"><span class="card-badge badge-exec">인지유연성</span></div>
+      <div class="card-title">위스콘신 카드분류</div>
+      <div class="card-sub">변화하는 규칙에 적응하기</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="thinkingpower.html">
+      <div class="badge-row"><span class="card-badge badge-exec">추론·개념형성</span></div>
+      <div class="card-title">사고력 게임</div>
+      <div class="card-sub">조건 분석 후 해답 도출</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="problem_solving.html">
+      <div class="badge-row"><span class="card-badge badge-exec">문제해결</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">문제해결력 훈련</div>
+      <div class="card-sub">수열·원인해결·우선순위·시나리오</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="judgment.html">
+      <div class="badge-row"><span class="card-badge badge-exec">상황판단</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">판단력 훈련</div>
+      <div class="card-sub">일상 안전·요리·공공장소 판단</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="executive_function.html">
+      <div class="badge-row"><span class="card-badge badge-exec">실생활 집행기능</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">IADL 시나리오 훈련</div>
+      <div class="card-sub">시간계획·예산·일정 관리</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+    <a class="menu-card" href="menu_task.html">
+      <div class="badge-row"><span class="card-badge badge-exec">수행기반 평가</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">메뉴판 과제</div>
+      <div class="card-sub">The Menu Task-K · 기능적 인지 평가</div>
+      <button class="card-btn exec">시작하기</button>
+    </a>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- 기타 -->
+<div class="section">
+  <div class="section-title cat-etc">📌 기타 Other</div>
+  <div class="card-grid">
+    <a class="menu-card" href="number_puzzle.html">
+      <div class="badge-row"><span class="card-badge badge-calc">수리계산</span></div>
+      <div class="card-title">숫자 퍼즐</div>
+      <div class="card-sub">사칙연산으로 목표값 만들기</div>
+      <button class="card-btn calc">시작하기</button>
+    </a>
+    <a class="menu-card" href="news_quiz.html">
+      <div class="badge-row"><span class="card-badge badge-etc">읽기이해</span><span class="card-badge badge-new">NEW</span></div>
+      <div class="card-title">뉴스 읽기 훈련</div>
+      <div class="card-sub">AI 생성 기사 읽고 이해력 퀴즈</div>
+      <button class="card-btn etc">시작하기</button>
+    </a>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+</body>
+</html>

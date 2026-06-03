@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>스트룹 훈련 - 광주365재활병원</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffffff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #222;
+    }
+
+    #description {
+      max-width: 720px;
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    #description b {
+      color: #000;
+    }
+
+    #level-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .level-btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #eeeeee;
+      color: #222;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.08s;
+    }
+
+    .level-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .level-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    .level-btn.active {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    #target-box {
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #rule-label {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    /* 문제 글씨 크게 */
+    #target-word {
+      font-size: 5rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      min-height: 4.8rem;
+      text-align: center;
+    }
+
+    #color-buttons {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    /* 보기: 검정 글씨 + 심플 버튼 */
+    .color-btn {
+      min-width: 120px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: transparent;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #111;  /* ← 항상 검정 글씨 */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s;
+    }
+
+    .color-btn:hover {
+      background: #f7f7f7;
+    }
+
+    .color-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    #status {
+      margin-top: 16px;
+      font-size: 0.98rem;
+      color: #555;
+      text-align: center;
+    }
+
+    #status span {
+      font-weight: 700;
+      color: #222;
+    }
+
+    #message {
+      margin-top: 10px;
+      min-height: 1.4rem;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    #message.success {
+      color: #2e7d32;
+    }
+
+    #message.error {
+      color: #d84315;
+    }
+
+    #result-box {
+      margin-top: 18px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fafafa;
+      font-size: 0.98rem;
+      line-height: 1.7;
+      display: none;
+    }
+
+    /* 시작/다시하기 버튼 스타일 */
+    #control-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    #start-btn {
+      background-color: #4caf50;
+    }
+
+    #start-btn:hover {
+      background-color: #388e3c;
+    }
+
+    #reset-btn {
+      background-color: #f44336;
+    }
+
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .control-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* 색상 버튼 비활성화 스타일 */
+    .color-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 480px) {
+      #target-word {
+        font-size: 3.6rem;
+      }
+      .color-btn {
+        min-width: 100px;
+        font-size: 1.15rem;
+        padding: 10px 14px;
+      }
+    }
+  
+    /* ── 터치스크린 최적화 ── */
+    * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+    button, .choice-btn, .quiz-opt, .stim-card, .menu-item, .opt-btn,
+    .cat-btn, .diff-card, .health-card, .topic-card, .mode-card,
+    .kcal-card, .predict-btn, .tab-btn, .nav-item, .setting-btn,
+    .ctrl-btn, .action-btn, .start-btn, .btn-start, .btn-end,
+    .btn-restart, .btn-primary, .btn-secondary, .rule-change-btn {
+      min-height: 48px;
+      cursor: pointer;
+    }
+    @media (hover: none) {
+      button:hover, .choice-btn:hover, .quiz-opt:hover,
+      .stim-card:hover, .menu-item:hover, .opt-btn:hover,
+      .cat-btn:hover, .diff-card:hover, .health-card:hover,
+      .topic-card:hover, .mode-card:hover, .kcal-card:hover,
+      .predict-btn:hover, .tab-btn:hover, .nav-item:hover,
+      .setting-btn:hover, .ctrl-btn:hover, .action-btn:hover,
+      .start-btn:hover, .btn-start:hover, .btn-end:hover,
+      .btn-restart:hover, .btn-primary:hover, .btn-secondary:hover,
+      .rule-change-btn:hover {
+        transform: none !important;
+      }
+    }
+    /* 터치 활성 피드백 */
+    button:active, .choice-btn:active, .quiz-opt:active,
+    .stim-card:active, .menu-item:active, .opt-btn:active,
+    .cat-btn:active, .diff-card:active, .health-card:active {
+      opacity: 0.75;
+      transition: opacity 0.05s;
+    }
+
+    </style>
+</head>
+<body>
+  <h1>스트룹 훈련</h1>
+
+  <div id="description">
+    <b>규칙:</b> 화면에 색 이름이 보이지만, <b>글씨 색(실제 색)</b>이 다를 수 있습니다.<br>
+    항상 <b>글씨 색</b>에 해당하는 버튼을 클릭하세요. (글자 내용에 속지 않기!)
+  </div>
+
+  <div id="level-panel">
+    <button class="level-btn" data-level="easy">쉬움 20문제 (색 3개)</button>
+    <button class="level-btn active" data-level="normal">중간 20문제 (색 5개)</button>
+    <button class="level-btn" data-level="hard">어려움 20문제 (색 7개)</button>
+  </div>
+
+  <div id="target-box">
+    <div id="rule-label">현재 규칙: <b>글씨 색 기준</b></div>
+    <div id="target-word">시작 버튼을 눌러 게임을 시작하세요</div>
+  </div>
+
+  <div id="color-buttons"></div>
+
+  <!-- 시작/다시하기 버튼 추가 -->
+  <div id="control-buttons">
+    <button id="start-btn" class="control-btn">시작하기</button>
+    <button id="reset-btn" class="control-btn">다시하기</button>
+  </div>
+
+  <div id="status">
+    난이도: <span id="level-label">중간</span> /
+    정답: <span id="hit-count">0</span>회 /
+    오답: <span id="miss-count">0</span>회 /
+    진행: <span id="progress">0</span> / <span id="total">20</span> /
+    소요 시간: <span id="elapsed-time">00:00.0</span>
+  </div>
+
+  <div id="message"></div>
+
+  <div id="result-box"></div>
+
+  <script>
+    // 전체 색 팔레트 (최대 난이도 기준 7개)
+    const ALL_COLORS = [
+      { id: "yellow",  name: "노랑",   css: "#ffeb3b" },
+      { id: "red",     name: "빨강",   css: "#f44336" },
+      { id: "blue",    name: "파랑",   css: "#2196f3" },
+      { id: "green",   name: "초록",   css: "#4caf50" },
+      { id: "black",   name: "검정",   css: "#111111" },
+      { id: "purple",  name: "보라",   css: "#9c27b0" },
+      { id: "orange",  name: "주황",   css: "#ff9800" }
+    ];
+
+    // 난이도별 사용 색 목록
+    const LEVEL_COLOR_CONFIG = {
+      easy:   ["yellow", "red", "blue"],                    // 3개
+      normal: ["yellow", "red", "blue", "green", "black"],  // 5개
+      hard:   ["yellow", "red", "blue", "green", "black", "purple", "orange"] // 7개
+    };
+
+    const levelButtons   = document.querySelectorAll(".level-btn");
+    const targetWordEl   = document.getElementById("target-word");
+    const ruleLabelEl    = document.getElementById("rule-label");
+    const colorButtonsEl = document.getElementById("color-buttons");
+    const levelLabelSpan = document.getElementById("level-label");
+    const hitSpan        = document.getElementById("hit-count");
+    const missSpan       = document.getElementById("miss-count");
+    const progressSpan   = document.getElementById("progress");
+    const totalSpan      = document.getElementById("total");
+    const elapsedTimeSpan = document.getElementById("elapsed-time");
+    const messageDiv     = document.getElementById("message");
+    const resultBox      = document.getElementById("result-box");
+    const startBtn       = document.getElementById("start-btn");
+    const resetBtn       = document.getElementById("reset-btn");
+
+    let level = "normal"; // "easy" | "normal" | "hard"
+    let totalQuestions = 20;
+    let currentQuestion = 0;
+    let hits = 0;
+    let misses = 0;
+    let currentWordColorId = null;
+    let currentFontColorId = null;
+    let currentColors = []; // 현재 난이도에서 사용 중인 색 목록
+    let startTime = null;
+    let timerInterval = null;
+    let elapsedMs = 0;
+    let gameStarted = false;
+
+    function getColorsForLevel(lv) {
+      const ids = LEVEL_COLOR_CONFIG[lv] || LEVEL_COLOR_CONFIG["normal"];
+      return ALL_COLORS.filter(c => ids.includes(c.id));
+    }
+
+    function randomItem(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function setMessage(text, type = "") {
+      messageDiv.textContent = text;
+      messageDiv.className = "";
+      if (type === "hit")   messageDiv.classList.add("success");
+      if (type === "miss")  messageDiv.classList.add("error");
+    }
+
+    function updateStatus() {
+      hitSpan.textContent = String(hits);
+      missSpan.textContent = String(misses);
+      progressSpan.textContent = String(currentQuestion);
+      totalSpan.textContent = String(totalQuestions);
+    }
+
+    // 시간 포맷팅 함수
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const tenths = Math.floor((ms % 1000) / 100);
+      
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+    }
+
+    // 타이머 시작 함수
+    function startTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      
+      startTime = new Date();
+      elapsedMs = 0;
+      elapsedTimeSpan.textContent = '00:00.0';
+      
+      timerInterval = setInterval(() => {
+        const now = new Date();
+        elapsedMs = now - startTime;
+        elapsedTimeSpan.textContent = formatTime(elapsedMs);
+      }, 100);
+    }
+
+    // 타이머 정지 함수
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // 색상 버튼 활성화/비활성화 함수
+    function setColorButtonsEnabled(enabled) {
+      const buttons = colorButtonsEl.querySelectorAll('.color-btn');
+      buttons.forEach(btn => {
+        btn.disabled = !enabled;
+      });
+    }
+
+    function resetGameState() {
+      hits = 0;
+      misses = 0;
+      currentQuestion = 0;
+      currentWordColorId = null;
+      currentFontColorId = null;
+      currentColors = getColorsForLevel(level);
+      gameStarted = false;
+      stopTimer();
+      elapsedMs = 0;
+      elapsedTimeSpan.textContent = '00:00.0';
+      resultBox.style.display = "none";
+      resultBox.textContent = "";
+      targetWordEl.textContent = "시작 버튼을 눌러 게임을 시작하세요";
+      targetWordEl.style.color = "#555555";
+      setMessage("항상 '글씨 색' 기준으로 선택하세요.");
+      buildColorButtons();   // 난이도 바뀔 때마다 버튼 갱신
+      updateStatus();
+      setColorButtonsEnabled(false); // 게임 시작 전 버튼 비활성화
+      startBtn.disabled = false;
+    }
+
+    function getLevelKoreanName(lv) {
+      if (lv === "easy") return "쉬움";
+      if (lv === "hard") return "어려움";
+      return "중간";
+    }
+
+    // 난이도별 불일치 비율
+    // 쉬움: 70% / 중간: 70% / 어려움: 90%
+    function getMismatchProbability() {
+      if (level === "easy")   return 0.7; // 70% 불일치
+      if (level === "hard")   return 0.9; // 90% 불일치
+      return 0.7; // normal: 70% 불일치
+    }
+
+    // hard에서 헷갈리는 조합 강화
+    function pickFontColor(wordColor) {
+      const mismatchProb = getMismatchProbability();
+      const shouldMismatch = Math.random() < mismatchProb;
+
+      if (!shouldMismatch) {
+        return wordColor; // 일치
+      }
+
+      const others = currentColors.filter(c => c.id !== wordColor.id);
+
+      if (level !== "hard") {
+        return randomItem(others);
+      }
+
+      // 어려움: '검정'은 가끔만 섞고, 나머지 색들 위주
+      const notBlack = others.filter(c => c.id !== "black");
+      if (notBlack.length > 0 && Math.random() < 0.8) {
+        return randomItem(notBlack);
+      }
+      return randomItem(others);
+    }
+
+    function createNextQuestion() {
+      // 첫 문제일 때 타이머 시작
+      if (currentQuestion === 0 && !gameStarted) {
+        gameStarted = true;
+        startTimer();
+        startBtn.disabled = true;
+      }
+      
+      currentQuestion++;
+
+      if (currentQuestion > totalQuestions) {
+        // 게임 종료 시 타이머 정지
+        stopTimer();
+        
+        const total = hits + misses;
+        const acc = total > 0 ? (hits / total * 100).toFixed(1) : "0.0";
+        const timeInSeconds = (elapsedMs / 1000).toFixed(1);
+        
+        setMessage("게임이 끝났습니다.");
+        targetWordEl.textContent = "완료!";
+        targetWordEl.style.color = "#222222";
+        setColorButtonsEnabled(false);
+        startBtn.disabled = false;
+
+        resultBox.style.display = "block";
+        resultBox.innerHTML =
+          `<b>난이도:</b> ${getLevelKoreanName(level)}<br>` +
+          `<b>총 문제 수:</b> ${totalQuestions}문제<br>` +
+          `<b>정답:</b> ${hits}회 / <b>오답:</b> ${misses}회<br>` +
+          `<b>정확도:</b> ${acc}%<br>` +
+          `<b>소요 시간:</b> ${formatTime(elapsedMs)} (${timeInSeconds}초)<br>` +
+          `<b>평균 반응 시간:</b> ${(timeInSeconds / totalQuestions).toFixed(2)}초/문제`;
+
+        return;
+      }
+
+      const wordColor = randomItem(currentColors);
+      const fontColor = pickFontColor(wordColor);
+
+      currentWordColorId = wordColor.id;
+      currentFontColorId = fontColor.id;
+
+      targetWordEl.textContent = wordColor.name;
+      targetWordEl.style.color = fontColor.css;
+
+      setMessage("글씨 색에 해당하는 버튼을 클릭하세요.");
+      updateStatus();
+    }
+
+    function handleColorClick(clickedColorId) {
+      if (!gameStarted || !currentFontColorId) return;
+
+      const correctId = currentFontColorId; // 항상 글씨 색 기준
+
+      if (clickedColorId === correctId) {
+        hits++;
+        setMessage("정답!", "hit");
+      } else {
+        misses++;
+        setMessage("오답!", "miss");
+      }
+
+      updateStatus();
+      createNextQuestion();
+    }
+
+    function buildColorButtons() {
+      colorButtonsEl.innerHTML = "";
+      currentColors.forEach(color => {
+        const btn = document.createElement("button");
+        btn.className = "color-btn";
+        btn.textContent = color.name;
+        // 보기 버튼은 항상 검정 글씨
+        btn.style.color = "#111111";
+        btn.disabled = true; // 초기에는 비활성화
+        btn.addEventListener("click", () => handleColorClick(color.id));
+        colorButtonsEl.appendChild(btn);
+      });
+    }
+
+    // 시작 버튼 이벤트 리스너
+    startBtn.addEventListener("click", () => {
+      if (gameStarted) return;
+      
+      setColorButtonsEnabled(true); // 색상 버튼 활성화
+      createNextQuestion(); // 첫 문제 생성
+    });
+
+    // 다시하기 버튼 이벤트 리스너
+    resetBtn.addEventListener("click", () => {
+      resetGameState();
+    });
+
+    levelButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        levelButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        level = btn.dataset.level || "normal";
+        levelLabelSpan.textContent = getLevelKoreanName(level);
+        resetGameState();
+      });
+    });
+
+    // 초기 세팅
+    ruleLabelEl.innerHTML = "현재 규칙: <b>글씨 색 기준</b>";
+    totalSpan.textContent = String(totalQuestions);
+
+    currentColors = getColorsForLevel(level);
+    buildColorButtons();
+    resetGameState();
+  </script>
+  
+<a href="index.html"><button style="position: absolute; top: 20px; left: 20px; padding: 8px 16px; border-radius: 999px; border: 1px solid #bbb; background: #fafafa; cursor: pointer; font-size: 13px;">← 메인으로</button></a>
+
+  <div style="position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background-color: rgba(255, 255, 255, 0.8); border-radius: 4px; font-weight: 500; z-index: 9999;">광주365재활병원_인지연하팀</div>
+<div id="hospital-logo" style="position:fixed;bottom:10px;right:10px;font-size:12px;color:#666;padding:5px 10px;background:rgba(255,255,255,0.9);border-radius:4px;font-weight:500;">광주365재활병원_인지연하팀</div>
+</body>
+</html>
