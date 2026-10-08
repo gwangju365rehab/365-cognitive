@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>지시 따르기 훈련 - 광주365재활병원</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: rgba(0,0,0,0.06); touch-action: manipulation; }
+  body {
+    margin: 0; padding: 70px 16px 70px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+    background: #f4f6fb; color: #1f2433;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  button { font: inherit; cursor: pointer; min-height: 48px; }
+  button:disabled { cursor: not-allowed; opacity: .45; }
+  button:focus-visible { outline: 3px solid #ffb300; outline-offset: 2px; }
+  .screen { display: none; width: 100%; max-width: 860px; flex-direction: column; align-items: center; gap: 14px; }
+  .screen.on { display: flex; }
+
+  #home-btn {
+    position: absolute; top: 16px; left: 16px; padding: 8px 16px; border-radius: 999px;
+    border: 1px solid #bbb; background: #fff; font-size: 14px;
+  }
+  h1 { margin: 0; font-size: 2rem; font-weight: 800; color: #1a237e; }
+  .lead { margin: 0; color: #555; text-align: center; line-height: 1.6; }
+
+  /* 설정 */
+  .panel { width: 100%; background: #fff; border: 1px solid #dfe3ec; border-radius: 16px; padding: 16px 18px; }
+  .set-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eef1f5; }
+  .set-row:last-child { border-bottom: none; }
+  .set-label { width: 92px; font-weight: 800; color: #555; font-size: .95rem; }
+  .opt { padding: 8px 14px; border-radius: 12px; border: 2px solid #d5dbe6; background: #fff; font-weight: 700; font-size: .95rem; text-align: left; }
+  .opt small { display: block; font-weight: 500; font-size: .78rem; color: #666; }
+  .opt.on { border-color: #1976d2; background: #e3f0fd; }
+  .set-row input[type=text] { font: inherit; padding: 9px 12px; border: 2px solid #d5dbe6; border-radius: 10px; min-width: 180px; }
+
+  .lv-table { width: 100%; border-collapse: collapse; font-size: .92rem; margin-top: 4px; }
+  .lv-table td { padding: 6px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  .lv-table td:first-child { white-space: nowrap; font-weight: 800; color: #1976d2; width: 64px; }
+  .lv-table td:last-child { color: #555; }
+
+  .big-btn { padding: 14px 28px; border-radius: 14px; border: none; font-size: 1.15rem; font-weight: 800; min-height: 56px; }
+  .b-pri { background: #1976d2; color: #fff; }
+  .b-sec { background: #fff; color: #1f2433; border: 2px solid #d5dbe6; }
+  .b-ok { background: #2e7d32; color: #fff; }
+
+  /* 훈련 */
+  .top { width: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+         background: #1a237e; color: #fff; border-radius: 14px; padding: 10px 14px; }
+  .top .lv { font-weight: 800; font-size: 1.1rem; }
+  .top .pg { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .top .stop { background: rgba(255,255,255,.18); color: #fff; border: none; border-radius: 10px; padding: 6px 12px; min-height: 40px; font-weight: 700; }
+
+  .instr-box {
+    width: 100%; background: #fff; border: 2px solid #c5cae9; border-radius: 16px;
+    padding: 16px 18px; min-height: 92px; display: flex; align-items: center; gap: 12px;
+  }
+  #instr-text { flex: 1; font-size: 1.5rem; font-weight: 800; line-height: 1.45; }
+  #instr-text.hidden-text { color: #9aa2b2; font-size: 1.15rem; font-weight: 700; }
+  #replay-btn { flex: none; padding: 8px 14px; border-radius: 12px; border: 2px solid #1976d2; background: #fff; color: #1976d2; font-weight: 800; }
+
+  #board {
+    display: grid; gap: 12px; justify-content: center;
+    background: #fff; border: 1px solid #dfe3ec; border-radius: 18px; padding: 16px;
+  }
+  .tok {
+    position: relative; width: 108px; height: 108px; border-radius: 16px;
+    border: 3px solid transparent; background: #f7f8fb; padding: 6px;
+  }
+  .tok svg { width: 100%; height: 100%; display: block; }
+  .tok.picked { border-color: #1f2433; background: #eef1f8; }
+  .tok.ans { border-color: #2e7d32; background: #e8f5e9; }
+  .tok.wrongpick { border-color: #c62828; background: #fdecea; }
+  .tok .num {
+    position: absolute; top: -10px; right: -10px; width: 34px; height: 34px; border-radius: 50%;
+    background: #1f2433; color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 1.05rem;
+  }
+  .tok.ans .num { background: #2e7d32; }
+  #board.locked .tok { pointer-events: none; }
+  #board.veiled { visibility: hidden; }
+
+  .act-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  #fb { width: 100%; min-height: 1.6rem; text-align: center; font-size: 1.15rem; font-weight: 800; }
+  #fb.ok { color: #2e7d32; } #fb.bad { color: #c62828; }
+  #fb small { display: block; font-size: .95rem; font-weight: 600; color: #555; margin-top: 4px; }
+
+  /* 결과 */
+  .rep h2 { margin: 0 0 4px; }
+  .rep .meta { color: #555; margin-bottom: 10px; }
+  .rep table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: .95rem; background: #fff; }
+  .rep th, .rep td { border: 1px solid #dfe3ec; padding: 7px 9px; text-align: center; }
+  .rep th { background: #f0f2f8; }
+  .rep td.l, .rep th.l { text-align: left; }
+  .rep .note { font-size: .85rem; color: #666; }
+  .okc { color: #2e7d32; font-weight: 800; } .badc { color: #c62828; font-weight: 800; }
+
+  #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666;
+    padding: 5px 10px; background: rgba(255,255,255,.9); border-radius: 4px; font-weight: 500; }
+
+  @media (max-width: 560px) {
+    .tok { width: 74px; height: 74px; padding: 4px; }
+    #board { gap: 8px; padding: 10px; }
+    #instr-text { font-size: 1.2rem; }
+    .set-label { width: 100%; }
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    #home-btn, #hospital-logo, .no-print { display: none !important; }
+    .panel { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">← 메인으로</button>
+
+<!-- 설정 -->
+<div class="screen on" id="scr-set">
+  <h1>지시 따르기 훈련</h1>
+  <p class="lead">지시를 듣거나 읽고, 말한 도형을 순서대로 누르세요.</p>
+  <div class="panel">
+    <div class="set-row"><span class="set-label">환자명</span><input type="text" id="pname" placeholder="선택 입력"/></div>
+    <div class="set-row" id="row-level"><span class="set-label">시작 단계</span></div>
+    <div class="set-row" id="row-prog"><span class="set-label">진행 방식</span></div>
+    <div class="set-row" id="row-pres"><span class="set-label">지시 제시</span></div>
+    <div class="set-row" id="row-mem"><span class="set-label">수행 방식</span></div>
+    <div class="set-row" id="row-count"><span class="set-label">문제 수</span></div>
+  </div>
+  <div class="panel">
+    <b>단계 안내</b>
+    <table class="lv-table" id="lv-table"></table>
+  </div>
+  <p class="lead" id="voice-note"></p>
+  <button class="big-btn b-pri" onclick="startSession()">시작하기</button>
+</div>
+
+<!-- 훈련 -->
+<div class="screen" id="scr-run">
+  <div class="top">
+    <span class="lv" id="r-level"></span>
+    <span class="pg" id="r-prog"></span>
+    <button class="stop" onclick="if(confirm('훈련을 끝내고 결과를 볼까요?')) finish()">끝내기</button>
+  </div>
+  <div class="instr-box">
+    <div id="instr-text"></div>
+    <button id="replay-btn" onclick="replay()">다시 듣기</button>
+  </div>
+  <div id="board"></div>
+  <div id="fb"></div>
+  <div class="act-row" id="act-row"></div>
+</div>
+
+<!-- 결과 -->
+<div class="screen" id="scr-rep">
+  <div class="panel rep" id="rep"></div>
+  <div class="act-row no-print">
+    <button class="big-btn b-sec" onclick="go('set')">설정으로</button>
+    <button class="big-btn b-pri" onclick="window.print()">인쇄하기</button>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ══ 자료 ══════════════════════════════════════
+const COLORS = [
+  { id: 'red',    adj: '빨간', noun: '빨간색', css: '#e53935' },
+  { id: 'blue',   adj: '파란', noun: '파란색', css: '#1e63d6' },
+  { id: 'yellow', adj: '노란', noun: '노란색', css: '#fbc02d' },
+  { id: 'green',  adj: '초록', noun: '초록색', css: '#2e9a3e' },
+  { id: 'black',  adj: '검은', noun: '검은색', css: '#222222' }
+];
+const SHAPES = [
+  { id: 'circle',   name: '동그라미' },
+  { id: 'square',   name: '네모' },
+  { id: 'triangle', name: '세모' },
+  { id: 'star',     name: '별' }
+];
+const LEVELS = [
+  { n: 1, name: '1단계', title: '한 가지 지시',   ex: '“빨간색을 누르세요” / “별을 누르세요”',               rows: 1, cols: 4 },
+  { n: 2, name: '2단계', title: '두 가지 특징',   ex: '“파란 네모를 누르세요”',                               rows: 2, cols: 4 },
+  { n: 3, name: '3단계', title: '두 번 연속',     ex: '“빨간 동그라미를 누르고, 노란 세모를 누르세요”',         rows: 2, cols: 5 },
+  { n: 4, name: '4단계', title: '세 번 연속',     ex: '“초록 별, 검은 네모, 파란 세모를 차례로 누르세요”',      rows: 3, cols: 4 },
+  { n: 5, name: '5단계', title: '조건·순서·위치', ex: '“A를 누르기 전에 B를”, “~을 모두”, “만약 ~이 있으면”, “~ 바로 오른쪽”', rows: 3, cols: 4 }
+];
+const OPTS = {
+  level: [1, 2, 3, 4, 5],
+  prog:  [{ v: 'fixed', t: '고정', s: '고른 단계만' }, { v: 'auto', t: '자동 조절', s: '3번 연속 정답 → 올라감, 2번 연속 오답 → 내려감' }],
+  pres:  [{ v: 'both', t: '소리 + 글', s: '' }, { v: 'audio', t: '소리만', s: '청각 이해' }, { v: 'text', t: '글만', s: '읽기 이해' }],
+  mem:   [{ v: 'see', t: '보면서 하기', s: '지시를 보며 수행' }, { v: 'memory', t: '기억해서 하기', s: '지시가 끝나면 가려짐' }],
+  count: [10, 15, 20]
+};
+const ERR_NAME = { item: '다른 도형 선택', omit: '빠뜨림', extra: '더 누름', order: '순서 틀림' };
+
+// ══ 상태 ══════════════════════════════════════
+const cfg = { level: 1, prog: 'fixed', pres: 'both', mem: 'see', count: 10 };
+let S = null;   // 세션
+let T = null;   // 현재 문제
+
+// ══ 도구 ══════════════════════════════════════
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function hasBatchim(w) { const c = w.charCodeAt(w.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; }
+const eul = w => w + (hasBatchim(w) ? '을' : '를');
+const iga = w => w + (hasBatchim(w) ? '이' : '가');
+const tname = t => `${t.color.adj} ${t.shape.name}`;
+const colorOf = id => COLORS.find(c => c.id === id);
+const shapeOf = id => SHAPES.find(s => s.id === id);
+
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  $('scr-' + name).classList.add('on');
+  window.scrollTo(0, 0);
+  if (name === 'set') renderSettings();
+}
+
+function shapeSVG(shape, css) {
+  const st = `fill="${css}" stroke="#333" stroke-width="3" stroke-linejoin="round"`;
+  let body;
+  if (shape === 'circle') body = `<circle cx="50" cy="50" r="40" ${st}/>`;
+  else if (shape === 'square') body = `<rect x="12" y="12" width="76" height="76" rx="6" ${st}/>`;
+  else if (shape === 'triangle') body = `<polygon points="50,9 92,88 8,88" ${st}/>`;
+  else {
+    const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 19 : 44, a = -Math.PI / 2 + i * Math.PI / 5; pts.push((50 + r * Math.cos(a)).toFixed(1) + ',' + (52 + r * Math.sin(a)).toFixed(1)); }
+    body = `<polygon points="${pts.join(' ')}" ${st}/>`;
+  }
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
+}
+
+// ══ 음성 ══════════════════════════════════════
+let koVoice = null;
+const canSpeak = 'speechSynthesis' in window;
+function loadVoice() {
+  if (!canSpeak) return;
+  const vs = speechSynthesis.getVoices();
+  koVoice = vs.find(v => /ko/i.test(v.lang)) || null;
+  renderVoiceNote();
+}
+if (canSpeak) { loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
+function speak(text, onEnd) {
+  if (!canSpeak || cfg.pres === 'text') { onEnd && onEnd(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice;
+  u.rate = 0.85;
+  let ended = false;
+  const done = () => { if (!ended) { ended = true; onEnd && onEnd(); } };
+  u.onend = done; u.onerror = done;
+  setTimeout(done, 1500 + text.length * 260);  // 음성이 끝났다는 신호가 오지 않을 때 대비
+  speechSynthesis.speak(u);
+}
+function renderVoiceNote() {
+  const el = $('voice-note'); if (!el) return;
+  el.textContent = !canSpeak || !koVoice
+    ? '이 기기에서는 한국어 음성을 찾지 못했습니다. 소리가 나오지 않으면 "글만"으로 진행하거나 치료사가 지시를 읽어 주세요.'
+    : '';
+}
+
+// ══ 설정 화면 ══════════════════════════════════
+function optRow(rowId, key, list) {
+  const row = $(rowId);
+  row.querySelectorAll('.opt').forEach(b => b.remove());
+  list.forEach(o => {
+    const v = typeof o === 'object' ? o.v : o;
+    const label = typeof o === 'object' ? o.t : (key === 'level' ? LEVELS[v - 1].name : v + '문제');
+    const sub = typeof o === 'object' ? o.s : (key === 'level' ? LEVELS[v - 1].title : '');
+    const b = document.createElement('button');
+    b.className = 'opt' + (cfg[key] === v ? ' on' : '');
+    b.innerHTML = label + (sub ? `<small>${sub}</small>` : '');
+    b.onclick = () => { cfg[key] = v; renderSettings(); };
+    row.appendChild(b);
+  });
+}
+function renderSettings() {
+  optRow('row-level', 'level', OPTS.level);
+  optRow('row-prog', 'prog', OPTS.prog);
+  optRow('row-pres', 'pres', OPTS.pres);
+  optRow('row-mem', 'mem', OPTS.mem);
+  optRow('row-count', 'count', OPTS.count);
+  $('lv-table').innerHTML = LEVELS.map(l => `<tr><td>${l.name}</td><td><b>${l.title}</b><br>${l.ex}</td></tr>`).join('');
+  renderVoiceNote();
+}
+
+// ══ 문제 만들기 ═════════════════════════════════
+function makeBoard(lv, need) {
+  const L = LEVELS[lv - 1], n = L.rows * L.cols;
+  for (let tries = 0; tries < 200; tries++) {
+    let combos;
+    if (lv === 1) {   // 1단계: 색도 모양도 모두 다르게
+      const cs = shuffle(COLORS).slice(0, n), ss = shuffle(SHAPES).slice(0, n);
+      combos = cs.map((c, i) => ({ color: c, shape: ss[i % ss.length] }));
+    } else {
+      const all = []; COLORS.forEach(c => SHAPES.forEach(s => all.push({ color: c, shape: s })));
+      combos = shuffle(all).slice(0, n);
+    }
+    const board = combos.map((t, i) => ({ ...t, id: 't' + i, r: Math.floor(i / L.cols), c: i % L.cols }));
+    if (!need || need(board)) return board;
+  }
+  return null;
+}
+
+function makeTrial(lv) {
+  const L = LEVELS[lv - 1];
+  if (lv === 1) {
+    const board = makeBoard(1), t = pick(board);
+    const byColor = Math.random() < 0.5;
+    const word = byColor ? t.color.noun : t.shape.name;
+    return { lv, board, text: `${eul(word)} 누르세요.`, answer: [t.id], ordered: true, kind: byColor ? '색' : '모양' };
+  }
+  if (lv === 2) {
+    const board = makeBoard(2), t = pick(board);
+    return { lv, board, text: `${eul(tname(t))} 누르세요.`, answer: [t.id], ordered: true, kind: '두 특징' };
+  }
+  if (lv === 3 || lv === 4) {
+    const k = lv === 3 ? 2 : 3;
+    const board = makeBoard(lv), ts = shuffle(board).slice(0, k);
+    const names = ts.map(tname);
+    let text;
+    if (k === 2) text = pick([`${eul(names[0])} 누르고, ${eul(names[1])} 누르세요.`, `${eul(names[0])} 누른 다음에 ${eul(names[1])} 누르세요.`]);
+    else text = pick([`${eul(names[0])} 누르고, ${eul(names[1])} 누르고, ${eul(names[2])} 누르세요.`,
+                      `${names[0]}, ${names[1]}, ${eul(names[2])} 차례로 누르세요.`]);
+    return { lv, board, text, answer: ts.map(t => t.id), ordered: true, kind: k + '단계 연속' };
+  }
+  // 5단계: 여러 유형 중 하나
+  const type = pick(['before', 'all', 'except', 'cond', 'space']);
+  if (type === 'before') {
+    const board = makeBoard(5), [a, b] = shuffle(board);
+    return { lv, board, text: `${eul(tname(a))} 누르기 전에 ${eul(tname(b))} 먼저 누르세요.`, answer: [b.id, a.id], ordered: true, kind: '순서 바꾸기' };
+  }
+  if (type === 'all') {
+    const cid = pick(COLORS).id;
+    const board = makeBoard(5, bd => { const k = bd.filter(t => t.color.id === cid).length; return k >= 2 && k <= 3; });
+    const ans = board.filter(t => t.color.id === cid);
+    return { lv, board, text: `${eul(colorOf(cid).noun)} 모두 누르세요.`, answer: ans.map(t => t.id), ordered: false, kind: '모두' };
+  }
+  if (type === 'except') {
+    const sid = pick(SHAPES).id;
+    let cid;
+    const board = makeBoard(5, bd => {
+      const same = bd.filter(t => t.shape.id === sid);
+      if (same.length < 3) return false;
+      cid = pick(same).color.id; return true;
+    });
+    const ans = board.filter(t => t.shape.id === sid && t.color.id !== cid);
+    return { lv, board, text: `${shapeOf(sid).name} 중에서 ${colorOf(cid).noun}이 아닌 것을 모두 누르세요.`, answer: ans.map(t => t.id), ordered: false, kind: '제외하고 모두' };
+  }
+  if (type === 'cond') {
+    const present = Math.random() < 0.5;
+    let x, y;
+    const board = makeBoard(5, bd => {
+      const all = []; COLORS.forEach(c => SHAPES.forEach(s => all.push({ color: c, shape: s })));
+      const absent = all.filter(o => !bd.some(t => t.color.id === o.color.id && t.shape.id === o.shape.id));
+      if (!absent.length) return false;
+      x = present ? pick(bd) : pick(absent);
+      y = pick(bd.filter(t => !(t.color.id === x.color.id && t.shape.id === x.shape.id)));
+      return true;
+    });
+    const xOnBoard = board.find(t => t.color.id === x.color.id && t.shape.id === x.shape.id);
+    return { lv, board, text: `만약 ${iga(tname(x))} 있으면 ${eul(tname(x))}, 없으면 ${eul(tname(y))} 누르세요.`,
+             answer: [xOnBoard ? xOnBoard.id : y.id], ordered: true, kind: '조건' };
+  }
+  // space
+  const dirs = [{ k: '오른쪽', dr: 0, dc: 1 }, { k: '왼쪽', dr: 0, dc: -1 }, { k: '위', dr: -1, dc: 0 }, { k: '아래', dr: 1, dc: 0 }];
+  const board = makeBoard(5);
+  const opts = [];
+  board.forEach(t => dirs.forEach(d => { const nb = board.find(o => o.r === t.r + d.dr && o.c === t.c + d.dc); if (nb) opts.push({ t, d, nb }); }));
+  const o = pick(opts);
+  return { lv, board, text: `${tname(o.t)} 바로 ${o.d.k}에 있는 것을 누르세요.`, answer: [o.nb.id], ordered: true, kind: '위치' };
+}
+
+// ══ 진행 ══════════════════════════════════════
+function startSession() {
+  if (cfg.pres !== 'text' && (!canSpeak || !koVoice) && !confirm('한국어 음성을 찾지 못했습니다. 소리가 나오지 않을 수 있어요. 계속할까요?')) return;
+  S = { cfg: { ...cfg }, name: $('pname').value.trim(), level: cfg.level, log: [], streakOk: 0, streakBad: 0, path: [cfg.level], t0: Date.now() };
+  go('run');
+  nextTrial();
+}
+
+function nextTrial() {
+  if (S.log.length >= S.cfg.count) { finish(); return; }
+  T = makeTrial(S.level);
+  T.taps = []; T.replays = 0; T.shownAt = 0; T.done = false;
+  $('r-level').textContent = `${LEVELS[S.level - 1].name} · ${LEVELS[S.level - 1].title}`;
+  $('r-prog').textContent = `${S.log.length + 1} / ${S.cfg.count}`;
+  $('fb').innerHTML = ''; $('fb').className = '';
+  drawBoard();
+  const memory = S.cfg.mem === 'memory';
+  const showText = S.cfg.pres !== 'audio';
+  const it = $('instr-text');
+  it.className = ''; it.textContent = showText ? T.text : '잘 들어 보세요.';
+  if (!showText) it.className = 'hidden-text';
+  $('replay-btn').style.display = S.cfg.pres === 'text' ? 'none' : '';
+  if (memory) {
+    $('board').classList.add('veiled');
+    $('replay-btn').disabled = true;
+    setActions([]);
+    const reveal = () => {
+      setActions([{ t: '준비됐어요', cls: 'b-pri', fn: () => {
+        it.className = 'hidden-text'; it.textContent = '기억한 대로 누르세요.';
+        $('replay-btn').disabled = false;
+        showBoard();
+      } }]);
+    };
+    if (S.cfg.pres === 'text') reveal(); else speak(T.text, reveal);
+  } else {
+    $('replay-btn').disabled = false;
+    showBoard();
+    speak(T.text);
+  }
+}
+
+function showBoard() {
+  $('board').classList.remove('veiled', 'locked');
+  T.shownAt = performance.now();
+  const multi = T.answer.length > 1 || !T.ordered;
+  setActions(multi ? [
+    { t: '지우기', cls: 'b-sec', fn: () => { T.taps = []; drawBoard(); } },
+    { t: '다 했어요', cls: 'b-ok', fn: submit }
+  ] : []);
+}
+
+function drawBoard() {
+  const L = LEVELS[T.lv - 1], b = $('board');
+  b.style.gridTemplateColumns = `repeat(${L.cols}, auto)`;
+  b.innerHTML = '';
+  T.board.forEach(t => {
+    const el = document.createElement('button');
+    el.className = 'tok';
+    el.setAttribute('aria-label', tname(t));
+    el.innerHTML = shapeSVG(t.shape.id, t.color.css);
+    const k = T.taps.indexOf(t.id);
+    if (k >= 0) { el.classList.add('picked'); el.insertAdjacentHTML('beforeend', `<span class="num">${k + 1}</span>`); }
+    el.onclick = () => tap(t.id);
+    b.appendChild(el);
+  });
+}
+
+function tap(id) {
+  if (T.done || !T.shownAt) return;
+  const k = T.taps.indexOf(id);
+  if (k >= 0) { T.taps.splice(k, 1); drawBoard(); return; }  // 다시 누르면 취소
+  T.taps.push(id); drawBoard();
+  if (T.answer.length === 1 && T.ordered) submit();
+}
+
+function replay() {
+  if (!T || T.done) return;
+  T.replays++;
+  if (S.cfg.mem === 'memory') { $('instr-text').className = 'hidden-text'; }
+  speak(T.text);
+}
+
+function evaluate(taps, ans, ordered) {
+  const extra = taps.filter(x => !ans.includes(x));
+  const missing = ans.filter(x => !taps.includes(x));
+  const okSteps = ordered ? ans.filter((x, i) => taps[i] === x).length : ans.filter(x => taps.includes(x)).length;
+  let correct, err = null;
+  if (ordered) correct = taps.length === ans.length && taps.every((x, i) => x === ans[i]);
+  else correct = !extra.length && !missing.length;
+  if (!correct) {
+    if (extra.length && taps.length > ans.length && !missing.length) err = 'extra';
+    else if (extra.length) err = 'item';
+    else if (missing.length) err = 'omit';
+    else err = 'order';
+  }
+  return { correct, err, okSteps };
+}
+
+function submit() {
+  if (T.done) return;
+  if (!T.taps.length) { $('fb').className = 'bad'; $('fb').textContent = '도형을 하나 이상 눌러 주세요.'; return; }
+  T.done = true;
+  if (canSpeak) speechSynthesis.cancel();
+  const rt = performance.now() - T.shownAt;
+  const r = evaluate(T.taps, T.answer, T.ordered);
+  S.log.push({ lv: T.lv, kind: T.kind, text: T.text, correct: r.correct, err: r.err, okSteps: r.okSteps, steps: T.answer.length, rt, replays: T.replays });
+
+  // 정답 표시
+  $('board').classList.add('locked');
+  const b = $('board').children;
+  T.board.forEach((t, i) => {
+    const el = b[i];
+    const ai = T.answer.indexOf(t.id);
+    if (ai >= 0) { el.classList.remove('picked'); el.classList.add('ans');
+      const n = el.querySelector('.num'); const lab = T.ordered && T.answer.length > 1 ? ai + 1 : '';
+      if (n) n.textContent = lab || '✓'; else el.insertAdjacentHTML('beforeend', `<span class="num">${lab || '✓'}</span>`); }
+    else if (T.taps.includes(t.id)) el.classList.add('wrongpick');
+  });
+  $('instr-text').className = ''; $('instr-text').textContent = T.text;
+  const fb = $('fb');
+  fb.className = r.correct ? 'ok' : 'bad';
+  const mine = T.taps.map(id => tname(T.board.find(t => t.id === id))).join(' → ');
+  const right = T.answer.map(id => tname(T.board.find(t => t.id === id))).join(T.ordered ? ' → ' : ', ');
+  fb.innerHTML = r.correct ? '정답입니다!'
+    : `아쉬워요. 테두리로 표시된 것이 정답이에요. (${ERR_NAME[r.err]})<small>누른 것: ${mine}<br>정답: ${right}</small>`;
+
+  // 단계 자동 조절
+  let move = '';
+  if (S.cfg.prog === 'auto') {
+    if (r.correct) { S.streakOk++; S.streakBad = 0; } else { S.streakBad++; S.streakOk = 0; }
+    if (S.streakOk >= 3 && S.level < 5) { S.level++; S.streakOk = 0; move = `잘하셨어요! ${LEVELS[S.level - 1].name}로 올라갑니다.`; }
+    else if (S.streakBad >= 2 && S.level > 1) { S.level--; S.streakBad = 0; move = `${LEVELS[S.level - 1].name}로 돌아가 연습해요.`; }
+    if (move) { S.path.push(S.level); fb.innerHTML += `<small>${move}</small>`; }
+  }
+  setActions([{ t: S.log.length >= S.cfg.count ? '결과 보기' : '다음 문제', cls: 'b-pri', fn: nextTrial }]);
+}
+
+function setActions(list) {
+  const row = $('act-row'); row.innerHTML = '';
+  list.forEach(a => { const b = document.createElement('button'); b.className = 'big-btn ' + a.cls; b.textContent = a.t; b.onclick = a.fn; row.appendChild(b); });
+}
+
+// ══ 결과 ══════════════════════════════════════
+function finish() {
+  if (canSpeak) speechSynthesis.cancel();
+  const log = S.log, c = S.cfg;
+  const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '-';
+  const sec = a => a.length ? (a.reduce((x, y) => x + y, 0) / a.length / 1000).toFixed(1) + '초' : '-';
+  const ok = log.filter(r => r.correct).length;
+  const stepsOk = log.reduce((s, r) => s + r.okSteps, 0), stepsAll = log.reduce((s, r) => s + r.steps, 0);
+
+  let rows = '';
+  LEVELS.forEach(L => {
+    const g = log.filter(r => r.lv === L.n); if (!g.length) return;
+    const gk = g.filter(r => r.correct);
+    rows += `<tr><td class="l">${L.name} ${L.title}</td><td>${g.length}</td><td>${gk.length}</td><td>${pct(gk.length, g.length)}</td><td>${sec(gk.map(r => r.rt))}</td><td>${g.reduce((s, r) => s + r.replays, 0)}회</td></tr>`;
+  });
+  const errs = Object.keys(ERR_NAME).map(k => `<tr><td class="l">${ERR_NAME[k]}</td><td>${log.filter(r => r.err === k).length}회</td></tr>`).join('');
+  const kinds = [...new Set(log.filter(r => r.lv === 5).map(r => r.kind))];
+  const kindRows = kinds.map(k => { const g = log.filter(r => r.lv === 5 && r.kind === k); return `<tr><td class="l">${k}</td><td>${g.length}</td><td>${pct(g.filter(r => r.correct).length, g.length)}</td></tr>`; }).join('');
+  const highest = log.filter(r => r.correct).reduce((m, r) => Math.max(m, r.lv), 0);
+
+  $('rep').innerHTML = `
+    <h2>지시 따르기 훈련 결과</h2>
+    <div class="meta">환자명: ${S.name || '—'} · ${new Date().toLocaleDateString('ko-KR')} ·
+      ${OPTS.prog.find(o => o.v === c.prog).t} · ${OPTS.pres.find(o => o.v === c.pres).t} · ${OPTS.mem.find(o => o.v === c.mem).t} ·
+      총 ${Math.round((Date.now() - S.t0) / 1000)}초</div>
+    <table>
+      <tr><th class="l">전체</th><th>문제 수</th><th>정답</th><th>정확도</th><th>지시 단위 정확도</th><th>정답한 최고 단계</th></tr>
+      <tr><td class="l">합계</td><td>${log.length}</td><td>${ok}</td><td>${pct(ok, log.length)}</td><td>${stepsOk}/${stepsAll} (${pct(stepsOk, stepsAll)})</td><td>${highest ? highest + '단계' : '-'}</td></tr>
+    </table>
+    ${c.prog === 'auto' ? `<p><b>단계 변화:</b> ${S.path.map(n => n + '단계').join(' → ')}</p>` : ''}
+    <table>
+      <tr><th class="l">단계</th><th>문제 수</th><th>정답</th><th>정확도</th><th>평균 수행시간</th><th>다시 듣기</th></tr>${rows}
+    </table>
+    ${kindRows ? `<table><tr><th class="l">5단계 지시 유형</th><th>문제 수</th><th>정확도</th></tr>${kindRows}</table>` : ''}
+    <table><tr><th class="l">오류 유형</th><th>횟수</th></tr>${errs}</table>
+    <table><tr><th>번호</th><th>단계</th><th class="l">지시</th><th>결과</th></tr>
+      ${log.map((r, i) => `<tr><td>${i + 1}</td><td>${r.lv}</td><td class="l">${r.text}</td><td>${r.correct ? '<span class="okc">정답</span>' : `<span class="badc">${ERR_NAME[r.err]}</span>`}</td></tr>`).join('')}
+    </table>
+    <p class="note">평균 수행시간은 정답 문제에서 도형이 보인 뒤 마지막 응답까지의 시간입니다. 지시 단위 정확도는 여러 단계 지시에서 맞게 수행한 단계 수의 비율입니다.</p>`;
+  go('rep');
+}
+
+renderSettings();
+</script>
+</body>
+</html>
