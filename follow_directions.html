@@ -5,56 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>지시 따르기 훈련 - 광주365재활병원</title>
 <style>
-  * { box-sizing: border-box; -webkit-tap-highlight-color: rgba(0,0,0,0.06); touch-action: manipulation; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   body {
-    margin: 0; padding: 70px 14px 70px;
+    margin: 0; padding: 16px 16px 80px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
-    background: #f4f6fb; color: #1f2433;
+    background: #fff; color: #222;
     display: flex; flex-direction: column; align-items: center; gap: 14px;
+    min-height: 100vh;
   }
-  button { font: inherit; cursor: pointer; min-height: 48px; }
-  button:disabled { cursor: not-allowed; opacity: .45; }
-  button:focus-visible { outline: 3px solid #ffb300; outline-offset: 2px; }
-  .screen { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; gap: 14px; }
-  .screen.on { display: flex; }
+  button { font: inherit; cursor: pointer; }
+  button:disabled { cursor: default; }
+  h1 { margin: 0 0 2px; font-size: 1.9rem; font-weight: 800; text-align: center; }
+  .sub { font-size: .95rem; color: #666; text-align: center; }
+  #home-btn {
+    position: fixed; top: 14px; left: 14px; z-index: 100;
+    padding: 10px 18px; border-radius: 999px; border: none;
+    background: #eee; color: #333; font-weight: 600; font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
 
-  #home-btn { position: absolute; top: 16px; left: 16px; padding: 8px 16px; border-radius: 999px; border: 1px solid #bbb; background: #fff; font-size: 14px; }
-  h1 { margin: 0; font-size: 2rem; font-weight: 800; color: #1a237e; }
-  .lead { margin: 0; color: #555; text-align: center; line-height: 1.6; }
+  /* 탭 */
+  #tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; max-width: 760px; }
+  .tab-btn {
+    padding: 10px 18px; border-radius: 999px; border: 2px solid #ddd;
+    font-size: .95rem; font-weight: 700; background: #fff; color: #555; transition: all .15s; min-height: 46px;
+  }
+  .tab-btn:hover { border-color: #1976d2; background: #e8f2ff; color: #1976d2; }
+  .tab-btn.active { background: #1976d2; border-color: #1976d2; color: #fff; }
 
-  /* 설정 */
-  .panel { width: 100%; background: #fff; border: 1px solid #dfe3ec; border-radius: 16px; padding: 14px 18px; }
-  .set-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eef1f5; }
-  .set-row:last-child { border-bottom: none; }
-  .set-label { width: 92px; font-weight: 800; color: #555; font-size: .95rem; }
-  .opt { padding: 8px 14px; border-radius: 12px; border: 2px solid #d5dbe6; background: #fff; font-weight: 700; font-size: .95rem; text-align: left; }
-  .opt small { display: block; font-weight: 500; font-size: .78rem; color: #666; }
-  .opt.on { border-color: #1976d2; background: #e3f0fd; }
-  .set-row input[type=text] { font: inherit; padding: 9px 12px; border: 2px solid #d5dbe6; border-radius: 10px; min-width: 180px; }
-  .lv-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  .lv-table th, .lv-table td { padding: 7px 8px; border-bottom: 1px solid #eef1f5; text-align: left; vertical-align: top; }
-  .lv-table th { color: #555; font-size: .85rem; }
-  .lv-table td:first-child { white-space: nowrap; font-weight: 800; color: #1976d2; }
+  .panel { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; max-width: 860px; }
+  .locked-ui { pointer-events: none; opacity: .45; }
 
-  .big-btn { padding: 14px 28px; border-radius: 14px; border: none; font-size: 1.15rem; font-weight: 800; min-height: 56px; }
-  .b-pri { background: #1976d2; color: #fff; }
-  .b-sec { background: #fff; color: #1f2433; border: 2px solid #d5dbe6; }
-  .b-ok { background: #2e7d32; color: #fff; }
+  /* 옵션 바 */
+  .opt-bar {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 10px 14px; border-radius: 12px; background: #f0f4fa;
+    border: 1px solid #d0ddf0; font-size: .9rem; font-weight: 700; color: #555; flex-wrap: wrap;
+  }
+  .opt-sep { width: 1px; height: 22px; background: #ccc; margin: 0 4px; }
+  .seg-btn {
+    padding: 6px 16px; border-radius: 999px; border: 2px solid #ddd; min-height: 40px;
+    font-size: .88rem; font-weight: 700; background: #fff; color: #555; transition: all .15s;
+  }
+  .seg-btn:hover { border-color: #1976d2; }
+  .seg-btn.active { background: #1976d2; border-color: #1976d2; color: #fff; }
 
-  /* 훈련 상단 */
-  .top { width: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #1a237e; color: #fff; border-radius: 14px; padding: 10px 14px; }
-  .top .lv { font-weight: 800; font-size: 1.05rem; }
-  .top .pg { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
-  .top .stop { background: rgba(255,255,255,.18); color: #fff; border: none; border-radius: 10px; padding: 6px 12px; min-height: 40px; font-weight: 700; }
-  .instr-box { width: 100%; background: #fff; border: 2px solid #c5cae9; border-radius: 16px; padding: 14px 18px; min-height: 86px; display: flex; align-items: center; gap: 12px; }
-  #instr-text { flex: 1; font-size: 1.45rem; font-weight: 800; line-height: 1.45; }
-  #instr-text.dim { color: #9aa2b2; font-size: 1.12rem; font-weight: 700; }
-  #replay-btn { flex: none; padding: 8px 14px; border-radius: 12px; border: 2px solid #1976d2; background: #fff; color: #1976d2; font-weight: 800; }
+  /* 진행바 */
+  .prog-wrap { width: 100%; display: none; }
+  .prog-bg { width: 100%; height: 10px; border-radius: 999px; background: #f0f4fa; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 999px; background: #1976d2; transition: width .4s; }
+  .prog-txt { font-size: .92rem; color: #666; text-align: center; margin-top: 4px; }
+  .prog-txt span { font-weight: 800; color: #222; }
+
+  /* 지시 카드 */
+  .q-card { width: 100%; border-radius: 18px; border: 2px solid #e0e8f8; background: #f7f9ff; overflow: hidden; }
+  .q-card-hd { padding: 10px 20px; font-size: .9rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .q-card-bd { padding: 20px 22px 8px; font-size: 1.35rem; font-weight: 800; line-height: 1.6; color: #1a1a2e; }
+  .q-card-bd.dim { color: #9aa2b2; font-size: 1.1rem; }
+  .q-card-q { padding: 4px 22px 16px; font-size: 1rem; font-weight: 700; color: #1976d2; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .q-card-q .ex { color: #555; font-weight: 600; }
+  #replay-btn { margin-left: auto; padding: 6px 14px; border-radius: 999px; border: 2px solid #1976d2; background: #fff; color: #1976d2; font-weight: 800; min-height: 40px; }
+  .th-pick   { background: #e8f5e9; color: #1b5e20; border-bottom: 3px solid #4caf50; }
+  .th-house  { background: #e8eaf6; color: #283593; border-bottom: 3px solid #3f51b5; }
+  .th-device { background: #fff3e0; color: #bf360c; border-bottom: 3px solid #fb8c00; }
+  .th-mix    { background: #f3e5f5; color: #6a1b9a; border-bottom: 3px solid #8e24aa; }
 
   #stage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
   #stage.veiled { visibility: hidden; }
   #stage.locked { pointer-events: none; }
-  .hint-line { color: #555; font-size: .95rem; text-align: center; min-height: 1.3rem; }
+  .hint-line { color: #666; font-size: .92rem; text-align: center; min-height: 1.2rem; }
 
   /* 물건 */
   .obj {
@@ -119,21 +138,38 @@
   .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .pad .call { background: #2e7d32; } .pad .end { background: #c62828; } .pad .del { background: #6b7280; font-size: .95rem; }
 
-  .act-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-  #fb { width: 100%; min-height: 1.6rem; text-align: center; font-size: 1.15rem; font-weight: 800; }
-  #fb.ok { color: #2e7d32; } #fb.bad { color: #c62828; }
-  #fb small { display: block; font-size: .95rem; font-weight: 600; color: #444; margin-top: 4px; line-height: 1.5; }
+
+
+  /* 피드백 */
+  .fb-box { display: none; width: 100%; border-radius: 14px; padding: 14px 20px; border: 2px solid #ddd; }
+  .fb-box.ok  { border-color: #388e3c; background: #f0fff4; }
+  .fb-box.bad { border-color: #d32f2f; background: #fff5f5; }
+  .fb-res { font-size: 1.15rem; font-weight: 800; }
+  .fb-box.ok .fb-res { color: #2e7d32; } .fb-box.bad .fb-res { color: #c62828; }
+  .fb-exp { margin-top: 4px; font-size: .98rem; color: #444; line-height: 1.6; }
+
+  /* 버튼 */
+  .act-row, .ctrl-wrap { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .ctrl-btn { padding: 14px 26px; border-radius: 14px; border: none; font-size: 1.05rem; font-weight: 800; color: #fff; min-height: 52px; }
+  .btn-s { background: #1976d2; } .btn-n { background: #388e3c; display: none; } .btn-r { background: #9e9e9e; }
+  .btn-w { background: #fff; color: #333; border: 2px solid #ccc; }
+  .btn-ok { background: #388e3c; }
 
   /* 결과 */
-  .rep h2 { margin: 0 0 4px; }
-  .rep .meta { color: #555; margin-bottom: 10px; }
-  .rep table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: .93rem; background: #fff; }
-  .rep th, .rep td { border: 1px solid #dfe3ec; padding: 6px 8px; text-align: center; }
-  .rep th { background: #f0f2f8; }
-  .rep .l { text-align: left; }
-  .rep .note { font-size: .85rem; color: #666; }
+  .res-box { display: none; width: 100%; border-radius: 18px; border: 2px solid #e0e8f8; background: #f7f9ff; padding: 20px 22px; }
+  .res-box h2 { margin: 0 0 10px; text-align: center; color: #1976d2; }
+  .r-row { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid #e3e9f3; font-size: 1.02rem; }
+  .r-val { font-weight: 800; }
+  .res-btns { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+  details { margin-top: 12px; font-size: .92rem; }
+  summary { cursor: pointer; font-weight: 700; color: #1976d2; padding: 6px 0; }
+  .det { width: 100%; border-collapse: collapse; margin-top: 6px; background: #fff; }
+  .det th, .det td { border: 1px solid #e0e6f0; padding: 6px 8px; text-align: center; }
+  .det th { background: #eef2f9; }
+  .det .l { text-align: left; }
   .okc { color: #2e7d32; font-weight: 800; } .badc { color: #c62828; font-weight: 800; }
 
+  #voice-note { font-size: .85rem; color: #b54708; text-align: center; }
   #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background: rgba(255,255,255,.9); border-radius: 4px; font-weight: 500; }
 
   @media (max-width: 640px) {
@@ -141,65 +177,52 @@
     .counter .obj { width: 70px; height: 70px; }
     .table-top { gap: 8px; padding: 10px; }
     .zones, .switches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    #instr-text { font-size: 1.18rem; }
-    .set-label { width: 100%; }
+    .q-card-bd { font-size: 1.15rem; }
     .mw-door { width: 150px; } .mw-door .glass { width: 120px; }
     #hospital-logo { display: none; }
-  }
-  @media print {
-    body { background: #fff; padding: 0; }
-    #home-btn, #hospital-logo, .no-print { display: none !important; }
-    .panel { border: none; padding: 0; }
   }
 </style>
 </head>
 <body>
-<button id="home-btn" onclick="location.href='index.html'">← 메인으로</button>
+<button id="home-btn" onclick="location.href='index.html'">← 홈</button>
+<h1>지시 따르기 훈련</h1>
+<div class="sub">지시를 듣거나 읽고, 그대로 해 보세요.</div>
 
-<!-- 설정 -->
-<div class="screen on" id="scr-set">
-  <h1>지시 따르기 훈련</h1>
-  <p class="lead">생활 속 지시를 듣거나 읽고, 그대로 해 보세요.</p>
-  <div class="panel">
-    <div class="set-row"><span class="set-label">환자명</span><input type="text" id="pname" placeholder="선택 입력"/></div>
-    <div class="set-row" id="row-theme"><span class="set-label">과제</span></div>
-    <div class="set-row" id="row-level"><span class="set-label">시작 단계</span></div>
-    <div class="set-row" id="row-prog"><span class="set-label">진행 방식</span></div>
-    <div class="set-row" id="row-pres"><span class="set-label">지시 제시</span></div>
-    <div class="set-row" id="row-mem"><span class="set-label">수행 방식</span></div>
-    <div class="set-row" id="row-count"><span class="set-label">문제 수</span></div>
-  </div>
-  <div class="panel">
-    <b>단계 안내</b>
-    <table class="lv-table" id="lv-table"></table>
-  </div>
-  <p class="lead" id="voice-note"></p>
-  <button class="big-btn b-pri" onclick="startSession()">시작하기</button>
+<div id="tabs">
+  <button class="tab-btn active" data-theme="pick">물건 고르기</button>
+  <button class="tab-btn" data-theme="house">집안 정리</button>
+  <button class="tab-btn" data-theme="device">기기 조작</button>
+  <button class="tab-btn" data-theme="mix">섞어서</button>
 </div>
 
-<!-- 훈련 -->
-<div class="screen" id="scr-run">
-  <div class="top">
-    <span class="lv" id="r-level"></span>
-    <span class="pg" id="r-prog"></span>
-    <button class="stop" onclick="if(confirm('훈련을 끝내고 결과를 볼까요?')) finish()">끝내기</button>
+<div class="panel">
+  <div class="opt-bar" id="bar-level"></div>
+  <div class="opt-bar" id="bar-more"></div>
+
+  <div class="prog-wrap" id="prog-wrap">
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-txt">문제 <span id="prog-cur">1</span> / <span id="prog-tot">10</span> &nbsp;|&nbsp; 정답 <span id="prog-score">0</span></div>
   </div>
-  <div class="instr-box">
-    <div id="instr-text"></div>
-    <button id="replay-btn" onclick="replay()">다시 듣기</button>
+
+  <div class="q-card" id="q-card">
+    <div class="q-card-hd" id="q-hd"></div>
+    <div class="q-card-bd" id="q-bd"></div>
+    <div class="q-card-q" id="q-q"></div>
   </div>
+
   <div id="stage"></div>
-  <div id="fb"></div>
   <div class="act-row" id="act-row"></div>
-</div>
 
-<!-- 결과 -->
-<div class="screen" id="scr-rep">
-  <div class="panel rep" id="rep"></div>
-  <div class="act-row no-print">
-    <button class="big-btn b-sec" onclick="go('set')">설정으로</button>
-    <button class="big-btn b-pri" onclick="window.print()">인쇄하기</button>
+  <div class="fb-box" id="fb"><div class="fb-res" id="fb-res"></div><div class="fb-exp" id="fb-exp"></div></div>
+
+  <div class="ctrl-wrap" id="ctrl">
+    <button class="ctrl-btn btn-s" id="btn-start" onclick="startSession()">시작하기</button>
+    <button class="ctrl-btn btn-n" id="btn-next" onclick="nextTrial()">다음 →</button>
+    <button class="ctrl-btn btn-r" id="btn-reset" onclick="if(confirm('처음 화면으로 돌아갈까요? 지금까지 한 기록은 지워집니다.')) resetAll()">처음으로</button>
   </div>
+  <div id="voice-note"></div>
+
+  <div class="res-box" id="res"></div>
 </div>
 
 <div id="hospital-logo">광주365재활병원_인지연하팀</div>
@@ -260,29 +283,6 @@ const ICONS = {
 const svg = (name, arg) => `<svg viewBox="0 0 100 100" aria-hidden="true">${ICONS[name](arg)}</svg>`;
 
 // ══════════════════════════════════════════════════════════════
-// 설정·단계
-// ══════════════════════════════════════════════════════════════
-const THEMES = {
-  pick:   { name: '생활 물건 고르기', short: '물건 고르기', desc: '식탁 위 물건을 지시대로 누르기' },
-  house:  { name: '집안 정리',       short: '집안 정리',   desc: '물건 옮기기, 불·가스·TV·창문' },
-  device: { name: '기기 조작',       short: '기기 조작',   desc: 'TV 리모컨, 전자레인지, 전화' }
-};
-const LV_TITLE = ['', '한 가지 지시', '구별해서 하기', '두 번 연속', '세 번 연속', '조건·순서·분류'];
-const LV_EX = {
-  pick:   ['', '“약통을 누르세요”', '“파란 컵을 누르세요”', '“열쇠를 누르고, 지갑을 누르세요”', '“안경, 휴대폰, 지갑을 차례로 누르세요”', '“세수할 때 쓰는 물건을 모두”, “만약 ~이 있으면”, “~ 바로 오른쪽”'],
-  house:  ['', '“불을 끄세요”', '“빨간 컵을 싱크대에 넣으세요”', '“우유를 냉장고에 넣고, TV를 끄세요”', '세 가지 일을 차례로', '“먹을 것은 모두 냉장고에”, “가스불이 켜져 있으면 ~”'],
-  device: ['', '“TV를 켜세요”', '“채널 7번을 누르세요”', '“112에 전화를 거세요”', '“1분 30초를 맞추고 시작하세요”', '“TV가 켜져 있으면 ~, 꺼져 있으면 ~”, 긴 전화번호']
-};
-const OPTS = {
-  theme: [{ v: 'pick', t: '생활 물건 고르기', s: THEMES.pick.desc }, { v: 'house', t: '집안 정리', s: THEMES.house.desc }, { v: 'device', t: '기기 조작', s: THEMES.device.desc }, { v: 'mix', t: '섞어서', s: '세 과제를 번갈아' }],
-  level: [1, 2, 3, 4, 5],
-  prog:  [{ v: 'fixed', t: '고정', s: '고른 단계만' }, { v: 'auto', t: '자동 조절', s: '3번 연속 정답 → 올라감, 2번 연속 오답 → 내려감' }],
-  pres:  [{ v: 'both', t: '소리 + 글', s: '' }, { v: 'audio', t: '소리만', s: '청각 이해' }, { v: 'text', t: '글만', s: '읽기 이해' }],
-  mem:   [{ v: 'see', t: '보면서 하기', s: '지시를 보며 수행' }, { v: 'memory', t: '기억해서 하기', s: '지시가 끝나면 가려짐' }],
-  count: [10, 15, 20]
-};
-const ERR_NAME = { item: '다른 것을 함', omit: '빠뜨림', extra: '더 함', order: '순서 틀림', state: '결과 다름' };
-const cfg = { theme: 'pick', level: 1, prog: 'fixed', pres: 'both', mem: 'see', count: 10 };
 
 // ══════════════════════════════════════════════════════════════
 // 과제 1: 생활 물건 고르기
@@ -724,50 +724,103 @@ function renderVoiceNote() {
   el.textContent = !canSpeak || !koVoice ? '이 기기에서는 한국어 음성을 찾지 못했습니다. 소리가 나오지 않으면 "글만"으로 하거나 치료사가 지시를 읽어 주세요.' : '';
 }
 
+
 // ══════════════════════════════════════════════════════════════
-// 설정 화면
+// 설정
 // ══════════════════════════════════════════════════════════════
-function optRow(rowId, key, list) {
-  const row = $(rowId);
-  row.querySelectorAll('.opt').forEach(b => b.remove());
-  list.forEach(o => {
-    const v = typeof o === 'object' ? o.v : o;
-    const label = typeof o === 'object' ? o.t : (key === 'level' ? v + '단계' : v + '문제');
-    const sub = typeof o === 'object' ? o.s : (key === 'level' ? LV_TITLE[v] : '');
-    const b = h('button', 'opt' + (cfg[key] === v ? ' on' : ''), label + (sub ? `<small>${sub}</small>` : ''));
-    b.onclick = () => { cfg[key] = v; renderSettings(); };
-    row.appendChild(b);
+const THEMES = {
+  pick:   { name: '물건 고르기', cls: 'th-pick' },
+  house:  { name: '집안 정리',   cls: 'th-house' },
+  device: { name: '기기 조작',   cls: 'th-device' },
+  mix:    { name: '섞어서',      cls: 'th-mix' }
+};
+const THEME_INTRO = {
+  pick:   '식탁 위 물건 중에서 지시한 물건을 누릅니다.',
+  house:  '물건을 누른 뒤 옮길 곳을 누르고, 전등·가스레인지·TV·창문을 켜고 끕니다.',
+  device: 'TV 리모컨, 전자레인지, 전화를 지시대로 조작합니다.',
+  mix:    '물건 고르기, 집안 정리, 기기 조작이 번갈아 나옵니다.'
+};
+const LV_TITLE = ['', '한 가지 지시', '구별해서 하기', '두 번 연속', '세 번 연속', '조건·순서·분류'];
+const LV_EX = {
+  pick:   ['', '“약통을 누르세요.”', '“파란 컵을 누르세요.”', '“열쇠를 누르고, 지갑을 누르세요.”', '“안경, 휴대폰, 지갑을 차례로 누르세요.”', '“세수할 때 쓰는 물건을 모두 누르세요.”'],
+  house:  ['', '“불을 끄세요.”', '“빨간 컵을 싱크대에 넣으세요.”', '“우유를 냉장고에 넣고, TV를 끄세요.”', '“컵을 싱크대에 넣고, 가스불을 끄고, 창문을 닫으세요.”', '“먹을 것은 모두 냉장고에 넣으세요.”'],
+  device: ['', '“TV를 켜세요.”', '“채널 7번을 누르세요.”', '“112로 전화를 거세요.”', '“1분 30초를 맞추고, 시작을 누르세요.”', '“TV가 켜져 있으면 ~, 꺼져 있으면 ~”'],
+  mix:    ['', '세 과제의 1단계', '세 과제의 2단계', '세 과제의 3단계', '세 과제의 4단계', '세 과제의 5단계']
+};
+const OPTS = {
+  pres:  [['both', '소리+글'], ['audio', '소리만'], ['text', '글만']],
+  mem:   [['see', '보면서'], ['memory', '기억해서']],
+  prog:  [['fixed', '고정'], ['auto', '자동']],
+  count: [[10, '10문제'], [15, '15문제'], [20, '20문제']]
+};
+const ERR_NAME = { item: '다른 것을 함', omit: '빠뜨림', extra: '더 함', order: '순서 틀림', state: '결과 다름' };
+const cfg = { theme: 'pick', level: 1, prog: 'fixed', pres: 'both', mem: 'see', count: 10 };
+
+function segGroup(label, key, list) {
+  const frag = document.createDocumentFragment();
+  frag.appendChild(h('span', '', label));
+  list.forEach(([v, t]) => {
+    const b = h('button', 'seg-btn' + (cfg[key] === v ? ' active' : ''), t);
+    b.onclick = () => { cfg[key] = v; if (S && !S.running) resetAll(); else renderSetup(); };
+    frag.appendChild(b);
   });
+  return frag;
 }
-function renderSettings() {
-  optRow('row-theme', 'theme', OPTS.theme);
-  optRow('row-level', 'level', OPTS.level);
-  optRow('row-prog', 'prog', OPTS.prog);
-  optRow('row-pres', 'pres', OPTS.pres);
-  optRow('row-mem', 'mem', OPTS.mem);
-  optRow('row-count', 'count', OPTS.count);
-  const th = cfg.theme === 'mix' ? ['pick', 'house', 'device'] : [cfg.theme];
-  $('lv-table').innerHTML = `<tr><th>단계</th>${th.map(t => `<th>${THEMES[t].short}</th>`).join('')}</tr>` +
-    [1, 2, 3, 4, 5].map(l => `<tr><td>${l}단계<br><small>${LV_TITLE[l]}</small></td>${th.map(t => `<td>${LV_EX[t][l]}</td>`).join('')}</tr>`).join('');
+function renderSetup() {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === cfg.theme));
+  const lv = $('bar-level'); lv.innerHTML = '';
+  lv.appendChild(segGroup('난이도', 'level', [1, 2, 3, 4, 5].map(n => [n, n + '단계'])));
+  const more = $('bar-more'); more.innerHTML = '';
+  more.appendChild(segGroup('지시', 'pres', OPTS.pres)); more.appendChild(h('span', 'opt-sep'));
+  more.appendChild(segGroup('수행', 'mem', OPTS.mem)); more.appendChild(h('span', 'opt-sep'));
+  more.appendChild(segGroup('단계 조절', 'prog', OPTS.prog)); more.appendChild(h('span', 'opt-sep'));
+  more.appendChild(segGroup('문제 수', 'count', OPTS.count));
+  if (S && S.running) return;
+  // 대기 화면: 고른 과제와 단계 설명만 보여 줌
+  $('q-hd').className = 'q-card-hd ' + THEMES[cfg.theme].cls;
+  $('q-hd').textContent = `${THEMES[cfg.theme].name} · ${cfg.level}단계 ${LV_TITLE[cfg.level]}`;
+  $('q-bd').className = 'q-card-bd';
+  $('q-bd').innerHTML = THEME_INTRO[cfg.theme];
+  $('q-q').innerHTML = `<span class="ex">예) ${LV_EX[cfg.theme][cfg.level]}</span>`;
   renderVoiceNote();
 }
+document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => {
+  if (S && S.running) return;
+  cfg.theme = b.dataset.theme; resetAll();
+});
 
 // ══════════════════════════════════════════════════════════════
 // 진행
 // ══════════════════════════════════════════════════════════════
 let S = null, T = null;
 
-function go(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  $('scr-' + name).classList.add('on');
-  window.scrollTo(0, 0);
-  if (name === 'set') renderSettings();
+function lockSetup(on) {
+  ['tabs', 'bar-level', 'bar-more'].forEach(id => $(id).classList.toggle('locked-ui', on));
+}
+
+function resetAll() {
+  if (canSpeak) speechSynthesis.cancel();
+  S = null; T = null;
+  lockSetup(false);
+  $('prog-wrap').style.display = 'none';
+  $('q-card').style.display = '';
+  $('stage').innerHTML = ''; $('stage').className = '';
+  $('act-row').innerHTML = '';
+  $('fb').style.display = 'none';
+  $('res').style.display = 'none';
+  $('btn-start').style.display = ''; $('btn-next').style.display = 'none';
+  $('btn-reset').style.display = 'none'; $('ctrl').style.display = ''; $('voice-note').style.display = '';
+  renderSetup();
 }
 
 function startSession() {
   if (cfg.pres !== 'text' && (!canSpeak || !koVoice) && !confirm('한국어 음성을 찾지 못했습니다. 소리가 나오지 않을 수 있어요. 계속할까요?')) return;
-  S = { cfg: { ...cfg }, name: $('pname').value.trim(), level: cfg.level, log: [], ok: 0, bad: 0, path: [cfg.level], t0: Date.now(), mixIdx: rnd(0, 2) };
-  go('run'); nextTrial();
+  S = { cfg: { ...cfg }, running: true, level: cfg.level, log: [], ok: 0, bad: 0, path: [cfg.level], t0: Date.now(), mixIdx: rnd(0, 2) };
+  lockSetup(true);
+  $('btn-start').style.display = 'none'; $('btn-reset').style.display = '';
+  $('res').style.display = 'none';
+  $('prog-wrap').style.display = 'block';
+  nextTrial();
 }
 
 function makeTrial(theme, lv) {
@@ -776,39 +829,50 @@ function makeTrial(theme, lv) {
   const t = deviceTrial(lv); return { ...t, theme, lv, presses: [], state: JSON.parse(JSON.stringify(t.init)) };
 }
 
+function updateProgress() {
+  const n = S.log.length, tot = S.cfg.count;
+  $('prog-cur').textContent = Math.min(n + 1, tot);
+  $('prog-tot').textContent = tot;
+  $('prog-score').textContent = S.log.filter(r => r.correct).length;
+  $('prog-fill').style.width = (n / tot * 100) + '%';
+}
+
 function nextTrial() {
+  if (!S) return;
   if (S.log.length >= S.cfg.count) { finish(); return; }
   const theme = S.cfg.theme === 'mix' ? ['pick', 'house', 'device'][(S.mixIdx + S.log.length) % 3] : S.cfg.theme;
   T = makeTrial(theme, S.level);
   T.replays = 0; T.shownAt = 0; T.done = false;
-  $('r-level').textContent = `${THEMES[theme].short} · ${T.lv}단계 ${LV_TITLE[T.lv]}`;
-  $('r-prog').textContent = `${S.log.length + 1} / ${S.cfg.count}`;
-  $('fb').innerHTML = ''; $('fb').className = '';
-  renderStage();
-  const it = $('instr-text');
+  $('fb').style.display = 'none';
+  $('btn-next').style.display = 'none';
+  updateProgress();
+  $('q-hd').className = 'q-card-hd ' + THEMES[theme].cls;
+  $('q-hd').textContent = `${THEMES[theme].name} · ${T.lv}단계 ${LV_TITLE[T.lv]}`;
   const showText = S.cfg.pres !== 'audio';
-  it.className = showText ? '' : 'dim';
-  it.textContent = showText ? T.text : '잘 들어 보세요.';
-  $('replay-btn').style.display = S.cfg.pres === 'text' ? 'none' : '';
+  $('q-bd').className = 'q-card-bd' + (showText ? '' : ' dim');
+  $('q-bd').textContent = showText ? T.text : '잘 들어 보세요.';
+  $('q-q').innerHTML = S.cfg.pres === 'text' ? '' : '<button id="replay-btn" onclick="replay()">다시 듣기</button>';
+  renderStage();
   if (S.cfg.mem === 'memory') {
-    $('stage').classList.add('veiled'); $('replay-btn').disabled = true; setActions([]);
-    const reveal = () => setActions([{ t: '준비됐어요', cls: 'b-pri', fn: () => {
-      it.className = 'dim'; it.textContent = '기억한 대로 해 보세요.'; $('replay-btn').disabled = false; begin();
+    $('stage').className = 'veiled'; setActions([]);
+    const rb = $('replay-btn'); if (rb) rb.disabled = true;
+    const reveal = () => setActions([{ t: '준비됐어요', cls: 'btn-s', fn: () => {
+      $('q-bd').className = 'q-card-bd dim'; $('q-bd').textContent = '기억한 대로 해 보세요.';
+      const rb2 = $('replay-btn'); if (rb2) rb2.disabled = false;
+      begin();
     } }]);
     if (S.cfg.pres === 'text') reveal(); else speak(T.text, reveal);
-  } else { $('replay-btn').disabled = false; begin(); speak(T.text); }
+  } else { begin(); speak(T.text); }
 }
 
 function begin() {
-  $('stage').classList.remove('veiled', 'locked');
+  $('stage').className = '';
   T.shownAt = performance.now();
   const single = T.theme === 'pick' && T.expect.length === 1 && T.ordered;
-  const acts = [];
-  if (!single) {
-    acts.push({ t: '처음부터', cls: 'b-sec', fn: resetTrial });
-    acts.push({ t: '다 했어요', cls: 'b-ok', fn: submit });
-  }
-  setActions(acts);
+  setActions(single ? [] : [
+    { t: '처음부터', cls: 'btn-w', fn: resetTrial },
+    { t: '다 했어요', cls: 'btn-ok', fn: submit }
+  ]);
 }
 
 function resetTrial() {
@@ -822,15 +886,17 @@ function resetTrial() {
 
 function renderStage() {
   const st = $('stage'); st.innerHTML = '';
+  if (!T) return;
   if (T.theme === 'pick') pickRender(T, st);
   else if (T.theme === 'house') houseRender(T, st);
   else deviceRender(T, st);
 }
 
-function replay() {
-  if (!T || T.done) return;
-  T.replays++;
-  speak(T.text);
+function replay() { if (!T || T.done) return; T.replays++; speak(T.text); }
+
+function setActions(list) {
+  const row = $('act-row'); row.innerHTML = '';
+  list.forEach(a => { const b = h('button', 'ctrl-btn ' + a.cls, a.t); b.onclick = a.fn; row.appendChild(b); });
 }
 
 function evalList(log, exp, ordered) {
@@ -851,7 +917,7 @@ function evalList(log, exp, ordered) {
 function submit() {
   if (T.done) return;
   const empty = T.theme === 'device' ? !T.presses.length : !T.log.length;
-  if (empty) { $('fb').className = 'bad'; $('fb').textContent = '아직 아무것도 하지 않았어요.'; return; }
+  if (empty) { showFb(false, '아직 아무것도 하지 않았어요.', ''); return; }
   T.done = true;
   if (canSpeak) speechSynthesis.cancel();
   const rt = performance.now() - T.shownAt;
@@ -869,28 +935,34 @@ function submit() {
   }
   S.log.push({ theme: T.theme, lv: T.lv, kind: T.kind, text: T.text, ...r, rt, replays: T.replays, resets: T.resets || 0 });
 
-  $('stage').classList.add('locked');
+  $('stage').className = 'locked';
   if (T.theme === 'pick') pickReveal(T);
   if (T.theme === 'house') houseReveal(T);
-  $('instr-text').className = ''; $('instr-text').textContent = T.text;
-  const fb = $('fb');
-  fb.className = r.correct ? 'ok' : 'bad';
-  fb.innerHTML = r.correct ? '정답입니다!'
-    : `아쉬워요. (${ERR_NAME[r.err]})<small>한 것: ${mine}<br>정답: ${right}</small>`;
+  $('q-bd').className = 'q-card-bd'; $('q-bd').textContent = T.text;
+  setActions([]);
 
+  let move = '';
   if (S.cfg.prog === 'auto') {
-    let move = '';
     if (r.correct) { S.ok++; S.bad = 0; } else { S.bad++; S.ok = 0; }
-    if (S.ok >= 3 && S.level < 5) { S.level++; S.ok = 0; move = `잘하셨어요! ${S.level}단계로 올라갑니다.`; }
-    else if (S.bad >= 2 && S.level > 1) { S.level--; S.bad = 0; move = `${S.level}단계로 돌아가 연습해요.`; }
-    if (move) { S.path.push(S.level); fb.innerHTML += `<small>${move}</small>`; }
+    if (S.ok >= 3 && S.level < 5) { S.level++; S.ok = 0; move = `잘하셨어요! 다음 문제부터 ${S.level}단계입니다.`; }
+    else if (S.bad >= 2 && S.level > 1) { S.level--; S.bad = 0; move = `다음 문제부터 ${S.level}단계로 연습해요.`; }
+    if (move) S.path.push(S.level);
   }
-  setActions([{ t: S.log.length >= S.cfg.count ? '결과 보기' : '다음 문제', cls: 'b-pri', fn: nextTrial }]);
+  showFb(r.correct, r.correct ? '정답입니다!' : `아쉬워요. (${ERR_NAME[r.err]})`,
+    (r.correct ? '' : `한 것: ${mine}<br>정답: ${right}`) + (move ? `${r.correct ? '' : '<br>'}${move}` : ''));
+  updateProgress();
+  $('prog-fill').style.width = (S.log.length / S.cfg.count * 100) + '%';
+  const nb = $('btn-next');
+  nb.textContent = S.log.length >= S.cfg.count ? '결과 보기' : '다음 →';
+  nb.style.display = 'inline-block';
 }
 
-function setActions(list) {
-  const row = $('act-row'); row.innerHTML = '';
-  list.forEach(a => { const b = h('button', 'big-btn ' + a.cls, a.t); b.onclick = a.fn; row.appendChild(b); });
+function showFb(ok, res, exp) {
+  const fb = $('fb');
+  fb.className = 'fb-box ' + (ok ? 'ok' : 'bad');
+  fb.style.display = 'block';
+  $('fb-res').textContent = res;
+  $('fb-exp').innerHTML = exp;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -899,41 +971,54 @@ function setActions(list) {
 function finish() {
   if (canSpeak) speechSynthesis.cancel();
   const log = S.log, c = S.cfg;
+  S.running = false;
   const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '-';
   const sec = a => a.length ? (a.reduce((x, y) => x + y, 0) / a.length / 1000).toFixed(1) + '초' : '-';
   const ok = log.filter(r => r.correct).length;
-  const ms = log.filter(r => r.theme !== 'device'), sOk = ms.reduce((s, r) => s + r.okSteps, 0), sAll = ms.reduce((s, r) => s + r.steps, 0);
   const highest = log.filter(r => r.correct).reduce((m, r) => Math.max(m, r.lv), 0);
+  const errCnt = Object.keys(ERR_NAME).map(k => [k, log.filter(r => r.err === k).length]).filter(x => x[1]);
 
   let rows = '';
   ['pick', 'house', 'device'].forEach(th => [1, 2, 3, 4, 5].forEach(lv => {
     const g = log.filter(r => r.theme === th && r.lv === lv); if (!g.length) return;
     const gk = g.filter(r => r.correct);
-    rows += `<tr><td class="l">${THEMES[th].short}</td><td>${lv}단계</td><td>${g.length}</td><td>${gk.length}</td><td>${pct(gk.length, g.length)}</td><td>${sec(gk.map(r => r.rt))}</td><td>${g.reduce((s, r) => s + r.replays, 0)}회</td></tr>`;
+    rows += `<tr><td class="l">${THEMES[th].name}</td><td>${lv}단계</td><td>${gk.length}/${g.length}</td><td>${pct(gk.length, g.length)}</td><td>${sec(gk.map(r => r.rt))}</td></tr>`;
   }));
-  const errs = Object.keys(ERR_NAME).map(k => [k, log.filter(r => r.err === k).length]).filter(x => x[1] || x[0] !== 'state')
-    .map(([k, n]) => `<tr><td class="l">${ERR_NAME[k]}</td><td>${n}회</td></tr>`).join('');
 
-  $('rep').innerHTML = `
-    <h2>지시 따르기 훈련 결과</h2>
-    <div class="meta">환자명: ${S.name || '—'} · ${new Date().toLocaleDateString('ko-KR')} ·
-      ${OPTS.theme.find(o => o.v === c.theme).t} · ${OPTS.prog.find(o => o.v === c.prog).t} · ${OPTS.pres.find(o => o.v === c.pres).t} ·
-      ${OPTS.mem.find(o => o.v === c.mem).t} · 총 ${Math.round((Date.now() - S.t0) / 1000)}초</div>
-    <table>
-      <tr><th>문제 수</th><th>정답</th><th>정확도</th><th>지시 단위 정확도</th><th>정답한 최고 단계</th></tr>
-      <tr><td>${log.length}</td><td>${ok}</td><td>${pct(ok, log.length)}</td><td>${sAll ? `${sOk}/${sAll} (${pct(sOk, sAll)})` : '-'}</td><td>${highest ? highest + '단계' : '-'}</td></tr>
-    </table>
-    ${c.prog === 'auto' ? `<p><b>단계 변화:</b> ${S.path.map(n => n + '단계').join(' → ')}</p>` : ''}
-    <table><tr><th class="l">과제</th><th>단계</th><th>문제 수</th><th>정답</th><th>정확도</th><th>평균 수행시간</th><th>다시 듣기</th></tr>${rows}</table>
-    <table><tr><th class="l">오류 유형</th><th>횟수</th></tr>${errs}</table>
-    <table><tr><th>번호</th><th>과제</th><th>단계</th><th class="l">지시</th><th>결과</th></tr>
-      ${log.map((r, i) => `<tr><td>${i + 1}</td><td>${THEMES[r.theme].short}</td><td>${r.lv}</td><td class="l">${r.text}</td><td>${r.correct ? '<span class="okc">정답</span>' : `<span class="badc">${ERR_NAME[r.err]}</span>`}</td></tr>`).join('')}
-    </table>
-    <p class="note">평균 수행시간은 정답 문제에서 화면이 보인 뒤 “다 했어요”까지의 시간입니다. 지시 단위 정확도는 물건 고르기·집안 정리에서 여러 단계 지시 중 맞게 한 단계의 비율입니다. 기기 조작은 마지막 결과(켜짐·채널·시간·번호 등)로 채점합니다.</p>`;
-  go('rep');
+  $('stage').innerHTML = ''; setActions([]);
+  $('fb').style.display = 'none'; $('btn-next').style.display = 'none';
+  $('q-card').style.display = 'none'; $('prog-wrap').style.display = 'none';
+  lockSetup(false);
+
+  const res = $('res');
+  res.innerHTML = `
+    <h2>훈련 완료!</h2>
+    <div class="r-row"><span>과제</span><span class="r-val">${THEMES[c.theme].name}</span></div>
+    <div class="r-row"><span>단계</span><span class="r-val">${c.prog === 'auto' ? S.path.map(n => n + '단계').join(' → ') : c.level + '단계 ' + LV_TITLE[c.level]}</span></div>
+    <div class="r-row"><span>총 문제</span><span class="r-val">${log.length}문제</span></div>
+    <div class="r-row"><span>정답 수</span><span class="r-val">${ok}개</span></div>
+    <div class="r-row"><span>정확도</span><span class="r-val">${pct(ok, log.length)}</span></div>
+    <div class="r-row"><span>평균 수행 시간 (정답)</span><span class="r-val">${sec(log.filter(r => r.correct).map(r => r.rt))}</span></div>
+    ${c.pres !== 'text' ? `<div class="r-row"><span>다시 듣기</span><span class="r-val">${log.reduce((s, r) => s + r.replays, 0)}회</span></div>` : ''}
+    ${c.prog === 'auto' ? `<div class="r-row"><span>정답한 최고 단계</span><span class="r-val">${highest ? highest + '단계' : '-'}</span></div>` : ''}
+    <div class="r-row"><span>오류 유형</span><span class="r-val">${errCnt.length ? errCnt.map(([k, n]) => `${ERR_NAME[k]} ${n}`).join(', ') : '없음'}</span></div>
+    <details>
+      <summary>자세히 보기</summary>
+      <table class="det"><tr><th class="l">과제</th><th>단계</th><th>정답</th><th>정확도</th><th>평균 시간</th></tr>${rows}</table>
+      <table class="det"><tr><th>번호</th><th class="l">지시</th><th>결과</th></tr>
+        ${log.map((r, i) => `<tr><td>${i + 1}</td><td class="l">${r.text}</td><td>${r.correct ? '<span class="okc">정답</span>' : `<span class="badc">${ERR_NAME[r.err]}</span>`}</td></tr>`).join('')}
+      </table>
+    </details>
+    <div class="res-btns">
+      <button class="ctrl-btn btn-s" onclick="resetAll();startSession()">다시 훈련</button>
+      <button class="ctrl-btn btn-r" onclick="location.href='index.html'">홈으로</button>
+    </div>`;
+  res.style.display = 'block';
+  $('ctrl').style.display = 'none'; $('voice-note').style.display = 'none';
+  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-renderSettings();
+resetAll();
 </script>
 </body>
 </html>
