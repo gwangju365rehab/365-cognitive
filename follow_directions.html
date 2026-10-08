@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: rgba(0,0,0,0.06); touch-action: manipulation; }
   body {
-    margin: 0; padding: 70px 16px 70px;
+    margin: 0; padding: 70px 14px 70px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
     background: #f4f6fb; color: #1f2433;
     display: flex; flex-direction: column; align-items: center; gap: 14px;
@@ -15,18 +15,15 @@
   button { font: inherit; cursor: pointer; min-height: 48px; }
   button:disabled { cursor: not-allowed; opacity: .45; }
   button:focus-visible { outline: 3px solid #ffb300; outline-offset: 2px; }
-  .screen { display: none; width: 100%; max-width: 860px; flex-direction: column; align-items: center; gap: 14px; }
+  .screen { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; gap: 14px; }
   .screen.on { display: flex; }
 
-  #home-btn {
-    position: absolute; top: 16px; left: 16px; padding: 8px 16px; border-radius: 999px;
-    border: 1px solid #bbb; background: #fff; font-size: 14px;
-  }
+  #home-btn { position: absolute; top: 16px; left: 16px; padding: 8px 16px; border-radius: 999px; border: 1px solid #bbb; background: #fff; font-size: 14px; }
   h1 { margin: 0; font-size: 2rem; font-weight: 800; color: #1a237e; }
   .lead { margin: 0; color: #555; text-align: center; line-height: 1.6; }
 
   /* 설정 */
-  .panel { width: 100%; background: #fff; border: 1px solid #dfe3ec; border-radius: 16px; padding: 16px 18px; }
+  .panel { width: 100%; background: #fff; border: 1px solid #dfe3ec; border-radius: 16px; padding: 14px 18px; }
   .set-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eef1f5; }
   .set-row:last-child { border-bottom: none; }
   .set-label { width: 92px; font-weight: 800; color: #555; font-size: .95rem; }
@@ -34,75 +31,120 @@
   .opt small { display: block; font-weight: 500; font-size: .78rem; color: #666; }
   .opt.on { border-color: #1976d2; background: #e3f0fd; }
   .set-row input[type=text] { font: inherit; padding: 9px 12px; border: 2px solid #d5dbe6; border-radius: 10px; min-width: 180px; }
-
-  .lv-table { width: 100%; border-collapse: collapse; font-size: .92rem; margin-top: 4px; }
-  .lv-table td { padding: 6px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
-  .lv-table td:first-child { white-space: nowrap; font-weight: 800; color: #1976d2; width: 64px; }
-  .lv-table td:last-child { color: #555; }
+  .lv-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .lv-table th, .lv-table td { padding: 7px 8px; border-bottom: 1px solid #eef1f5; text-align: left; vertical-align: top; }
+  .lv-table th { color: #555; font-size: .85rem; }
+  .lv-table td:first-child { white-space: nowrap; font-weight: 800; color: #1976d2; }
 
   .big-btn { padding: 14px 28px; border-radius: 14px; border: none; font-size: 1.15rem; font-weight: 800; min-height: 56px; }
   .b-pri { background: #1976d2; color: #fff; }
   .b-sec { background: #fff; color: #1f2433; border: 2px solid #d5dbe6; }
   .b-ok { background: #2e7d32; color: #fff; }
 
-  /* 훈련 */
-  .top { width: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-         background: #1a237e; color: #fff; border-radius: 14px; padding: 10px 14px; }
-  .top .lv { font-weight: 800; font-size: 1.1rem; }
+  /* 훈련 상단 */
+  .top { width: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #1a237e; color: #fff; border-radius: 14px; padding: 10px 14px; }
+  .top .lv { font-weight: 800; font-size: 1.05rem; }
   .top .pg { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
   .top .stop { background: rgba(255,255,255,.18); color: #fff; border: none; border-radius: 10px; padding: 6px 12px; min-height: 40px; font-weight: 700; }
-
-  .instr-box {
-    width: 100%; background: #fff; border: 2px solid #c5cae9; border-radius: 16px;
-    padding: 16px 18px; min-height: 92px; display: flex; align-items: center; gap: 12px;
-  }
-  #instr-text { flex: 1; font-size: 1.5rem; font-weight: 800; line-height: 1.45; }
-  #instr-text.hidden-text { color: #9aa2b2; font-size: 1.15rem; font-weight: 700; }
+  .instr-box { width: 100%; background: #fff; border: 2px solid #c5cae9; border-radius: 16px; padding: 14px 18px; min-height: 86px; display: flex; align-items: center; gap: 12px; }
+  #instr-text { flex: 1; font-size: 1.45rem; font-weight: 800; line-height: 1.45; }
+  #instr-text.dim { color: #9aa2b2; font-size: 1.12rem; font-weight: 700; }
   #replay-btn { flex: none; padding: 8px 14px; border-radius: 12px; border: 2px solid #1976d2; background: #fff; color: #1976d2; font-weight: 800; }
 
-  #board {
-    display: grid; gap: 12px; justify-content: center;
-    background: #fff; border: 1px solid #dfe3ec; border-radius: 18px; padding: 16px;
+  #stage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  #stage.veiled { visibility: hidden; }
+  #stage.locked { pointer-events: none; }
+  .hint-line { color: #555; font-size: .95rem; text-align: center; min-height: 1.3rem; }
+
+  /* 물건 */
+  .obj {
+    position: relative; width: 112px; height: 112px; border-radius: 16px; border: 3px solid transparent;
+    background: #fff; padding: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
   }
-  .tok {
-    position: relative; width: 108px; height: 108px; border-radius: 16px;
-    border: 3px solid transparent; background: #f7f8fb; padding: 6px;
+  .obj svg { width: 100%; height: 100%; display: block; }
+  .obj.picked { border-color: #1f2433; background: #eef1f8; }
+  .obj.holding { border-color: #1976d2; background: #e3f0fd; transform: translateY(-4px); }
+  .obj.ans { border-color: #2e7d32; background: #e8f5e9; }
+  .obj.wrongpick { border-color: #c62828; background: #fdecea; }
+  .num { position: absolute; top: -10px; right: -10px; width: 34px; height: 34px; border-radius: 50%;
+    background: #1f2433; color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 1.05rem; }
+  .obj.ans .num { background: #2e7d32; }
+  .table-top { display: grid; gap: 12px; justify-content: center; padding: 18px; border-radius: 18px;
+    background: #e9d8bf; border: 4px solid #b98d5b; box-shadow: inset 0 -6px 0 rgba(0,0,0,.06); }
+
+  /* 집안 정리 */
+  .zones, .switches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; width: 100%; }
+  .zone, .switch {
+    border-radius: 16px; border: 3px solid #d5dbe6; background: #fff; padding: 8px 6px 6px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 150px;
   }
-  .tok svg { width: 100%; height: 100%; display: block; }
-  .tok.picked { border-color: #1f2433; background: #eef1f8; }
-  .tok.ans { border-color: #2e7d32; background: #e8f5e9; }
-  .tok.wrongpick { border-color: #c62828; background: #fdecea; }
-  .tok .num {
-    position: absolute; top: -10px; right: -10px; width: 34px; height: 34px; border-radius: 50%;
-    background: #1f2433; color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 1.05rem;
+  .zone .ic, .switch .ic { width: 78px; height: 78px; }
+  .zone .nm, .switch .nm { font-weight: 800; font-size: 1rem; }
+  .switch .st { font-size: .85rem; font-weight: 800; padding: 1px 10px; border-radius: 999px; background: #eceff4; color: #444; }
+  .switch.on .st { background: #1f2433; color: #fff; }
+  .zone.ready { border-color: #1976d2; background: #f2f8fe; }
+  .zone .inbox { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; min-height: 30px; }
+  .zone .inbox svg { width: 30px; height: 30px; }
+  .zone.ans, .switch.ans { border-color: #2e7d32; background: #e8f5e9; }
+  .counter { width: 100%; min-height: 150px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+    padding: 14px; border-radius: 18px; background: #e9d8bf; border: 4px solid #b98d5b; }
+  .counter-title { font-weight: 800; color: #6d4c2a; }
+  .counter .obj { width: 96px; height: 96px; }
+  .history { width: 100%; font-size: .95rem; color: #333; background: #fff; border: 1px dashed #c5cae9; border-radius: 12px; padding: 8px 12px; min-height: 40px; }
+
+  /* 기기 */
+  .device { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .screen-box { width: 300px; height: 190px; border-radius: 14px; background: #111; border: 10px solid #333;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; gap: 6px; }
+  .screen-box.off { background: #050505; color: #555; }
+  .screen-box .big { font-size: 2.2rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .screen-box .small { font-size: 1.1rem; font-weight: 700; }
+  .remote { width: 230px; background: #2b2f38; border-radius: 28px; padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .remote button, .mw button, .pad button {
+    border: none; border-radius: 12px; background: #4a5060; color: #fff; font-weight: 800; font-size: 1.15rem; min-height: 50px;
   }
-  .tok.ans .num { background: #2e7d32; }
-  #board.locked .tok { pointer-events: none; }
-  #board.veiled { visibility: hidden; }
+  .remote .pw { background: #c62828; grid-column: span 3; }
+  .remote .lbl { color: #cfd3dc; font-size: .8rem; text-align: center; align-self: center; font-weight: 700; }
+  .mw-body { display: flex; gap: 0; border-radius: 16px; overflow: hidden; border: 4px solid #8a8f99; background: #d9dde3; }
+  .mw-door { width: 260px; height: 190px; background: #2d3037; border-right: 4px solid #8a8f99; display: flex; align-items: center; justify-content: center; }
+  .mw-door .glass { width: 210px; height: 140px; border-radius: 10px; background: #1b1d22; display: flex; align-items: center; justify-content: center; color: #555; font-weight: 800; }
+  .mw-door .glass.run { background: #4a3a14; color: #ffd54f; }
+  .mw { width: 170px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .mw .disp { background: #0d1a0d; color: #69f0ae; border-radius: 8px; font-size: 1.8rem; font-weight: 900; text-align: center; padding: 6px; font-variant-numeric: tabular-nums; }
+  .mw .start { background: #2e7d32; } .mw .cancel { background: #c62828; }
+  .phone { width: 280px; background: #1f2128; border-radius: 30px; padding: 18px 16px 22px; display: flex; flex-direction: column; gap: 10px; }
+  .phone .disp { background: #fff; border-radius: 12px; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; }
+  .phone .disp .n { font-size: 1.6rem; font-weight: 900; letter-spacing: 1px; font-variant-numeric: tabular-nums; min-height: 2rem; }
+  .phone .disp .s { font-size: .9rem; color: #2e7d32; font-weight: 800; min-height: 1.1rem; }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pad .call { background: #2e7d32; } .pad .end { background: #c62828; } .pad .del { background: #6b7280; font-size: .95rem; }
 
   .act-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
   #fb { width: 100%; min-height: 1.6rem; text-align: center; font-size: 1.15rem; font-weight: 800; }
   #fb.ok { color: #2e7d32; } #fb.bad { color: #c62828; }
-  #fb small { display: block; font-size: .95rem; font-weight: 600; color: #555; margin-top: 4px; }
+  #fb small { display: block; font-size: .95rem; font-weight: 600; color: #444; margin-top: 4px; line-height: 1.5; }
 
   /* 결과 */
   .rep h2 { margin: 0 0 4px; }
   .rep .meta { color: #555; margin-bottom: 10px; }
-  .rep table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: .95rem; background: #fff; }
-  .rep th, .rep td { border: 1px solid #dfe3ec; padding: 7px 9px; text-align: center; }
+  .rep table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: .93rem; background: #fff; }
+  .rep th, .rep td { border: 1px solid #dfe3ec; padding: 6px 8px; text-align: center; }
   .rep th { background: #f0f2f8; }
-  .rep td.l, .rep th.l { text-align: left; }
+  .rep .l { text-align: left; }
   .rep .note { font-size: .85rem; color: #666; }
   .okc { color: #2e7d32; font-weight: 800; } .badc { color: #c62828; font-weight: 800; }
 
-  #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666;
-    padding: 5px 10px; background: rgba(255,255,255,.9); border-radius: 4px; font-weight: 500; }
+  #hospital-logo { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #666; padding: 5px 10px; background: rgba(255,255,255,.9); border-radius: 4px; font-weight: 500; }
 
-  @media (max-width: 560px) {
-    .tok { width: 74px; height: 74px; padding: 4px; }
-    #board { gap: 8px; padding: 10px; }
-    #instr-text { font-size: 1.2rem; }
+  @media (max-width: 640px) {
+    .obj { width: 76px; height: 76px; padding: 4px; }
+    .counter .obj { width: 70px; height: 70px; }
+    .table-top { gap: 8px; padding: 10px; }
+    .zones, .switches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #instr-text { font-size: 1.18rem; }
     .set-label { width: 100%; }
+    .mw-door { width: 150px; } .mw-door .glass { width: 120px; }
+    #hospital-logo { display: none; }
   }
   @media print {
     body { background: #fff; padding: 0; }
@@ -117,9 +159,10 @@
 <!-- 설정 -->
 <div class="screen on" id="scr-set">
   <h1>지시 따르기 훈련</h1>
-  <p class="lead">지시를 듣거나 읽고, 말한 도형을 순서대로 누르세요.</p>
+  <p class="lead">생활 속 지시를 듣거나 읽고, 그대로 해 보세요.</p>
   <div class="panel">
     <div class="set-row"><span class="set-label">환자명</span><input type="text" id="pname" placeholder="선택 입력"/></div>
+    <div class="set-row" id="row-theme"><span class="set-label">과제</span></div>
     <div class="set-row" id="row-level"><span class="set-label">시작 단계</span></div>
     <div class="set-row" id="row-prog"><span class="set-label">진행 방식</span></div>
     <div class="set-row" id="row-pres"><span class="set-label">지시 제시</span></div>
@@ -145,7 +188,7 @@
     <div id="instr-text"></div>
     <button id="replay-btn" onclick="replay()">다시 듣기</button>
   </div>
-  <div id="board"></div>
+  <div id="stage"></div>
   <div id="fb"></div>
   <div class="act-row" id="act-row"></div>
 </div>
@@ -162,51 +205,557 @@
 <div id="hospital-logo">광주365재활병원_인지연하팀</div>
 
 <script>
-// ══ 자료 ══════════════════════════════════════
-const COLORS = [
-  { id: 'red',    adj: '빨간', noun: '빨간색', css: '#e53935' },
-  { id: 'blue',   adj: '파란', noun: '파란색', css: '#1e63d6' },
-  { id: 'yellow', adj: '노란', noun: '노란색', css: '#fbc02d' },
-  { id: 'green',  adj: '초록', noun: '초록색', css: '#2e9a3e' },
-  { id: 'black',  adj: '검은', noun: '검은색', css: '#222222' }
-];
-const SHAPES = [
-  { id: 'circle',   name: '동그라미' },
-  { id: 'square',   name: '네모' },
-  { id: 'triangle', name: '세모' },
-  { id: 'star',     name: '별' }
-];
-const LEVELS = [
-  { n: 1, name: '1단계', title: '한 가지 지시',   ex: '“빨간색을 누르세요” / “별을 누르세요”',               rows: 1, cols: 4 },
-  { n: 2, name: '2단계', title: '두 가지 특징',   ex: '“파란 네모를 누르세요”',                               rows: 2, cols: 4 },
-  { n: 3, name: '3단계', title: '두 번 연속',     ex: '“빨간 동그라미를 누르고, 노란 세모를 누르세요”',         rows: 2, cols: 5 },
-  { n: 4, name: '4단계', title: '세 번 연속',     ex: '“초록 별, 검은 네모, 파란 세모를 차례로 누르세요”',      rows: 3, cols: 4 },
-  { n: 5, name: '5단계', title: '조건·순서·위치', ex: '“A를 누르기 전에 B를”, “~을 모두”, “만약 ~이 있으면”, “~ 바로 오른쪽”', rows: 3, cols: 4 }
-];
+// ══════════════════════════════════════════════════════════════
+// 공통 도구
+// ══════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function batchim(w) { const c = w.charCodeAt(w.length - 1); if (c >= 0xAC00 && c <= 0xD7A3) return (c - 0xAC00) % 28 !== 0; return /[0-9]$/.test(w) ? /[013678]$/.test(w) : false; }
+const eul = w => w + (batchim(w) ? '을' : '를');
+const iga = w => w + (batchim(w) ? '이' : '가');
+const euro = w => { const last = w[w.length - 1]; if (/[0-9]/.test(last)) return w + (/[036]/.test(last) ? '으로' : '로'); const c = w.charCodeAt(w.length - 1); const b = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 : 0; return w + (b === 0 || b === 8 ? '로' : '으로'); };
+const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const mmss = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+const tlabel = s => (s >= 60 ? Math.floor(s / 60) + '분' : '') + (s % 60 ? (s >= 60 ? ' ' : '') + (s % 60) + '초' : '');
+
+// ══════════════════════════════════════════════════════════════
+// 그림 (SVG)
+// ══════════════════════════════════════════════════════════════
+const CCSS = { red: '#e53935', blue: '#1e63d6', yellow: '#fbc02d', green: '#2e9a3e' };
+const CADJ = { red: '빨간', blue: '파란', yellow: '노란', green: '초록' };
+const O = 'stroke="#333" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+const ICONS = {
+  cup: c => `<path d="M24 30h44v40a10 10 0 0 1-10 10H34a10 10 0 0 1-10-10z" fill="${c}" ${O}/><path d="M68 40h6a10 10 0 0 1 0 20h-6" fill="none" ${O}/><path d="M34 18c0 4 6 4 6 8M48 16c0 4 6 4 6 8" fill="none" stroke="#999" stroke-width="3" stroke-linecap="round"/>`,
+  spoon: () => `<ellipse cx="34" cy="30" rx="15" ry="20" transform="rotate(-35 34 30)" fill="#cfd5dd" ${O}/><path d="M44 42L80 84" stroke="#333" stroke-width="10" stroke-linecap="round"/><path d="M44 42L80 84" stroke="#cfd5dd" stroke-width="5" stroke-linecap="round"/>`,
+  chopsticks: () => `<path d="M30 12L46 90M44 10L56 90" stroke="#333" stroke-width="9" stroke-linecap="round"/><path d="M30 12L46 90M44 10L56 90" stroke="#a1764a" stroke-width="5" stroke-linecap="round"/>`,
+  pills: () => `<rect x="28" y="18" width="44" height="14" rx="3" fill="#fff" ${O}/><rect x="30" y="32" width="40" height="52" rx="6" fill="#f39c3a" ${O}/><rect x="34" y="46" width="32" height="22" rx="3" fill="#fff" ${O}/><path d="M42 57h16M50 51v12" stroke="#e53935" stroke-width="3" stroke-linecap="round"/>`,
+  glasses: () => `<circle cx="30" cy="54" r="16" fill="#e3f2fd" ${O}/><circle cx="70" cy="54" r="16" fill="#e3f2fd" ${O}/><path d="M46 52q4-6 8 0M14 50L6 40M86 50L94 40" fill="none" ${O}/>`,
+  phone: () => `<rect x="30" y="10" width="40" height="80" rx="8" fill="#333" ${O}/><rect x="35" y="18" width="30" height="58" rx="3" fill="#7ab8f5"/><circle cx="50" cy="83" r="3" fill="#ddd"/>`,
+  key: () => `<circle cx="32" cy="34" r="16" fill="#f2c94c" ${O}/><circle cx="32" cy="34" r="6" fill="#fff" ${O}/><path d="M44 46L80 82M64 66l8-8M72 74l8-8" fill="none" stroke="#333" stroke-width="9" stroke-linecap="round"/><path d="M44 46L80 82M64 66l8-8M72 74l8-8" fill="none" stroke="#f2c94c" stroke-width="4" stroke-linecap="round"/>`,
+  wallet: () => `<rect x="14" y="28" width="72" height="50" rx="8" fill="#8d5a34" ${O}/><path d="M14 40h72" stroke="#333" stroke-width="3"/><rect x="58" y="48" width="28" height="16" rx="4" fill="#a8703f" ${O}/><circle cx="68" cy="56" r="3" fill="#f2c94c"/>`,
+  towel: c => `<path d="M10 22h80" stroke="#8d6e63" stroke-width="7" stroke-linecap="round"/><path d="M24 22h52v56H24z" fill="${c}" ${O}/><path d="M24 22h52v20q-26 8-52 0z" fill="${c}" ${O}/><path d="M24 58h52M24 66h52" stroke="#fff" stroke-width="4"/><path d="M28 78v8M36 78v8M44 78v8M52 78v8M60 78v8M68 78v8M72 78v8" stroke="#333" stroke-width="3" stroke-linecap="round"/>`,
+  toothbrush: c => `<path d="M16 88L58 40" stroke="#333" stroke-width="13" stroke-linecap="round"/><path d="M16 88L58 40" stroke="${c}" stroke-width="8" stroke-linecap="round"/><g transform="rotate(41 68 28)"><rect x="52" y="20" width="34" height="16" rx="4" fill="#fff" ${O}/><path d="M57 20v-12M63 20v-12M69 20v-12M75 20v-12M81 20v-12" stroke="#42a5f5" stroke-width="4" stroke-linecap="round"/></g>`,
+  watch: () => `<rect x="38" y="8" width="24" height="84" rx="6" fill="#555" ${O}/><circle cx="50" cy="50" r="20" fill="#fff" ${O}/><path d="M50 50V38M50 50l8 5" stroke="#333" stroke-width="3" stroke-linecap="round"/>`,
+  remote: () => `<rect x="32" y="8" width="36" height="84" rx="10" fill="#444" ${O}/><circle cx="50" cy="22" r="5" fill="#e53935"/><circle cx="42" cy="42" r="4" fill="#ddd"/><circle cx="58" cy="42" r="4" fill="#ddd"/><circle cx="42" cy="56" r="4" fill="#ddd"/><circle cx="58" cy="56" r="4" fill="#ddd"/><circle cx="42" cy="70" r="4" fill="#ddd"/><circle cx="58" cy="70" r="4" fill="#ddd"/>`,
+  milk: () => `<path d="M30 30l8-14h24l8 14v58H30z" fill="#fff" ${O}/><path d="M30 30h40" stroke="#333" stroke-width="3"/><rect x="30" y="46" width="40" height="22" fill="#5c9ded"/><path d="M38 16l4-6h16l4 6" fill="#fff" ${O}/>`,
+  apple: () => `<path d="M50 30c-8-8-30-6-30 18 0 20 14 36 22 36 4 0 6-2 8-2s4 2 8 2c8 0 22-16 22-36 0-24-22-26-30-18z" fill="#e53935" ${O}/><path d="M50 30c0-8 2-14 6-18" fill="none" ${O}/><path d="M54 22c6-8 16-8 18-4-4 6-12 8-18 4z" fill="#43a047" ${O}/>`,
+  banana: () => `<path d="M18 30c6 34 34 54 66 46 4-1 4-6 0-6-26 2-46-14-54-40-2-6-14-6-12 0z" fill="#fdd835" ${O}/><path d="M14 30l-4-8" ${O}/>`,
+  tissue: () => `<path d="M24 46l10-22 18 8 16-10 10 20-6 18 6 16-20 8-14-8-18 6-6-16z" fill="#eceff1" ${O}/><path d="M38 40l12 10M52 56l14-6M34 62l10-4" stroke="#90a4ae" stroke-width="3" stroke-linecap="round"/>`,
+  can: () => `<rect x="30" y="20" width="40" height="64" rx="6" fill="#b0bec5" ${O}/><ellipse cx="50" cy="20" rx="20" ry="6" fill="#cfd8dc" ${O}/><rect x="30" y="40" width="40" height="22" fill="#e53935"/><path d="M40 52l20-6" stroke="#fff" stroke-width="3"/>`,
+  // 장소
+  fridge: () => `<rect x="20" y="6" width="60" height="88" rx="6" fill="#eef3f8" ${O}/><path d="M20 38h60" stroke="#333" stroke-width="3"/><path d="M28 18v12M28 48v16" stroke="#333" stroke-width="4" stroke-linecap="round"/>`,
+  drawer: () => `<rect x="10" y="14" width="80" height="76" rx="4" fill="#c79a6b" ${O}/><rect x="16" y="20" width="68" height="20" rx="2" fill="#d9b088" ${O}/><rect x="16" y="44" width="68" height="20" rx="2" fill="#d9b088" ${O}/><rect x="16" y="68" width="68" height="18" rx="2" fill="#d9b088" ${O}/><path d="M42 30h16M42 54h16M42 77h16" stroke="#333" stroke-width="4" stroke-linecap="round"/>`,
+  sink: () => `<path d="M10 50h80l-8 30H18z" fill="#cfd8dc" ${O}/><rect x="24" y="54" width="52" height="18" rx="6" fill="#90a4ae"/><path d="M60 50V26a8 8 0 0 0-16 0v6" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/><path d="M60 50V26a8 8 0 0 0-16 0v6" fill="none" stroke="#b0bec5" stroke-width="4" stroke-linecap="round"/>`,
+  trash: () => `<path d="M26 30h48l-6 60H32z" fill="#78909c" ${O}/><rect x="20" y="20" width="60" height="10" rx="3" fill="#90a4ae" ${O}/><path d="M42 16h16" ${O}/><path d="M40 42v36M50 42v36M60 42v36" stroke="#cfd8dc" stroke-width="3"/>`,
+  // 스위치
+  light: on => `<path d="M50 12a24 24 0 0 0-14 44c4 3 6 8 6 12h16c0-4 2-9 6-12a24 24 0 0 0-14-44z" fill="${on ? '#ffe066' : '#d0d4da'}" ${O}/><rect x="40" y="70" width="20" height="14" rx="3" fill="#888" ${O}/>${on ? '<path d="M50 2v6M84 36h6M10 36h6M78 12l-4 4M22 12l4 4" stroke="#f9a825" stroke-width="4" stroke-linecap="round"/>' : ''}`,
+  stove: on => `<rect x="8" y="40" width="84" height="46" rx="6" fill="#455a64" ${O}/><ellipse cx="50" cy="40" rx="30" ry="8" fill="#263238" ${O}/>${on ? '<path d="M34 36c0-12 8-14 6-24 8 6 6 14 10 16 2-6 4-8 4-14 8 10 8 16 6 22z" fill="#ff7043" stroke="#e64a19" stroke-width="2"/><path d="M42 36c0-6 4-8 4-12 4 4 4 8 6 12z" fill="#42a5f5"/>' : ''}<circle cx="30" cy="68" r="6" fill="#cfd8dc" ${O}/><circle cx="70" cy="68" r="6" fill="#cfd8dc" ${O}/>`,
+  tv: on => `<rect x="8" y="14" width="84" height="56" rx="6" fill="#222" ${O}/><rect x="14" y="20" width="72" height="44" rx="2" fill="${on ? '#64b5f6' : '#111'}"/>${on ? '<path d="M14 54l20-16 14 10 14-14 24 20v10H14z" fill="#81c784"/><circle cx="72" cy="30" r="5" fill="#fff59d"/>' : ''}<path d="M36 84h28M50 70v14" ${O}/>`,
+  window: open => open
+    ? `<rect x="14" y="12" width="72" height="76" fill="#b3e5fc" ${O}/><path d="M14 12l22 10v60l-22 6zM86 12l-22 10v60l22 6z" fill="#e1f5fe" ${O}/>`
+    : `<rect x="14" y="12" width="72" height="76" fill="#e1f5fe" ${O}/><path d="M50 12v76M14 50h72" ${O}/>`
+};
+const svg = (name, arg) => `<svg viewBox="0 0 100 100" aria-hidden="true">${ICONS[name](arg)}</svg>`;
+
+// ══════════════════════════════════════════════════════════════
+// 설정·단계
+// ══════════════════════════════════════════════════════════════
+const THEMES = {
+  pick:   { name: '생활 물건 고르기', short: '물건 고르기', desc: '식탁 위 물건을 지시대로 누르기' },
+  house:  { name: '집안 정리',       short: '집안 정리',   desc: '물건 옮기기, 불·가스·TV·창문' },
+  device: { name: '기기 조작',       short: '기기 조작',   desc: 'TV 리모컨, 전자레인지, 전화' }
+};
+const LV_TITLE = ['', '한 가지 지시', '구별해서 하기', '두 번 연속', '세 번 연속', '조건·순서·분류'];
+const LV_EX = {
+  pick:   ['', '“약통을 누르세요”', '“파란 컵을 누르세요”', '“열쇠를 누르고, 지갑을 누르세요”', '“안경, 휴대폰, 지갑을 차례로 누르세요”', '“세수할 때 쓰는 물건을 모두”, “만약 ~이 있으면”, “~ 바로 오른쪽”'],
+  house:  ['', '“불을 끄세요”', '“빨간 컵을 싱크대에 넣으세요”', '“우유를 냉장고에 넣고, TV를 끄세요”', '세 가지 일을 차례로', '“먹을 것은 모두 냉장고에”, “가스불이 켜져 있으면 ~”'],
+  device: ['', '“TV를 켜세요”', '“채널 7번을 누르세요”', '“112에 전화를 거세요”', '“1분 30초를 맞추고 시작하세요”', '“TV가 켜져 있으면 ~, 꺼져 있으면 ~”, 긴 전화번호']
+};
 const OPTS = {
+  theme: [{ v: 'pick', t: '생활 물건 고르기', s: THEMES.pick.desc }, { v: 'house', t: '집안 정리', s: THEMES.house.desc }, { v: 'device', t: '기기 조작', s: THEMES.device.desc }, { v: 'mix', t: '섞어서', s: '세 과제를 번갈아' }],
   level: [1, 2, 3, 4, 5],
   prog:  [{ v: 'fixed', t: '고정', s: '고른 단계만' }, { v: 'auto', t: '자동 조절', s: '3번 연속 정답 → 올라감, 2번 연속 오답 → 내려감' }],
   pres:  [{ v: 'both', t: '소리 + 글', s: '' }, { v: 'audio', t: '소리만', s: '청각 이해' }, { v: 'text', t: '글만', s: '읽기 이해' }],
   mem:   [{ v: 'see', t: '보면서 하기', s: '지시를 보며 수행' }, { v: 'memory', t: '기억해서 하기', s: '지시가 끝나면 가려짐' }],
   count: [10, 15, 20]
 };
-const ERR_NAME = { item: '다른 도형 선택', omit: '빠뜨림', extra: '더 누름', order: '순서 틀림' };
+const ERR_NAME = { item: '다른 것을 함', omit: '빠뜨림', extra: '더 함', order: '순서 틀림', state: '결과 다름' };
+const cfg = { theme: 'pick', level: 1, prog: 'fixed', pres: 'both', mem: 'see', count: 10 };
 
-// ══ 상태 ══════════════════════════════════════
-const cfg = { level: 1, prog: 'fixed', pres: 'both', mem: 'see', count: 10 };
-let S = null;   // 세션
-let T = null;   // 현재 문제
+// ══════════════════════════════════════════════════════════════
+// 과제 1: 생활 물건 고르기
+// ══════════════════════════════════════════════════════════════
+const PICK_TYPES = [
+  { id: 'cup',        name: '컵',       colors: ['red', 'blue', 'yellow', 'green'], cat: 'meal' },
+  { id: 'spoon',      name: '숟가락',   cat: 'meal' },
+  { id: 'chopsticks', name: '젓가락',   cat: 'meal' },
+  { id: 'pills',      name: '약통',     cat: 'med' },
+  { id: 'glasses',    name: '안경',     cat: 'out' },
+  { id: 'phone',      name: '휴대폰',   cat: 'out' },
+  { id: 'key',        name: '열쇠',     cat: 'out' },
+  { id: 'wallet',     name: '지갑',     cat: 'out' },
+  { id: 'towel',      name: '수건',     colors: ['red', 'blue', 'yellow', 'green'], cat: 'wash' },
+  { id: 'toothbrush', name: '칫솔',     colors: ['red', 'blue', 'yellow', 'green'], cat: 'wash' },
+  { id: 'watch',      name: '손목시계', cat: 'out' },
+  { id: 'remote',     name: '리모컨',   cat: 'etc' }
+];
+const PICK_CATS = { meal: '밥 먹을 때 쓰는 물건', wash: '세수할 때 쓰는 물건', out: '외출할 때 챙기는 물건' };
+const PICK_LAYOUT = { 1: [1, 4], 2: [2, 4], 3: [2, 4], 4: [2, 5], 5: [2, 5] };
 
-// ══ 도구 ══════════════════════════════════════
-const $ = id => document.getElementById(id);
-const pick = a => a[Math.floor(Math.random() * a.length)];
-function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function hasBatchim(w) { const c = w.charCodeAt(w.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; }
-const eul = w => w + (hasBatchim(w) ? '을' : '를');
-const iga = w => w + (hasBatchim(w) ? '이' : '가');
-const tname = t => `${t.color.adj} ${t.shape.name}`;
-const colorOf = id => COLORS.find(c => c.id === id);
-const shapeOf = id => SHAPES.find(s => s.id === id);
+function pickBoard(lv, need) {
+  const [rows, cols] = PICK_LAYOUT[lv], n = rows * cols;
+  for (let k = 0; k < 300; k++) {
+    let items = [];
+    if (lv === 1) {
+      items = shuffle(PICK_TYPES).slice(0, n).map(t => ({ type: t, color: t.colors ? pick(t.colors) : null }));
+    } else {
+      const pool = [];
+      PICK_TYPES.forEach(t => { if (t.colors) t.colors.forEach(c => pool.push({ type: t, color: c })); else pool.push({ type: t, color: null }); });
+      // 색 있는 물건이 너무 많이 나오지 않게: 한 종류당 최대 3개
+      for (const it of shuffle(pool)) {
+        if (items.length >= n) break;
+        if (items.filter(x => x.type.id === it.type.id).length >= 3) continue;
+        items.push(it);
+      }
+    }
+    const board = items.map((it, i) => ({ ...it, id: 'p' + i, r: Math.floor(i / cols), c: i % cols }));
+    if (!need || need(board)) return { board, rows, cols };
+  }
+  return null;
+}
+function pickName(it, board) {
+  const same = board.filter(x => x.type.id === it.type.id).length;
+  return it.color && same > 1 ? `${CADJ[it.color]} ${it.type.name}` : it.type.name;
+}
+function pickTrial(lv) {
+  if (lv === 1) {
+    const B = pickBoard(1), t = pick(B.board);
+    return { ...B, text: `${eul(t.type.name)} 누르세요.`, expect: ['tap:' + t.id], ordered: true, kind: '한 가지' };
+  }
+  if (lv === 2) {
+    const B = pickBoard(2, b => b.some(x => x.color && b.filter(y => y.type.id === x.type.id).length >= 2));
+    const t = pick(B.board.filter(x => x.color && B.board.filter(y => y.type.id === x.type.id).length >= 2));
+    return { ...B, text: `${eul(pickName(t, B.board))} 누르세요.`, expect: ['tap:' + t.id], ordered: true, kind: '색 구별' };
+  }
+  if (lv === 3 || lv === 4) {
+    const k = lv === 3 ? 2 : 3, B = pickBoard(lv), ts = shuffle(B.board).slice(0, k), nm = ts.map(t => pickName(t, B.board));
+    const text = k === 2
+      ? pick([`${eul(nm[0])} 누르고, ${eul(nm[1])} 누르세요.`, `${eul(nm[0])} 누른 다음에 ${eul(nm[1])} 누르세요.`])
+      : pick([`${eul(nm[0])} 누르고, ${eul(nm[1])} 누르고, ${eul(nm[2])} 누르세요.`, `${nm[0]}, ${nm[1]}, ${eul(nm[2])} 차례로 누르세요.`]);
+    return { ...B, text, expect: ts.map(t => 'tap:' + t.id), ordered: true, kind: k + '번 연속' };
+  }
+  const type = pick(['cat', 'before', 'cond', 'space']);
+  if (type === 'cat') {
+    const cat = pick(Object.keys(PICK_CATS));
+    const B = pickBoard(5, b => { const k = b.filter(x => x.type.cat === cat).length; return k >= 2 && k <= 4; });
+    const ans = B.board.filter(x => x.type.cat === cat);
+    return { ...B, text: `${eul(PICK_CATS[cat])} 모두 누르세요.`, expect: ans.map(t => 'tap:' + t.id), ordered: false, kind: '분류해서 모두' };
+  }
+  if (type === 'before') {
+    const B = pickBoard(5), [a, b] = shuffle(B.board);
+    return { ...B, text: `${eul(pickName(a, B.board))} 누르기 전에 ${eul(pickName(b, B.board))} 먼저 누르세요.`, expect: ['tap:' + b.id, 'tap:' + a.id], ordered: true, kind: '순서 바꾸기' };
+  }
+  if (type === 'cond') {
+    const present = Math.random() < 0.5;
+    let x;
+    const B = pickBoard(5, b => {
+      const uncolored = PICK_TYPES.filter(t => !t.colors);
+      const cand = uncolored.filter(t => present === b.some(y => y.type.id === t.id));
+      if (!cand.length) return false; x = pick(cand); return true;
+    });
+    const y = pick(B.board.filter(t => t.type.id !== x.id));
+    const xi = B.board.find(t => t.type.id === x.id);
+    return { ...B, text: `만약 ${iga(x.name)} 있으면 ${eul(x.name)}, 없으면 ${eul(pickName(y, B.board))} 누르세요.`,
+             expect: ['tap:' + (xi ? xi.id : y.id)], ordered: true, kind: '조건' };
+  }
+  const B = pickBoard(5);
+  const dirs = [{ k: '오른쪽', dc: 1 }, { k: '왼쪽', dc: -1 }];
+  const opts = [];
+  B.board.forEach(t => dirs.forEach(d => { const nb = B.board.find(o => o.r === t.r && o.c === t.c + d.dc); if (nb) opts.push({ t, d, nb }); }));
+  const o = pick(opts);
+  return { ...B, text: `${pickName(o.t, B.board)} 바로 ${o.d.k}에 있는 물건을 누르세요.`, expect: ['tap:' + o.nb.id], ordered: true, kind: '위치' };
+}
+function pickRender(T, stage) {
+  stage.appendChild(h('div', 'hint-line', T.expect.length > 1 || !T.ordered ? '다 누른 뒤 “다 했어요”를 누르세요. 다시 누르면 취소됩니다.' : ''));
+  const tb = h('div', 'table-top'); tb.style.gridTemplateColumns = `repeat(${T.cols}, auto)`;
+  T.board.forEach(it => {
+    const b = h('button', 'obj', svg(it.type.id, it.color ? CCSS[it.color] : undefined));
+    b.dataset.id = it.id; b.setAttribute('aria-label', pickName(it, T.board));
+    const k = T.taps.indexOf(it.id);
+    if (k >= 0) { b.classList.add('picked'); b.insertAdjacentHTML('beforeend', `<span class="num">${k + 1}</span>`); }
+    b.onclick = () => {
+      if (T.done) return;
+      const i = T.taps.indexOf(it.id);
+      if (i >= 0) T.taps.splice(i, 1); else T.taps.push(it.id);
+      T.log = T.taps.map(id => 'tap:' + id);
+      renderStage();
+      if (T.expect.length === 1 && T.ordered && T.taps.length === 1) submit();
+    };
+    tb.appendChild(b);
+  });
+  stage.appendChild(tb);
+}
+function pickReveal(T) {
+  document.querySelectorAll('#stage .obj').forEach(b => {
+    const id = b.dataset.id, ai = T.expect.indexOf('tap:' + id);
+    b.querySelector('.num')?.remove();
+    if (ai >= 0) { b.classList.remove('picked'); b.classList.add('ans'); b.insertAdjacentHTML('beforeend', `<span class="num">${T.ordered && T.expect.length > 1 ? ai + 1 : '✓'}</span>`); }
+    else if (T.taps.includes(id)) b.classList.add('wrongpick');
+  });
+}
+const pickDesc = (T, key) => pickName(T.board.find(x => x.id === key.split(':')[1]), T.board);
+
+// ══════════════════════════════════════════════════════════════
+// 과제 2: 집안 정리
+// ══════════════════════════════════════════════════════════════
+const ZONES = [
+  { id: 'fridge', name: '냉장고',   verb: { imp: '넣으세요', and: '넣고', bef: '넣기 전에', ed: '넣었어요' }, loc: '냉장고에' },
+  { id: 'drawer', name: '서랍',     verb: { imp: '넣으세요', and: '넣고', bef: '넣기 전에', ed: '넣었어요' }, loc: '서랍에' },
+  { id: 'sink',   name: '싱크대',   verb: { imp: '넣으세요', and: '넣고', bef: '넣기 전에', ed: '넣었어요' }, loc: '싱크대에' },
+  { id: 'trash',  name: '쓰레기통', verb: { imp: '버리세요', and: '버리고', bef: '버리기 전에', ed: '버렸어요' }, loc: '쓰레기통에' }
+];
+const HOUSE_OBJS = [
+  { id: 'milk',     icon: 'milk',   name: '우유',     zones: ['fridge'], cat: 'food' },
+  { id: 'apple',    icon: 'apple',  name: '사과',     zones: ['fridge'], cat: 'food' },
+  { id: 'banana',   icon: 'banana', name: '바나나',   zones: ['fridge'], cat: 'food' },
+  { id: 'cup_red',  icon: 'cup',    color: 'red',  name: '컵', zones: ['sink'], cat: 'dish' },
+  { id: 'cup_blue', icon: 'cup',    color: 'blue', name: '컵', zones: ['sink'], cat: 'dish' },
+  { id: 'spoon',    icon: 'spoon',  name: '숟가락',   zones: ['sink', 'drawer'], cat: 'dish' },
+  { id: 'pills',    icon: 'pills',  name: '약통',     zones: ['drawer'], cat: 'etc' },
+  { id: 'key',      icon: 'key',    name: '열쇠',     zones: ['drawer'], cat: 'etc' },
+  { id: 'tissue',   icon: 'tissue', name: '휴지',     zones: ['trash'], cat: 'trash' },
+  { id: 'can',      icon: 'can',    name: '빈 캔',    zones: ['trash'], cat: 'trash' }
+];
+const SWITCHES = [
+  { id: 'light',  icon: 'light',  name: '전등',   noun: '불',     on: '켜짐', off: '꺼짐', toOn: { imp: '켜세요', and: '켜고', bef: '켜기 전에' }, toOff: { imp: '끄세요', and: '끄고', bef: '끄기 전에' } },
+  { id: 'stove',  icon: 'stove',  name: '가스레인지', noun: '가스불', on: '켜짐', off: '꺼짐', toOn: null, toOff: { imp: '끄세요', and: '끄고', bef: '끄기 전에' } },
+  { id: 'tv',     icon: 'tv',     name: 'TV',     noun: 'TV',     on: '켜짐', off: '꺼짐', toOn: { imp: '켜세요', and: '켜고', bef: '켜기 전에' }, toOff: { imp: '끄세요', and: '끄고', bef: '끄기 전에' } },
+  { id: 'window', icon: 'window', name: '창문',   noun: '창문',   on: '열림', off: '닫힘', toOn: { imp: '여세요', and: '열고', bef: '열기 전에' }, toOff: { imp: '닫으세요', and: '닫고', bef: '닫기 전에' } }
+];
+const HOUSE_COUNT = { 1: 4, 2: 5, 3: 6, 4: 7, 5: 7 };
+const FOOD_CATS = { food: { name: '먹을 것', zone: 'fridge' }, trash: { name: '쓰레기', zone: 'trash' } };
+
+function houseObjName(o, objs) { return o.color && objs.filter(x => x.icon === o.icon).length > 1 ? `${CADJ[o.color]} ${o.name}` : o.name; }
+
+function houseSetup(lv, need) {
+  for (let k = 0; k < 300; k++) {
+    let objs = shuffle(HOUSE_OBJS).slice(0, HOUSE_COUNT[lv]);
+    const sw = {}; SWITCHES.forEach(s => sw[s.id] = Math.random() < 0.5);
+    const S = { objs, sw };
+    if (!need || need(S)) return S;
+  }
+  return null;
+}
+// 할 수 있는 동작 하나 만들기 (현재 상태 기준)
+function houseActions(S, used) {
+  const list = [];
+  S.objs.forEach(o => { if (!used.has(o.id)) o.zones.forEach(z => list.push({ type: 'place', o, z: ZONES.find(x => x.id === z) })); });
+  SWITCHES.forEach(s => {
+    if (used.has(s.id)) return;
+    const v = S.sw[s.id] ? s.toOff : s.toOn;
+    if (v) list.push({ type: 'toggle', s, v });
+  });
+  return list;
+}
+function actKey(a) { return a.type === 'place' ? `place:${a.o.id}>${a.z.id}` : `toggle:${a.s.id}`; }
+function actPhrase(a, S, form) {
+  if (a.type === 'place') return `${eul(houseObjName(a.o, S.objs))} ${a.z.loc} ${a.z.verb[form]}`;
+  return `${eul(a.s.noun)} ${a.v[form]}`;
+}
+function pickActions(S, k, opts = {}) {
+  const used = new Set(), acts = [];
+  for (let i = 0; i < k; i++) {
+    let list = houseActions(S, used);
+    if (opts.colorFirst && i === 0) list = list.filter(a => a.type === 'place' && a.o.color && S.objs.filter(x => x.icon === a.o.icon).length > 1);
+    if (opts.mix && i === 1 && acts[0]) list = list.filter(a => a.type !== acts[0].type).length ? list.filter(a => a.type !== acts[0].type) : list;
+    const a = pick(list); acts.push(a); used.add(a.type === 'place' ? a.o.id : a.s.id);
+  }
+  return acts;
+}
+function houseTrial(lv) {
+  if (lv === 1) {
+    const S = houseSetup(1), [a] = pickActions(S, 1);
+    return { S, text: actPhrase(a, S, 'imp') + '.', expect: [actKey(a)], ordered: true, kind: a.type === 'place' ? '옮기기' : '켜고 끄기' };
+  }
+  if (lv === 2) {
+    if (Math.random() < 0.5) {
+      const S = houseSetup(2, s => s.objs.filter(o => o.icon === 'cup').length === 2);
+      const [a] = pickActions(S, 1, { colorFirst: true });
+      return { S, text: actPhrase(a, S, 'imp') + '.', expect: [actKey(a)], ordered: true, kind: '색 구별' };
+    }
+    const S = houseSetup(2, s => s.objs.some(o => o.id === 'spoon'));
+    const zid = pick(['sink', 'drawer']);
+    const a = { type: 'place', o: S.objs.find(o => o.id === 'spoon'), z: ZONES.find(z => z.id === zid) };
+    return { S, text: actPhrase(a, S, 'imp') + '.', expect: [actKey(a)], ordered: true, kind: '갈 곳 구별' };
+  }
+  if (lv === 3 || lv === 4) {
+    const k = lv === 3 ? 2 : 3, S = houseSetup(lv), acts = pickActions(S, k, { mix: true });
+    const text = acts.map((a, i) => actPhrase(a, S, i === k - 1 ? 'imp' : 'and')).join(', ') + '.';
+    return { S, text, expect: acts.map(actKey), ordered: true, kind: k + '번 연속' };
+  }
+  const type = pick(['all', 'cond', 'before']);
+  if (type === 'all') {
+    const ck = pick(Object.keys(FOOD_CATS)), cat = FOOD_CATS[ck];
+    const S = houseSetup(5, s => { const n = s.objs.filter(o => o.cat === ck).length; return n >= 2; });
+    const z = ZONES.find(x => x.id === cat.zone);
+    const ans = S.objs.filter(o => o.cat === ck);
+    return { S, text: `${cat.name}${ck === 'food' ? '은' : '는'} 모두 ${z.loc} ${z.verb.imp}.`,
+             expect: ans.map(o => `place:${o.id}>${z.id}`), ordered: false, kind: '분류해서 모두' };
+  }
+  if (type === 'cond') {
+    const s = pick(SWITCHES.filter(x => x.toOff && x.id !== 'window'));
+    const S = houseSetup(5);
+    const used = new Set([s.id]);
+    const other = pick(houseActions(S, used));
+    const onWord = s.id === 'window' ? '열려' : '켜져';
+    const text = `${iga(s.noun)} ${onWord} 있으면 ${eul(s.noun)} ${s.toOff.and}, ${s.id === 'window' ? '닫혀' : '꺼져'} 있으면 ${actPhrase(other, S, 'imp')}.`;
+    const expect = S.sw[s.id] ? [`toggle:${s.id}`] : [actKey(other)];
+    return { S, text, expect, ordered: true, kind: '조건' };
+  }
+  const S = houseSetup(5), [a, b] = pickActions(S, 2, { mix: true });
+  return { S, text: `${actPhrase(b, S, 'bef')} ${actPhrase(a, S, 'imp')}.`,
+           expect: [actKey(a), actKey(b)], ordered: true, kind: '순서 바꾸기', beforeFix: [a, b] };
+}
+function houseRender(T, stage) {
+  const S = T.S, st = T.state;
+  stage.appendChild(h('div', 'hint-line', T.holding ? `옮길 곳을 누르세요. (다시 누르면 내려놓기)` : '물건을 누른 뒤 옮길 곳을 누르세요. 스위치는 누르면 바뀝니다.'));
+  const zones = h('div', 'zones');
+  ZONES.forEach(z => {
+    const b = h('button', 'zone' + (T.holding ? ' ready' : ''), `<div class="ic">${svg(z.id)}</div><div class="nm">${z.name}</div><div class="inbox"></div>`);
+    b.dataset.zone = z.id;
+    S.objs.filter(o => st.where[o.id] === z.id).forEach(o => b.querySelector('.inbox').insertAdjacentHTML('beforeend', svg(o.icon, o.color ? CCSS[o.color] : undefined)));
+    b.onclick = () => {
+      if (T.done || !T.holding) return;
+      const o = S.objs.find(x => x.id === T.holding);
+      st.where[o.id] = z.id; T.log.push(`place:${o.id}>${z.id}`);
+      T.hist.push(`${houseObjName(o, S.objs)} → ${z.name}`);
+      T.holding = null; renderStage();
+    };
+    zones.appendChild(b);
+  });
+  stage.appendChild(zones);
+  const sws = h('div', 'switches');
+  SWITCHES.forEach(s => {
+    const on = st.sw[s.id];
+    const b = h('button', 'switch' + (on ? ' on' : ''), `<div class="ic">${svg(s.icon, on)}</div><div class="nm">${s.name}</div><div class="st">${on ? s.on : s.off}</div>`);
+    b.dataset.sw = s.id;
+    b.onclick = () => {
+      if (T.done) return;
+      st.sw[s.id] = !st.sw[s.id]; T.log.push(`toggle:${s.id}`); T.holding = null;
+      T.hist.push(`${s.name} ${st.sw[s.id] ? s.on : s.off}`);
+      renderStage();
+    };
+    sws.appendChild(b);
+  });
+  stage.appendChild(sws);
+  const ct = h('div', 'counter');
+  const left = S.objs.filter(o => !st.where[o.id]);
+  if (!left.length) ct.appendChild(h('div', 'counter-title', '식탁이 비었어요'));
+  left.forEach(o => {
+    const b = h('button', 'obj' + (T.holding === o.id ? ' holding' : ''), svg(o.icon, o.color ? CCSS[o.color] : undefined));
+    b.dataset.id = o.id; b.setAttribute('aria-label', houseObjName(o, S.objs));
+    b.onclick = () => { if (T.done) return; T.holding = T.holding === o.id ? null : o.id; renderStage(); };
+    ct.appendChild(b);
+  });
+  stage.appendChild(ct);
+  stage.appendChild(h('div', 'history', '<b>한 일:</b> ' + (T.hist.length ? T.hist.map((x, i) => `${i + 1}) ${x}`).join('  ') : '아직 없음')));
+}
+function houseReveal(T) {
+  T.expect.forEach(k => {
+    if (k.startsWith('place:')) { const z = k.split('>')[1]; document.querySelector(`#stage [data-zone="${z}"]`)?.classList.add('ans'); }
+    else document.querySelector(`#stage [data-sw="${k.split(':')[1]}"]`)?.classList.add('ans');
+  });
+}
+function houseDesc(T, key) {
+  if (key.startsWith('place:')) { const [o, z] = key.slice(6).split('>'); const ob = T.S.objs.find(x => x.id === o); return `${houseObjName(ob, T.S.objs)} → ${ZONES.find(x => x.id === z).name}`; }
+  const s = SWITCHES.find(x => x.id === key.split(':')[1]); return `${s.name} ${T.S.sw[s.id] ? (s.id === 'window' ? '닫기' : '끄기') : (s.id === 'window' ? '열기' : '켜기')}`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// 과제 3: 기기 조작
+// ══════════════════════════════════════════════════════════════
+const DEVICES = {
+  tv: {
+    name: 'TV 리모컨',
+    describe: s => s.power ? `TV 켜짐, 채널 ${s.ch}번, 음량 ${s.vol}` : 'TV 꺼짐',
+    same: (a, b) => a.power === b.power && (!a.power || (a.ch === b.ch && a.vol === b.vol))
+  },
+  mw: {
+    name: '전자레인지',
+    describe: s => `${s.time ? tlabel(s.time) : '0초'}${s.running ? ', 작동 중' : ', 멈춤'}`,
+    same: (a, b) => a.time === b.time && a.running === b.running
+  },
+  phone: {
+    name: '전화',
+    describe: s => `${s.num ? fmtPhone(s.num) : '번호 없음'}${s.calling ? ', 통화 중' : ''}`,
+    same: (a, b) => a.num === b.num && a.calling === b.calling
+  }
+};
+function fmtPhone(n) {
+  if (n.length === 11) return `${n.slice(0, 3)}-${n.slice(3, 7)}-${n.slice(7)}`;
+  if (n.length === 10) return `${n.slice(0, 3)}-${n.slice(3, 6)}-${n.slice(6)}`;
+  if (n.length === 7) return `${n.slice(0, 3)}-${n.slice(3)}`;
+  if (n.length === 8) return `${n.slice(0, 4)}-${n.slice(4)}`;
+  return n;
+}
+const sayNum = n => fmtPhone(n);  // 화면 글과 소리 모두 하이픈 형식
+
+function deviceTrial(lv) {
+  const dev = pick(['tv', 'mw', 'phone']);
+  let init, target, text, kind;
+  if (dev === 'tv') {
+    const ch = rnd(1, 9), vol = rnd(6, 14);
+    const other = c => pick([1, 2, 3, 4, 5, 6, 7, 8, 9].filter(x => x !== c));
+    if (lv === 1) { const on = Math.random() < 0.5; init = { power: on, ch, vol }; target = { ...init, power: !on }; text = on ? 'TV를 끄세요.' : 'TV를 켜세요.'; kind = '전원'; }
+    else if (lv === 2) {
+      init = { power: true, ch, vol };
+      const w = pick(['num', 'up', 'down', 'chup']);
+      if (w === 'num') { const n = other(ch); target = { ...init, ch: n }; text = `채널 ${n}번을 누르세요.`; }
+      else if (w === 'up') { target = { ...init, vol: vol + 1 }; text = '음량을 한 번 올리세요.'; }
+      else if (w === 'down') { target = { ...init, vol: vol - 1 }; text = '음량을 한 번 내리세요.'; }
+      else { target = { ...init, ch: ch % 9 + 1 }; text = '채널을 한 번 올리세요.'; }
+      kind = '버튼 하나';
+    }
+    else if (lv === 3) { const n = other(ch); init = { power: false, ch, vol }; target = { power: true, ch: n, vol }; text = `TV를 켜고, 채널 ${n}번으로 바꾸세요.`; kind = '두 단계'; }
+    else if (lv === 4) { const n = other(ch), d = pick([2, 3]), up = Math.random() < 0.5; init = { power: false, ch, vol }; target = { power: true, ch: n, vol: vol + (up ? d : -d) };
+      text = `TV를 켜고, 채널 ${n}번으로 바꾼 다음, 음량을 ${d === 2 ? '두' : '세'} 번 ${up ? '올리세요' : '내리세요'}.`; kind = '세 단계'; }
+    else { const on = Math.random() < 0.5, n = other(ch); init = { power: on, ch, vol };
+      target = on ? { ...init, ch: n } : { ...init, power: true, vol: vol + 1 };
+      text = `TV가 켜져 있으면 채널 ${n}번으로 바꾸고, 꺼져 있으면 TV를 켠 다음 음량을 한 번 올리세요.`; kind = '조건'; }
+  } else if (dev === 'mw') {
+    if (lv === 1) { if (Math.random() < 0.5) { init = { time: 30, running: false }; target = { time: 30, running: true }; text = '시작 버튼을 누르세요.'; }
+                    else { init = { time: 0, running: false }; target = { time: 60, running: false }; text = '1분 버튼을 누르세요.'; } kind = '버튼 하나'; }
+    else if (lv === 2) { const t = pick([20, 30, 40, 120]); init = { time: 0, running: false }; target = { time: t, running: false }; text = `${tlabel(t)}를 맞추세요.`.replace('분를', '분을'); kind = '시간 맞추기'; }
+    else if (lv === 3) { const t = pick([20, 30, 40, 50, 60, 120]); init = { time: 0, running: false }; target = { time: t, running: true }; text = `${eul(tlabel(t))} 맞추고, 시작을 누르세요.`; kind = '두 단계'; }
+    else if (lv === 4) { const t = pick([70, 80, 90, 130, 150]); init = { time: 0, running: false }; target = { time: t, running: true }; text = `${eul(tlabel(t))} 맞추고, 시작을 누르세요.`; kind = '세 단계 이상'; }
+    else {
+      if (Math.random() < 0.5) { const wrong = pick([150, 180, 240]), t = pick([50, 80, 90]); init = { time: wrong, running: false }; target = { time: t, running: true };
+        text = `시간이 잘못 맞춰져 있어요. 취소를 누르고 ${eul(tlabel(t))} 다시 맞춘 뒤 시작하세요.`; kind = '고쳐서 하기'; }
+      else { const cur = pick([30, 40, 90, 120]); init = { time: cur, running: false };
+        target = cur > 60 ? { time: 30, running: true } : { time: cur, running: true };
+        text = '맞춰진 시간이 1분보다 길면 취소하고 30초를 맞춰서 시작하고, 1분보다 짧으면 그대로 시작하세요.'; kind = '조건'; }
+    }
+  } else {
+    const r4 = () => String(rnd(1000, 9999)), r3 = () => String(rnd(200, 899));
+    if (lv === 1) { const n = '010' + r4() + r4(); init = { num: n, calling: false }; target = { num: n, calling: true }; text = '통화 버튼을 누르세요.'; kind = '버튼 하나'; }
+    else if (lv === 2) { const n = pick(['119', '112', '114', '120']); init = { num: '', calling: false }; target = { num: n, calling: false }; text = `${eul(n)} 누르세요.`; kind = '번호 누르기'; }
+    else if (lv === 3) { const n = pick(['119', '112', '1330', '1577']); init = { num: '', calling: false }; target = { num: n, calling: true }; text = `${euro(n)} 전화를 거세요.`; kind = '두 단계'; }
+    else if (lv === 4) { const n = r3() + r4(); init = { num: '', calling: false }; target = { num: n, calling: true }; text = `${euro(sayNum(n))} 전화를 거세요.`; kind = '긴 번호'; }
+    else {
+      if (Math.random() < 0.5) { const n = '010' + r4() + r4(); init = { num: '', calling: false }; target = { num: n, calling: true }; text = `${euro(sayNum(n))} 전화를 거세요.`; kind = '긴 번호'; }
+      else { const wrong = String(rnd(10, 99)) + String(rnd(10, 99)), n = pick(['119', '112']); init = { num: wrong, calling: false }; target = { num: n, calling: true };
+        text = `번호가 잘못 눌려 있어요. 모두 지운 뒤 ${euro(n)} 전화를 거세요.`; kind = '고쳐서 하기'; }
+    }
+  }
+  return { dev, init, target, text, kind, ordered: true };
+}
+
+function deviceRender(T, stage) {
+  const s = T.state, d = T.dev;
+  stage.appendChild(h('div', 'hint-line', `${DEVICES[d].name} · 다 한 뒤 “다 했어요”를 누르세요.`));
+  const wrap = h('div', 'device');
+  const press = (label, fn) => { if (T.done) return; fn(); T.presses.push(label); renderStage(); };
+  if (d === 'tv') {
+    const scr = h('div', 'screen-box' + (s.power ? '' : ' off'),
+      s.power ? `<div class="big">채널 ${s.ch}</div><div class="small">음량 ${s.vol}</div>` : '<div class="small">꺼짐</div>');
+    const rc = h('div', 'remote');
+    const btn = (lbl, cls, fn) => { const b = h('button', cls || '', lbl); b.onclick = () => press(lbl, fn); rc.appendChild(b); };
+    btn('전원', 'pw', () => { s.power = !s.power; });
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(n => btn(String(n), '', () => { if (s.power) s.ch = n; }));
+    btn('채널 ▲', '', () => { if (s.power) s.ch = s.ch % 9 + 1; });
+    rc.appendChild(h('div', 'lbl', ''));
+    btn('음량 +', '', () => { if (s.power) s.vol = Math.min(30, s.vol + 1); });
+    btn('채널 ▼', '', () => { if (s.power) s.ch = (s.ch + 7) % 9 + 1; });
+    rc.appendChild(h('div', 'lbl', ''));
+    btn('음량 −', '', () => { if (s.power) s.vol = Math.max(0, s.vol - 1); });
+    wrap.append(scr, rc);
+  } else if (d === 'mw') {
+    const body = h('div', 'mw-body');
+    body.appendChild(h('div', 'mw-door', `<div class="glass${s.running ? ' run' : ''}">${s.running ? '작동 중' : ''}</div>`));
+    const p = h('div', 'mw');
+    p.appendChild(h('div', 'disp', mmss(s.time)));
+    const btn = (lbl, cls, fn) => { const b = h('button', cls || '', lbl); b.onclick = () => press(lbl, fn); p.appendChild(b); };
+    btn('10초', '', () => { if (!s.running) s.time = Math.min(5940, s.time + 10); });
+    btn('1분', '', () => { if (!s.running) s.time = Math.min(5940, s.time + 60); });
+    btn('시작', 'start', () => { if (s.time > 0) s.running = true; });
+    btn('취소', 'cancel', () => { s.time = 0; s.running = false; });
+    body.appendChild(p); wrap.appendChild(body);
+  } else {
+    const ph = h('div', 'phone');
+    ph.appendChild(h('div', 'disp', `<div class="n">${s.num ? fmtPhone(s.num) : ''}</div><div class="s">${s.calling ? '전화 거는 중…' : ''}</div>`));
+    const pad = h('div', 'pad');
+    const btn = (lbl, cls, fn) => { const b = h('button', cls || '', lbl); b.onclick = () => press(lbl, fn); pad.appendChild(b); };
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(n => btn(n, '', () => { if (!s.calling && s.num.length < 11) s.num += n; }));
+    btn('지우기', 'del', () => { if (!s.calling) s.num = s.num.slice(0, -1); });
+    btn('0', '', () => { if (!s.calling && s.num.length < 11) s.num += '0'; });
+    btn('', '', () => {}); pad.lastChild.style.visibility = 'hidden';
+    btn('통화', 'call', () => { if (s.num.length >= 3) s.calling = true; });
+    btn('', '', () => {}); pad.lastChild.style.visibility = 'hidden';
+    btn('종료', 'end', () => { s.calling = false; s.num = ''; });
+    ph.appendChild(pad); wrap.appendChild(ph);
+  }
+  stage.appendChild(wrap);
+}
+
+// ══════════════════════════════════════════════════════════════
+// 음성
+// ══════════════════════════════════════════════════════════════
+let koVoice = null;
+const canSpeak = 'speechSynthesis' in window;
+function loadVoice() { if (!canSpeak) return; koVoice = speechSynthesis.getVoices().find(v => /ko/i.test(v.lang)) || null; renderVoiceNote(); }
+if (canSpeak) { loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
+function spoken(text) {  // 전화번호는 숫자를 하나씩 읽도록
+  return text.replace(/[0-9][0-9-]{2,}[0-9]/g, m => m.split('').map(c => c === '-' ? ', ' : '공일이삼사오육칠팔구'[+c]).join(' '));
+}
+function speak(text, onEnd) {
+  if (!canSpeak || S.cfg.pres === 'text') { onEnd && onEnd(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(spoken(text));
+  u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = 0.85;
+  let ended = false; const done = () => { if (!ended) { ended = true; onEnd && onEnd(); } };
+  u.onend = done; u.onerror = done;
+  setTimeout(done, 1500 + text.length * 280);
+  speechSynthesis.speak(u);
+}
+function renderVoiceNote() {
+  const el = $('voice-note'); if (!el) return;
+  el.textContent = !canSpeak || !koVoice ? '이 기기에서는 한국어 음성을 찾지 못했습니다. 소리가 나오지 않으면 "글만"으로 하거나 치료사가 지시를 읽어 주세요.' : '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// 설정 화면
+// ══════════════════════════════════════════════════════════════
+function optRow(rowId, key, list) {
+  const row = $(rowId);
+  row.querySelectorAll('.opt').forEach(b => b.remove());
+  list.forEach(o => {
+    const v = typeof o === 'object' ? o.v : o;
+    const label = typeof o === 'object' ? o.t : (key === 'level' ? v + '단계' : v + '문제');
+    const sub = typeof o === 'object' ? o.s : (key === 'level' ? LV_TITLE[v] : '');
+    const b = h('button', 'opt' + (cfg[key] === v ? ' on' : ''), label + (sub ? `<small>${sub}</small>` : ''));
+    b.onclick = () => { cfg[key] = v; renderSettings(); };
+    row.appendChild(b);
+  });
+}
+function renderSettings() {
+  optRow('row-theme', 'theme', OPTS.theme);
+  optRow('row-level', 'level', OPTS.level);
+  optRow('row-prog', 'prog', OPTS.prog);
+  optRow('row-pres', 'pres', OPTS.pres);
+  optRow('row-mem', 'mem', OPTS.mem);
+  optRow('row-count', 'count', OPTS.count);
+  const th = cfg.theme === 'mix' ? ['pick', 'house', 'device'] : [cfg.theme];
+  $('lv-table').innerHTML = `<tr><th>단계</th>${th.map(t => `<th>${THEMES[t].short}</th>`).join('')}</tr>` +
+    [1, 2, 3, 4, 5].map(l => `<tr><td>${l}단계<br><small>${LV_TITLE[l]}</small></td>${th.map(t => `<td>${LV_EX[t][l]}</td>`).join('')}</tr>`).join('');
+  renderVoiceNote();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 진행
+// ══════════════════════════════════════════════════════════════
+let S = null, T = null;
 
 function go(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
@@ -215,292 +764,125 @@ function go(name) {
   if (name === 'set') renderSettings();
 }
 
-function shapeSVG(shape, css) {
-  const st = `fill="${css}" stroke="#333" stroke-width="3" stroke-linejoin="round"`;
-  let body;
-  if (shape === 'circle') body = `<circle cx="50" cy="50" r="40" ${st}/>`;
-  else if (shape === 'square') body = `<rect x="12" y="12" width="76" height="76" rx="6" ${st}/>`;
-  else if (shape === 'triangle') body = `<polygon points="50,9 92,88 8,88" ${st}/>`;
-  else {
-    const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 19 : 44, a = -Math.PI / 2 + i * Math.PI / 5; pts.push((50 + r * Math.cos(a)).toFixed(1) + ',' + (52 + r * Math.sin(a)).toFixed(1)); }
-    body = `<polygon points="${pts.join(' ')}" ${st}/>`;
-  }
-  return `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
-}
-
-// ══ 음성 ══════════════════════════════════════
-let koVoice = null;
-const canSpeak = 'speechSynthesis' in window;
-function loadVoice() {
-  if (!canSpeak) return;
-  const vs = speechSynthesis.getVoices();
-  koVoice = vs.find(v => /ko/i.test(v.lang)) || null;
-  renderVoiceNote();
-}
-if (canSpeak) { loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
-function speak(text, onEnd) {
-  if (!canSpeak || cfg.pres === 'text') { onEnd && onEnd(); return; }
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice;
-  u.rate = 0.85;
-  let ended = false;
-  const done = () => { if (!ended) { ended = true; onEnd && onEnd(); } };
-  u.onend = done; u.onerror = done;
-  setTimeout(done, 1500 + text.length * 260);  // 음성이 끝났다는 신호가 오지 않을 때 대비
-  speechSynthesis.speak(u);
-}
-function renderVoiceNote() {
-  const el = $('voice-note'); if (!el) return;
-  el.textContent = !canSpeak || !koVoice
-    ? '이 기기에서는 한국어 음성을 찾지 못했습니다. 소리가 나오지 않으면 "글만"으로 진행하거나 치료사가 지시를 읽어 주세요.'
-    : '';
-}
-
-// ══ 설정 화면 ══════════════════════════════════
-function optRow(rowId, key, list) {
-  const row = $(rowId);
-  row.querySelectorAll('.opt').forEach(b => b.remove());
-  list.forEach(o => {
-    const v = typeof o === 'object' ? o.v : o;
-    const label = typeof o === 'object' ? o.t : (key === 'level' ? LEVELS[v - 1].name : v + '문제');
-    const sub = typeof o === 'object' ? o.s : (key === 'level' ? LEVELS[v - 1].title : '');
-    const b = document.createElement('button');
-    b.className = 'opt' + (cfg[key] === v ? ' on' : '');
-    b.innerHTML = label + (sub ? `<small>${sub}</small>` : '');
-    b.onclick = () => { cfg[key] = v; renderSettings(); };
-    row.appendChild(b);
-  });
-}
-function renderSettings() {
-  optRow('row-level', 'level', OPTS.level);
-  optRow('row-prog', 'prog', OPTS.prog);
-  optRow('row-pres', 'pres', OPTS.pres);
-  optRow('row-mem', 'mem', OPTS.mem);
-  optRow('row-count', 'count', OPTS.count);
-  $('lv-table').innerHTML = LEVELS.map(l => `<tr><td>${l.name}</td><td><b>${l.title}</b><br>${l.ex}</td></tr>`).join('');
-  renderVoiceNote();
-}
-
-// ══ 문제 만들기 ═════════════════════════════════
-function makeBoard(lv, need) {
-  const L = LEVELS[lv - 1], n = L.rows * L.cols;
-  for (let tries = 0; tries < 200; tries++) {
-    let combos;
-    if (lv === 1) {   // 1단계: 색도 모양도 모두 다르게
-      const cs = shuffle(COLORS).slice(0, n), ss = shuffle(SHAPES).slice(0, n);
-      combos = cs.map((c, i) => ({ color: c, shape: ss[i % ss.length] }));
-    } else {
-      const all = []; COLORS.forEach(c => SHAPES.forEach(s => all.push({ color: c, shape: s })));
-      combos = shuffle(all).slice(0, n);
-    }
-    const board = combos.map((t, i) => ({ ...t, id: 't' + i, r: Math.floor(i / L.cols), c: i % L.cols }));
-    if (!need || need(board)) return board;
-  }
-  return null;
-}
-
-function makeTrial(lv) {
-  const L = LEVELS[lv - 1];
-  if (lv === 1) {
-    const board = makeBoard(1), t = pick(board);
-    const byColor = Math.random() < 0.5;
-    const word = byColor ? t.color.noun : t.shape.name;
-    return { lv, board, text: `${eul(word)} 누르세요.`, answer: [t.id], ordered: true, kind: byColor ? '색' : '모양' };
-  }
-  if (lv === 2) {
-    const board = makeBoard(2), t = pick(board);
-    return { lv, board, text: `${eul(tname(t))} 누르세요.`, answer: [t.id], ordered: true, kind: '두 특징' };
-  }
-  if (lv === 3 || lv === 4) {
-    const k = lv === 3 ? 2 : 3;
-    const board = makeBoard(lv), ts = shuffle(board).slice(0, k);
-    const names = ts.map(tname);
-    let text;
-    if (k === 2) text = pick([`${eul(names[0])} 누르고, ${eul(names[1])} 누르세요.`, `${eul(names[0])} 누른 다음에 ${eul(names[1])} 누르세요.`]);
-    else text = pick([`${eul(names[0])} 누르고, ${eul(names[1])} 누르고, ${eul(names[2])} 누르세요.`,
-                      `${names[0]}, ${names[1]}, ${eul(names[2])} 차례로 누르세요.`]);
-    return { lv, board, text, answer: ts.map(t => t.id), ordered: true, kind: k + '단계 연속' };
-  }
-  // 5단계: 여러 유형 중 하나
-  const type = pick(['before', 'all', 'except', 'cond', 'space']);
-  if (type === 'before') {
-    const board = makeBoard(5), [a, b] = shuffle(board);
-    return { lv, board, text: `${eul(tname(a))} 누르기 전에 ${eul(tname(b))} 먼저 누르세요.`, answer: [b.id, a.id], ordered: true, kind: '순서 바꾸기' };
-  }
-  if (type === 'all') {
-    const cid = pick(COLORS).id;
-    const board = makeBoard(5, bd => { const k = bd.filter(t => t.color.id === cid).length; return k >= 2 && k <= 3; });
-    const ans = board.filter(t => t.color.id === cid);
-    return { lv, board, text: `${eul(colorOf(cid).noun)} 모두 누르세요.`, answer: ans.map(t => t.id), ordered: false, kind: '모두' };
-  }
-  if (type === 'except') {
-    const sid = pick(SHAPES).id;
-    let cid;
-    const board = makeBoard(5, bd => {
-      const same = bd.filter(t => t.shape.id === sid);
-      if (same.length < 3) return false;
-      cid = pick(same).color.id; return true;
-    });
-    const ans = board.filter(t => t.shape.id === sid && t.color.id !== cid);
-    return { lv, board, text: `${shapeOf(sid).name} 중에서 ${colorOf(cid).noun}이 아닌 것을 모두 누르세요.`, answer: ans.map(t => t.id), ordered: false, kind: '제외하고 모두' };
-  }
-  if (type === 'cond') {
-    const present = Math.random() < 0.5;
-    let x, y;
-    const board = makeBoard(5, bd => {
-      const all = []; COLORS.forEach(c => SHAPES.forEach(s => all.push({ color: c, shape: s })));
-      const absent = all.filter(o => !bd.some(t => t.color.id === o.color.id && t.shape.id === o.shape.id));
-      if (!absent.length) return false;
-      x = present ? pick(bd) : pick(absent);
-      y = pick(bd.filter(t => !(t.color.id === x.color.id && t.shape.id === x.shape.id)));
-      return true;
-    });
-    const xOnBoard = board.find(t => t.color.id === x.color.id && t.shape.id === x.shape.id);
-    return { lv, board, text: `만약 ${iga(tname(x))} 있으면 ${eul(tname(x))}, 없으면 ${eul(tname(y))} 누르세요.`,
-             answer: [xOnBoard ? xOnBoard.id : y.id], ordered: true, kind: '조건' };
-  }
-  // space
-  const dirs = [{ k: '오른쪽', dr: 0, dc: 1 }, { k: '왼쪽', dr: 0, dc: -1 }, { k: '위', dr: -1, dc: 0 }, { k: '아래', dr: 1, dc: 0 }];
-  const board = makeBoard(5);
-  const opts = [];
-  board.forEach(t => dirs.forEach(d => { const nb = board.find(o => o.r === t.r + d.dr && o.c === t.c + d.dc); if (nb) opts.push({ t, d, nb }); }));
-  const o = pick(opts);
-  return { lv, board, text: `${tname(o.t)} 바로 ${o.d.k}에 있는 것을 누르세요.`, answer: [o.nb.id], ordered: true, kind: '위치' };
-}
-
-// ══ 진행 ══════════════════════════════════════
 function startSession() {
   if (cfg.pres !== 'text' && (!canSpeak || !koVoice) && !confirm('한국어 음성을 찾지 못했습니다. 소리가 나오지 않을 수 있어요. 계속할까요?')) return;
-  S = { cfg: { ...cfg }, name: $('pname').value.trim(), level: cfg.level, log: [], streakOk: 0, streakBad: 0, path: [cfg.level], t0: Date.now() };
-  go('run');
-  nextTrial();
+  S = { cfg: { ...cfg }, name: $('pname').value.trim(), level: cfg.level, log: [], ok: 0, bad: 0, path: [cfg.level], t0: Date.now(), mixIdx: rnd(0, 2) };
+  go('run'); nextTrial();
+}
+
+function makeTrial(theme, lv) {
+  if (theme === 'pick') { const t = pickTrial(lv); return { ...t, theme, lv, taps: [], log: [] }; }
+  if (theme === 'house') { const t = houseTrial(lv); return { ...t, theme, lv, log: [], hist: [], holding: null, state: { where: {}, sw: { ...t.S.sw } } }; }
+  const t = deviceTrial(lv); return { ...t, theme, lv, presses: [], state: JSON.parse(JSON.stringify(t.init)) };
 }
 
 function nextTrial() {
   if (S.log.length >= S.cfg.count) { finish(); return; }
-  T = makeTrial(S.level);
-  T.taps = []; T.replays = 0; T.shownAt = 0; T.done = false;
-  $('r-level').textContent = `${LEVELS[S.level - 1].name} · ${LEVELS[S.level - 1].title}`;
+  const theme = S.cfg.theme === 'mix' ? ['pick', 'house', 'device'][(S.mixIdx + S.log.length) % 3] : S.cfg.theme;
+  T = makeTrial(theme, S.level);
+  T.replays = 0; T.shownAt = 0; T.done = false;
+  $('r-level').textContent = `${THEMES[theme].short} · ${T.lv}단계 ${LV_TITLE[T.lv]}`;
   $('r-prog').textContent = `${S.log.length + 1} / ${S.cfg.count}`;
   $('fb').innerHTML = ''; $('fb').className = '';
-  drawBoard();
-  const memory = S.cfg.mem === 'memory';
-  const showText = S.cfg.pres !== 'audio';
+  renderStage();
   const it = $('instr-text');
-  it.className = ''; it.textContent = showText ? T.text : '잘 들어 보세요.';
-  if (!showText) it.className = 'hidden-text';
+  const showText = S.cfg.pres !== 'audio';
+  it.className = showText ? '' : 'dim';
+  it.textContent = showText ? T.text : '잘 들어 보세요.';
   $('replay-btn').style.display = S.cfg.pres === 'text' ? 'none' : '';
-  if (memory) {
-    $('board').classList.add('veiled');
-    $('replay-btn').disabled = true;
-    setActions([]);
-    const reveal = () => {
-      setActions([{ t: '준비됐어요', cls: 'b-pri', fn: () => {
-        it.className = 'hidden-text'; it.textContent = '기억한 대로 누르세요.';
-        $('replay-btn').disabled = false;
-        showBoard();
-      } }]);
-    };
+  if (S.cfg.mem === 'memory') {
+    $('stage').classList.add('veiled'); $('replay-btn').disabled = true; setActions([]);
+    const reveal = () => setActions([{ t: '준비됐어요', cls: 'b-pri', fn: () => {
+      it.className = 'dim'; it.textContent = '기억한 대로 해 보세요.'; $('replay-btn').disabled = false; begin();
+    } }]);
     if (S.cfg.pres === 'text') reveal(); else speak(T.text, reveal);
-  } else {
-    $('replay-btn').disabled = false;
-    showBoard();
-    speak(T.text);
-  }
+  } else { $('replay-btn').disabled = false; begin(); speak(T.text); }
 }
 
-function showBoard() {
-  $('board').classList.remove('veiled', 'locked');
+function begin() {
+  $('stage').classList.remove('veiled', 'locked');
   T.shownAt = performance.now();
-  const multi = T.answer.length > 1 || !T.ordered;
-  setActions(multi ? [
-    { t: '지우기', cls: 'b-sec', fn: () => { T.taps = []; drawBoard(); } },
-    { t: '다 했어요', cls: 'b-ok', fn: submit }
-  ] : []);
+  const single = T.theme === 'pick' && T.expect.length === 1 && T.ordered;
+  const acts = [];
+  if (!single) {
+    acts.push({ t: '처음부터', cls: 'b-sec', fn: resetTrial });
+    acts.push({ t: '다 했어요', cls: 'b-ok', fn: submit });
+  }
+  setActions(acts);
 }
 
-function drawBoard() {
-  const L = LEVELS[T.lv - 1], b = $('board');
-  b.style.gridTemplateColumns = `repeat(${L.cols}, auto)`;
-  b.innerHTML = '';
-  T.board.forEach(t => {
-    const el = document.createElement('button');
-    el.className = 'tok';
-    el.setAttribute('aria-label', tname(t));
-    el.innerHTML = shapeSVG(t.shape.id, t.color.css);
-    const k = T.taps.indexOf(t.id);
-    if (k >= 0) { el.classList.add('picked'); el.insertAdjacentHTML('beforeend', `<span class="num">${k + 1}</span>`); }
-    el.onclick = () => tap(t.id);
-    b.appendChild(el);
-  });
+function resetTrial() {
+  if (T.done) return;
+  if (T.theme === 'pick') { T.taps = []; T.log = []; }
+  else if (T.theme === 'house') { T.log = []; T.hist = []; T.holding = null; T.state = { where: {}, sw: { ...T.S.sw } }; }
+  else { T.presses = []; T.state = JSON.parse(JSON.stringify(T.init)); }
+  T.resets = (T.resets || 0) + 1;
+  renderStage();
 }
 
-function tap(id) {
-  if (T.done || !T.shownAt) return;
-  const k = T.taps.indexOf(id);
-  if (k >= 0) { T.taps.splice(k, 1); drawBoard(); return; }  // 다시 누르면 취소
-  T.taps.push(id); drawBoard();
-  if (T.answer.length === 1 && T.ordered) submit();
+function renderStage() {
+  const st = $('stage'); st.innerHTML = '';
+  if (T.theme === 'pick') pickRender(T, st);
+  else if (T.theme === 'house') houseRender(T, st);
+  else deviceRender(T, st);
 }
 
 function replay() {
   if (!T || T.done) return;
   T.replays++;
-  if (S.cfg.mem === 'memory') { $('instr-text').className = 'hidden-text'; }
   speak(T.text);
 }
 
-function evaluate(taps, ans, ordered) {
-  const extra = taps.filter(x => !ans.includes(x));
-  const missing = ans.filter(x => !taps.includes(x));
-  const okSteps = ordered ? ans.filter((x, i) => taps[i] === x).length : ans.filter(x => taps.includes(x)).length;
-  let correct, err = null;
-  if (ordered) correct = taps.length === ans.length && taps.every((x, i) => x === ans[i]);
-  else correct = !extra.length && !missing.length;
+function evalList(log, exp, ordered) {
+  const extra = log.filter(x => !exp.includes(x)), missing = exp.filter(x => !log.includes(x));
+  const okSteps = ordered ? exp.filter((x, i) => log[i] === x).length : exp.filter(x => log.includes(x)).length;
+  const correct = ordered ? (log.length === exp.length && log.every((x, i) => x === exp[i])) : (!extra.length && !missing.length && log.length === exp.length);
+  let err = null;
   if (!correct) {
-    if (extra.length && taps.length > ans.length && !missing.length) err = 'extra';
+    if (extra.length && !missing.length) err = 'extra';
     else if (extra.length) err = 'item';
     else if (missing.length) err = 'omit';
+    else if (log.length > exp.length) err = 'extra';
     else err = 'order';
   }
-  return { correct, err, okSteps };
+  return { correct, err, okSteps, steps: exp.length };
 }
 
 function submit() {
   if (T.done) return;
-  if (!T.taps.length) { $('fb').className = 'bad'; $('fb').textContent = '도형을 하나 이상 눌러 주세요.'; return; }
+  const empty = T.theme === 'device' ? !T.presses.length : !T.log.length;
+  if (empty) { $('fb').className = 'bad'; $('fb').textContent = '아직 아무것도 하지 않았어요.'; return; }
   T.done = true;
   if (canSpeak) speechSynthesis.cancel();
   const rt = performance.now() - T.shownAt;
-  const r = evaluate(T.taps, T.answer, T.ordered);
-  S.log.push({ lv: T.lv, kind: T.kind, text: T.text, correct: r.correct, err: r.err, okSteps: r.okSteps, steps: T.answer.length, rt, replays: T.replays });
+  let r, mine, right;
+  if (T.theme === 'device') {
+    const D = DEVICES[T.dev], ok = D.same(T.state, T.target);
+    r = { correct: ok, err: ok ? null : 'state', okSteps: ok ? 1 : 0, steps: 1 };
+    mine = `${D.describe(T.state)} (누른 버튼: ${T.presses.join(', ')})`;
+    right = D.describe(T.target);
+  } else {
+    r = evalList(T.log, T.expect, T.ordered);
+    const desc = T.theme === 'pick' ? k => pickDesc(T, k) : k => houseDesc(T, k);
+    mine = T.log.map(desc).join(' → ');
+    right = T.expect.map(desc).join(T.ordered ? ' → ' : ', ');
+  }
+  S.log.push({ theme: T.theme, lv: T.lv, kind: T.kind, text: T.text, ...r, rt, replays: T.replays, resets: T.resets || 0 });
 
-  // 정답 표시
-  $('board').classList.add('locked');
-  const b = $('board').children;
-  T.board.forEach((t, i) => {
-    const el = b[i];
-    const ai = T.answer.indexOf(t.id);
-    if (ai >= 0) { el.classList.remove('picked'); el.classList.add('ans');
-      const n = el.querySelector('.num'); const lab = T.ordered && T.answer.length > 1 ? ai + 1 : '';
-      if (n) n.textContent = lab || '✓'; else el.insertAdjacentHTML('beforeend', `<span class="num">${lab || '✓'}</span>`); }
-    else if (T.taps.includes(t.id)) el.classList.add('wrongpick');
-  });
+  $('stage').classList.add('locked');
+  if (T.theme === 'pick') pickReveal(T);
+  if (T.theme === 'house') houseReveal(T);
   $('instr-text').className = ''; $('instr-text').textContent = T.text;
   const fb = $('fb');
   fb.className = r.correct ? 'ok' : 'bad';
-  const mine = T.taps.map(id => tname(T.board.find(t => t.id === id))).join(' → ');
-  const right = T.answer.map(id => tname(T.board.find(t => t.id === id))).join(T.ordered ? ' → ' : ', ');
   fb.innerHTML = r.correct ? '정답입니다!'
-    : `아쉬워요. 테두리로 표시된 것이 정답이에요. (${ERR_NAME[r.err]})<small>누른 것: ${mine}<br>정답: ${right}</small>`;
+    : `아쉬워요. (${ERR_NAME[r.err]})<small>한 것: ${mine}<br>정답: ${right}</small>`;
 
-  // 단계 자동 조절
-  let move = '';
   if (S.cfg.prog === 'auto') {
-    if (r.correct) { S.streakOk++; S.streakBad = 0; } else { S.streakBad++; S.streakOk = 0; }
-    if (S.streakOk >= 3 && S.level < 5) { S.level++; S.streakOk = 0; move = `잘하셨어요! ${LEVELS[S.level - 1].name}로 올라갑니다.`; }
-    else if (S.streakBad >= 2 && S.level > 1) { S.level--; S.streakBad = 0; move = `${LEVELS[S.level - 1].name}로 돌아가 연습해요.`; }
+    let move = '';
+    if (r.correct) { S.ok++; S.bad = 0; } else { S.bad++; S.ok = 0; }
+    if (S.ok >= 3 && S.level < 5) { S.level++; S.ok = 0; move = `잘하셨어요! ${S.level}단계로 올라갑니다.`; }
+    else if (S.bad >= 2 && S.level > 1) { S.level--; S.bad = 0; move = `${S.level}단계로 돌아가 연습해요.`; }
     if (move) { S.path.push(S.level); fb.innerHTML += `<small>${move}</small>`; }
   }
   setActions([{ t: S.log.length >= S.cfg.count ? '결과 보기' : '다음 문제', cls: 'b-pri', fn: nextTrial }]);
@@ -508,48 +890,46 @@ function submit() {
 
 function setActions(list) {
   const row = $('act-row'); row.innerHTML = '';
-  list.forEach(a => { const b = document.createElement('button'); b.className = 'big-btn ' + a.cls; b.textContent = a.t; b.onclick = a.fn; row.appendChild(b); });
+  list.forEach(a => { const b = h('button', 'big-btn ' + a.cls, a.t); b.onclick = a.fn; row.appendChild(b); });
 }
 
-// ══ 결과 ══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// 결과
+// ══════════════════════════════════════════════════════════════
 function finish() {
   if (canSpeak) speechSynthesis.cancel();
   const log = S.log, c = S.cfg;
   const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '-';
   const sec = a => a.length ? (a.reduce((x, y) => x + y, 0) / a.length / 1000).toFixed(1) + '초' : '-';
   const ok = log.filter(r => r.correct).length;
-  const stepsOk = log.reduce((s, r) => s + r.okSteps, 0), stepsAll = log.reduce((s, r) => s + r.steps, 0);
+  const ms = log.filter(r => r.theme !== 'device'), sOk = ms.reduce((s, r) => s + r.okSteps, 0), sAll = ms.reduce((s, r) => s + r.steps, 0);
+  const highest = log.filter(r => r.correct).reduce((m, r) => Math.max(m, r.lv), 0);
 
   let rows = '';
-  LEVELS.forEach(L => {
-    const g = log.filter(r => r.lv === L.n); if (!g.length) return;
+  ['pick', 'house', 'device'].forEach(th => [1, 2, 3, 4, 5].forEach(lv => {
+    const g = log.filter(r => r.theme === th && r.lv === lv); if (!g.length) return;
     const gk = g.filter(r => r.correct);
-    rows += `<tr><td class="l">${L.name} ${L.title}</td><td>${g.length}</td><td>${gk.length}</td><td>${pct(gk.length, g.length)}</td><td>${sec(gk.map(r => r.rt))}</td><td>${g.reduce((s, r) => s + r.replays, 0)}회</td></tr>`;
-  });
-  const errs = Object.keys(ERR_NAME).map(k => `<tr><td class="l">${ERR_NAME[k]}</td><td>${log.filter(r => r.err === k).length}회</td></tr>`).join('');
-  const kinds = [...new Set(log.filter(r => r.lv === 5).map(r => r.kind))];
-  const kindRows = kinds.map(k => { const g = log.filter(r => r.lv === 5 && r.kind === k); return `<tr><td class="l">${k}</td><td>${g.length}</td><td>${pct(g.filter(r => r.correct).length, g.length)}</td></tr>`; }).join('');
-  const highest = log.filter(r => r.correct).reduce((m, r) => Math.max(m, r.lv), 0);
+    rows += `<tr><td class="l">${THEMES[th].short}</td><td>${lv}단계</td><td>${g.length}</td><td>${gk.length}</td><td>${pct(gk.length, g.length)}</td><td>${sec(gk.map(r => r.rt))}</td><td>${g.reduce((s, r) => s + r.replays, 0)}회</td></tr>`;
+  }));
+  const errs = Object.keys(ERR_NAME).map(k => [k, log.filter(r => r.err === k).length]).filter(x => x[1] || x[0] !== 'state')
+    .map(([k, n]) => `<tr><td class="l">${ERR_NAME[k]}</td><td>${n}회</td></tr>`).join('');
 
   $('rep').innerHTML = `
     <h2>지시 따르기 훈련 결과</h2>
     <div class="meta">환자명: ${S.name || '—'} · ${new Date().toLocaleDateString('ko-KR')} ·
-      ${OPTS.prog.find(o => o.v === c.prog).t} · ${OPTS.pres.find(o => o.v === c.pres).t} · ${OPTS.mem.find(o => o.v === c.mem).t} ·
-      총 ${Math.round((Date.now() - S.t0) / 1000)}초</div>
+      ${OPTS.theme.find(o => o.v === c.theme).t} · ${OPTS.prog.find(o => o.v === c.prog).t} · ${OPTS.pres.find(o => o.v === c.pres).t} ·
+      ${OPTS.mem.find(o => o.v === c.mem).t} · 총 ${Math.round((Date.now() - S.t0) / 1000)}초</div>
     <table>
-      <tr><th class="l">전체</th><th>문제 수</th><th>정답</th><th>정확도</th><th>지시 단위 정확도</th><th>정답한 최고 단계</th></tr>
-      <tr><td class="l">합계</td><td>${log.length}</td><td>${ok}</td><td>${pct(ok, log.length)}</td><td>${stepsOk}/${stepsAll} (${pct(stepsOk, stepsAll)})</td><td>${highest ? highest + '단계' : '-'}</td></tr>
+      <tr><th>문제 수</th><th>정답</th><th>정확도</th><th>지시 단위 정확도</th><th>정답한 최고 단계</th></tr>
+      <tr><td>${log.length}</td><td>${ok}</td><td>${pct(ok, log.length)}</td><td>${sAll ? `${sOk}/${sAll} (${pct(sOk, sAll)})` : '-'}</td><td>${highest ? highest + '단계' : '-'}</td></tr>
     </table>
     ${c.prog === 'auto' ? `<p><b>단계 변화:</b> ${S.path.map(n => n + '단계').join(' → ')}</p>` : ''}
-    <table>
-      <tr><th class="l">단계</th><th>문제 수</th><th>정답</th><th>정확도</th><th>평균 수행시간</th><th>다시 듣기</th></tr>${rows}
-    </table>
-    ${kindRows ? `<table><tr><th class="l">5단계 지시 유형</th><th>문제 수</th><th>정확도</th></tr>${kindRows}</table>` : ''}
+    <table><tr><th class="l">과제</th><th>단계</th><th>문제 수</th><th>정답</th><th>정확도</th><th>평균 수행시간</th><th>다시 듣기</th></tr>${rows}</table>
     <table><tr><th class="l">오류 유형</th><th>횟수</th></tr>${errs}</table>
-    <table><tr><th>번호</th><th>단계</th><th class="l">지시</th><th>결과</th></tr>
-      ${log.map((r, i) => `<tr><td>${i + 1}</td><td>${r.lv}</td><td class="l">${r.text}</td><td>${r.correct ? '<span class="okc">정답</span>' : `<span class="badc">${ERR_NAME[r.err]}</span>`}</td></tr>`).join('')}
+    <table><tr><th>번호</th><th>과제</th><th>단계</th><th class="l">지시</th><th>결과</th></tr>
+      ${log.map((r, i) => `<tr><td>${i + 1}</td><td>${THEMES[r.theme].short}</td><td>${r.lv}</td><td class="l">${r.text}</td><td>${r.correct ? '<span class="okc">정답</span>' : `<span class="badc">${ERR_NAME[r.err]}</span>`}</td></tr>`).join('')}
     </table>
-    <p class="note">평균 수행시간은 정답 문제에서 도형이 보인 뒤 마지막 응답까지의 시간입니다. 지시 단위 정확도는 여러 단계 지시에서 맞게 수행한 단계 수의 비율입니다.</p>`;
+    <p class="note">평균 수행시간은 정답 문제에서 화면이 보인 뒤 “다 했어요”까지의 시간입니다. 지시 단위 정확도는 물건 고르기·집안 정리에서 여러 단계 지시 중 맞게 한 단계의 비율입니다. 기기 조작은 마지막 결과(켜짐·채널·시간·번호 등)로 채점합니다.</p>`;
   go('rep');
 }
 
