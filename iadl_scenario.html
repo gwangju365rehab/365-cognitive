@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IADL 시나리오 훈련 - 광주365재활병원</title>
+<style>
+:root{
+  --ink:#1f2433; --sub:#5b6375; --line:#d5dbe6; --bg:#eef1f6; --card:#fff;
+  --pri:#283593; --pri-2:#3f51b5; --pri-soft:#e8eaf6;
+  --ok:#2e7d32; --ok-soft:#e8f5e9; --bad:#c62828; --bad-soft:#fdecea;
+  --warn:#b54708; --warn-soft:#fff4e5;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:18px;line-height:1.5;padding:16px 14px 90px}
+button{font:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
+.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.screen{display:none}
+.screen.on{display:flex}
+
+#home-btn{position:fixed;top:12px;left:12px;z-index:50;padding:10px 18px;border-radius:999px;border:none;
+  background:#fff;color:#333;font-weight:700;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:800}
+.lead{text-align:center;color:var(--sub);font-size:1rem;margin:0}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field label{font-weight:700;color:var(--sub);font-size:.95rem}
+.field input{font:inherit;padding:10px 12px;border:2px solid var(--line);border-radius:10px;min-width:180px}
+
+/* 활동 목록 */
+.act-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.act-list{grid-template-columns:1fr}}
+.act-card{text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px;
+  display:flex;flex-direction:column;gap:6px;min-height:150px}
+.act-card:hover{border-color:var(--pri-2)}
+.act-card.done{border-color:#81c784;background:#f6fbf6}
+.act-card .t{font-size:1.15rem;font-weight:800}
+.act-card .d{font-size:.95rem;color:var(--sub)}
+.act-card .st{margin-top:auto;font-size:.9rem;font-weight:700;color:var(--ok)}
+.tag{display:inline-block;align-self:flex-start;padding:2px 10px;border-radius:999px;font-size:.8rem;font-weight:800;color:#fff}
+.tag-seq{background:#e64a19}.tag-plan{background:#1976d2}.tag-conflict{background:#7b1fa2}
+.tag-budget{background:#388e3c}.tag-adapt{background:#00838f}
+
+.big-btn{padding:16px 22px;border-radius:14px;border:none;font-size:1.1rem;font-weight:800;min-height:58px}
+.b-pri{background:var(--pri);color:#fff}
+.b-sec{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.b-ok{background:var(--ok);color:#fff}
+
+/* 활동 화면 */
+.act-top{margin-top:46px;display:flex;align-items:center;gap:12px;background:var(--pri);color:#fff;border-radius:16px;padding:14px 16px}
+.act-top .back{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;font-size:.95rem}
+.act-top .ttl{flex:1;font-size:1.25rem;font-weight:800}
+.act-top .tm{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px;font-size:1rem}
+.steps-bar{display:flex;gap:8px;flex-wrap:wrap}
+.step-pill{padding:6px 12px;border-radius:999px;background:#fff;border:2px solid var(--line);font-size:.9rem;font-weight:700;color:var(--sub)}
+.step-pill.cur{border-color:var(--pri);color:var(--pri);background:var(--pri-soft)}
+.step-pill.past{border-color:#a5d6a7;color:var(--ok)}
+.situ{background:#fffdf5;border:2px solid #ead9a6;border-radius:16px;padding:14px 18px}
+.situ .h{font-weight:800;color:#8a6d1a;font-size:.95rem;margin-bottom:4px}
+.situ p{margin:4px 0}
+.situ ul{margin:6px 0;padding-left:22px}
+.instr{font-size:1.2rem;font-weight:800;color:var(--pri);margin:0}
+.hint{font-size:.95rem;color:var(--sub);margin:0}
+.lbl{font-size:.92rem;font-weight:800;color:var(--sub);margin:6px 0 2px}
+
+/* 순서 정하기 */
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:58px}
+.chip{padding:12px 16px;border-radius:12px;border:2px solid var(--pri-2);background:#fff;color:var(--pri);font-weight:700;min-height:54px}
+.chip.sel{background:var(--pri-2);color:#fff}
+.slots{display:flex;flex-direction:column;gap:8px}
+.slot{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;border-radius:12px;border:2px dashed var(--line);background:#fafbfd;min-height:54px}
+.slot.filled{border-style:solid;border-color:var(--pri-2);background:var(--pri-soft)}
+.slot-n{min-width:32px;height:32px;border-radius:50%;background:var(--pri-2);color:#fff;font-weight:800;display:grid;place-items:center;font-size:.95rem}
+.slot:not(.filled) .slot-n{background:#c5cbd8}
+.slot-t{font-weight:700}
+.slot:not(.filled) .slot-t{color:#9aa2b2}
+.locked{pointer-events:none;opacity:.8}
+.dlist{display:flex;flex-direction:column;gap:8px}
+.drow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:2px solid var(--pri-2);
+  background:var(--pri-soft);min-height:58px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.drow:active{cursor:grabbing}
+.drow .grip{margin-left:auto;color:#7986cb;font-size:1.3rem;line-height:1}
+.drow.dsrc{opacity:.3}
+.drow.dover{border-color:#ff9800;box-shadow:0 0 0 3px #ffe0b2}
+.dclone{position:fixed;left:0;top:0;margin:0;z-index:9999;pointer-events:none;opacity:.95;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.empty-note{color:var(--sub);font-size:.95rem;padding:12px 0}
+
+/* 선택 버튼 묶음 */
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-width:64px;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:700}
+.seg button.on{border-color:var(--pri-2);background:var(--pri-2);color:#fff}
+.est-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #eceff4}
+.est-row .nm{font-weight:700}
+.total{font-size:1.15rem;font-weight:800;text-align:right}
+
+/* 시간 선택 */
+.clock{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
+.clock .disp{font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--pri);background:var(--pri-soft);padding:8px 28px;border-radius:14px}
+.clock .ctrls{display:grid;grid-template-columns:repeat(4,auto);gap:8px}
+.clock .ctrls button{padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:800;min-width:96px}
+
+/* 타임라인 */
+.tl{display:flex;flex-direction:column;gap:4px;font-variant-numeric:tabular-nums}
+.tl div{display:flex;gap:12px;padding:8px 12px;border-radius:10px;background:#f6f7fb}
+.tl .tt{min-width:170px;font-weight:700;color:var(--sub)}
+.tl .fin{background:var(--pri-soft);font-weight:800}
+
+/* 피드백 */
+.fb{border-radius:14px;padding:14px 16px;border:2px solid}
+.fb.ok{background:var(--ok-soft);border-color:#a5d6a7}
+.fb.bad{background:var(--bad-soft);border-color:#ef9a9a}
+.fb.warn{background:var(--warn-soft);border-color:#ffcc80}
+.fb .r{font-weight:800;font-size:1.1rem;margin-bottom:4px}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.fb li{margin:3px 0}
+.okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
+
+/* 달력 */
+.cal-wrap{overflow-x:auto}
+.cal{display:grid;gap:0;border:1px solid var(--line);border-radius:12px;background:#fff;position:relative}
+.cal .dh{display:grid;place-items:center;font-weight:800;background:#f3f5fa;border-bottom:1px solid var(--line)}
+.cal .th{white-space:nowrap;font-size:.78rem;color:var(--sub);padding:0 6px;text-align:right;border-right:1px solid var(--line)}
+.cal .cell{border:none;border-top:1px solid #f0f2f6;border-left:1px solid #f0f2f6;background:transparent;padding:0}
+.cal .cell.hr{border-top:1px solid #dfe3eb}
+.cal.pickable .cell:hover{background:#e3f2fd}
+.cal .blk{margin:2px 4px;border-radius:8px;background:#5c6bc0;color:#fff;font-size:.82rem;font-weight:700;
+  padding:3px 6px;overflow:hidden;line-height:1.25;z-index:2;border:2px solid transparent;text-align:left}
+.cal .blk small{display:block;font-weight:500;opacity:.9}
+.cal .blk.med{background:#7b1fa2}
+.cal .blk.new{background:#00838f}
+.cal .blk.sel{background:#fff;color:var(--bad);border-color:var(--bad)}
+.cal .blk.ghost{background:transparent;border:2px dashed #9aa2b2;color:#9aa2b2;pointer-events:none}
+.cal .blk.tap{cursor:pointer}
+.cal .blk.fixed{background:#546e7a}
+.cal .blk.fixed.med{background:#7b1fa2}
+.cal .blk.p2{background:#ef6c00}
+.cal .blk.rt{background:#8d6e63}
+.npad{display:grid;grid-template-columns:repeat(3,96px);gap:8px}
+.npad button{padding:14px 0;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:800;font-size:1.2rem}
+.qb{min-width:52px;height:42px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:800;font-size:.9rem}
+.amt{min-width:110px;text-align:center;font-variant-numeric:tabular-nums}
+.mx{border-collapse:collapse;width:100%;min-width:520px}
+.mx th,.mx td{border:1px solid var(--line);padding:4px;text-align:center;font-size:.9rem}
+.mx th{background:#f3f5fa}.mx th.rh{text-align:left;padding:6px 10px;white-space:nowrap}
+.mxb{width:100%;min-height:44px;border:none;border-radius:8px;background:#fff;font-weight:800;font-size:1.2rem;color:#fff}
+.mxb.on{background:var(--ok)}
+.mtl{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.mtr{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:42px;padding:4px 10px;border-top:1px solid #eef1f5}
+.mtr.meal{background:#fff8e1}
+.mtr.pick{cursor:pointer}.mtr.pick:hover{background:#e3f2fd}
+.mtr .tm{min-width:110px;color:var(--sub);font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums}
+.mtr .ml{min-width:80px;font-weight:800;color:#8a6d1a;font-size:.9rem}
+.pill{padding:6px 12px;border-radius:999px;background:var(--pri-2);color:#fff;font-weight:700;font-size:.85rem;border:none}
+.tag-health{background:#c62828}.tag-prior{background:#f57c00}
+
+/* 장보기 */
+.shop{display:grid;grid-template-columns:1fr 290px;gap:14px;align-items:start}
+@media(max-width:720px){.shop{grid-template-columns:1fr}}
+.sec-h{font-weight:800;color:var(--sub);margin:10px 0 6px;font-size:.95rem}
+.goods{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.good{text-align:left;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:#fff;min-height:74px}
+.good .n{font-weight:800}
+.good .u{font-size:.85rem;color:var(--sub)}
+.good .p{font-weight:700;color:var(--pri)}
+.good.in{border-color:var(--pri-2);background:var(--pri-soft)}
+.cart{position:sticky;top:10px}
+.cart-row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #eceff4;font-size:.95rem}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:800}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:700;color:var(--sub)}
+.toggle input{width:22px;height:22px}
+
+/* 메시지 */
+.msgs{display:flex;flex-direction:column;gap:8px}
+.msg{background:#e0f2f1;border-radius:14px 14px 14px 4px;padding:12px 16px;max-width:560px}
+.msg .from{font-size:.85rem;font-weight:800;color:#00695c}
+.palette{display:flex;flex-wrap:wrap;gap:10px}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--bad-soft);border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px}
+
+/* 질문 */
+.q{padding:12px 0;border-bottom:1px solid #eceff4}
+.q .qt{font-weight:700;margin-bottom:8px}
+.q .seg button.on.r0{background:var(--ok);border-color:var(--ok)}
+.q .seg button.on.r1{background:#ef6c00;border-color:#ef6c00}
+.q .seg button.on.r2{background:var(--bad);border-color:var(--bad)}
+textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid var(--line);border-radius:10px}
+
+.foot{display:flex;justify-content:flex-end;gap:10px}
+
+/* 리포트 */
+.rep h2{margin:0 0 4px;font-size:1.4rem}
+.rep .meta{color:var(--sub);margin-bottom:10px}
+.rep table{width:100%;border-collapse:collapse;font-size:.95rem;margin:6px 0 10px}
+.rep th,.rep td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+.rep th{background:#f3f5fa}
+.rep .act-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:14px;border-bottom:2px solid var(--pri);padding-bottom:4px}
+.rep .act-h b{font-size:1.1rem}
+.pass{color:var(--ok);font-weight:800}.fail{color:var(--bad);font-weight:800}.na{color:var(--sub)}
+#hospital-logo{position:fixed;bottom:10px;right:14px;font-size:.8rem;color:#9aa2b2;font-weight:700}
+
+@media print{
+  body{background:#fff;padding:0;font-size:12px}
+  #home-btn,#hospital-logo,.no-print{display:none!important}
+  .panel{border:none;padding:0}
+  .rep table{font-size:11px}
+  .act-h{break-after:avoid}
+  table{break-inside:auto} tr{break-inside:avoid}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">홈으로</button>
+
+<!-- 홈 -->
+<div class="wrap screen on" id="scr-home">
+  <h1>IADL 시나리오 훈련</h1>
+  <p class="lead">상황을 읽고, 화면에서 직접 계획하고 정리해 보세요.</p>
+  <div class="panel field">
+    <label for="pname">환자명</label><input id="pname" placeholder="선택 입력"/>
+    <label>날짜</label><span id="today"></span>
+  </div>
+  <div class="act-list" id="act-list"></div>
+  <div class="row" style="justify-content:center">
+    <button class="big-btn b-pri" id="btn-report" disabled onclick="showReport()">결과 리포트 보기</button>
+  </div>
+</div>
+
+<!-- 활동 -->
+<div class="wrap screen" id="scr-act">
+  <div class="act-top">
+    <button class="back" onclick="leaveActivity()">목록으로</button>
+    <div class="ttl" id="a-title"></div>
+    <div class="tm" id="a-timer">0:00</div>
+  </div>
+  <div class="steps-bar" id="a-steps"></div>
+  <div class="situ" id="a-situ"></div>
+  <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <p class="instr" id="a-instr"></p>
+    <p class="hint" id="a-hint"></p>
+    <div id="a-body" style="display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+  <div class="foot"><button class="big-btn b-pri" id="a-next" disabled>다음 단계</button></div>
+</div>
+
+<!-- 리포트 -->
+<div class="wrap screen" id="scr-rep">
+  <div class="panel rep" id="rep-body"></div>
+  <div class="row no-print" style="justify-content:center">
+    <button class="big-btn b-sec" onclick="go('home')">목록으로</button>
+    <button class="big-btn b-pri" onclick="window.print()">인쇄하기</button>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+// ══ 공통 도구 ══════════════════════════════════════════
+function h(tag, props, ...kids){
+  const e=document.createElement(tag);
+  if(props) for(const k in props){
+    const v=props[k];
+    if(v==null||v===false) continue;
+    if(k==='class') e.className=v;
+    else if(k==='html') e.innerHTML=v;
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),v);
+    else if(k==='style') e.style.cssText=v;
+    else if(k==='disabled') e.disabled=!!v;
+    else e.setAttribute(k,v);
+  }
+  kids.flat(Infinity).forEach(c=>{ if(c==null||c===false) return; e.append(c.nodeType?c:document.createTextNode(String(c))); });
+  return e;
+}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function fmt(m){const hh=Math.floor(m/60),mm=m%60;const ap=hh<12?'오전':'오후';const h12=hh>12?hh-12:hh;return `${ap} ${h12}시${mm?` ${mm}분`:''}`;}
+function won(n){return n.toLocaleString('ko-KR')+'원';}
+function mmss(ms){const s=Math.floor(ms/1000);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+const DAYS=['월','화','수','목','금'];
+const DAYN=['월요일','화요일','수요일','목요일','금요일'];
+
+// 순서 정하기 위젯: 카드를 끌어서 다른 카드 위에 놓으면 그 자리로 끼워 넣음 (순서화 훈련과 같은 방식)
+function orderer(items, onChange){
+  let order=items.slice(), locked=false;
+  const wrap=h('div',{class:'dlist'});
+  let src=null, clone=null, offX=0, offY=0, over=null;
+  function draw(){
+    wrap.innerHTML='';
+    order.forEach((it,i)=>{
+      const row=h('div',{class:'drow','data-pos':i},h('span',{class:'slot-n'},i+1),h('span',{class:'slot-t'},it),h('span',{class:'grip','aria-hidden':'true'},'☰'));
+      row.addEventListener('pointerdown',e=>start(e,row));
+      wrap.append(row);
+    });
+  }
+  function rowAt(x,y){
+    if(clone) clone.style.display='none';
+    const el=document.elementFromPoint(x,y);
+    if(clone) clone.style.display='';
+    const r=el&&el.closest('.drow');
+    return r&&wrap.contains(r)?r:null;
+  }
+  function start(e,row){
+    if(locked||src||(e.button!==undefined&&e.button!==0)) return;
+    e.preventDefault();
+    src=row;
+    const r=row.getBoundingClientRect();
+    offX=e.clientX-r.left; offY=e.clientY-r.top;
+    clone=row.cloneNode(true); clone.classList.add('dclone');
+    clone.style.width=r.width+'px';
+    clone.style.transform=`translate3d(${r.left}px,${r.top}px,0)`;
+    document.body.append(clone);
+    row.classList.add('dsrc');
+    window.addEventListener('pointermove',move,{passive:false});
+    window.addEventListener('pointerup',finish);
+    window.addEventListener('pointercancel',cancel);
+  }
+  function move(e){
+    if(!src) return;
+    e.preventDefault();
+    clone.style.transform=`translate3d(${e.clientX-offX}px,${e.clientY-offY}px,0)`;
+    const el=rowAt(e.clientX,e.clientY);
+    if(el!==over){ if(over) over.classList.remove('dover'); over=(el&&el!==src)?el:null; if(over) over.classList.add('dover'); }
+  }
+  function cleanup(){
+    window.removeEventListener('pointermove',move);
+    window.removeEventListener('pointerup',finish);
+    window.removeEventListener('pointercancel',cancel);
+    if(clone){clone.remove();clone=null;}
+    if(over){over.classList.remove('dover');over=null;}
+    if(src) src.classList.remove('dsrc');
+  }
+  function finish(e){
+    if(!src) return;
+    const target=rowAt(e.clientX,e.clientY);
+    const from=+src.dataset.pos;
+    cleanup(); src=null;
+    if(target){
+      const to=+target.dataset.pos;
+      if(to!==from){ const [m]=order.splice(from,1); order.splice(to,0,m); draw(); onChange(order.slice()); }
+    }
+  }
+  function cancel(){ cleanup(); src=null; }
+  draw();
+  return {el:wrap,get:()=>order.slice(),
+    lock(){locked=true;wrap.classList.add('locked');},
+    unlock(){locked=false;wrap.classList.remove('locked');}};
+}
+
+function seg(options, onPick, cur, fmtFn){
+  const s=h('div',{class:'seg'});
+  options.forEach(o=>s.append(h('button',{class:o===cur?'on':'',onclick:()=>onPick(o)},fmtFn?fmtFn(o):o)));
+  return s;
+}
+
+function fbBox(kind,title,lines){
+  return h('div',{class:'fb '+kind},h('div',{class:'r'},title),lines&&lines.length?h('ul',null,lines.map(l=>h('li',{html:l}))):null);
+}
+
+// 달력 위젯 (월~금, 오전 9시~오후 5시, 30분 단위)
+const CAL_START=540, CAL_END=1020, SLOT=30;
+function calendar(opts){
+  // opts: cols(열 이름), colNames, start, end, blocks [{id,day,start,dur,name,cls,tap}], onCell(day,start), onBlock(block), pickable
+  const cols=opts.cols||DAYS, names=opts.colNames||DAYN, st=opts.start??CAL_START, en=opts.end??CAL_END;
+  const rows=(en-st)/SLOT, cw=cols.length>1?96:220;
+  const g=h('div',{class:'cal'+(opts.pickable?' pickable':''),
+    style:`grid-template-columns:78px repeat(${cols.length},minmax(${cw}px,1fr));grid-template-rows:38px repeat(${rows},30px);min-width:${78+cols.length*cw}px`});
+  g.append(h('div',{style:'grid-row:1;grid-column:1;background:#f3f5fa;border-bottom:1px solid var(--line)'}));
+  cols.forEach((d,i)=>g.append(h('div',{class:'dh',style:`grid-row:1;grid-column:${i+2}`},d)));
+  for(let r=0;r<rows;r++){
+    const t=st+r*SLOT;
+    g.append(h('div',{class:'th',style:`grid-row:${r+2};grid-column:1;${t%60?'':'border-top:1px solid #dfe3eb'}`},t%60?'':fmt(t)));
+    for(let d=0;d<cols.length;d++){
+      g.append(h('button',{class:'cell'+(t%60?'':' hr'),style:`grid-row:${r+2};grid-column:${d+2}`,'aria-label':`${names[d]} ${fmt(t)}`,
+        onclick:opts.onCell?()=>opts.onCell(d,t):null,tabindex:opts.pickable?0:-1}));
+    }
+  }
+  (opts.blocks||[]).forEach(b=>{
+    const r0=(b.start-st)/SLOT, span=Math.max(1,b.dur/SLOT), tap=opts.onBlock&&b.tap!==false;
+    g.append(h(tap?'button':'div',{class:'blk '+(b.cls||'')+(tap?' tap':''),
+      style:`grid-row:${r0+2} / span ${span};grid-column:${b.day+2}`,onclick:tap?()=>opts.onBlock(b):null},
+      b.name,span>1?h('small',null,fmt(b.start)):null));
+  });
+  return h('div',{class:'cal-wrap'},g);
+}
+const overlap=(a,b)=>a.day===b.day&&a.start<b.start+b.dur&&b.start<a.start+a.dur;
+
+// ══ 활동 정의 ══════════════════════════════════════════
+const HOSPITALS=['내과','정형외과','신경과','재활의학과','피부과','안과','이비인후과'];
+const MARTS=['이마트','홈플러스','롯데마트','하나로마트'];
+
+const ACTS=[
+// ── 1. 아침 준비하기 (순서화) ─────────────────
+{
+  id:'morning', no:1, title:'아침 준비하기', tag:'순서화', tagClass:'tag-seq',
+  desc:'아침 활동 6가지를 순서대로 배열하고 걸리는 시간을 예상합니다.',
+  init(){ return {items:['침대에서 일어나기','세수하기','이 닦기','옷 입기','아침 식사하기','약 복용하기']}; },
+  situation(c){ return `<p>아침에 할 수 있는 활동들입니다.</p><p><b>${c.items.join(' / ')}</b></p>`; },
+  steps:[
+    { name:'순서 정하기', instr:'6가지 활동을 가장 알맞은 순서로 배열하세요.', hint:'카드를 끌어서 다른 카드 위에 놓으면 그 자리로 옮겨집니다.',
+      render(body,c,d,done){
+        d.attempts=0;
+        let check;
+        const o=orderer(shuffle(c.items),()=>{});
+        const out=h('div');
+        check=h('button',{class:'big-btn b-pri',onclick:()=>{
+          const ord=o.get(); d.attempts++;
+          const v=[];
+          if(ord[0]!=='침대에서 일어나기') v.push('침대에서 일어나기가 가장 먼저 와야 합니다.');
+          if(ord.indexOf('약 복용하기')<ord.indexOf('아침 식사하기')) v.push('약은 아침 식사 후에 복용합니다.');
+          if(d.attempts===1){d.firstOk=!v.length;d.firstOrder=ord;d.firstViol=v;}
+          d.finalOrder=ord; d.finalOk=!v.length;
+          o.lock(); check.style.display='none'; out.innerHTML='';
+          if(!v.length){ out.append(fbBox('ok','알맞은 순서입니다.',['세수·이 닦기·옷 입기의 순서는 사람마다 달라도 괜찮습니다.'])); }
+          else{
+            out.append(fbBox('bad','다시 생각해 볼 부분이 있습니다.',v));
+            out.append(h('button',{class:'big-btn b-sec',style:'margin-top:8px',onclick:()=>{o.unlock();out.innerHTML='';check.style.display='';}},'순서 고치기'));
+          }
+          done();
+        }},'순서 확인');
+        body.append(o.el,h('div',{class:'row'},check),out);
+      }},
+    { name:'시간 예상하기', instr:'각 활동에 걸리는 시간을 예상해 고르세요.', hint:'정답은 없습니다. 평소 생활을 떠올려 보세요.',
+      render(body,c,d,done){
+        const list=d.finalOrder||c.items; d.times={};
+        const box=h('div'); const tot=h('div',{class:'total'});
+        function draw(){
+          box.innerHTML='';
+          list.forEach(it=>box.append(h('div',{class:'est-row'},h('span',{class:'nm'},it),
+            seg([5,10,15,20,30],v=>{d.times[it]=v;draw();},d.times[it],v=>v+'분'))));
+          const n=Object.keys(d.times).length, sum=Object.values(d.times).reduce((a,b)=>a+b,0);
+          tot.textContent=`모두 마치는 데 예상 시간: ${sum}분`+(n<list.length?` (${list.length-n}개 남음)`:'');
+          if(n===list.length) done();
+        }
+        draw(); body.append(box,tot);
+      }},
+  ],
+  questions:['순서를 그렇게 정한 이유를 설명해 보세요.','시간이 부족하다면 어떤 활동을 먼저 해야 할까요?','어떤 활동이 가장 중요하다고 생각하나요?'],
+  summarize(d){
+    const sum=Object.values(d.times||{}).reduce((a,b)=>a+b,0);
+    return [
+      {label:'순서 배열 (첫 시도)',ok:!!d.firstOk,detail:(d.firstOrder||[]).join(' → ')+(d.firstViol&&d.firstViol.length?`<br><span class="badc">${d.firstViol.join(' ')}</span>`:'')},
+      {label:'순서 고친 횟수',ok:null,detail:`${Math.max(0,(d.attempts||1)-1)}회`+(d.attempts>1?` (최종 ${d.finalOk?'알맞음':'오류 남음'})`:'')},
+      {label:'예상 소요 시간',ok:null,detail:`총 ${sum}분 — `+Object.entries(d.times||{}).map(([k,v])=>`${k} ${v}분`).join(', ')},
+    ];
+  }
+},
+// ── 2. 병원 방문 계획하기 (시간계획) ───────────
+{
+  id:'hospital', no:2, title:'병원 방문 계획하기', tag:'시간계획', tagClass:'tag-plan',
+  desc:'출발 시각을 거꾸로 계산하고, 아침 준비 시간표를 만듭니다.',
+  init(){ const appt=pick([540,600,660]); return {hosp:pick(HOSPITALS),appt,deadline:appt-50}; },
+  situation(c){ return `<p>내일 <b>${fmt(c.appt)}</b>에 <b>${c.hosp}</b> 예약이 있습니다.</p>
+    <p>병원까지는 차로 <b>30분</b>이 걸리고, 접수 및 대기 시간으로 <b>20분</b>이 필요합니다.</p>
+    <p>병원 가기 전에 아침 식사와 약 복용, 개인위생을 해야 하며, 병원에 가져갈 서류와 보험카드도 준비해야 합니다.</p>`; },
+  steps:[
+    { name:'출발 시각 계산', instr:'늦지 않으려면 집에서 늦어도 몇 시에 출발해야 할까요?', hint:'버튼으로 시각을 맞춘 뒤 확인을 누르세요.',
+      render(body,c,d,done){
+        let t=420;
+        const disp=h('div',{class:'disp'});
+        const set=v=>{t=Math.max(360,Math.min(720,v));disp.textContent=fmt(t);};
+        set(t);
+        const out=h('div');
+        const ctr=h('div',{class:'ctrls'},
+          h('button',{onclick:()=>set(t-60)},'1시간 빼기'),h('button',{onclick:()=>set(t-10)},'10분 빼기'),
+          h('button',{onclick:()=>set(t+10)},'10분 더하기'),h('button',{onclick:()=>set(t+60)},'1시간 더하기'));
+        const ok=h('button',{class:'big-btn b-pri',onclick:()=>{
+          d.depart=t; const diff=c.deadline-t;
+          let kind,msg;
+          if(diff===0){kind='ok';msg='정확합니다.';d.departJudge='정확';d.departOk=true;}
+          else if(diff>0&&diff<=30){kind='ok';msg='여유 있게 출발하는 계획입니다.';d.departJudge=`${diff}분 일찍 (허용)`;d.departOk=true;}
+          else if(diff>30){kind='warn';msg='늦지는 않지만 너무 일찍 출발합니다.';d.departJudge=`${diff}분 일찍`;d.departOk=false;}
+          else {kind='bad';msg='이 시각에 출발하면 늦습니다.';d.departJudge=`${-diff}분 늦음`;d.departOk=false;}
+          ok.style.display='none'; ctr.classList.add('locked');
+          out.append(fbBox(kind,msg,[`예약 ${fmt(c.appt)} − 접수·대기 20분 − 이동 30분 = <b>${fmt(c.deadline)}</b>까지 출발`]));
+          done();
+        }},'확인');
+        body.append(h('div',{class:'clock'},disp,ctr,ok),out);
+      }},
+    { name:'아침 시간표 만들기', instr:'오전 7시에 일어나서 출발할 때까지 할 일을 순서대로 놓고, 걸리는 시간을 정하세요.', hint:'카드를 끌어서 순서를 바꾸고, 아래에서 시간을 고르면 출발 시각이 바로 계산됩니다.',
+      render(body,c,d,done){
+        const items=['개인위생 (세수·옷 입기)','아침 식사','약 복용','서류·보험카드 챙기기'];
+        d.dur={}; let ord=[];
+        const durBox=h('div'), tl=h('div',{class:'tl'}), out=h('div');
+        let check;
+        const o=orderer(shuffle(items),x=>{ord=x;draw();});
+        function draw(){
+          durBox.innerHTML='';
+          if(ord.length) durBox.append(h('div',{class:'lbl'},'걸리는 시간'));
+          ord.forEach(it=>durBox.append(h('div',{class:'est-row'},h('span',{class:'nm'},it),
+            seg([10,20,30,40],v=>{d.dur[it]=v;draw();},d.dur[it],v=>v+'분'))));
+          tl.innerHTML=''; let cur=420;
+          tl.append(h('div',null,h('span',{class:'tt'},fmt(420)),'일어나기'));
+          ord.forEach(it=>{ const m=d.dur[it];
+            if(m){ tl.append(h('div',null,h('span',{class:'tt'},`${fmt(cur)} ~ ${fmt(cur+m)}`),it)); cur+=m; }
+            else tl.append(h('div',null,h('span',{class:'tt'},'시간 미정'),it));
+          });
+          const ready=ord.length===items.length&&ord.every(i=>d.dur[i]);
+          if(ready) tl.append(h('div',{class:'fin'},h('span',{class:'tt'},fmt(cur)),'집에서 출발'));
+          check.disabled=!ready;
+        }
+        check=h('button',{class:'big-btn b-pri',disabled:true,onclick:()=>{
+          let cur=420; ord.forEach(i=>cur+=d.dur[i]);
+          d.order=ord.slice(); d.finish=cur;
+          d.medOk=ord.indexOf('약 복용')>ord.indexOf('아침 식사');
+          d.timeOk=cur<=c.deadline;
+          const lines=[];
+          lines.push(d.medOk?'<span class="okc">약 복용이 식사 뒤에 있습니다.</span>':'<span class="badc">약은 아침 식사 후에 복용합니다.</span>');
+          lines.push(d.timeOk?`<span class="okc">${fmt(cur)}에 출발 — ${fmt(c.deadline)}보다 늦지 않습니다.</span>`
+                             :`<span class="badc">${fmt(cur)}에 출발 — ${fmt(c.deadline)}까지 출발해야 하므로 ${cur-c.deadline}분 늦습니다.</span>`);
+          o.lock(); durBox.classList.add('locked'); check.style.display='none';
+          out.append(fbBox(d.medOk&&d.timeOk?'ok':'bad',d.medOk&&d.timeOk?'시간 안에 준비를 마칠 수 있습니다.':'계획을 다시 살펴볼 부분이 있습니다.',lines));
+          done();
+        }},'계획 확인');
+        body.append(o.el,durBox,h('div',{class:'lbl'},'나의 아침 시간표'),tl,h('div',{class:'row'},check),out);
+        ord=o.get(); draw();
+      }},
+  ],
+  questions:['예상치 못한 교통 체증이 생기면 계획을 어떻게 바꿀 수 있을까요?','어떤 활동이 가장 중요하고 반드시 해야 하나요?','시간을 아낄 수 있는 방법은 무엇일까요?'],
+  summarize(d,c){
+    return [
+      {label:'출발 시각 계산',ok:!!d.departOk,detail:`답 ${fmt(d.depart)} / 기준 ${fmt(c.deadline)} (${d.departJudge}) — 예약 ${c.hosp} ${fmt(c.appt)}`},
+      {label:'준비 순서 (약은 식사 후)',ok:!!d.medOk,detail:(d.order||[]).join(' → ')},
+      {label:'시간 안에 준비 완료',ok:!!d.timeOk,detail:`계획상 출발 ${d.finish?fmt(d.finish):'-'}`},
+      {label:'활동별 배정 시간',ok:null,detail:Object.entries(d.dur||{}).map(([k,v])=>`${k} ${v}분`).join(', ')},
+    ];
+  }
+},
+// ── 3. 겹치는 의료 약속 조정하기 (일정충돌) ────
+{
+  id:'conflict', no:8, title:'겹치는 의료 약속 조정하기', tag:'일정충돌', tagClass:'tag-conflict',
+  desc:'이동 시간 때문에 겹치는 약속을 찾고, 새 시간을 달력에서 정합니다.',
+  init(){
+    return {appts:[
+      {id:'a1',day:0,start:600,dur:60,name:'신경과 진료'},
+      {id:'a2',day:0,start:660,dur:60,name:'물리치료'},
+      {id:'a3',day:2,start:840,dur:60,name:'작업치료'},
+      {id:'a4',day:2,start:900,dur:60,name:'심장 전문의 진료'},
+      {id:'a5',day:4,start:540,dur:30,name:'혈액 검사'},
+    ], pairs:[['a1','a2'],['a3','a4']]};
+  },
+  situation(c){ return `<p>다음 주에 여러 의료 약속이 잡혀 있습니다.</p><ul>`+
+    c.appts.map(a=>`<li>${DAYN[a.day]} ${fmt(a.start)}: ${a.name} (${a.dur===60?'1시간':'30분'})</li>`).join('')+
+    `</ul><p>병원 간 이동 시간은 약 <b>30분</b>이 필요합니다.</p>`; },
+  steps:[
+    { name:'겹치는 약속 찾기', instr:'이동 시간 때문에 제시간에 갈 수 없는 약속을 모두 눌러 고르세요.', hint:'겹치는 두 약속을 모두 골라야 합니다. 다시 누르면 선택이 풀립니다.',
+      render(body,c,d,done){
+        const sel=new Set(); const calBox=h('div'), out=h('div');
+        const draw=()=>{ calBox.innerHTML='';
+          calBox.append(calendar({blocks:c.appts.map(a=>({...a,cls:'med'+(sel.has(a.id)?' sel':'')})),
+            onBlock:b=>{sel.has(b.id)?sel.delete(b.id):sel.add(b.id);draw();check.disabled=!sel.size;}}));};
+        const check=h('button',{class:'big-btn b-pri',disabled:true,onclick:()=>{
+          const target=new Set(c.pairs.flat());
+          d.hits=[...sel].filter(x=>target.has(x)).length; d.fa=[...sel].filter(x=>!target.has(x)).length;
+          d.findOk=d.hits===4&&d.fa===0;
+          calBox.classList.add('locked'); check.style.display='none';
+          out.append(fbBox(d.findOk?'ok':'bad',d.findOk?'겹치는 약속을 모두 찾았습니다.':`4개 중 ${d.hits}개를 찾았습니다.`+(d.fa?` 겹치지 않는 약속 ${d.fa}개를 골랐습니다.`:''),[
+            '월요일: 신경과 진료가 오전 11시에 끝나고 30분 이동하면 11시 30분 도착 → 오전 11시 물리치료와 겹침',
+            '수요일: 작업치료가 오후 3시에 끝나고 30분 이동하면 3시 30분 도착 → 오후 3시 심장 전문의 진료와 겹침',
+            '금요일 혈액 검사는 다른 약속과 겹치지 않습니다.']));
+          done();
+        }},'확인');
+        draw(); body.append(calBox,h('div',{class:'row'},check),out);
+      }},
+    { name:'옮길 약속 정하기', instr:'겹치는 두 약속 중 시간을 옮길 약속을 하나씩 고르세요.', hint:'이유는 치료사에게 말로 설명해 주세요.',
+      render(body,c,d,done){
+        d.move={};
+        const box=h('div');
+        const draw=()=>{ box.innerHTML='';
+          c.pairs.forEach((p,i)=>{
+            const [x,y]=p.map(id=>c.appts.find(a=>a.id===id));
+            box.append(h('div',{class:'est-row'},h('span',{class:'nm'},`${DAYN[x.day]}`),
+              seg([x.id,y.id],v=>{d.move[i]=v;draw();},d.move[i],id=>{const a=c.appts.find(q=>q.id===id);return `${a.name} (${fmt(a.start)})`;})));
+          });
+          if(Object.keys(d.move).length===2) done();
+        };
+        draw(); body.append(box);
+      }},
+    { name:'새 시간 정하기', instr:'', hint:'달력의 빈칸을 누르면 그 시각에 시작하는 약속으로 옮겨집니다. 다른 약속과 앞뒤로 30분 이동 시간이 있어야 합니다.',
+      render(body,c,d,done,api){
+        const pos={}; c.appts.forEach(a=>pos[a.id]={...a});
+        const queue=[d.move[0],d.move[1]]; let qi=0; d.tries=[0,0]; d.newPos={};
+        const calBox=h('div'), out=h('div');
+        function draw(){
+          calBox.innerHTML=''; out.innerHTML='';
+          if(qi>=queue.length){
+            api.setInstr('두 약속을 모두 옮겼습니다.');
+            calBox.append(calendar({blocks:Object.values(pos).map(a=>({...a,cls:queue.includes(a.id)?'new':'med'}))}));
+            out.append(fbBox(d.tries.every(t=>t===1)?'ok':'warn','새 일정이 완성되었습니다.',
+              queue.map((id,i)=>`${c.appts.find(a=>a.id===id).name} → ${DAYN[pos[id].day]} ${fmt(pos[id].start)} (시도 ${d.tries[i]}회)`)));
+            done(); return;
+          }
+          const mv=c.appts.find(a=>a.id===queue[qi]);
+          api.setInstr(`‘${DAYN[mv.day]} ${fmt(mv.start)} ${mv.name}’을(를) 옮길 시간을 고르세요.`);
+          const blocks=Object.values(pos).filter(a=>a.id!==mv.id).map(a=>({...a,cls:queue.slice(0,qi).includes(a.id)?'new':'med'}));
+          blocks.push({...mv,cls:'ghost',name:'원래 시간',tap:false});
+          calBox.append(calendar({pickable:true,blocks,onCell:(day,start)=>tryPlace(mv,day,start)}));
+        }
+        function tryPlace(mv,day,start){
+          d.tries[qi]++;
+          const cand={id:mv.id,day,start,dur:mv.dur};
+          let reason=null;
+          if(start+mv.dur>CAL_END) reason='오후 5시 안에 끝나지 않습니다.';
+          if(!reason){
+            for(const o of Object.values(pos)){
+              if(o.id===mv.id||o.day!==day) continue;
+              if(start<o.start+o.dur+30 && o.start<start+mv.dur+30){
+                reason=`${o.name}(${fmt(o.start)}~${fmt(o.start+o.dur)})와 사이에 이동 시간 30분이 부족합니다.`; break; }
+            }
+          }
+          if(reason){ out.innerHTML=''; out.append(fbBox('bad',`${DAYN[day]} ${fmt(start)}에는 옮길 수 없습니다.`,[reason])); return; }
+          pos[mv.id]={...pos[mv.id],day,start}; d.newPos[mv.id]={day,start}; qi++; draw();
+        }
+        draw(); body.append(calBox,out);
+      }},
+  ],
+  questions:['어떤 약속을 먼저 지키기로 했나요? 그 이유는 무엇인가요?','약속을 바꾸려면 어디에, 어떤 순서로 연락해야 할까요?','약속 변경이 어려우면 어떤 대안이 있을까요?'],
+  summarize(d,c){
+    const nm=id=>c.appts.find(a=>a.id===id).name;
+    const ids=[d.move?.[0],d.move?.[1]].filter(Boolean);
+    return [
+      {label:'겹치는 약속 찾기',ok:!!d.findOk,detail:`4개 중 ${d.hits??0}개 찾음, 잘못 고른 약속 ${d.fa??0}개`},
+      {label:'옮길 약속 선택',ok:null,detail:ids.map(nm).join(', ')},
+      {label:'새 시간 정하기 (첫 시도 성공)',ok:(d.tries||[]).every(t=>t===1),
+        detail:ids.map((id,i)=>`${nm(id)} → ${d.newPos?.[id]?DAYN[d.newPos[id].day]+' '+fmt(d.newPos[id].start):'-'} (시도 ${d.tries?.[i]??0}회)`).join('<br>')},
+    ];
+  }
+},
+// ── 4. 건강한 식사 계획과 장보기 (예산관리) ────
+{
+  id:'shopping', no:5, title:'건강한 식사 계획과 장보기', tag:'예산관리', tagClass:'tag-budget',
+  desc:'저염·저지방 원칙과 예산에 맞게 3일치 식재료를 장바구니에 담습니다.',
+  init(){ return {budget:pick([50000,60000,70000,80000]),mart:pick(MARTS)}; },
+  situation(c){ return `<p>의사는 <b>저염식, 저지방 식단</b>을 권장했습니다.</p>
+    <p>${c.mart}에서 3일치 식단에 필요한 식재료를 사려고 합니다. 예산은 <b>${won(c.budget)}</b>입니다.</p>
+    <p>필요한 재료: <b>단백질 식품 2가지 이상, 채소 3가지 이상, 밥에 넣을 곡류 1가지 이상</b></p>`; },
+  steps:[
+    { name:'장바구니 담기', instr:'필요한 식재료를 골라 장바구니에 담으세요.', hint:'상품을 누르면 1개씩 담깁니다. 장바구니에서 개수를 바꿀 수 있습니다. 가격은 연습용 예시입니다.',
+      render(body,c,d,done){
+        const G=GOODS; const cart={}; d.rounds=[]; let showTotal=true;
+        const left=h('div'), right=h('div',{class:'panel cart'}), out=h('div');
+        const total=()=>Object.entries(cart).reduce((s,[k,q])=>s+G.find(g=>g.id===k).price*q,0);
+        function drawGoods(){
+          left.innerHTML='';
+          SECTIONS.forEach(sec=>{
+            left.append(h('div',{class:'sec-h'},sec));
+            const box=h('div',{class:'goods'});
+            G.filter(g=>g.sec===sec).forEach(g=>box.append(h('button',{class:'good'+(cart[g.id]?' in':''),onclick:()=>{cart[g.id]=(cart[g.id]||0)+1;redraw();}},
+              h('div',{class:'n'},g.name),h('div',{class:'u'},g.unit),h('div',{class:'p'},won(g.price)))));
+            left.append(box);
+          });
+        }
+        function drawCart(){
+          right.innerHTML='';
+          right.append(h('div',{class:'lbl',style:'margin-top:0'},`장바구니 (예산 ${won(c.budget)})`));
+          const ks=Object.keys(cart);
+          if(!ks.length) right.append(h('div',{class:'empty-note'},'아직 담은 상품이 없습니다.'));
+          ks.forEach(k=>{ const g=G.find(x=>x.id===k);
+            right.append(h('div',{class:'cart-row'},h('span',null,g.name),h('div',{class:'qty'},
+              h('button',{onclick:()=>{cart[k]--; if(!cart[k]) delete cart[k]; redraw();},'aria-label':'빼기'},'−'),
+              h('b',null,cart[k]),
+              h('button',{onclick:()=>{cart[k]++;redraw();},'aria-label':'더하기'},'+'))));
+          });
+          right.append(h('div',{class:'total',style:'margin-top:8px'},showTotal?`합계 ${won(total())}`:'합계 숨김'));
+          right.append(h('label',{class:'toggle',style:'margin-top:8px'},
+            h('input',{type:'checkbox',...(showTotal?{checked:''}:{}),onchange:e=>{showTotal=e.target.checked;drawCart();}}),'합계 보이기 (치료사 설정)'));
+          right.append(h('button',{class:'big-btn b-pri',style:'width:100%;margin-top:10px',disabled:!ks.length,onclick:checkout},'계산하기'));
+        }
+        function redraw(){drawGoods();drawCart();}
+        function checkout(){
+          const sum=total(); const items=Object.keys(cart).map(k=>G.find(g=>g.id===k));
+          const bad=items.filter(g=>g.bad);
+          const cnt=cat=>items.filter(g=>g.cat===cat&&!g.bad).length;
+          const r={sum,showTotal,budgetOk:sum<=c.budget,bad:bad.map(g=>g.name),pro:cnt('단백질'),veg:cnt('채소'),grain:cnt('곡류'),
+            list:Object.entries(cart).map(([k,q])=>G.find(g=>g.id===k).name+(q>1?`×${q}`:''))};
+          r.compOk=r.pro>=2&&r.veg>=3&&r.grain>=1;
+          d.rounds.push(r);
+          out.innerHTML='';
+          const lines=[
+            r.budgetOk?`<span class="okc">합계 ${won(sum)} — 예산 안에서 샀습니다.</span>`:`<span class="badc">합계 ${won(sum)} — 예산을 ${won(sum-c.budget)} 넘었습니다.</span>`,
+            r.bad.length?`<span class="badc">저염·저지방 식단에 맞지 않는 상품: ${bad.map(g=>`${g.name}(${g.why})`).join(', ')}</span>`:'<span class="okc">모두 식단에 맞는 상품입니다.</span>',
+            r.compOk?'<span class="okc">필요한 재료를 모두 갖췄습니다.</span>':`<span class="badc">재료 구성: 단백질 ${r.pro}가지(2 이상), 채소 ${r.veg}가지(3 이상), 곡류 ${r.grain}가지(1 이상)</span>`,
+          ];
+          const allOk=r.budgetOk&&!r.bad.length&&r.compOk;
+          out.append(fbBox(allOk?'ok':'bad',allOk?'장보기를 잘 마쳤습니다.':'다시 살펴볼 부분이 있습니다.',lines));
+          if(!allOk) out.append(h('button',{class:'big-btn b-sec',style:'margin-top:8px',onclick:()=>{out.innerHTML='';out.scrollIntoView({block:'nearest'});}},'장바구니 다시 고르기'));
+          done();
+          out.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+        redraw(); body.append(h('div',{class:'shop'},left,right),out);
+      }},
+  ],
+  questions:['건강에 좋은 식품을 어떤 기준으로 골랐나요?','마트에서 시간을 아끼려면 어떤 순서로 돌면 좋을까요?','예산이 부족하면 무엇을 빼거나 바꾸겠어요?'],
+  summarize(d,c){
+    const f=d.rounds?.[0], l=d.rounds?.[d.rounds.length-1];
+    if(!f) return [{label:'장보기',ok:false,detail:'계산하지 않음'}];
+    return [
+      {label:'예산 안에서 구매 (첫 계산)',ok:f.budgetOk,detail:`합계 ${won(f.sum)} / 예산 ${won(c.budget)} — 합계 ${f.showTotal?'보임':'숨김'}`},
+      {label:'저염·저지방 원칙',ok:!f.bad.length,detail:f.bad.length?'부적합: '+f.bad.join(', '):'부적합 상품 없음'},
+      {label:'필요 재료 구성',ok:f.compOk,detail:`단백질 ${f.pro}, 채소 ${f.veg}, 곡류 ${f.grain}`},
+      {label:'다시 고른 횟수',ok:null,detail:`${d.rounds.length-1}회`+(d.rounds.length>1?` (최종: ${l.budgetOk&&!l.bad.length&&l.compOk?'모두 충족':'미충족 남음'})`:'')},
+      {label:'구매 목록 (첫 계산)',ok:null,detail:f.list.join(', ')},
+    ];
+  }
+},
+// ── 5. 갑작스러운 일정 변경에 대응하기 (돌발대응) ──
+{
+  id:'change', no:17, title:'갑작스러운 일정 변경에 대응하기', tag:'돌발대응', tagClass:'tag-adapt',
+  desc:'새로 온 연락 3개를 읽고, 기억해서 이번 주 달력을 고칩니다.',
+  init(){ return {}; },
+  situation(){ return `<p>오늘은 <b>월요일</b>입니다. 이번 주 계획은 다음과 같습니다.</p>
+    <ul><li>화요일 오전 10시: 물리치료</li><li>수요일 오후 2시: 친구와 차 마시기</li><li>목요일 오전 11시: 정기 검진</li><li>금요일 오후 3시: 미용실 예약</li></ul>`; },
+  steps:[
+    { name:'연락 확인', instr:'방금 연락 3개가 왔습니다. 잘 읽고 기억하세요.', hint:'다음 단계에서는 연락 내용이 가려집니다.',
+      render(body,c,d,done){ body.append(msgList()); done(); }},
+    { name:'달력 고치기', instr:'연락 내용대로 이번 주 달력을 고치세요.', hint:'일정을 누르면 지울 수 있습니다. 아래 새 일정을 누른 뒤 달력 빈칸을 누르면 그 시각에 들어갑니다.',
+      render(body,c,d,done){
+        let blocks=[
+          {id:'pt',day:1,start:600,dur:60,name:'물리치료'},
+          {id:'fr',day:2,start:840,dur:60,name:'친구와 차'},
+          {id:'ck',day:3,start:660,dur:60,name:'정기 검진'},
+          {id:'hr',day:4,start:900,dur:60,name:'미용실'},
+        ];
+        const NEW=[{id:'n_ck',name:'정기 검진',dur:60},{id:'n_ch',name:'자녀 도움',dur:120},{id:'n_rp',name:'수리공 방문',dur:60}];
+        d.peeks=0; d.clashes=0; d.deleted=[];
+        let selNew=null, delTarget=null, peek=false, finished=false;
+        const top=h('div'), pal=h('div'), calBox=h('div'), out=h('div');
+        function draw(){
+          top.innerHTML=''; pal.innerHTML=''; calBox.innerHTML='';
+          if(!finished){
+            top.append(h('button',{class:'big-btn b-sec',onclick:()=>{if(!peek)d.peeks++;peek=!peek;draw();}},peek?'연락 내용 가리기':`연락 다시 보기 (${d.peeks}회)`));
+            if(peek) top.append(h('div',{style:'margin-top:10px'},msgList()));
+            if(delTarget) top.append(h('div',{class:'confirm',style:'margin-top:10px'},h('b',null,`‘${delTarget.name}’ 일정을 지울까요?`),
+              h('button',{class:'big-btn b-pri',style:'background:var(--bad)',onclick:()=>{
+                blocks=blocks.filter(b=>b!==delTarget); if(!delTarget.id.startsWith('n_')) d.deleted.push(delTarget.name); delTarget=null; draw();}},'지우기'),
+              h('button',{class:'big-btn b-sec',onclick:()=>{delTarget=null;draw();}},'취소')));
+            const remain=NEW.filter(n=>!blocks.some(b=>b.id===n.id));
+            pal.append(h('div',{class:'lbl'},'새로 넣을 일정'));
+            const p=h('div',{class:'palette'});
+            if(remain.length) remain.forEach(n=>p.append(h('button',{class:'chip'+(selNew===n?' sel':''),onclick:()=>{selNew=selNew===n?null:n;delTarget=null;draw();}},
+              `${n.name} (${n.dur/60}시간)`)));
+            else p.append(h('div',{class:'empty-note'},'새 일정을 모두 넣었습니다.'));
+            pal.append(p);
+            if(selNew) pal.append(h('p',{class:'hint',style:'margin-top:6px'},`‘${selNew.name}’을(를) 넣을 달력 칸을 누르세요.`));
+          }
+          calBox.append(calendar({pickable:!!selNew&&!finished,
+            blocks:blocks.map(b=>({...b,cls:(b.id.startsWith('n_')?'new':'')+(delTarget===b?' sel':''),tap:!finished})),
+            onBlock:finished?null:b=>{if(selNew){d.clashes++;out.innerHTML='';out.append(fbBox('warn',`그 시간에는 이미 ‘${b.name}’ 일정이 있습니다.`,[]));return;}delTarget=blocks.find(x=>x.id===b.id);draw();},
+            onCell:finished?null:(day,start)=>{
+              if(!selNew) return;
+              const cand={id:selNew.id,day,start,dur:selNew.dur,name:selNew.name};
+              if(start+cand.dur>CAL_END){out.innerHTML='';out.append(fbBox('warn','오후 5시 안에 끝나지 않습니다.',[]));return;}
+              const hit=blocks.find(b=>overlap(b,cand));
+              if(hit){d.clashes++;out.innerHTML='';out.append(fbBox('warn',`그 시간에는 이미 ‘${hit.name}’ 일정이 있습니다.`,[]));return;}
+              blocks.push(cand); selNew=null; out.innerHTML=''; draw();
+            }}));
+        }
+        const fin=h('button',{class:'big-btn b-pri',onclick:()=>{
+          finished=true; peek=false; delTarget=null; selNew=null;
+          const has=(id,day,st)=>blocks.some(b=>b.id===id&&b.day===day&&(st==null||b.start===st));
+          const ch=blocks.find(b=>b.id==='n_ch');
+          d.crit=[
+            {label:'목요일 정기 검진 지우기',ok:!has('ck',3)},
+            {label:'정기 검진을 화요일 오후 2시에 넣기',ok:has('n_ck',1,840)},
+            {label:'수리공 방문을 수요일 오전 10시에 넣기',ok:has('n_rp',2,600)},
+            {label:'자녀 도움을 금요일 오전에 넣기',ok:!!ch&&ch.day===4&&ch.start<720},
+            {label:'바뀌지 않은 일정 유지 (물리치료·친구·미용실)',ok:has('pt',1,600)&&has('fr',2,840)&&has('hr',4,900)},
+          ];
+          fin.style.display='none'; draw();
+          const n=d.crit.filter(x=>x.ok).length;
+          out.innerHTML='';
+          out.append(fbBox(n===d.crit.length?'ok':'bad',`${d.crit.length}가지 중 ${n}가지를 맞게 고쳤습니다.`,
+            d.crit.map(x=>`<span class="${x.ok?'okc':'badc'}">${x.ok?'맞음':'다시 확인'}</span> ${x.label}`)));
+          done();
+        }},'달력 정리 완료');
+        draw(); body.append(top,pal,calBox,h('div',{class:'row'},fin),out);
+      }},
+  ],
+  questions:['바뀐 일정에서 가장 바쁜 날은 언제인가요?','일정을 바꾸면서 누구에게 어떤 연락을 해야 할까요?','이런 갑작스러운 변화에 대비해 평소에 어떤 준비를 할 수 있을까요?'],
+  summarize(d){
+    const rows=(d.crit||[]).map(x=>({label:x.label,ok:x.ok,detail:''}));
+    rows.push({label:'연락 다시 보기',ok:null,detail:`${d.peeks??0}회`});
+    rows.push({label:'겹치는 자리에 넣으려 한 횟수',ok:null,detail:`${d.clashes??0}회`});
+    if(d.deleted?.length) rows.push({label:'지운 기존 일정',ok:null,detail:d.deleted.join(', ')});
+    return rows;
+  }
+},
+];
+
+// ══ 추가 도구 ══════════════════════════════════════════
+function durTxt(m){const hh=Math.floor(m/60),mm=m%60;return ((hh?hh+'시간':'')+(mm?(hh?' ':'')+mm+'분':''))||'0분';}
+function rowsAsk(defs,store,onChange){
+  let locked=false; const box=h('div');
+  const draw=()=>{box.innerHTML='';
+    defs.forEach(df=>box.append(h('div',{class:'est-row'},h('span',{class:'nm'},df.label),
+      seg(df.options,v=>{if(locked)return;store[df.key]=v;draw();onChange&&onChange();},store[df.key],df.fmt))));};
+  draw();
+  return {el:box,all:()=>defs.every(df=>store[df.key]!==undefined),lock(){locked=true;box.classList.add('locked');},unlock(){locked=false;box.classList.remove('locked');}};
+}
+function multiPick(options,onChange){
+  const sel=new Set(); let locked=false; const box=h('div',{class:'palette'});
+  const draw=()=>{box.innerHTML='';options.forEach((o,i)=>box.append(h('button',{class:'chip'+(sel.has(i)?' sel':''),onclick:()=>{if(locked)return;sel.has(i)?sel.delete(i):sel.add(i);draw();onChange&&onChange(sel);}},o)));};
+  draw();
+  return {el:box,get:()=>new Set(sel),lock(){locked=true;box.classList.add('locked');},unlock(){locked=false;box.classList.remove('locked');}};
+}
+function clockPicker(init){
+  let t=init; const disp=h('div',{class:'disp'});
+  const set=v=>{t=Math.max(300,Math.min(1380,v));disp.textContent=fmt(t);}; set(t);
+  const ctr=h('div',{class:'ctrls'},
+    h('button',{onclick:()=>set(t-60)},'1시간 빼기'),h('button',{onclick:()=>set(t-10)},'10분 빼기'),
+    h('button',{onclick:()=>set(t+10)},'10분 더하기'),h('button',{onclick:()=>set(t+60)},'1시간 더하기'));
+  return {el:h('div',{class:'clock'},disp,ctr),get:()=>t,lock(){ctr.classList.add('locked');},unlock(){ctr.classList.remove('locked');}};
+}
+function numPad(unit){
+  let v=''; const disp=h('div',{class:'disp'}); const keys=h('div',{class:'npad'});
+  const draw=()=>{disp.textContent=(v?Number(v).toLocaleString('ko-KR'):'0')+(unit||'');};
+  ['1','2','3','4','5','6','7','8','9','00','0','지우기'].forEach(k=>keys.append(h('button',{onclick:()=>{
+    if(k==='지우기') v=v.slice(0,-1); else if(v.length<10) v=(v+k).replace(/^0+/,''); draw();}},k)));
+  draw();
+  return {el:h('div',{class:'clock'},disp,keys),get:()=>Number(v||0),lock(){keys.classList.add('locked');},unlock(){keys.classList.remove('locked');}};
+}
+function matrix(rows,cols){
+  const on=rows.map(()=>cols.map(()=>false)); let locked=false; const t=h('table',{class:'mx'});
+  const draw=()=>{t.innerHTML='';
+    t.append(h('tr',null,h('th',null,''),cols.map(c=>h('th',null,c))));
+    rows.forEach((r,i)=>t.append(h('tr',null,h('th',{class:'rh'},r),cols.map((c,j)=>h('td',null,
+      h('button',{class:'mxb'+(on[i][j]?' on':''),'aria-label':`${c} ${r}`,onclick:()=>{if(locked)return;on[i][j]=!on[i][j];draw();}},on[i][j]?'✓':''))))));};
+  draw();
+  return {el:h('div',{class:'cal-wrap'},t),get:()=>on.map(r=>r.slice()),lock(){locked=true;t.classList.add('locked');},unlock(){locked=false;t.classList.remove('locked');}};
+}
+// 확인 버튼: 첫 시도와 최종 결과를 기록하고, 틀리면 '고치기'로 이어서 수정
+function checker(label,o){
+  const out=h('div'); let tries=0;
+  const btn=h('button',{class:'big-btn b-pri',onclick:()=>{
+    out.innerHTML='';
+    const r=o.evaluate();
+    if(r.incomplete){out.append(fbBox('warn',r.incomplete,[]));return;}
+    tries++; if(tries===1) o.d[o.key+'First']=r; o.d[o.key]=r; o.d[o.key+'Tries']=tries;
+    o.lock(); btn.style.display='none';
+    out.append(fbBox(r.ok?'ok':'bad',r.title,r.lines));
+    if(!r.ok&&o.unlock) out.append(h('button',{class:'big-btn b-sec',style:'margin-top:8px',onclick:()=>{o.unlock();out.innerHTML='';btn.style.display='';}},'고치기'));
+    o.done();
+  }},label);
+  return h('div',{style:'display:flex;flex-direction:column;gap:10px'},h('div',{class:'row'},btn),out);
+}
+const crit=(label,ok)=>({label,ok});
+const critLines=list=>list.map(x=>`<span class="${x.ok?'okc':'badc'}">${x.ok?'맞음':'다시 확인'}</span> ${x.label}`);
+function critResult(list,extra){
+  const n=list.filter(x=>x.ok).length;
+  return {ok:n===list.length,title:`${list.length}가지 중 ${n}가지를 맞게 했습니다.`,lines:critLines(list).concat(extra||[]),crit:list};
+}
+// 첫 시도 기준 요약 + 고친 횟수
+function sumCheck(d,key,label){
+  const f=d[key+'First'], l=d[key];
+  if(!f) return [{label,ok:false,detail:'확인하지 않음'}];
+  const rows=(f.crit||[{label,ok:f.ok}]).map(x=>({label:x.label,ok:x.ok,detail:x.detail||''}));
+  if(d[key+'Tries']>1) rows.push({label:`${label}: 고친 횟수`,ok:null,detail:`${d[key+'Tries']-1}회 (최종 ${l.ok?'모두 맞음':'틀린 곳 남음'})`});
+  return rows;
+}
+// 하루·주간 시간표에 일정 넣기 (항목을 누르고 칸을 누름, 넣은 항목을 누르면 빠짐)
+function planner(o){
+  const st=o.start,en=o.end,items=o.items,fixed=o.fixed||[];
+  const pos={}; items.forEach(it=>{if(it.at) pos[it.id]={day:it.at.day,start:it.at.start};});
+  let sel=null,locked=false; const stats={clashes:0};
+  const wrap=h('div',{style:'display:flex;flex-direction:column;gap:10px'}); const msg=h('div');
+  const all=()=>fixed.map(f=>({...f,fx:true})).concat(items.filter(it=>pos[it.id]).map(it=>({id:it.id,name:it.name,dur:it.dur,cls:it.cls,...pos[it.id]})));
+  function draw(){
+    wrap.innerHTML='';
+    if(!locked){
+      const rest=items.filter(it=>!pos[it.id]); const p=h('div',{class:'palette'});
+      if(rest.length) rest.forEach(it=>p.append(h('button',{class:'chip'+(sel===it?' sel':''),onclick:()=>{sel=sel===it?null:it;msg.innerHTML='';draw();}},`${it.name} (${durTxt(it.dur)})`)));
+      else p.append(h('div',{class:'empty-note'},'모두 넣었습니다.'));
+      wrap.append(h('div',{class:'lbl'},o.paletteLabel||'넣을 일정'),p);
+      if(sel) wrap.append(h('p',{class:'hint'},`‘${sel.name}’을(를) 넣을 칸을 누르세요.`));
+    }
+    wrap.append(calendar({cols:o.cols,colNames:o.colNames,start:st,end:en,pickable:!!sel&&!locked,
+      blocks:all().map(b=>({...b,cls:b.fx?('fixed '+(b.cls||'')):(b.cls||'new'),tap:!locked&&(!b.fx||!!sel)})),
+      onBlock:locked?null:b=>{
+        if(sel){stats.clashes++;msg.innerHTML='';msg.append(fbBox('warn',`그 시간에는 이미 ‘${b.name}’이(가) 있습니다.`,[]));return;}
+        if(b.fx)return; delete pos[b.id]; msg.innerHTML=''; draw();},
+      onCell:locked?null:(day,start)=>place(day,start)}));
+    wrap.append(msg);
+  }
+  function place(day,start){
+    if(!sel) return;
+    const cand={day,start,dur:sel.dur};
+    if(start+sel.dur>en){msg.innerHTML='';msg.append(fbBox('warn',`${fmt(en)} 안에 끝나지 않습니다.`,[]));return;}
+    if(!o.allowOverlap){const hit=all().find(b=>overlap(b,cand));
+      if(hit){stats.clashes++;msg.innerHTML='';msg.append(fbBox('warn',`그 시간에는 이미 ‘${hit.name}’이(가) 있습니다.`,[]));return;}}
+    pos[sel.id]={day,start}; sel=null; msg.innerHTML=''; draw();
+  }
+  draw();
+  return {el:wrap,pos:id=>pos[id]||null,all,stats,placedAll:ids=>ids.every(id=>pos[id]),
+    lock(){locked=true;sel=null;draw();},unlock(){locked=false;draw();}};
+}
+const shufOpts=(right,others)=>shuffle([right,...others.filter((x,i,a)=>x!==right&&a.indexOf(x)===i)]).slice(0,4);
+const THERAPY=['물리치료','작업치료','언어치료','인지치료'];
+
+// ══ 나머지 14개 활동 ══════════════════════════════════════
+ACTS.push(
+// ── 3. 나의 하루 계획하기 ───────────────────
+{
+  id:'day', no:3, title:'나의 하루 계획하기', tag:'시간계획', tagClass:'tag-plan',
+  desc:'하루 활동 7가지의 시간을 예상하고 하루 시간표에 직접 배치합니다.',
+  init(){ return {acts:[['b','아침 식사 준비 및 식사'],['h','병원 또는 치료 방문'],['l','점심 식사'],['e','운동'],['d','저녁 식사 준비 및 식사'],['f','취미 활동'],['p','내일 준비하기']].map(([id,name])=>({id,name}))}; },
+  situation(c){ return `<p>오늘 해야 할 활동들이 아래와 같습니다.</p><p><b>${c.acts.map(a=>a.name).join(' / ')}</b></p>`; },
+  steps:[
+    { name:'시간 예상하기', instr:'각 활동에 걸릴 시간을 예상해 고르세요.', hint:'고른 시간이 다음 단계 시간표에 그대로 쓰입니다.',
+      render(body,c,d,done){ d.dur={}; const r=rowsAsk(c.acts.map(a=>({key:a.id,label:a.name,options:[30,60,90,120],fmt:durTxt})),d.dur,()=>{if(r.all())done();}); body.append(r.el); }},
+    { name:'시간표 만들기', instr:'활동들을 오전 7시부터 오후 9시 사이에 배치하세요.', hint:'활동을 누른 뒤 시간표 빈칸을 누르면 그 시각에 들어갑니다. 넣은 활동을 누르면 다시 빠집니다. 이동 시간과 쉬는 시간도 생각하세요.',
+      render(body,c,d,done){
+        const pl=planner({cols:['오늘'],colNames:['오늘'],start:420,end:1260,items:c.acts.map(a=>({id:a.id,name:a.name,dur:d.dur[a.id]}))});
+        body.append(pl.el,checker('시간표 확인',{d,key:'plan',done,lock:pl.lock,unlock:pl.unlock,evaluate(){
+          if(!pl.placedAll(c.acts.map(a=>a.id))) return {incomplete:'아직 시간표에 넣지 않은 활동이 있습니다.'};
+          const P=id=>pl.pos(id).start, bl=pl.all().sort((x,y)=>x.start-y.start);
+          const hs=P('h'),he=hs+d.dur.h;
+          const list=[
+            crit('식사 순서 (아침 → 점심 → 저녁)',P('b')<P('l')&&P('l')<P('d')),
+            crit('식사 시간대 (아침 9시 전, 점심 11시~1시 반, 저녁 5시~7시 반에 시작)',P('b')<=540&&P('l')>=660&&P('l')<=810&&P('d')>=1020&&P('d')<=1170),
+            crit('병원·치료 앞뒤로 이동 시간 30분 이상',hs-420>=30&&1260-he>=30&&bl.every(x=>x.id==='h'||x.start+x.dur<=hs-30||x.start>=he+30)),
+            crit('내일 준비하기를 마지막에 배치',bl[bl.length-1].id==='p')];
+          const free=840-bl.reduce((s,x)=>s+x.dur,0);
+          d.free=free; d.planTxt=bl.map(x=>`${fmt(x.start)} ${x.name}`).join(', ');
+          return critResult(list,[`활동 사이 빈 시간(쉬는 시간) 합계: ${durTxt(free)}`]);
+        }}));
+      }},
+    { name:'스스로 평가', instr:'내가 만든 시간표가 현실적인지 평가해 보세요.', hint:'정답은 없습니다.',
+      render(body,c,d,done){ d.self={}; body.append(rowsAsk([{key:'q',label:'이 계획은 현실적인가요?',options:['현실적이다','조금 무리다','무리다']}],d.self,done).el); }},
+  ],
+  questions:['계획한 시간표가 현실적이라고 생각하나요?','우선순위에 맞게 시간을 배분했나요?','계획대로 안 될 때 어떻게 조정할 수 있을까요?'],
+  summarize(d,c){ return sumCheck(d,'plan','시간표').concat([
+    {label:'예상 소요 시간',ok:null,detail:c.acts.map(a=>`${a.name} ${durTxt(d.dur?.[a.id]||0)}`).join(', ')},
+    {label:'시간표',ok:null,detail:d.planTxt||'-'},{label:'쉬는 시간 합계',ok:null,detail:durTxt(d.free||0)},
+    {label:'스스로 평가',ok:null,detail:d.self?.q||'-'}]); }
+},
+// ── 4. 한 주의 약속 관리하기 ─────────────────
+{
+  id:'week', no:4, title:'한 주의 약속 관리하기', tag:'일정관리', tagClass:'tag-plan',
+  desc:'약속 5개를 주간 달력에 옮겨 적고, 준비·이동을 포함한 시각을 계산합니다.',
+  init(){ const t1=pick(THERAPY),t2=pick(THERAPY.filter(x=>x!==t1));
+    return {appts:[{id:'a',day:0,start:600,dur:60,name:t1},{id:'b',day:1,start:840,dur:120,name:'정기 건강검진'},{id:'c',day:2,start:660,dur:90,name:'친구와 점심 약속'},{id:'d',day:3,start:900,dur:60,name:'은행 업무'},{id:'e',day:4,start:540,dur:60,name:t2}]}; },
+  situation(c){ return `<p>다음 주에 여러 중요한 약속이 있습니다.</p><ul>`+c.appts.map(a=>`<li>${DAYN[a.day]} ${fmt(a.start)}: ${a.name} (${durTxt(a.dur)})</li>`).join('')+
+    `</ul><p>각 장소까지는 평균 <b>30분</b>이 걸리며, 집에 돌아오는 시간도 같습니다. 약속 준비에는 <b>30분</b>이 필요합니다.</p>`; },
+  steps:[
+    { name:'달력에 옮기기', instr:'모든 약속을 요일별로 달력에 정리하세요.', hint:'약속을 누른 뒤 달력 칸을 누르면 그 시각에 들어갑니다. 넣은 약속을 누르면 다시 빠집니다.',
+      render(body,c,d,done){
+        const pl=planner({start:480,end:1080,items:c.appts.map(a=>({id:a.id,name:a.name,dur:a.dur}))});
+        body.append(pl.el,checker('달력 확인',{d,key:'cal',done,lock:pl.lock,unlock:pl.unlock,evaluate(){
+          if(!pl.placedAll(c.appts.map(a=>a.id))) return {incomplete:'아직 넣지 않은 약속이 있습니다.'};
+          return critResult(c.appts.map(a=>{const p=pl.pos(a.id);return crit(`${a.name}: ${DAYN[a.day]} ${fmt(a.start)}`,p.day===a.day&&p.start===a.start);}));
+        }}));
+      }},
+    { name:'시각 계산하기', instr:'준비와 이동 시간을 포함해서 각 약속의 시각을 고르세요.', hint:'준비 30분 + 가는 길 30분, 끝난 뒤 오는 길 30분입니다.',
+      render(body,c,d,done){
+        d.tm={}; const defs=[];
+        c.appts.forEach(a=>{const e=a.start+a.dur;
+          defs.push({key:'p'+a.id,label:`${a.name} 준비 시작`,options:shufOpts(a.start-60,[a.start-30,a.start-90,a.start]),fmt});
+          defs.push({key:'r'+a.id,label:`${a.name} 집 도착`,options:shufOpts(e+30,[e,e+60,e-30]),fmt});});
+        const r=rowsAsk(defs,d.tm);
+        body.append(r.el,checker('계산 확인',{d,key:'calc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'아직 고르지 않은 칸이 있습니다.'};
+          return critResult(c.appts.flatMap(a=>[crit(`${a.name} 준비 시작 ${fmt(a.start-60)}`,d.tm['p'+a.id]===a.start-60),crit(`${a.name} 집 도착 ${fmt(a.start+a.dur+30)}`,d.tm['r'+a.id]===a.start+a.dur+30)]));
+        }}));
+      }},
+    { name:'충돌 확인', instr:'약속끼리 겹치는 것이 있는지 확인하세요.', hint:'',
+      render(body,c,d,done){ d.cf={}; const r=rowsAsk([{key:'q',label:'겹치는 약속이 있나요?',options:['있다','없다']}],d.cf);
+        body.append(r.el,checker('확인',{d,key:'conf',done,lock:r.lock,evaluate(){
+          if(!r.all()) return {incomplete:'답을 골라 주세요.'};
+          const ok=d.cf.q==='없다'; return {ok,title:ok?'맞습니다. 겹치는 약속이 없습니다.':'다시 살펴보세요.',lines:['약속이 모두 다른 요일에 있어 겹치지 않습니다.']};
+        }})); }},
+  ],
+  questions:['가장 바쁜 날은 언제이며, 에너지 관리를 어떻게 할 계획인가요?','약속 전후로 휴식 시간을 어떻게 배치했나요?','갑작스러운 컨디션 저하에 대비한 계획은 무엇인가요?'],
+  summarize(d){ return sumCheck(d,'cal','달력 옮기기').concat(sumCheck(d,'calc','시각 계산'),[{label:'겹침 여부 판단',ok:!!d.confFirst?.ok,detail:d.cf?.q||'-'}]); }
+},
+// ── 6. 복잡한 투약 일정 관리하기 ──────────────
+{
+  id:'meds', no:6, title:'복잡한 투약 일정 관리하기', tag:'건강관리', tagClass:'tag-health',
+  desc:'약 5종류의 복용 규칙에 맞게 하루 투약표를 만들고 복약 관리 방법을 고릅니다.',
+  init(){ return {}; },
+  situation(){ return `<p>의사가 다음과 같은 약을 처방했습니다.</p><ul>
+    <li>혈압약: 하루 2회 (아침·저녁 식사 30분 전)</li><li>혈당 조절제: 하루 3회 (매 식사 직후)</li>
+    <li>항응고제: 하루 1회 (저녁 식사 후)</li><li>진통제: 필요시 (통증 있을 때, 최소 4시간 간격)</li><li>비타민: 하루 1회 (아침 식사와 함께)</li></ul>
+    <p>식사 시간: 아침 8시, 점심 12시, 저녁 6시 (각 30분) / 취침: 밤 10시</p>`; },
+  steps:[
+    { name:'투약표 만들기', instr:'오전 6시부터 취침 전까지 하루 투약표를 만드세요.', hint:'약을 누른 뒤 시간 줄을 누르면 그 시각에 들어갑니다. 넣은 약을 누르면 빠집니다. 진통제는 필요할 때만 먹으므로 넣지 않습니다.',
+      render(body,c,d,done){
+        const MEDS=[{id:'bp',name:'혈압약',n:2},{id:'gl',name:'혈당 조절제',n:3},{id:'ac',name:'항응고제',n:1},{id:'vt',name:'비타민',n:1}];
+        const MEAL={480:'아침 식사',720:'점심 식사',1080:'저녁 식사',1320:'취침'};
+        let placed=[],sel=null,locked=false; const box=h('div');
+        const left=id=>MEDS.find(m=>m.id===id).n-placed.filter(p=>p.id===id).length;
+        function draw(){
+          box.innerHTML='';
+          if(!locked){const p=h('div',{class:'palette'});
+            MEDS.forEach(m=>{const n=left(m.id); if(n>0) p.append(h('button',{class:'chip'+(sel===m.id?' sel':''),onclick:()=>{sel=sel===m.id?null:m.id;draw();}},`${m.name} (${n}번 남음)`));});
+            if(!p.childNodes.length) p.append(h('div',{class:'empty-note'},'모두 넣었습니다.'));
+            box.append(h('div',{class:'lbl'},'넣을 약'),p);}
+          const tl=h('div',{class:'mtl'});
+          for(let t=360;t<=1320;t+=30){
+            const row=h('div',{class:'mtr'+(MEAL[t]?' meal':'')+(sel&&!locked?' pick':''),onclick:()=>{if(locked||!sel||t>=1320)return;placed.push({id:sel,t});if(left(sel)<=0)sel=null;draw();}},
+              h('span',{class:'tm'},fmt(t)),h('span',{class:'ml'},MEAL[t]||''));
+            placed.filter(p=>p.t===t).forEach(p=>row.append(h('button',{class:'pill',onclick:e=>{e.stopPropagation();if(locked)return;placed=placed.filter(x=>x!==p);draw();}},MEDS.find(m=>m.id===p.id).name)));
+            tl.append(row);
+          }
+          box.append(tl);
+        }
+        draw();
+        body.append(box,checker('투약표 확인',{d,key:'mt',done,lock(){locked=true;sel=null;draw();},unlock(){locked=false;draw();},evaluate(){
+          if(MEDS.some(m=>left(m.id)>0)) return {incomplete:'아직 넣지 않은 약이 있습니다.'};
+          const T=id=>placed.filter(p=>p.id===id).map(p=>p.t).sort((a,b)=>a-b).join();
+          const ac=placed.find(p=>p.id==='ac').t;
+          d.mtTxt=MEDS.map(m=>`${m.name} ${placed.filter(p=>p.id===m.id).map(p=>fmt(p.t)).sort().join('·')}`).join(', ');
+          return critResult([crit('혈압약: 오전 7시 30분, 오후 5시 30분 (식사 30분 전)',T('bp')==='450,1050'),
+            crit('혈당 조절제: 오전 8시 30분, 오후 12시 30분, 오후 6시 30분 (식사 직후)',T('gl')==='510,750,1110'),
+            crit('항응고제: 저녁 식사 후 (오후 6시 30분 ~ 9시 30분)',ac>=1110&&ac<=1290),
+            crit('비타민: 아침 식사와 함께 (오전 8시)',T('vt')==='480')]);
+        }}));
+      }},
+    { name:'진통제 간격', instr:'오전 10시에 진통제를 먹었습니다. 다음 진통제는 몇 시부터 먹을 수 있나요?', hint:'버튼으로 시각을 맞춘 뒤 확인을 누르세요.',
+      render(body,c,d,done){ const cp=clockPicker(600);
+        body.append(cp.el,checker('확인',{d,key:'pain',done,lock:cp.lock,unlock:cp.unlock,evaluate(){
+          const t=cp.get(); d.painAns=t; const ok=t===840;
+          return {ok,title:ok?'맞습니다.':`${fmt(t)}는 맞지 않습니다.`,lines:['최소 4시간 간격이므로 오전 10시 + 4시간 = <b>오후 2시</b>부터 먹을 수 있습니다.']};
+        }})); }},
+    { name:'잊지 않는 방법', instr:'약을 잊지 않고 먹기 위한 방법을 3가지 고르세요.', hint:'',
+      render(body,c,d,done){
+        const OPT=['휴대폰 알람 맞추기','요일별·시간별 약통 쓰기','복약 달력에 표시하기','가족에게 알려 달라고 부탁하기','생각날 때 먹기','따로 준비하지 않고 기억하기'], BAD=[4,5];
+        const mp=multiPick(OPT);
+        body.append(mp.el,checker('확인',{d,key:'remind',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=[...mp.get()]; if(s.length!==3) return {incomplete:`3가지를 골라 주세요. (지금 ${s.length}가지)`};
+          d.remindTxt=s.map(i=>OPT[i]).join(', '); const bad=s.filter(i=>BAD.includes(i));
+          return {ok:!bad.length,title:bad.length?'다시 생각해 볼 방법이 있습니다.':'좋은 방법들입니다.',lines:bad.map(i=>`<span class="badc">${OPT[i]}</span>: 잊기 쉬워 믿을 만한 방법이 아닙니다.`)};
+        }})); }},
+    { name:'외출할 때', instr:'외출할 때 약 관리 방법으로 알맞은 것을 모두 고르세요.', hint:'',
+      render(body,c,d,done){
+        const OPT=['외출 시간 동안 먹을 약만 작은 약통에 챙긴다','처방전이나 약 목록을 가지고 다닌다','외출 중에도 휴대폰 알람을 켜 둔다','외출하는 날은 약을 건너뛴다','집에 와서 한꺼번에 먹는다'], GOOD=[0,1,2];
+        const mp=multiPick(OPT);
+        body.append(mp.el,checker('확인',{d,key:'out',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=mp.get(); if(!s.size) return {incomplete:'하나 이상 골라 주세요.'};
+          const list=OPT.map((o,i)=>crit(`${o} → ${GOOD.includes(i)?'알맞음':'알맞지 않음'}`,s.has(i)===GOOD.includes(i)));
+          return critResult(list);
+        }})); }},
+  ],
+  questions:['여러 약을 동시에 복용해야 할 때 어떻게 구분할 계획인가요?','약 복용을 잊었을 때 어떻게 대처할 계획인가요?','약 복용 일정을 가족에게 어떻게 설명할 수 있을까요?'],
+  summarize(d){ return sumCheck(d,'mt','투약표').concat([{label:'투약표 내용',ok:null,detail:d.mtTxt||'-'},
+    {label:'진통제 다음 복용 시각 (첫 답)',ok:!!d.painFirst?.ok,detail:d.painAns!=null?fmt(d.painAns):'-'},
+    {label:'잊지 않는 방법 (첫 시도)',ok:!!d.remindFirst?.ok,detail:d.remindTxt||'-'},
+    {label:'외출 시 약 관리 (첫 시도)',ok:!!d.outFirst?.ok,detail:''}]); }
+},
+// ── 7. 월간 생활비 계획하기 ──────────────────
+{
+  id:'money', no:7, title:'월간 생활비 계획하기', tag:'예산관리', tagClass:'tag-budget',
+  desc:'남은 생활비를 계산하고 항목별로 나눈 뒤 한 주 식비를 계산합니다.',
+  init(){ const m=pick([1200000,1500000,1800000]),f=pick([600000,700000,800000]); return {m,f,rem:m-f}; },
+  situation(c){ return `<p>이번 달 생활비로 <b>${won(c.m)}</b>이 있습니다.</p><p>고정 지출(월세, 공과금, 통신비 등)은 <b>${won(c.f)}</b>입니다.</p><p>나머지 금액으로 식비, 의료비, 교통비, 여가 활동비 등을 계획해야 합니다.</p>`; },
+  steps:[
+    { name:'남은 금액 계산', instr:'고정 지출을 빼고 남은 금액은 얼마인가요?', hint:'숫자를 눌러 입력하세요.',
+      render(body,c,d,done){ const np=numPad('원');
+        body.append(np.el,checker('확인',{d,key:'rem',done,lock:np.lock,unlock:np.unlock,evaluate(){
+          const v=np.get(); if(!v) return {incomplete:'금액을 입력해 주세요.'}; d.remAns=v; const ok=v===c.rem;
+          return {ok,title:ok?'맞습니다.':`${won(v)}은(는) 맞지 않습니다.`,lines:[`${won(c.m)} − ${won(c.f)} = <b>${won(c.rem)}</b>`]};
+        }})); }},
+    { name:'항목별 배분', instr:'', hint:'버튼으로 금액을 조절하세요. 예상치 못한 지출에 대비한 비상금도 정해 두세요.',
+      render(body,c,d,done,api){
+        api.setInstr(`남은 ${won(c.rem)}을 항목별로 나누세요.`);
+        const CAT=['식비','의료비','교통비','여가 활동비','비상금']; const v=CAT.map(()=>0); let locked=false;
+        const box=h('div'), tot=h('div',{class:'total'});
+        function draw(){ box.innerHTML='';
+          CAT.forEach((k,i)=>box.append(h('div',{class:'est-row'},h('span',{class:'nm'},k),h('div',{class:'qty'},
+            ...[-50000,-10000].map(s=>h('button',{class:'qb',onclick:()=>{if(locked)return;v[i]=Math.max(0,v[i]+s);draw();}},s===-50000?'−5만':'−1만')),
+            h('b',{class:'amt'},won(v[i])),
+            ...[10000,50000].map(s=>h('button',{class:'qb',onclick:()=>{if(locked)return;v[i]+=s;draw();}},s===50000?'+5만':'+1만'))))));
+          const t=v.reduce((a,b)=>a+b,0); tot.textContent=`나눈 금액 합계 ${won(t)} / 남은 돈 ${won(c.rem-t)}`; }
+        draw();
+        body.append(box,tot,checker('배분 확인',{d,key:'alloc',done,lock(){locked=true;box.classList.add('locked');},unlock(){locked=false;box.classList.remove('locked');},evaluate(){
+          const t=v.reduce((a,b)=>a+b,0); d.allocV=v.slice(); d.allocTxt=CAT.map((k,i)=>`${k} ${won(v[i])}`).join(', ');
+          return critResult([crit(`나눈 합계가 남은 금액(${won(c.rem)})과 같음`,t===c.rem),crit('비상금을 정해 둠',v[4]>0),crit('식비와 의료비를 포함함',v[0]>0&&v[1]>0)]);
+        }}));
+      }},
+    { name:'주별 식비', instr:'', hint:'숫자를 눌러 입력하세요.',
+      render(body,c,d,done,api){
+        const food=(d.allocV||[0])[0]; api.setInstr(`식비 ${won(food)}을 4주 동안 똑같이 나누면 한 주에 얼마씩 쓸 수 있나요?`);
+        const np=numPad('원');
+        body.append(np.el,checker('확인',{d,key:'week',done,lock:np.lock,unlock:np.unlock,evaluate(){
+          const x=np.get(); d.weekAns=x; const ok=x===food/4;
+          return {ok,title:ok?'맞습니다.':`${won(x)}은(는) 맞지 않습니다.`,lines:[`${won(food)} ÷ 4 = <b>${won(food/4)}</b>`]};
+        }})); }},
+  ],
+  questions:['어떤 항목에 우선순위를 두었나요? 그 이유는 무엇인가요?','예산을 초과하게 된다면 어떤 항목을 조정할 계획인가요?','남은 금액이 생긴다면 어떻게 활용할 계획인가요?'],
+  summarize(d,c){ return [{label:'남은 금액 계산 (첫 답)',ok:!!d.remFirst?.ok,detail:`답 ${d.remAns!=null?won(d.remAns):'-'} / 정답 ${won(c.rem)}`}]
+    .concat(sumCheck(d,'alloc','항목별 배분'),[{label:'배분 내용',ok:null,detail:d.allocTxt||'-'},{label:'한 주 식비 계산 (첫 답)',ok:!!d.weekFirst?.ok,detail:d.weekAns!=null?won(d.weekAns):'-'}]); }
+},
+// ── 9. 일상 루틴에 약속 통합하기 ──────────────
+{
+  id:'routine', no:9, title:'일상 루틴에 약속 통합하기', tag:'일정관리', tagClass:'tag-plan',
+  desc:'평소 하루 일과에 약속 3개와 이동 시간을 넣고, 겹치는 일과를 옮깁니다.',
+  init(){ return {day:pick(DAYN)}; },
+  situation(c){ return `<p>평소 일상 루틴:</p><ul><li>오전 7시 기상 / 오전 7시 30분 아침 식사 및 약 복용</li><li>오전 8시 30분 가벼운 스트레칭 / 오전 11시 30분 점심 식사 및 약 복용</li><li>오후 2시 낮잠(30분) / 오후 5시 30분 저녁 식사 및 약 복용 / 오후 10시 취침</li></ul>
+    <p>이번 주 <b>${c.day}</b>에 추가 약속:</p><ul><li>오전 10시: 치과 진료 (1시간)</li><li>오후 1시: 은행 방문 (1시간)</li><li>오후 4시: 친구 만남 (2시간)</li></ul><p>각 장소까지는 약 <b>30분</b>이 걸립니다.</p>`; },
+  steps:[
+    { name:'하루 일정표', instr:'', hint:'이동 시간을 약속 앞뒤에 넣으세요. 약속과 겹치는 일과는 눌러서 빼낸 뒤 다른 시간에 다시 넣으세요. 약속은 옮길 수 없습니다.',
+      render(body,c,d,done,api){
+        api.setInstr(`이동 시간을 포함해 ${c.day} 전체 일정표를 완성하세요.`);
+        const R=[['wake','기상',420,30],['bf','아침 식사·약',450,60],['st','스트레칭',510,30],['ln','점심 식사·약',690,60],['nap','낮잠',840,30],['dn','저녁 식사·약',1050,60],['sl','취침',1320,30]];
+        const items=R.map(([id,name,s,dur])=>({id,name,dur,cls:'rt',at:{day:0,start:s}})).concat([1,2,3,4,5,6].map(i=>({id:'mv'+i,name:'이동',dur:30})));
+        const fixed=[{id:'dt',name:'치과 진료',day:0,start:600,dur:60,cls:'med'},{id:'bk',name:'은행 방문',day:0,start:780,dur:60,cls:'med'},{id:'fr',name:'친구 만남',day:0,start:960,dur:120,cls:'med'}];
+        const pl=planner({cols:[c.day.slice(0,1)],colNames:[c.day],start:420,end:1350,items,fixed});
+        body.append(pl.el,checker('일정표 확인',{d,key:'rt',done,lock:pl.lock,unlock:pl.unlock,evaluate(){
+          const mv=[1,2,3,4,5,6].map(i=>pl.pos('mv'+i)).filter(Boolean);
+          if(mv.length<6) return {incomplete:`이동 시간을 6번 모두 넣어 주세요. (지금 ${mv.length}번)`};
+          const bl=pl.all(); let clash=false; for(let i=0;i<bl.length;i++)for(let j=i+1;j<bl.length;j++) if(overlap(bl[i],bl[j])) clash=true;
+          const travelOk=fixed.every(f=>mv.some(m=>m.start===f.start-30)&&mv.some(m=>m.start===f.start+f.dur));
+          const dn=pl.pos('dn');
+          d.rtTxt=bl.sort((a,b)=>a.start-b.start).map(x=>`${fmt(x.start)} ${x.name}`).join(', ');
+          return critResult([crit('약속마다 앞뒤로 이동 시간 30분',travelOk),crit('겹치는 일정 없음',!clash),
+            crit('일과(식사·약·낮잠 등)를 빼먹지 않고 모두 유지',R.every(r=>pl.pos(r[0]))),
+            crit('저녁 식사·약을 오후 5시~8시 사이에 시작',!!dn&&dn.start>=1020&&dn.start<=1200)]);
+        }}));
+      }},
+  ],
+  questions:['일상 루틴 중 어떤 부분을 조정했나요? 그 이유는 무엇인가요?','약속 사이에 충분한 휴식 시간을 확보했나요?','이런 바쁜 날 컨디션 관리를 위한 전략은 무엇인가요?'],
+  summarize(d){ return sumCheck(d,'rt','하루 일정표').concat([{label:'완성한 일정표',ok:null,detail:d.rtTxt||'-'}]); }
+},
+// ── 10. 가족 행사와 개인 일정 조율하기 ────────
+{
+  id:'wedding', no:10, title:'가족 행사와 개인 일정 조율하기', tag:'일정충돌', tagClass:'tag-conflict',
+  desc:'결혼식 날 하루 일정을 짜고, 약 복용과 저녁 약속을 어떻게 할지 결정합니다.',
+  init(){ return {}; },
+  situation(){ return `<p>이번 주 토요일에 가족 결혼식이 있습니다 (<b>오후 1시~5시</b>).</p><p>결혼식장까지는 차로 <b>1시간</b>이 걸립니다.</p>
+    <p>같은 날 개인 일정:</p><ul><li>오전 9시: 정기 물리치료 (1시간)</li><li>오후 3시: 중요한 약 복용</li><li>오후 6시: 이웃과의 저녁 식사 약속</li></ul>`; },
+  steps:[
+    { name:'토요일 일정표', instr:'결혼식 준비와 이동, 휴식을 넣어 토요일 일정표를 만드세요.', hint:'결혼식 준비는 옷 갈아입기와 선물 준비입니다. 휴식은 1번 이상 넣으세요.',
+      render(body,c,d,done){
+        const items=[{id:'prep',name:'결혼식 준비(옷·선물)',dur:60},{id:'go',name:'결혼식장 가는 길',dur:60},{id:'back',name:'집으로 오는 길',dur:60},{id:'r1',name:'휴식',dur:30},{id:'r2',name:'휴식',dur:30}];
+        const fixed=[{id:'pt',name:'물리치료',day:0,start:540,dur:60,cls:'med'},{id:'wd',name:'결혼식',day:0,start:780,dur:240,cls:'med'}];
+        const pl=planner({cols:['토'],colNames:['토요일'],start:480,end:1290,items,fixed});
+        body.append(pl.el,checker('일정표 확인',{d,key:'sat',done,lock:pl.lock,unlock:pl.unlock,evaluate(){
+          if(!pl.placedAll(['prep','go','back'])) return {incomplete:'준비, 가는 길, 오는 길을 모두 넣어 주세요.'};
+          const P=id=>pl.pos(id); d.satTxt=pl.all().sort((a,b)=>a.start-b.start).map(x=>`${fmt(x.start)} ${x.name}`).join(', ');
+          return critResult([crit('결혼식장 가는 길: 낮 12시 출발',P('go').start===720),crit('집으로 오는 길: 오후 5시 출발',P('back').start===1020),
+            crit('결혼식 준비: 물리치료 뒤, 출발 전',P('prep').start>=600&&P('prep').start+60<=720),crit('휴식 시간 1번 이상',!!(P('r1')||P('r2')))]);
+        }}));
+      }},
+    { name:'약 복용', instr:'오후 3시 약은 결혼식 도중입니다. 어떻게 하는 것이 가장 알맞을까요?', hint:'',
+      render(body,c,d,done){
+        const OPT=['약을 챙겨 가서 오후 3시에 결혼식장에서 먹는다','결혼식이 끝나고 집에 와서 먹는다','오늘 한 번은 건너뛴다','아침에 미리 같이 먹는다'];
+        d.med={}; const r=rowsAsk([{key:'q',label:'',options:OPT}],d.med);
+        body.append(r.el,checker('확인',{d,key:'medc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'하나를 골라 주세요.'}; const ok=d.med.q===OPT[0];
+          return {ok,title:ok?'알맞은 방법입니다.':'다시 생각해 보세요.',lines:['중요한 약은 정해진 시간에 먹어야 하므로 챙겨 가서 제때 먹습니다. 오후 3시에 알람을 맞춰 두면 더 좋습니다.']};
+        }})); }},
+    { name:'저녁 약속', instr:'집에 오후 6시에 도착합니다. 이웃과의 오후 6시 저녁 약속을 어떻게 하겠습니까?', hint:'',
+      render(body,c,d,done){
+        const OPT=['오후 6시에 그대로 간다','시간을 오후 7시 이후로 늦춘다','다른 날로 미룬다','연락 없이 가지 않는다'];
+        d.nb={}; const r=rowsAsk([{key:'q',label:'',options:OPT}],d.nb);
+        body.append(r.el,checker('확인',{d,key:'nbc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'하나를 골라 주세요.'}; const q=d.nb.q;
+          const ok=q===OPT[1]||q===OPT[2];
+          return {ok,title:ok?'알맞은 결정입니다.':'다시 생각해 보세요.',lines:[q===OPT[0]?'도착하자마자 바로 가면 쉬지 못하고 늦을 수 있습니다.':q===OPT[3]?'약속을 바꿀 때는 미리 연락해야 합니다.':'미리 이웃에게 연락해 바뀐 약속을 알립니다.']};
+        }})); }},
+  ],
+  questions:['이 계획에서 가장 어려운 부분은 무엇이었나요?','예상치 못한 교통 체증이 발생한다면 어떻게 조정할 수 있을까요?','결혼식에서 피로감을 느낀다면 어떻게 대처할 계획인가요?'],
+  summarize(d){ return sumCheck(d,'sat','토요일 일정표').concat([{label:'일정표',ok:null,detail:d.satTxt||'-'},
+    {label:'약 복용 방법 (첫 답)',ok:!!d.medcFirst?.ok,detail:d.med?.q||'-'},{label:'저녁 약속 결정 (첫 답)',ok:!!d.nbcFirst?.ok,detail:d.nb?.q||'-'}]); }
+},
+// ── 11. 계절 변화에 따른 일정 조정 ────────────
+{
+  id:'snow', no:11, title:'계절 변화에 따른 일정 조정', tag:'돌발대응', tagClass:'tag-adapt',
+  desc:'눈 예보에 맞춰 약속을 유지·변경으로 나누고, 늘어난 이동 시간을 계산합니다.',
+  init(){ return {ap:[['rh','월요일 오전 9시: 재활센터 방문 (2시간)',1],['cf','화요일 오후 2시: 친구와 카페 만남 (1시간)',0],['hp','수요일 오전 10시: 병원 검진 (1시간 30분)',1],['cm','목요일 오후 3시: 지역 센터 모임 (2시간)',0],['hr','금요일 오전 11시: 미용실 예약 (1시간)',0]]}; },
+  situation(c){ return `<p>겨울이 다가오고 있으며, 다음 주에는 눈이 내릴 가능성이 높습니다.</p><ul>${c.ap.map(a=>`<li>${a[1]}</li>`).join('')}</ul>
+    <p>대중교통을 이용 중이며, 눈이 오면 이동 시간이 평소보다 <b>2배</b> 길어질 수 있습니다.</p>`; },
+  steps:[
+    { name:'약속 나누기', instr:'꼭 유지해야 할 약속과 변경·취소할 수 있는 약속으로 나누세요.', hint:'',
+      render(body,c,d,done){ d.keep={}; const r=rowsAsk(c.ap.map(a=>({key:a[0],label:a[1],options:['꼭 유지','변경 가능']})),d.keep);
+        body.append(r.el,checker('확인',{d,key:'keepc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 약속을 나눠 주세요.'};
+          return critResult(c.ap.map(a=>crit(`${a[1].split(':')[1].trim()} → ${a[2]?'꼭 유지 (건강 관련)':'변경 가능'}`,(d.keep[a[0]]==='꼭 유지')===!!a[2])));
+        }})); }},
+    { name:'대안 정하기', instr:'변경 가능한 약속을 각각 어떻게 할지 고르세요.', hint:'',
+      render(body,c,d,done){
+        const OPT=['날씨 좋은 날로 미룬다','전화·영상 통화로 대신한다','미리 연락해 취소한다','연락 없이 가지 않는다'];
+        const list=c.ap.filter(a=>d.keep[a[0]]==='변경 가능'); d.alt={};
+        if(!list.length){ body.append(h('p',{class:'hint'},'변경 가능으로 고른 약속이 없습니다. 다음 단계로 넘어가세요.')); done(); return; }
+        const r=rowsAsk(list.map(a=>({key:a[0],label:a[1].split(':')[1].trim(),options:OPT})),d.alt);
+        body.append(r.el,checker('확인',{d,key:'altc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 약속의 대안을 골라 주세요.'};
+          return critResult(list.map(a=>crit(`${a[1].split(':')[1].trim()}: ${d.alt[a[0]]}`,d.alt[a[0]]!==OPT[3])),['약속을 바꿀 때는 상대에게 미리 연락합니다.']);
+        }})); }},
+    { name:'이동 시간 계산', instr:'평소 재활센터까지 30분 걸립니다. 눈이 와서 2배가 걸린다면, 월요일 오전 9시에 늦지 않으려면 몇 시에 출발해야 하나요?', hint:'버튼으로 시각을 맞춘 뒤 확인을 누르세요.',
+      render(body,c,d,done){ const cp=clockPicker(540);
+        body.append(cp.el,checker('확인',{d,key:'go',done,lock:cp.lock,unlock:cp.unlock,evaluate(){
+          const t=cp.get(); d.goAns=t; const ok=t<=480&&t>=450;
+          return {ok,title:ok?'맞습니다.':`${fmt(t)}에 출발하면 ${t>480?'늦습니다.':'너무 이릅니다.'}`,lines:['30분 × 2 = 1시간이므로 늦어도 <b>오전 8시</b>에 출발합니다.']};
+        }})); }},
+    { name:'눈길 대비', instr:'눈이 올 때 이동을 위한 준비로 알맞은 것을 모두 고르세요.', hint:'',
+      render(body,c,d,done){
+        const OPT=['미끄럼 방지 신발을 신는다','평소보다 일찍 출발한다','택시나 가족 차량을 미리 알아 둔다','일기예보를 미리 확인한다','평소와 같은 시간에 출발한다','늦을까 봐 눈길을 서둘러 걷는다'], GOOD=[0,1,2,3];
+        const mp=multiPick(OPT);
+        body.append(mp.el,checker('확인',{d,key:'prep',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=mp.get(); if(!s.size) return {incomplete:'하나 이상 골라 주세요.'};
+          return critResult(OPT.map((o,i)=>crit(`${o} → ${GOOD.includes(i)?'알맞음':'알맞지 않음'}`,s.has(i)===GOOD.includes(i))));
+        }})); }},
+  ],
+  questions:['어떤 약속을 필수적으로 유지해야 한다고 판단했나요? 이유는?','날씨로 인한 불확실성에 대비하기 위해 어떤 전략을 사용했나요?','갑작스러운 기상 악화로 외출이 불가능해질 경우의 대비책은 무엇인가요?'],
+  summarize(d,c){ return sumCheck(d,'keepc','약속 나누기').concat(d.altc?sumCheck(d,'altc','대안 정하기'):[],
+    [{label:'눈 오는 날 출발 시각 (첫 답)',ok:!!d.goFirst?.ok,detail:d.goAns!=null?fmt(d.goAns):'-'}],sumCheck(d,'prep','눈길 대비')); }
+},
+// ── 12. 가족 생일 모임 계획하기 ───────────────
+{
+  id:'party', no:12, title:'가족 생일 모임 계획하기', tag:'시간계획', tagClass:'tag-plan',
+  desc:'5일 준비 계획, 식이 제한을 고려한 메뉴, 당일 진행 순서를 정합니다.',
+  init(){ return {}; },
+  situation(){ return `<p>다음 주 토요일은 배우자의 생일입니다.</p><p>15명의 가족과 친구들을 초대하여 집에서 특별한 생일 모임을 열기로 했습니다.</p>
+    <p>손님 중:</p><ul><li>2명은 음식 알레르기 (견과류, 해산물)</li><li>3명은 당뇨가 있어 설탕 섭취 제한 필요</li></ul>`; },
+  steps:[
+    { name:'5일 준비 계획', instr:'준비할 일을 생일 며칠 전에 할지 정하세요.', hint:'',
+      render(body,c,d,done){
+        const DAYS5=['5일 전','4일 전','3일 전','2일 전','1일 전'];
+        const T=[['inv','손님에게 초대 연락하기'],['menu','메뉴 정하기'],['list','장보기 목록 만들기'],['shop','장보기'],['clean','집 청소하기'],['cook','음식 미리 만들기'],['deco','장식 준비하기']];
+        d.p5={}; const r=rowsAsk(T.map(([k,l])=>({key:k,label:l,options:DAYS5})),d.p5);
+        body.append(r.el,checker('계획 확인',{d,key:'p5c',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 일의 날짜를 정해 주세요.'};
+          const I=k=>DAYS5.indexOf(d.p5[k]);
+          return critResult([crit('초대 연락은 4일 전까지',I('inv')<=1),crit('메뉴 → 장보기 목록 → 장보기 순서',I('menu')<=I('list')&&I('list')<=I('shop')),
+            crit('장보기를 한 뒤에 음식 만들기',I('shop')<=I('cook')),crit('음식은 2일 전 이후에 만들기 (신선도)',I('cook')>=3)]);
+        }}));
+      }},
+    { name:'메뉴 고르기', instr:'모든 손님을 배려해서 메뉴 5가지를 고르세요.', hint:'',
+      render(body,c,d,done){
+        const M=[['불고기',''],['잡채',''],['갈비찜',''],['나물 비빔밥',''],['새우튀김','sea'],['해물파전','sea'],['견과류 샐러드','nut'],['호두파이','nut sug'],['생크림 케이크','sug'],['과일 화채',''],['무설탕 떡','dia'],['과일 모둠','dia']];
+        const mp=multiPick(M.map(m=>m[0]));
+        body.append(mp.el,checker('메뉴 확인',{d,key:'menuc',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=[...mp.get()]; if(s.length!==5) return {incomplete:`5가지를 골라 주세요. (지금 ${s.length}가지)`};
+          d.menuTxt=s.map(i=>M[i][0]).join(', ');
+          const allergy=s.filter(i=>/sea|nut/.test(M[i][1]));
+          const lines=allergy.map(i=>`<span class="badc">${M[i][0]}</span>: ${/sea/.test(M[i][1])?'해산물':'견과류'} 알레르기 손님이 먹을 수 없습니다.`);
+          return {...critResult([crit('알레르기(견과류·해산물) 메뉴 없음',!allergy.length),crit('당뇨 손님이 먹을 수 있는 디저트 포함 (무설탕 떡·과일 모둠)',s.some(i=>M[i][1]==='dia'))],lines)};
+        }}));
+      }},
+    { name:'당일 진행 순서', instr:'생일 모임 당일 진행 순서를 정하세요.', hint:'카드를 끌어서 다른 카드 위에 놓으면 그 자리로 옮겨집니다.',
+      render(body,c,d,done){
+        const o=orderer(shuffle(['손님 맞이','함께 식사','생일 케이크와 축하','함께하는 게임·활동','손님 배웅']),()=>{});
+        body.append(o.el,checker('순서 확인',{d,key:'ord',done,lock:o.lock,unlock:o.unlock,evaluate(){
+          const a=o.get(); d.ordTxt=a.join(' → ');
+          return critResult([crit('손님 맞이가 처음',a[0]==='손님 맞이'),crit('손님 배웅이 마지막',a[4]==='손님 배웅'),crit('식사를 한 뒤 케이크와 축하',a.indexOf('함께 식사')<a.indexOf('생일 케이크와 축하'))]);
+        }}));
+      }},
+  ],
+  questions:['필요한 물품은 무엇이며 언제 사겠습니까?','모임 중 어떤 간단한 활동이나 게임을 하겠습니까?','다양한 식이 제한을 가진 손님들을 어떻게 배려했나요?','모임 중 피로해질 경우를 대비한 계획은 무엇인가요?','준비 과정에서 도움이 필요한 부분은 어떻게 해결할 계획인가요?'],
+  summarize(d){ return sumCheck(d,'p5c','5일 준비 계획').concat(sumCheck(d,'menuc','메뉴'),[{label:'고른 메뉴 (최종)',ok:null,detail:d.menuTxt||'-'}],sumCheck(d,'ord','당일 진행 순서'),[{label:'진행 순서 (최종)',ok:null,detail:d.ordTxt||'-'}]); }
+},
+// ── 13. 주택 수리 계획 및 예산 관리 ───────────
+{
+  id:'repair', no:13, title:'주택 수리 계획 및 예산 관리', tag:'예산관리', tagClass:'tag-budget',
+  desc:'수리 우선순위를 정하고 예산 안에서 고른 뒤 기간과 추가 비용을 계산합니다.',
+  init(){ return {R:[{id:'k',name:'부엌 싱크대',cost:1500000,days:3},{id:'s',name:'화장실 샤워 부스',cost:1200000,days:2},{id:'e',name:'현관 계단',cost:800000,days:1}],budget:3000000}; },
+  situation(c){ return `<p>집의 여러 부분에 수리가 필요합니다.</p><p>수리 예산으로 <b>${won(c.budget)}</b>이 있으며, 모든 수리를 한 번에 할 수는 없습니다.</p><p>수리 견적:</p><ul>${c.R.map(r=>`<li>${r.name}: ${won(r.cost)} (${r.days}일 소요)</li>`).join('')}</ul>`; },
+  steps:[
+    { name:'우선순위', instr:'가장 먼저 해야 할 수리부터 순서대로 놓으세요.', hint:'카드를 끌어서 다른 카드 위에 놓으면 그 자리로 옮겨집니다. 이유는 치료사에게 말로 설명해 주세요.',
+      render(body,c,d,done){ const o=orderer(shuffle(c.R.map(r=>r.name)),()=>{});
+        body.append(o.el,h('div',{class:'row'},h('button',{class:'big-btn b-pri',onclick:e=>{d.prio=o.get().join(' → ');o.lock();e.target.style.display='none';done();}},'순서 정하기'))); }},
+    { name:'수리 고르기', instr:'예산 안에서 이번에 할 수리를 고르세요.', hint:'금액을 직접 더해 보고 고르세요.',
+      render(body,c,d,done){ const mp=multiPick(c.R.map(r=>`${r.name} ${won(r.cost)}`));
+        body.append(mp.el,checker('확인',{d,key:'sel',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=[...mp.get()]; if(!s.length) return {incomplete:'하나 이상 골라 주세요.'};
+          const tot=s.reduce((a,i)=>a+c.R[i].cost,0); d.selIdx=s; d.selTot=tot;
+          return {...critResult([crit(`합계 ${won(tot)} — 예산 ${won(c.budget)} 안`,tot<=c.budget)]),lines:[`고른 수리: ${s.map(i=>c.R[i].name).join(', ')}`,`합계 ${won(tot)}`]};
+        }})); }},
+    { name:'수리 기간', instr:'고른 수리를 차례로 모두 하면 며칠이 걸리나요?', hint:'',
+      render(body,c,d,done){ const days=d.selIdx.reduce((a,i)=>a+c.R[i].days,0); d.dy={};
+        const r=rowsAsk([{key:'q',label:'수리 기간',options:shufOpts(days,[days+1,days-1>0?days-1:days+2,days+2,6]),fmt:v=>v+'일'}],d.dy);
+        body.append(r.el,checker('확인',{d,key:'dayc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'답을 골라 주세요.'}; const ok=d.dy.q===days;
+          return {ok,title:ok?'맞습니다.':'다시 계산해 보세요.',lines:[`${d.selIdx.map(i=>c.R[i].days+'일').join(' + ')} = <b>${days}일</b>`]};
+        }})); }},
+    { name:'추가 비용', instr:'', hint:'숫자를 눌러 입력하세요.',
+      render(body,c,d,done,api){ const tot=d.selTot, add=Math.round(tot*1.2);
+        api.setInstr(`고른 수리(${won(tot)})에 20% 추가 비용이 생기면 모두 얼마인가요?`);
+        const np=numPad('원'); d.ov={};
+        const r=rowsAsk([{key:'q',label:'추가 비용이 예산을 넘으면 어떻게 하겠습니까?',options:['비용이 적은 수리를 다음으로 미룬다','추가 예산을 마련할 방법을 찾는다','수리를 중간에 멈추게 한다']}],d.ov);
+        body.append(np.el,r.el,checker('확인',{d,key:'extra',done,lock(){np.lock();r.lock();},unlock(){np.unlock();r.unlock();},evaluate(){
+          const v=np.get(); if(!v||!r.all()) return {incomplete:'금액을 입력하고 대응 방법을 골라 주세요.'}; d.extraAns=v;
+          return critResult([crit(`${won(tot)} × 1.2 = ${won(add)}`,v===add),crit(`대응 방법: ${d.ov.q}`,d.ov.q!=='수리를 중간에 멈추게 한다')],[`예산 ${won(c.budget)}을 ${add>c.budget?`${won(add-c.budget)} 넘습니다.`:'넘지 않습니다.'}`]);
+        }})); }},
+  ],
+  questions:['우선순위를 결정할 때 어떤 요소를 고려했나요?','예산 제약 내에서 어떻게 최대한의 수리를 계획했나요?','수리 기간 동안 일상생활을 어떻게 조정하겠습니까?','수리 중 발생할 수 있는 불편함을 어떻게 최소화할 계획인가요?'],
+  summarize(d,c){ return [{label:'우선순위',ok:null,detail:d.prio||'-'}].concat(sumCheck(d,'sel','예산 안에서 고르기'),
+    [{label:'고른 수리 (최종)',ok:null,detail:(d.selIdx||[]).map(i=>c.R[i].name).join(', ')},{label:'수리 기간 계산 (첫 답)',ok:!!d.daycFirst?.ok,detail:d.dy?.q!=null?d.dy.q+'일':'-'}],sumCheck(d,'extra','추가 비용')); }
+},
+// ── 14. 지역사회 활동 참여 계획하기 ───────────
+{
+  id:'community', no:14, title:'지역사회 활동 참여 계획하기', tag:'시간계획', tagClass:'tag-plan',
+  desc:'참여할 프로그램을 골라 주간 시간표에 넣고 준비물을 챙깁니다.',
+  init(){ return {P:[{id:'ex',name:'시니어 체조',days:[0,2,4],start:600,dur:60,item:'편한 운동복과 운동화'},{id:'gd',name:'원예 치료',days:[1,3],start:840,dur:90,item:'장갑과 모자'},
+    {id:'bk',name:'독서 모임',days:[2],start:900,dur:120,item:'읽을 책과 돋보기 안경'},{id:'ck',name:'요리 교실',days:[3],start:660,dur:120,item:'앞치마와 위생모'},{id:'wk',name:'산책 모임',days:[5],start:540,dur:60,item:'운동화와 물병'}]}; },
+  situation(c){ const D=['월','화','수','목','금','토']; return `<p>지역 센터에서 다음과 같은 프로그램을 제공합니다.</p><ul>${c.P.map(p=>`<li>${p.days.map(x=>D[x]).join('/')} ${fmt(p.start)}: ${p.name} (${durTxt(p.dur)})</li>`).join('')}</ul>`; },
+  steps:[
+    { name:'프로그램 고르기', instr:'참여하고 싶은 프로그램을 2~3개 고르세요.', hint:'고른 이유는 치료사에게 말로 설명해 주세요.',
+      render(body,c,d,done){ const mp=multiPick(c.P.map(p=>p.name)); const out=h('div');
+        const b=h('button',{class:'big-btn b-pri',onclick:()=>{const s=[...mp.get()];out.innerHTML='';
+          if(s.length<2||s.length>3){out.append(fbBox('warn',`2~3개를 골라 주세요. (지금 ${s.length}개)`,[]));return;}
+          d.chosen=s; mp.lock(); b.style.display='none'; done();}},'선택 완료');
+        body.append(mp.el,h('div',{class:'row'},b),out); }},
+    { name:'주간 시간표', instr:'고른 프로그램을 주간 시간표에 모두 넣으세요.', hint:'프로그램을 누른 뒤 시간표 칸을 누르세요. 여러 요일에 하는 프로그램은 요일마다 넣습니다.',
+      render(body,c,d,done){
+        const ch=d.chosen.map(i=>c.P[i]); const items=[];
+        ch.forEach(p=>p.days.forEach((_,k)=>items.push({id:p.id+k,pid:p.id,name:p.name,dur:p.dur})));
+        const pl=planner({cols:['월','화','수','목','금','토'],colNames:['월요일','화요일','수요일','목요일','금요일','토요일'],start:540,end:1080,items});
+        body.append(pl.el,checker('시간표 확인',{d,key:'tt',done,lock:pl.lock,unlock:pl.unlock,evaluate(){
+          if(!pl.placedAll(items.map(x=>x.id))) return {incomplete:'아직 넣지 않은 프로그램이 있습니다.'};
+          const D=['월','화','수','목','금','토'];
+          return critResult(ch.map(p=>{const ps=items.filter(x=>x.pid===p.id).map(x=>pl.pos(x.id));
+            const ok=ps.every(q=>q.start===p.start)&&p.days.every(dd=>ps.some(q=>q.day===dd));
+            return crit(`${p.name}: ${p.days.map(x=>D[x]).join('/')} ${fmt(p.start)}`,ok);}));
+        }}));
+      }},
+    { name:'준비물', instr:'각 프로그램에 필요한 준비물을 고르세요.', hint:'',
+      render(body,c,d,done){ const ch=d.chosen.map(i=>c.P[i]); const all=c.P.map(p=>p.item); d.it={};
+        const r=rowsAsk(ch.map(p=>({key:p.id,label:p.name,options:shuffle(all)})),d.it);
+        body.append(r.el,checker('확인',{d,key:'itc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 프로그램의 준비물을 골라 주세요.'};
+          return critResult(ch.map(p=>crit(`${p.name}: ${p.item}`,d.it[p.id]===p.item)));
+        }})); }},
+  ],
+  questions:['활동 장소까지 어떻게 이동할 계획인가요?','몸이 좋지 않은 날에는 참여를 어떻게 조정하겠습니까?','이 활동들이 재활과 사회적 연결에 어떻게 도움이 될 것 같나요?','활동 참여에 장애가 될 수 있는 요소는 무엇이며, 어떻게 극복할 계획인가요?','새로운 사람들과의 교류에 대한 계획은 무엇인가요?'],
+  summarize(d,c){ return [{label:'고른 프로그램',ok:null,detail:(d.chosen||[]).map(i=>c.P[i].name).join(', ')}].concat(sumCheck(d,'tt','주간 시간표'),sumCheck(d,'itc','준비물')); }
+},
+// ── 15. 여러 가족 구성원의 약속 조율 ──────────
+{
+  id:'family', no:15, title:'여러 가족 구성원의 약속 조율', tag:'일정충돌', tagClass:'tag-conflict',
+  desc:'가족 모두의 약속을 한 달력에 모으고, 차량 1대로 이동 방법을 정합니다.',
+  init(){ const t1=pick(THERAPY),t2=pick(THERAPY.filter(x=>x!==t1));
+    return {A:[{id:'m1',who:'나',name:t1,day:0,start:600,dur:60},{id:'m2',who:'나',name:'의사 진료',day:2,start:840,dur:60},{id:'m3',who:'나',name:t2,day:4,start:660,dur:60},
+      {id:'s1',who:'배우자',name:'건강검진',day:1,start:900,dur:120},{id:'s2',who:'배우자',name:'치과 진료',day:3,start:540,dur:60}]}; },
+  situation(c){ const L=w=>c.A.filter(a=>a.who===w).map(a=>`<li>${DAYN[a.day]} ${fmt(a.start)}: ${a.name} (${durTxt(a.dur)})</li>`).join('');
+    return `<p>가족의 일정 관리를 담당하고 있습니다. 혼자 운전하기 어려우며, 가족은 차량 1대를 공유합니다.</p>
+    <p>나의 일정:</p><ul>${L('나')}</ul><p>배우자 일정:</p><ul>${L('배우자')}</ul><p>성인 자녀: 월~금 직장 (오전 9시~오후 6시), 수요일 저녁 회의</p>`; },
+  steps:[
+    { name:'가족 달력', instr:'나와 배우자의 일정을 한 주간 달력에 모두 넣으세요.', hint:'일정을 누른 뒤 달력 칸을 누르세요. 주황색은 배우자 일정입니다.',
+      render(body,c,d,done){
+        const pl=planner({start:480,end:1080,items:c.A.map(a=>({id:a.id,name:`${a.who}: ${a.name}`,dur:a.dur,cls:a.who==='나'?'new':'p2'}))});
+        body.append(pl.el,checker('달력 확인',{d,key:'fc',done,lock:pl.lock,unlock:pl.unlock,evaluate(){
+          if(!pl.placedAll(c.A.map(a=>a.id))) return {incomplete:'아직 넣지 않은 일정이 있습니다.'};
+          return critResult(c.A.map(a=>{const p=pl.pos(a.id);return crit(`${a.who}: ${a.name} ${DAYN[a.day]} ${fmt(a.start)}`,p.day===a.day&&p.start===a.start);}));
+        }}));
+      }},
+    { name:'이동 방법', instr:'나의 약속마다 어떻게 갈지 고르세요.', hint:'자녀의 근무 시간과 배우자 일정을 확인하세요.',
+      render(body,c,d,done){ const OPT=['배우자가 운전해 준다','자녀가 운전해 준다','택시·대중교통을 이용한다','혼자 운전한다']; d.tr={};
+        const mine=c.A.filter(a=>a.who==='나');
+        const r=rowsAsk(mine.map(a=>({key:a.id,label:`${DAYN[a.day]} ${fmt(a.start)} ${a.name}`,options:OPT})),d.tr);
+        body.append(r.el,checker('확인',{d,key:'trc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 약속의 이동 방법을 골라 주세요.'};
+          const lines=[];
+          const list=mine.map(a=>{const v=d.tr[a.id];
+            if(v===OPT[3]) lines.push(`${a.name}: 혼자 운전하기 어렵습니다.`);
+            if(v===OPT[1]) lines.push(`${a.name}: 자녀는 그 시간에 직장에 있습니다.`);
+            return crit(`${a.name}: ${v}`,v===OPT[0]||v===OPT[2]);});
+          return critResult(list,lines);
+        }})); }},
+    { name:'비상 대비', instr:'약속 날 차가 고장 나면 어떻게 하는 것이 가장 알맞을까요?', hint:'',
+      render(body,c,d,done){ const OPT=['택시·콜택시 번호를 미리 알아 둔다','그날 약속은 연락 없이 빠진다','자녀에게 회사를 쉬라고 한다','고장 나면 그때 생각한다']; d.em={};
+        const r=rowsAsk([{key:'q',label:'',options:OPT}],d.em);
+        body.append(r.el,checker('확인',{d,key:'emc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'하나를 골라 주세요.'}; const ok=d.em.q===OPT[0];
+          return {ok,title:ok?'알맞은 대비입니다.':'다시 생각해 보세요.',lines:['다른 이동 방법을 미리 알아 두면 갑작스러운 상황에도 약속을 지킬 수 있습니다.']};
+        }})); }},
+  ],
+  questions:['약속 장소가 서로 다른 방향에 있다면 어떻게 하겠습니까?','가장 복잡한 일정 충돌은 무엇이었으며 어떻게 해결했나요?','가족 구성원들과 일정 조율을 위해 어떤 의사소통이 필요할까요?','이런 복잡한 일정 관리를 더 효율적으로 할 수 있는 방법은 무엇인가요?'],
+  summarize(d){ return sumCheck(d,'fc','가족 달력').concat(sumCheck(d,'trc','이동 방법'),[{label:'비상 대비 (첫 답)',ok:!!d.emcFirst?.ok,detail:d.em?.q||'-'}]); }
+},
+// ── 16. 제한된 에너지로 우선순위 결정 ─────────
+{
+  id:'energy', no:16, title:'제한된 에너지로 우선순위 결정', tag:'우선순위', tagClass:'tag-prior',
+  desc:'하루 4시간 활동 제한 안에서 참석할 활동을 고르고 못 가는 활동에 대처합니다.',
+  init(){ return {A:[{id:'dr',name:'의사 진료',time:'오전 9시',dur:60,out:1},{id:'bk',name:'은행 서류 제출 (마감일)',time:'오전 11시',dur:30,out:1},{id:'sh',name:'손자 학교 발표회',time:'오후 1시',dur:120,out:1},{id:'nb',name:'이웃 주민 모임',time:'오후 4시',dur:90,out:1},{id:'dn',name:'저녁 식사 준비',time:'',dur:60,out:0}]}; },
+  situation(c){ return `<p>의사는 하루에 <b>4시간</b> 이상 활동하지 말고 충분히 휴식할 것을 권고했습니다.</p><p>다음 주 화요일 일정:</p><ul>${c.A.map(a=>`<li>${a.time?a.time+': ':''}${a.name} (${durTxt(a.dur)})</li>`).join('')}</ul>
+    <p>각 장소 간 이동 시간은 약 <b>30분</b>씩 걸립니다. (은행 업무는 30분으로 계산합니다)</p>`; },
+  steps:[
+    { name:'중요도 평가', instr:'각 활동의 중요도를 평가하세요.', hint:'정답은 없습니다. 중요도와 급한 정도를 생각해 보세요.',
+      render(body,c,d,done){ d.imp={}; const r=rowsAsk(c.A.map(a=>({key:a.id,label:a.name,options:['높음','보통','낮음']})),d.imp,()=>{if(r.all())done();}); body.append(r.el); }},
+    { name:'참석할 활동', instr:'4시간 제한 안에서 참석할 활동을 고르세요.', hint:'이동 시간도 활동 시간에 포함됩니다. 외출 활동은 집에서 나가고 돌아오는 이동까지 계산합니다.',
+      render(body,c,d,done){ const tot=h('div',{class:'total'});
+        const calc=s=>{const sel=[...s].map(i=>c.A[i]);const n=sel.filter(a=>a.out).length;return sel.reduce((a,x)=>a+x.dur,0)+(n?(n+1)*30:0);};
+        const mp=multiPick(c.A.map(a=>`${a.name} (${durTxt(a.dur)})`),s=>{tot.textContent=`이동 포함 활동 시간: ${durTxt(calc(s))} / 4시간`;});
+        tot.textContent='이동 포함 활동 시간: 0분 / 4시간';
+        body.append(mp.el,tot,checker('확인',{d,key:'att',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=mp.get(); if(!s.size) return {incomplete:'하나 이상 골라 주세요.'};
+          const t=calc(s); d.attIdx=[...s]; d.attTot=t;
+          return critResult([crit(`이동 포함 ${durTxt(t)} — 4시간 이내`,t<=240),crit('의사 진료 참석 (건강)',s.has(0)),crit('은행 서류 제출 참석 (마감일)',s.has(1))]);
+        }}));
+      }},
+    { name:'못 가는 활동', instr:'참석하지 않는 활동을 각각 어떻게 할지 고르세요.', hint:'',
+      render(body,c,d,done){ const skip=c.A.filter((a,i)=>!d.attIdx.includes(i)); d.sk={};
+        if(!skip.length){body.append(h('p',{class:'hint'},'모든 활동에 참석합니다. 다음 단계로 넘어가세요.'));done();return;}
+        const OPT_OUT=['미리 연락해 양해를 구한다','다른 날로 미룬다','영상·사진으로 대신 함께한다','연락 없이 빠진다'], OPT_DN=['간단한 음식이나 반찬을 산다','가족에게 부탁한다','저녁을 거른다'];
+        const r=rowsAsk(skip.map(a=>({key:a.id,label:a.name,options:a.out?OPT_OUT:OPT_DN})),d.sk);
+        body.append(r.el,checker('확인',{d,key:'skc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 활동의 대처를 골라 주세요.'};
+          return critResult(skip.map(a=>crit(`${a.name}: ${d.sk[a.id]}`,!['연락 없이 빠진다','저녁을 거른다'].includes(d.sk[a.id]))));
+        }})); }},
+  ],
+  questions:['선택한 활동들의 하루 시간 계획을 말해 보세요 (이동·휴식 포함).','활동 우선순위를 어떤 기준으로 결정했나요?','참석하지 못하는 활동에 대한 아쉬움을 어떻게 관리할 계획인가요?','비슷한 상황이 반복된다면 어떻게 미리 계획을 조정할 수 있을까요?'],
+  summarize(d,c){ return [{label:'중요도 평가',ok:null,detail:c.A.map(a=>`${a.name} ${d.imp?.[a.id]||'-'}`).join(', ')}].concat(sumCheck(d,'att','참석할 활동'),
+    [{label:'참석 활동 (최종)',ok:null,detail:(d.attIdx||[]).map(i=>c.A[i].name).join(', ')+(d.attTot!=null?` / ${durTxt(d.attTot)}`:'')}],d.skc?sumCheck(d,'skc','못 가는 활동 대처'):[]); }
+},
+// ── 18. 명절 기간 건강관리와 가족 행사 조율 ───
+{
+  id:'holiday', no:18, title:'명절 기간 건강관리와 가족 행사 조율', tag:'건강관리', tagClass:'tag-health',
+  desc:'5일 연휴 동안의 건강관리 표를 만들고, 날짜별 어려움과 명절 음식 전략을 정합니다.',
+  init(){ return {D:['첫째 날','둘째 날','셋째 날','넷째 날','다섯째 날']}; },
+  situation(){ return `<p>추석 연휴(5일간) 가족 행사:</p><ul><li>첫째 날: 고향 방문 및 차례 준비 (이동 3시간)</li><li>둘째 날: 차례 및 가족 식사</li><li>셋째 날: 친척 방문</li><li>넷째 날: 가족 나들이</li><li>다섯째 날: 귀가 (이동 3시간)</li></ul>
+    <p>건강관리 필요 사항: 매일 정해진 시간에 약 복용(하루 3회), 하루 30분 가벼운 운동, 충분한 휴식(과로 금지), 저염식 식단 유지, 스트레스 관리</p>`; },
+  steps:[
+    { name:'5일 건강관리표', instr:'5일 동안 할 건강관리를 표에 표시하세요.', hint:'칸을 누르면 표시되고, 다시 누르면 지워집니다.',
+      render(body,c,d,done){ const R=['아침 약','점심 약','저녁 약','30분 가벼운 운동','휴식 시간']; const mx=matrix(R,c.D);
+        body.append(mx.el,checker('표 확인',{d,key:'hm',done,lock:mx.lock,unlock:mx.unlock,evaluate(){
+          const g=mx.get(); const cnt=i=>g[i].filter(Boolean).length;
+          d.hmTxt=R.map((r,i)=>`${r} ${cnt(i)}일`).join(', ');
+          return critResult([crit('약 하루 3회, 5일 모두',[0,1,2].every(i=>cnt(i)===5)),crit('30분 운동 5일 모두',cnt(3)===5),crit('휴식 시간 5일 모두',cnt(4)===5)]);
+        }})); }},
+    { name:'날짜별 어려움', instr:'날마다 예상되는 어려움에 알맞은 대처를 고르세요.', hint:'',
+      render(body,c,d,done){
+        const Q=[['첫째 날 (이동 3시간)','중간 휴게소에서 쉬며 스트레칭한다',['쉬지 않고 한 번에 간다','약은 도착해서 몰아 먹는다']],
+          ['둘째 날 (차례·가족 식사)','앉아서 할 수 있는 일을 맡고 중간에 쉰다',['혼자 모든 음식을 준비한다','쉬지 않고 계속 일한다']],
+          ['셋째 날 (친척 방문)','방문 시간을 짧게 정하고 다녀온다',['하루에 여러 집을 몰아서 방문한다','피곤해도 늦게까지 머문다']],
+          ['넷째 날 (가족 나들이)','가까운 곳을 고르고 쉴 곳을 미리 알아 둔다',['오래 걷는 코스를 고른다','약을 집에 두고 간다']],
+          ['다섯째 날 (귀가 3시간)','출발 전 충분히 쉬고 중간에 휴식한다',['밤늦게 출발한다','혼자 오래 운전한다']]];
+        d.df={}; const r=rowsAsk(Q.map((q,i)=>({key:'q'+i,label:q[0],options:shuffle([q[1],...q[2]])})),d.df);
+        body.append(r.el,checker('확인',{d,key:'dfc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 날의 대처를 골라 주세요.'};
+          return critResult(Q.map((q,i)=>crit(`${q[0]}: ${q[1]}`,d.df['q'+i]===q[1])));
+        }}));
+      }},
+    { name:'명절 음식', instr:'저염식을 지키기 위한 명절 음식 전략으로 알맞은 것을 모두 고르세요.', hint:'',
+      render(body,c,d,done){ const OPT=['전·튀김은 조금만 먹는다','국물은 적게 먹는다','나물과 채소 위주로 먹는다','김치·젓갈 같은 짠 음식은 줄인다','명절이니 마음껏 먹는다','남은 음식은 버리지 않으려 다 먹는다'], GOOD=[0,1,2,3];
+        const mp=multiPick(OPT);
+        body.append(mp.el,checker('확인',{d,key:'food',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=mp.get(); if(!s.size) return {incomplete:'하나 이상 골라 주세요.'};
+          return critResult(OPT.map((o,i)=>crit(`${o} → ${GOOD.includes(i)?'알맞음':'알맞지 않음'}`,s.has(i)===GOOD.includes(i))));
+        }})); }},
+  ],
+  questions:['가족 행사 참여와 건강관리 사이에서 어떻게 균형을 맞추었나요?','예상치 못한 피로나 건강 이슈가 발생할 경우 어떻게 대처할 계획인가요?','가족들에게 건강관리 필요성을 어떻게 설명할 계획인가요?'],
+  summarize(d){ return sumCheck(d,'hm','5일 건강관리표').concat([{label:'건강관리표 내용 (최종)',ok:null,detail:d.hmTxt||'-'}],sumCheck(d,'dfc','날짜별 대처'),sumCheck(d,'food','명절 음식 전략')); }
+},
+// ── 19. 건강 이슈와 사회적 약속 균형 맞추기 ───
+{
+  id:'balance', no:19, title:'건강 이슈와 사회적 약속 균형 맞추기', tag:'우선순위', tagClass:'tag-prior',
+  desc:'피로한 한 주의 약속을 평가하고, 조정할 약속과 알리는 방법을 정합니다.',
+  init(){ return {A:[{id:'th',name:`${pick(THERAPY)} (월요일 오전 9시)`,h:1},{id:'fr',name:'오랜 친구와의 만남 (화요일 오후)',h:0},{id:'dr',name:`${pick(HOSPITALS)} 정기 진료 (수요일 오전 10시)`,h:1},{id:'fm',name:'가족 식사 모임 (목요일)',h:0},{id:'vl',name:'동네 주민 봉사 활동 (금요일)',h:0}]}; },
+  situation(c){ return `<p>최근 건강이 좋지 않아 피로감이 심합니다. 이번 주에 다음과 같은 약속들이 있습니다.</p><ul>${c.A.map(a=>`<li>${a.name}</li>`).join('')}</ul><p>모든 약속을 지키면 과로가 예상됩니다.</p>`; },
+  steps:[
+    { name:'약속 성격', instr:'각 약속이 어떤 성격인지 고르세요.', hint:'정답은 없습니다. 생각한 이유를 치료사에게 말해 주세요.',
+      render(body,c,d,done){ d.kind={}; const r=rowsAsk(c.A.map(a=>({key:a.id,label:a.name,options:['건강','사회적 의무','개인 의지']})),d.kind,()=>{if(r.all())done();}); body.append(r.el); }},
+    { name:'유지·조정', instr:'건강을 가장 먼저 생각해서 유지할 약속과 조정할 약속을 정하세요.', hint:'',
+      render(body,c,d,done){ d.keep={}; const r=rowsAsk(c.A.map(a=>({key:a.id,label:a.name,options:['유지','조정 (미루기·줄이기·취소)']})),d.keep);
+        body.append(r.el,checker('확인',{d,key:'kp',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 약속을 정해 주세요.'};
+          const adj=c.A.filter(a=>d.keep[a.id]!=='유지');
+          return critResult([crit('건강 관련 약속(치료·진료) 유지',c.A.filter(a=>a.h).every(a=>d.keep[a.id]==='유지')),crit('과로를 줄이려 약속을 1개 이상 조정',adj.length>=1)]);
+        }})); }},
+    { name:'알리는 방법', instr:'조정한 약속의 상대방에게 어떻게 알리겠습니까?', hint:'',
+      render(body,c,d,done){ const adj=c.A.filter(a=>d.keep[a.id]&&d.keep[a.id]!=='유지'); d.say={};
+        if(!adj.length){body.append(h('p',{class:'hint'},'조정한 약속이 없습니다. 다음 단계로 넘어가세요.'));done();return;}
+        const OPT=['건강 사정을 솔직하게 말하고 다음 약속을 정한다','다른 핑계를 대며 둘러댄다','아무 말 없이 가지 않는다'];
+        const r=rowsAsk(adj.map(a=>({key:a.id,label:a.name,options:OPT})),d.say);
+        body.append(r.el,checker('확인',{d,key:'sayc',done,lock:r.lock,unlock:r.unlock,evaluate(){
+          if(!r.all()) return {incomplete:'모든 약속의 알리는 방법을 골라 주세요.'};
+          return critResult(adj.map(a=>crit(`${a.name}: ${d.say[a.id]}`,d.say[a.id]===OPT[0])));
+        }})); }},
+    { name:'에너지 아끼기', instr:'남은 약속을 덜 지치게 하는 방법으로 알맞은 것을 모두 고르세요.', hint:'',
+      render(body,c,d,done){ const OPT=['약속 시간을 짧게 줄인다','약속 사이에 쉬는 날을 둔다','가까운 곳에서 만나자고 한다','무리해도 끝까지 다 지킨다','잠을 줄여 시간을 낸다'], GOOD=[0,1,2];
+        const mp=multiPick(OPT);
+        body.append(mp.el,checker('확인',{d,key:'en',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=mp.get(); if(!s.size) return {incomplete:'하나 이상 골라 주세요.'};
+          return critResult(OPT.map((o,i)=>crit(`${o} → ${GOOD.includes(i)?'알맞음':'알맞지 않음'}`,s.has(i)===GOOD.includes(i))));
+        }})); }},
+  ],
+  questions:['건강과 사회적 책임 사이에서 어떻게 균형을 잡았나요?','약속을 취소하거나 변경할 때 어떤 감정이 생길 수 있고 어떻게 관리할까요?','앞으로 비슷한 상황을 예방하기 위해 어떻게 일정을 관리할 수 있을까요?'],
+  summarize(d,c){ return [{label:'약속 성격',ok:null,detail:c.A.map(a=>`${a.name} ${d.kind?.[a.id]||'-'}`).join(', ')}].concat(sumCheck(d,'kp','유지·조정'),d.sayc?sumCheck(d,'sayc','알리는 방법'):[],sumCheck(d,'en','에너지 아끼기')); }
+}
+);
+ACTS.sort((a,b)=>a.no-b.no);
+
+
+function msgList(){
+  return h('div',{class:'msgs'},
+    h('div',{class:'msg'},h('div',{class:'from'},'병원'),'목요일 정기 검진이 취소되었습니다. 내일(화요일) 오후 2시로 바꿔 드렸습니다.'),
+    h('div',{class:'msg'},h('div',{class:'from'},'자녀'),'금요일 오전에 중요한 일이 있어서 도와주셨으면 해요.'),
+    h('div',{class:'msg'},h('div',{class:'from'},'수도 수리공'),'수요일 오전 10시에 방문하겠습니다.'));
+}
+
+// 장보기 상품 (가격은 연습용 예시)
+const SECTIONS=['채소 코너','정육·수산 코너','냉장 코너','곡물 코너','과일 코너','가공식품 코너'];
+const GOODS=[
+  {id:'spin',name:'시금치',unit:'1단',price:3000,sec:'채소 코너',cat:'채소'},
+  {id:'broc',name:'브로콜리',unit:'1송이',price:3500,sec:'채소 코너',cat:'채소'},
+  {id:'cabb',name:'양배추',unit:'1통',price:4000,sec:'채소 코너',cat:'채소'},
+  {id:'carr',name:'당근',unit:'3개',price:2500,sec:'채소 코너',cat:'채소'},
+  {id:'zucc',name:'애호박',unit:'1개',price:2000,sec:'채소 코너',cat:'채소'},
+  {id:'chik',name:'닭가슴살',unit:'500g',price:7000,sec:'정육·수산 코너',cat:'단백질'},
+  {id:'beef',name:'소고기 우둔살',unit:'300g',price:15000,sec:'정육·수산 코너',cat:'단백질'},
+  {id:'fish',name:'동태',unit:'1팩',price:8000,sec:'정육·수산 코너',cat:'단백질'},
+  {id:'pork',name:'삼겹살',unit:'600g',price:16000,sec:'정육·수산 코너',cat:'단백질',bad:true,why:'지방 많음'},
+  {id:'tofu',name:'두부',unit:'1모',price:2500,sec:'냉장 코너',cat:'단백질'},
+  {id:'egg', name:'달걀',unit:'10구',price:4500,sec:'냉장 코너',cat:'단백질'},
+  {id:'milk',name:'저지방 우유',unit:'1L',price:3000,sec:'냉장 코너',cat:'기타'},
+  {id:'ham', name:'햄·소시지',unit:'1팩',price:6000,sec:'냉장 코너',cat:'단백질',bad:true,why:'나트륨·지방 많음'},
+  {id:'jeot',name:'젓갈',unit:'1통',price:7000,sec:'냉장 코너',cat:'기타',bad:true,why:'나트륨 많음'},
+  {id:'rice',name:'현미',unit:'2kg',price:12000,sec:'곡물 코너',cat:'곡류'},
+  {id:'grai',name:'잡곡',unit:'1kg',price:9000,sec:'곡물 코너',cat:'곡류'},
+  {id:'appl',name:'사과',unit:'1봉',price:10000,sec:'과일 코너',cat:'기타'},
+  {id:'bana',name:'바나나',unit:'1송이',price:4000,sec:'과일 코너',cat:'기타'},
+  {id:'ramn',name:'라면',unit:'5개 묶음',price:4500,sec:'가공식품 코너',cat:'기타',bad:true,why:'나트륨 많음'},
+  {id:'chip',name:'감자칩',unit:'1봉',price:3000,sec:'가공식품 코너',cat:'기타',bad:true,why:'나트륨·지방 많음'},
+  {id:'mand',name:'냉동 튀김만두',unit:'1봉',price:8000,sec:'가공식품 코너',cat:'기타',bad:true,why:'지방 많음'},
+];
+
+// ══ 화면 흐름 ══════════════════════════════════════════
+const S={results:{}};
+let RUN=null, TIMER=null;
+const RATE=['적절','부분 적절','부적절'];
+
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('scr-'+name).classList.add('on');
+  window.scrollTo(0,0);
+  if(name==='home') renderHome();
+}
+
+function renderHome(){
+  const box=document.getElementById('act-list'); box.innerHTML='';
+  ACTS.forEach(a=>{
+    const r=S.results[a.id];
+    box.append(h('button',{class:'act-card'+(r?' done':''),onclick:()=>openActivity(a)},
+      h('span',{class:'tag '+a.tagClass},a.tag),
+      h('div',{class:'t'},`${a.no}. ${a.title}`),
+      h('div',{class:'d'},a.desc),
+      r?h('div',{class:'st'},`완료 · ${mmss(r.elapsed)} · 다시 하려면 누르세요`):null));
+  });
+  document.getElementById('btn-report').disabled=!Object.keys(S.results).length;
+}
+
+function openActivity(act){
+  const ctx=act.init();
+  const steps=[...act.steps,{name:'생각 나누기',instr:'아래 질문에 말로 답해 보세요.',hint:'치료사가 답변을 듣고 평가를 눌러 주세요.',render:renderQuestions,isQ:true}];
+  RUN={act,ctx,steps,i:0,data:{},ratings:act.questions.map(()=>null),memo:'',t0:Date.now()};
+  document.getElementById('a-title').textContent=`${act.no}. ${act.title}`;
+  document.getElementById('a-situ').innerHTML='<div class="h">상황</div>'+act.situation(ctx);
+  clearInterval(TIMER);
+  TIMER=setInterval(()=>{document.getElementById('a-timer').textContent=mmss(Date.now()-RUN.t0);},1000);
+  document.getElementById('a-timer').textContent='0:00';
+  go('act'); renderStep();
+}
+
+function renderStep(){
+  const {steps,i}=RUN, st=steps[i];
+  const bar=document.getElementById('a-steps'); bar.innerHTML='';
+  steps.forEach((s,k)=>bar.append(h('span',{class:'step-pill'+(k===i?' cur':k<i?' past':'')},`${k+1}. ${s.name}`)));
+  document.getElementById('a-instr').textContent=st.instr;
+  document.getElementById('a-hint').textContent=st.hint||'';
+  const body=document.getElementById('a-body'); body.innerHTML='';
+  const nx=document.getElementById('a-next');
+  nx.disabled=true; nx.textContent=i===steps.length-1?'활동 마치기':'다음 단계';
+  nx.onclick=()=>{ if(i===steps.length-1) finishActivity(); else {RUN.i++;renderStep();window.scrollTo(0,0);} };
+  const api={setInstr:t=>{document.getElementById('a-instr').textContent=t;}};
+  st.render(body,RUN.ctx,RUN.data,()=>{nx.disabled=false;},api);
+}
+
+function renderQuestions(body,c,d,done){
+  const box=h('div');
+  const draw=()=>{ box.innerHTML='';
+    RUN.act.questions.forEach((q,k)=>box.append(h('div',{class:'q'},h('div',{class:'qt'},`${k+1}. ${q}`),
+      (()=>{const s=h('div',{class:'seg'});RATE.forEach((r,ri)=>s.append(h('button',{class:(RUN.ratings[k]===ri?'on r'+ri:''),onclick:()=>{RUN.ratings[k]=RUN.ratings[k]===ri?null:ri;draw();}},r)));return s;})())));
+  };
+  draw();
+  const memo=h('textarea',{placeholder:'치료사 메모 (관찰 내용, 단서 제공 등)',oninput:e=>{RUN.memo=e.target.value;}});
+  memo.value=RUN.memo;
+  body.append(box,h('div',{class:'lbl'},'메모'),memo);
+  done();
+}
+
+function finishActivity(){
+  clearInterval(TIMER);
+  const {act,ctx,data,ratings,memo,t0}=RUN;
+  S.results[act.id]={elapsed:Date.now()-t0,items:act.summarize(data,ctx),ratings:ratings.slice(),memo,
+    questions:act.questions.slice(),ctx,at:new Date()};
+  RUN=null; go('home');
+}
+
+function leaveActivity(){
+  if(RUN && !confirm('지금 나가면 이 활동의 진행 내용이 저장되지 않습니다. 나갈까요?')) return;
+  clearInterval(TIMER); RUN=null; go('home');
+}
+
+function showReport(){
+  const b=document.getElementById('rep-body'); b.innerHTML='';
+  const name=document.getElementById('pname').value.trim();
+  const done=ACTS.filter(a=>S.results[a.id]);
+  let pass=0,tot=0;
+  done.forEach(a=>S.results[a.id].items.forEach(it=>{if(it.ok!==null){tot++;if(it.ok)pass++;}}));
+  b.append(h('h2',null,'IADL 시나리오 훈련 결과'),
+    h('div',{class:'meta'},`환자명: ${name||'—'}　날짜: ${todayStr()}　완료 활동: ${done.length}/${ACTS.length}　자동 판정 통과: ${pass}/${tot}`));
+  done.forEach(a=>{
+    const r=S.results[a.id];
+    b.append(h('div',{class:'act-h'},h('b',null,`${a.no}. ${a.title} (${a.tag})`),h('span',null,`소요 ${mmss(r.elapsed)}`)));
+    const t=h('table',null,h('tr',null,h('th',{style:'width:34%'},'항목'),h('th',{style:'width:12%'},'판정'),h('th',null,'내용')));
+    r.items.forEach(it=>t.append(h('tr',null,h('td',null,it.label),
+      h('td',{class:it.ok===null?'na':it.ok?'pass':'fail'},it.ok===null?'기록':it.ok?'통과':'확인 필요'),h('td',{html:it.detail||''}))));
+    b.append(t);
+    const q=h('table',null,h('tr',null,h('th',null,'질문'),h('th',{style:'width:18%'},'치료사 평가')));
+    r.questions.forEach((qq,k)=>q.append(h('tr',null,h('td',null,qq),h('td',null,r.ratings[k]==null?'—':RATE[r.ratings[k]]))));
+    b.append(q);
+    if(r.memo) b.append(h('div',null,h('b',null,'메모: '),r.memo));
+  });
+  b.append(h('p',{class:'hint',style:'margin-top:12px'},'자동 판정은 화면 수행 결과 기준이며, 질문 평가는 치료사 관찰에 따릅니다. 장보기 가격은 연습용 예시입니다.'));
+  go('rep');
+}
+
+function todayStr(){const d=new Date();return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
+document.getElementById('today').textContent=todayStr();
+renderHome();
+</script>
+</body>
+</html>
