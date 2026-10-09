@@ -1131,20 +1131,13 @@ ACTS.push(
 // ── 7. 월간 생활비 계획하기 ──────────────────
 {
   id:'money', no:7, title:'월간 생활비 계획하기', tag:'예산관리', tagClass:'tag-budget',
-  desc:'남은 생활비를 계산하고, 주어진 조건에 맞게 항목별로 나눈 뒤 한 주 식비를 계산합니다.',
-  init(){
-    for(;;){
-      const m=pick([1500000,1800000,2000000]),f=pick([700000,800000,900000]),rem=m-f;
-      const c={m,f,rem,food:pick([250000,300000,350000]),med:pick([100000,150000,200000]),tr:pick([50000,80000,100000]),
-        emg:Math.ceil(rem*0.1/10000)*10000};
-      if(c.food+c.med+c.tr+c.emg<=rem-50000) return c;
-    }
-  },
+  desc:'남은 생활비를 계산하고, 조건에 맞게 항목별로 나눈 뒤 한 주 식비를 계산합니다.',
+  init(){ const m=pick([1200000,1500000,1800000]),f=pick([600000,700000,800000]); return {m,f,rem:m-f}; },
   situation(c){ return `<p>이번 달 생활비로 <b>${won(c.m)}</b>이 있습니다. 고정 지출(월세, 공과금, 통신비 등)은 <b>${won(c.f)}</b>입니다.</p>
     <p>나머지 금액을 나눌 때 지켜야 할 조건:</p><ul class="conds">
-    <li>식비: <b>${won(c.food)}</b> 이상</li><li>의료비(병원비·약값): <b>${won(c.med)}</b> 이상</li>
-    <li>교통비: <b>${won(c.tr)}</b> 이상</li><li>비상금: 남은 금액의 <b>10%</b> 이상</li>
-    <li>여가 활동비는 자유롭게 정합니다.</li><li>나눈 금액을 모두 더하면 남은 금액과 <b>정확히 같아야</b> 합니다.</li></ul>`; },
+    <li>식비와 의료비(병원비·약값)는 꼭 넣습니다.</li>
+    <li>예상치 못한 지출에 대비해 <b>비상금</b>도 정해 둡니다.</li>
+    <li>나눈 금액을 모두 더하면 남은 금액과 <b>정확히 같아야</b> 합니다.</li></ul>`; },
   steps:[
     { name:'남은 금액 계산', instr:'고정 지출을 빼고 남은 금액은 얼마인가요?', hint:'숫자를 눌러 입력하세요.',
       render(body,c,d,done){ const np=numPad('원');
@@ -1174,10 +1167,8 @@ ACTS.push(
           const t=v.reduce((a,b)=>a+b,0); d.allocV=v.slice(); d.allocTxt=CAT.map((k,i)=>`${k} ${won(v[i])}`).join(', ');
           return critResult([
             crit(`합계 ${won(t)} = 남은 금액 ${won(c.rem)}`+(t===c.rem?'':` (${t>c.rem?won(t-c.rem)+' 초과':won(c.rem-t)+' 부족'})`),t===c.rem),
-            crit(`식비 ${won(c.food)} 이상 (지금 ${won(v[0])})`,v[0]>=c.food),
-            crit(`의료비 ${won(c.med)} 이상 (지금 ${won(v[1])})`,v[1]>=c.med),
-            crit(`교통비 ${won(c.tr)} 이상 (지금 ${won(v[2])})`,v[2]>=c.tr),
-            crit(`비상금 남은 금액의 10%(${won(c.emg)}) 이상 (지금 ${won(v[4])})`,v[4]>=c.emg)]);
+            crit(`식비와 의료비를 넣음 (식비 ${won(v[0])}, 의료비 ${won(v[1])})`,v[0]>0&&v[1]>0),
+            crit(`비상금을 정해 둠 (${won(v[4])})`,v[4]>0)]);
         }}));
       }},
     { name:'주별 식비', instr:'', hint:'숫자를 눌러 입력하세요.',
@@ -1190,8 +1181,7 @@ ACTS.push(
         }})); }},
   ],
   questions:['어떤 항목에 우선순위를 두었나요? 그 이유는 무엇인가요?','예산을 초과하게 된다면 어떤 항목을 조정할 계획인가요?','남은 금액이 생긴다면 어떻게 활용할 계획인가요?'],
-  summarize(d,c){ return [{label:'조건',ok:null,detail:`남은 금액 ${won(c.rem)} / 식비 ${won(c.food)}↑, 의료비 ${won(c.med)}↑, 교통비 ${won(c.tr)}↑, 비상금 ${won(c.emg)}↑`},
-    {label:'남은 금액 계산 (첫 답)',ok:!!d.remFirst?.ok,detail:`답 ${d.remAns!=null?won(d.remAns):'-'} / 정답 ${won(c.rem)}`}]
+  summarize(d,c){ return [{label:'남은 금액 계산 (첫 답)',ok:!!d.remFirst?.ok,detail:`답 ${d.remAns!=null?won(d.remAns):'-'} / 정답 ${won(c.rem)}`}]
     .concat(sumCheck(d,'alloc','항목별 배분'),[{label:'배분 내용',ok:null,detail:(d.allocTxt||'-')+` — 남은 돈 실시간 표시 ${d.showRem===false?'끔':'켬'}`},{label:'한 주 식비 계산 (첫 답)',ok:!!d.weekFirst?.ok,detail:d.weekAns!=null?won(d.weekAns):'-'}]); }
 },
 // ── 9. 일상 루틴에 약속 통합하기 ──────────────
