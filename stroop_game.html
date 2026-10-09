@@ -141,16 +141,10 @@
     .bar { position: relative; height: 12px; background: #eceff4; border-radius: 6px; min-width: 90px; }
     .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: #1976d2; }
     .finds { display: flex; flex-direction: column; gap: 8px; }
-    .find { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: start; background: #fff;
-            border: 1px solid #ddd; border-radius: 12px; padding: 10px 12px; }
-    .find .lv { text-align: center; border-radius: 8px; padding: 4px 0; font-weight: 800; font-size: .9rem; }
-    .lv-0 { background: #e8f5e9; color: #2e7d32; }
-    .lv-1 { background: #fff4e5; color: #b54708; }
-    .lv-2 { background: #fdecea; color: #c62828; }
-    .lv-x { background: #eceff4; color: #666; }
+    .find { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 10px 14px; }
     .find .t { font-weight: 800; }
     .find .d { font-size: .93rem; color: #444; }
-    @media (max-width: 480px) { .tiles { grid-template-columns: 1fr; } .find { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .tiles { grid-template-columns: 1fr; } }
     #result-box .actions { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
     #result-box .actions button { padding: 8px 18px; border-radius: 8px; border: 1px solid #bbb; background: #fff; font-weight: 700; }
 
@@ -170,7 +164,6 @@
       body > *:not(#result-box) { display: none !important; }
       #result-box { display: block !important; border: none; background: #fff; }
       .bar i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .find .lv { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       #result-box .actions { display: none; }
     }
   </style>
@@ -486,27 +479,21 @@
         `<td class="n">${s.acc}</td><td class="n">${sec(s.rt)}</td></tr>`;
       const grp = t => `<tr class="grp"><td colspan="5">${t}</td></tr>`;
 
-      // 두 조건 비교 → 차이 정도 (이번 수행 안에서의 비교, 규준 아님)
-      // 정답률 차이 10%p 미만이면서 반응시간 0.3초 미만 느림 → 차이 작음 / 20%p 이상 또는 1초 이상 느림 → 차이 큼 / 그 사이 → 차이 있음
+      // 두 조건 비교 → 정답률·반응시간 차이를 문장으로
       function compare(base, hard) {
         if (!base.n || !hard.n) return null;
         const dAcc = Math.round((accN(base) - accN(hard)) * 100);
         const dRt = base.rt != null && hard.rt != null ? hard.rt - base.rt : null;
-        const slow = dRt != null && dRt > 0 ? dRt / 1000 : 0;
-        let lv = 0;
-        if (dAcc >= 20 || slow >= 1) lv = 2; else if (dAcc >= 10 || slow >= 0.3) lv = 1;
         const parts = [];
         parts.push(dAcc > 0 ? `정답률이 ${dAcc}%p 낮았고` : dAcc < 0 ? `정답률이 오히려 ${-dAcc}%p 높았고` : "정답률은 같았고");
         parts.push(dRt == null ? "반응시간은 비교할 수 없습니다" :
           Math.abs(dRt) < 50 ? "반응 속도는 비슷했습니다" :
           dRt > 0 ? `반응이 ${(dRt / 1000).toFixed(2)}초 느렸습니다` : `반응은 오히려 ${(-dRt / 1000).toFixed(2)}초 빨랐습니다`);
-        return { lv, text: parts.join(", ") + ".", few: Math.min(base.n, hard.n) < 5 };
+        return { text: parts.join(", ") + ".", few: Math.min(base.n, hard.n) < 5 };
       }
-      const LV = ["차이 작음", "차이 있음", "차이 큼"];
       const finds = [];
       const addFind = (title, cmp, prefix) => {
-        if (!cmp) { finds.push({ lv: "x", lvT: "비교 불가", title, desc: "해당 문제가 없어 비교할 수 없습니다." }); return; }
-        finds.push({ lv: cmp.lv, lvT: LV[cmp.lv], title, desc: prefix + " " + cmp.text + (cmp.few ? " (문제 수가 적어 참고만 하세요.)" : "") });
+        finds.push({ title, desc: cmp ? prefix + " " + cmp.text + (cmp.few ? " (문제 수가 적어 참고만 하세요.)" : "") : "해당 문제가 없어 비교할 수 없습니다." });
       };
       addFind("글자에 끌리지 않고 억제하기 (간섭)", compare(con, inc), "글자와 색이 다를 때는 같을 때보다");
       if (switching) {
@@ -514,14 +501,12 @@
         const weak = rc.n && rw.n ? (accN(rc) < accN(rw) ? ["글씨 색", rc, rw] : accN(rw) < accN(rc) ? ["글자 읽기", rw, rc] : null) : null;
         if (weak) {
           const d = Math.round((accN(weak[2]) - accN(weak[1])) * 100);
-          finds.push({ lv: d >= 20 ? 2 : d >= 10 ? 1 : 0, lvT: LV[d >= 20 ? 2 : d >= 10 ? 1 : 0], title: "규칙별 수행",
-            desc: `‘${weak[0]}’ 규칙에서 정답률이 ${d}%p 낮았습니다.` });
+          finds.push({ title: "규칙별 수행", desc: `‘${weak[0]}’ 규칙에서 정답률이 ${d}%p 낮았습니다.` });
         } else if (rc.n && rw.n) {
-          finds.push({ lv: 0, lvT: LV[0], title: "규칙별 수행", desc: "두 규칙의 정답률이 같았습니다." });
+          finds.push({ title: "규칙별 수행", desc: "두 규칙의 정답률이 같았습니다." });
         }
       }
-      const errLv = errI === 0 ? 0 : errI <= 2 ? 1 : 2;
-      finds.push({ lv: errLv, lvT: errI === 0 ? "없음" : errI + "회", title: "반대쪽 정보를 고른 실수 (간섭 오류)",
+      finds.push({ title: `반대쪽 정보를 고른 실수 (간섭 오류) ${errI}회`,
         desc: (switching ? "‘글씨 색’ 규칙에서 적힌 글자를, ‘글자 읽기’ 규칙에서 글씨 색을 고른 경우입니다."
                          : "글씨 색 대신 적힌 글자를 고른 경우입니다.") + (errO ? ` 그 밖의 실수는 ${errO}회입니다.` : "") });
 
@@ -532,15 +517,15 @@
           <div class="tile"><div class="v">${sec(all.rt)}</div><div class="k">평균 반응시간 (정답만)</div></div>
           <div class="tile"><div class="v">${formatTime(elapsedMs)}</div><div class="k">총 소요 시간</div></div>
         </div>
-        <h3>한눈에 보는 해석</h3>
-        <div class="finds">${finds.map(f => `<div class="find"><div class="lv lv-${f.lv}">${f.lvT}</div><div><div class="t">${f.title}</div><div class="d">${f.desc}</div></div></div>`).join("")}</div>
+        <h3>결과 요약</h3>
+        <div class="finds">${finds.map(f => `<div class="find"><div class="t">${f.title}</div><div class="d">${f.desc}</div></div>`).join("")}</div>
         <h3>조건별 비교</h3>
         <table class="cmp"><tr><th>조건</th><th>맞힘</th><th colspan="2">정답률</th><th>평균 반응시간</th></tr>
           ${grp("글자와 색")}${line("같을 때 (예: 빨강을 빨간색으로)", con)}${line("다를 때 (예: 빨강을 파란색으로)", inc)}` +
         (switching ? `${grp("규칙")}${line("글씨 색 고르기", rc)}${line("글자 읽기", rw)}
           ${grp("규칙 바뀜")}${line("같은 규칙이 이어질 때", rep)}${line("규칙이 바뀐 직후", swi)}` : "") +
         `</table>
-        <div class="note">해석은 이번 수행 안에서 두 조건을 비교한 것이며, 연령 규준과 비교한 점수가 아닙니다. 기준: 정답률 차이 10%p 미만이고 반응시간이 0.3초 미만 느리면 ‘차이 작음’, 정답률 차이 20%p 이상이거나 1초 이상 느리면 ‘차이 큼’. 평균 반응시간은 맞힌 문제만 계산합니다.</div>
+        <div class="note">평균 반응시간은 맞힌 문제만 계산합니다.</div>
         <div class="actions"><button onclick="window.print()">인쇄하기</button><button onclick="startGame()">같은 설정으로 다시</button></div>`;
       resultBox.innerHTML = html;
       resultBox.style.display = "block";
