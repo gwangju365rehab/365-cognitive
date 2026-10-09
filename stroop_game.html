@@ -29,10 +29,19 @@
 
     h1 { margin: 0; font-size: 2rem; font-weight: 800; }
 
-    #description {
-      max-width: 720px; font-size: 1rem; color: #444; line-height: 1.7; text-align: center;
+    #description { max-width: 720px; width: 100%; display: flex; justify-content: center; }
+    .legend { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .lg-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+      border: 2px solid #e2e6ee; border-radius: 12px; background: #fafbfd; font-size: 1rem;
     }
-    #description b { color: #000; }
+    .lg-item b { font-size: 1.05rem; }
+    .lg-arrow { color: #888; font-weight: 700; }
+    .lg-sub { width: 100%; text-align: center; font-size: .92rem; color: #666; }
+    .mini-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px;
+      font-size: .95rem; font-weight: 800; white-space: nowrap;
+    }
 
     /* ── 설정 ── */
     .setup { display: flex; flex-direction: column; gap: 10px; align-items: center; width: 100%; max-width: 760px; }
@@ -54,12 +63,12 @@
     }
     #rule-badge {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 18px; border-radius: 999px;
-      font-size: 1.15rem; font-weight: 800;
-      background: #f1f1f1; color: #222; border: 2px solid #bbb;
+      padding: 8px 20px; border-radius: 999px;
+      font-size: 1.2rem; font-weight: 800;
       transition: transform .15s;
     }
-    #rule-badge.word { background: #222; color: #fff; border-color: #222; }
+    .rb-color { background: #fff; color: #222; border: 3px solid #222; }
+    .rb-word  { background: #222; color: #fff; border: 3px solid #222; }
     #rule-badge.flash { animation: flash .6s ease 2; }
     @keyframes flash { 50% { transform: scale(1.12); } }
     .rule-icon {
@@ -72,14 +81,14 @@
       font-size: .8rem; line-height: 18px; text-align: center; color: #fff; width: 24px;
     }
 
+    /* 자극 상자: 규칙과 관계없이 항상 같은 크기·같은 테두리 */
     #target-word {
       font-size: 5rem; font-weight: 900; letter-spacing: 3px;
-      min-height: 7rem; min-width: 280px; text-align: center;
+      height: 9rem; width: 340px; max-width: 100%; text-align: center;
       display: flex; align-items: center; justify-content: center;
-      padding: 4px 28px; border: 6px solid transparent; border-radius: 16px;
+      padding: 4px 20px; border: 4px solid #c3c9d4; border-radius: 16px; background: #fff;
     }
-    #target-word.framed { border-color: #222; }
-    #target-word.idle { font-size: 1.4rem; font-weight: 600; color: #555; letter-spacing: 0; }
+    #target-word.idle { font-size: 1.3rem; font-weight: 600; color: #555; letter-spacing: 0; }
 
     #switch-note { min-height: 1.6rem; font-size: 1.1rem; font-weight: 800; color: #222; }
 
@@ -121,6 +130,27 @@
     #result-box th { background: #f0f2f6; }
     #result-box td:first-child, #result-box th:first-child { text-align: left; }
     #result-box .note { font-size: .85rem; color: #666; }
+    #result-box h3 { margin: 16px 0 6px; font-size: 1.05rem; }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0 4px; }
+    .tile { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 10px; text-align: center; }
+    .tile .v { font-size: 1.6rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .tile .k { font-size: .85rem; color: #666; font-weight: 700; }
+    #result-box table.cmp td { text-align: left; }
+    #result-box table.cmp td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    #result-box table.cmp tr.grp td { background: #f0f2f6; font-weight: 800; font-size: .9rem; color: #444; }
+    .bar { position: relative; height: 12px; background: #eceff4; border-radius: 6px; min-width: 90px; }
+    .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: #1976d2; }
+    .finds { display: flex; flex-direction: column; gap: 8px; }
+    .find { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: start; background: #fff;
+            border: 1px solid #ddd; border-radius: 12px; padding: 10px 12px; }
+    .find .lv { text-align: center; border-radius: 8px; padding: 4px 0; font-weight: 800; font-size: .9rem; }
+    .lv-0 { background: #e8f5e9; color: #2e7d32; }
+    .lv-1 { background: #fff4e5; color: #b54708; }
+    .lv-2 { background: #fdecea; color: #c62828; }
+    .lv-x { background: #eceff4; color: #666; }
+    .find .t { font-weight: 800; }
+    .find .d { font-size: .93rem; color: #444; }
+    @media (max-width: 480px) { .tiles { grid-template-columns: 1fr; } .find { grid-template-columns: 1fr; } }
     #result-box .actions { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
     #result-box .actions button { padding: 8px 18px; border-radius: 8px; border: 1px solid #bbb; background: #fff; font-weight: 700; }
 
@@ -130,7 +160,7 @@
     }
 
     @media (max-width: 480px) {
-      #target-word { font-size: 3.6rem; min-width: 220px; }
+      #target-word { font-size: 3.6rem; width: 260px; height: 7.5rem; }
       .color-btn { min-width: 96px; font-size: 1.15rem; }
       .setup-label { min-width: 0; width: 100%; text-align: center; }
     }
@@ -139,6 +169,8 @@
       body { padding: 0; }
       body > *:not(#result-box) { display: none !important; }
       #result-box { display: block !important; border: none; background: #fff; }
+      .bar i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .find .lv { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       #result-box .actions { display: none; }
     }
   </style>
@@ -245,16 +277,20 @@
     }
 
     // ── 설명 문구 ──────────────────────────────
+    const BADGE_HTML = {
+      color: '<span class="rule-icon"></span>글씨 색',
+      word:  '<span class="rule-icon word">가</span>글자 읽기'
+    };
     function renderDescription() {
       const d = $("description");
+      const item = r => `<div class="lg-item"><span class="mini-badge ${r === "word" ? "rb-word" : "rb-color"}">${BADGE_HTML[r]}</span>` +
+                        `<span class="lg-arrow">→</span><span>${r === "word" ? "적힌 <b>글자</b>를 고르기" : "글씨의 <b>색</b>을 고르기"}</span></div>`;
       if (mode === "basic") {
-        d.innerHTML = "<b>규칙:</b> 화면에 색 이름이 보이지만, <b>글씨 색(실제 색)</b>이 다를 수 있습니다.<br>" +
-                      "항상 <b>글씨 색</b>에 해당하는 버튼을 누르세요. (글자 내용에 속지 않기!)";
+        d.innerHTML = `<div class="legend">${item("color")}<div class="lg-sub">글자 내용에 속지 말고, 항상 글씨 색을 고르세요.</div></div>`;
       } else {
-        d.innerHTML = "<b>규칙이 바뀝니다.</b> 위쪽 표시를 보고 규칙에 맞게 누르세요.<br>" +
-                      "<b>[글씨 색]</b> 표시, 테두리 없음 → 글씨의 <b>색</b>을 고르기<br>" +
-                      "<b>[글자 읽기]</b> 표시, 검은 테두리 → 적힌 <b>글자</b>를 고르기" +
-                      (mode === "fixed" ? `<br>규칙은 ${FIXED_BLOCK}문제마다 번갈아 바뀝니다.` : "<br>규칙은 예고 없이 바뀝니다.");
+        d.innerHTML = `<div class="legend">${item("color")}${item("word")}<div class="lg-sub">` +
+                      (mode === "fixed" ? `${FIXED_BLOCK}문제마다 규칙이 바뀝니다.` : "규칙이 예고 없이 바뀝니다.") +
+                      ` 상자 위 표시를 보고 누르세요.</div></div>`;
       }
     }
 
@@ -307,10 +343,8 @@
     function renderBadge(rule) {
       if (!rule) { badgeEl.style.visibility = "hidden"; return; }
       badgeEl.style.visibility = "visible";
-      badgeEl.className = rule === "word" ? "word" : "";
-      badgeEl.innerHTML = rule === "word"
-        ? '<span class="rule-icon word">가</span>글자 읽기'
-        : '<span class="rule-icon"></span>글씨 색';
+      badgeEl.className = rule === "word" ? "rb-word" : "rb-color";
+      badgeEl.innerHTML = BADGE_HTML[rule];
     }
 
     function buildColorButtons() {
@@ -393,7 +427,7 @@
         if (!running) return;
         wordEl.textContent = t.word.name;
         wordEl.style.color = t.ink.css;
-        wordEl.className = t.rule === "word" ? "framed" : "";
+        wordEl.className = "";
         shownAt = performance.now();
         accepting = true; setButtons(true);
         updateStatus();
@@ -439,33 +473,75 @@
 
       const all = stats(log);
       const con = stats(log.filter(r => r.congruent)), inc = stats(log.filter(r => !r.congruent));
-      const interf = inc.rt != null && con.rt != null ? inc.rt - con.rt : null;
       const errI = log.filter(r => r.errType === "interference").length;
       const errO = log.filter(r => r.errType === "other").length;
-      const head = "<tr><th>구분</th><th>문제 수</th><th>정답</th><th>정확도</th><th>평균 반응시간</th></tr>";
+      const switching = mode !== "basic";
+      const rc = stats(log.filter(r => r.rule === "color")), rw = stats(log.filter(r => r.rule === "word"));
+      const rep = stats(log.filter(r => r.switched === false)), swi = stats(log.filter(r => r.switched === true));
+
+      // 비교표 한 줄: 조건 / 정답(맞힌 수/문제 수) / 정답률 막대 / 평균 반응시간
+      const accN = s => s.n ? s.ok / s.n : null;
+      const line = (label, s) => `<tr><td>${label}</td><td class="n">${s.ok} / ${s.n}</td>` +
+        `<td><div class="bar"><i style="width:${s.n ? Math.round(accN(s) * 100) : 0}%"></i></div></td>` +
+        `<td class="n">${s.acc}</td><td class="n">${sec(s.rt)}</td></tr>`;
+      const grp = t => `<tr class="grp"><td colspan="5">${t}</td></tr>`;
+
+      // 두 조건 비교 → 차이 정도 (이번 수행 안에서의 비교, 규준 아님)
+      // 정답률 차이 10%p 미만이면서 반응시간 0.3초 미만 느림 → 차이 작음 / 20%p 이상 또는 1초 이상 느림 → 차이 큼 / 그 사이 → 차이 있음
+      function compare(base, hard) {
+        if (!base.n || !hard.n) return null;
+        const dAcc = Math.round((accN(base) - accN(hard)) * 100);
+        const dRt = base.rt != null && hard.rt != null ? hard.rt - base.rt : null;
+        const slow = dRt != null && dRt > 0 ? dRt / 1000 : 0;
+        let lv = 0;
+        if (dAcc >= 20 || slow >= 1) lv = 2; else if (dAcc >= 10 || slow >= 0.3) lv = 1;
+        const parts = [];
+        parts.push(dAcc > 0 ? `정답률이 ${dAcc}%p 낮았고` : dAcc < 0 ? `정답률이 오히려 ${-dAcc}%p 높았고` : "정답률은 같았고");
+        parts.push(dRt == null ? "반응시간은 비교할 수 없습니다" :
+          Math.abs(dRt) < 50 ? "반응 속도는 비슷했습니다" :
+          dRt > 0 ? `반응이 ${(dRt / 1000).toFixed(2)}초 느렸습니다` : `반응은 오히려 ${(-dRt / 1000).toFixed(2)}초 빨랐습니다`);
+        return { lv, text: parts.join(", ") + ".", few: Math.min(base.n, hard.n) < 5 };
+      }
+      const LV = ["차이 작음", "차이 있음", "차이 큼"];
+      const finds = [];
+      const addFind = (title, cmp, prefix) => {
+        if (!cmp) { finds.push({ lv: "x", lvT: "비교 불가", title, desc: "해당 문제가 없어 비교할 수 없습니다." }); return; }
+        finds.push({ lv: cmp.lv, lvT: LV[cmp.lv], title, desc: prefix + " " + cmp.text + (cmp.few ? " (문제 수가 적어 참고만 하세요.)" : "") });
+      };
+      addFind("글자에 끌리지 않고 억제하기 (간섭)", compare(con, inc), "글자와 색이 다를 때는 같을 때보다");
+      if (switching) {
+        addFind("규칙 바꾸기 (전환)", compare(rep, swi), "규칙이 바뀐 직후에는 같은 규칙이 이어질 때보다");
+        const weak = rc.n && rw.n ? (accN(rc) < accN(rw) ? ["글씨 색", rc, rw] : accN(rw) < accN(rc) ? ["글자 읽기", rw, rc] : null) : null;
+        if (weak) {
+          const d = Math.round((accN(weak[2]) - accN(weak[1])) * 100);
+          finds.push({ lv: d >= 20 ? 2 : d >= 10 ? 1 : 0, lvT: LV[d >= 20 ? 2 : d >= 10 ? 1 : 0], title: "규칙별 수행",
+            desc: `‘${weak[0]}’ 규칙에서 정답률이 ${d}%p 낮았습니다.` });
+        } else if (rc.n && rw.n) {
+          finds.push({ lv: 0, lvT: LV[0], title: "규칙별 수행", desc: "두 규칙의 정답률이 같았습니다." });
+        }
+      }
+      const errLv = errI === 0 ? 0 : errI <= 2 ? 1 : 2;
+      finds.push({ lv: errLv, lvT: errI === 0 ? "없음" : errI + "회", title: "반대쪽 정보를 고른 실수 (간섭 오류)",
+        desc: (switching ? "‘글씨 색’ 규칙에서 적힌 글자를, ‘글자 읽기’ 규칙에서 글씨 색을 고른 경우입니다."
+                         : "글씨 색 대신 적힌 글자를 고른 경우입니다.") + (errO ? ` 그 밖의 실수는 ${errO}회입니다.` : "") });
 
       let html = `<h2>스트룹 훈련 결과</h2>
-        <div class="meta">${new Date().toLocaleDateString("ko-KR")} · ${MODE_NAME[mode]} · ${LEVEL_NAME[level]} · ${totalQuestions}문제 · 총 ${formatTime(elapsedMs)}</div>
-        <table>${head}${row("전체", all)}${row("일치 (글자 = 색)", con)}${row("불일치 (글자 ≠ 색)", inc)}</table>`;
-
-      if (mode !== "basic") {
-        const rc = stats(log.filter(r => r.rule === "color")), rw = stats(log.filter(r => r.rule === "word"));
-        const rep = stats(log.filter(r => r.switched === false)), swi = stats(log.filter(r => r.switched === true));
-        const cost = swi.rt != null && rep.rt != null ? swi.rt - rep.rt : null;
-        html += `<table>${head}${row("규칙: 글씨 색", rc)}${row("규칙: 글자 읽기", rw)}
-                 ${row("규칙 유지 문제", rep)}${row("규칙 전환 직후 문제", swi)}</table>
-                 <table><tr><th>지표</th><th>값</th></tr>
-                 <tr><td>전환 비용 (전환 직후 − 유지, 반응시간)</td><td>${sgn(cost)}</td></tr>
-                 <tr><td>전환 비용 (정확도 차이)</td><td>${rep.n && swi.n ? ((rep.ok / rep.n - swi.ok / swi.n) * 100).toFixed(0) + "%p" : "-"}</td></tr>`;
-      } else {
-        html += `<table><tr><th>지표</th><th>값</th></tr>`;
-      }
-      html += `<tr><td>간섭 효과 (불일치 − 일치, 반응시간)</td><td>${sgn(interf)}</td></tr>
-               <tr><td>간섭 오류 (규칙과 반대쪽 정보를 고름)</td><td>${errI}회</td></tr>
-               <tr><td>기타 오류</td><td>${errO}회</td></tr></table>
-               <div class="note">평균 반응시간은 정답 문제만 계산합니다. 간섭 오류는 글씨 색 규칙에서 적힌 글자를, 글자 읽기 규칙에서 글씨 색을 고른 경우입니다.` +
-               (mode !== "basic" ? " 전환 비용이 클수록 규칙을 바꿀 때 어려움이 큽니다." : "") + `</div>
-               <div class="actions"><button onclick="window.print()">인쇄하기</button><button onclick="startGame()">같은 설정으로 다시</button></div>`;
+        <div class="meta">${new Date().toLocaleDateString("ko-KR")} · ${MODE_NAME[mode]} · ${LEVEL_NAME[level]} · ${totalQuestions}문제</div>
+        <div class="tiles">
+          <div class="tile"><div class="v">${all.acc}</div><div class="k">정답률 (${all.ok}/${all.n})</div></div>
+          <div class="tile"><div class="v">${sec(all.rt)}</div><div class="k">평균 반응시간 (정답만)</div></div>
+          <div class="tile"><div class="v">${formatTime(elapsedMs)}</div><div class="k">총 소요 시간</div></div>
+        </div>
+        <h3>한눈에 보는 해석</h3>
+        <div class="finds">${finds.map(f => `<div class="find"><div class="lv lv-${f.lv}">${f.lvT}</div><div><div class="t">${f.title}</div><div class="d">${f.desc}</div></div></div>`).join("")}</div>
+        <h3>조건별 비교</h3>
+        <table class="cmp"><tr><th>조건</th><th>맞힘</th><th colspan="2">정답률</th><th>평균 반응시간</th></tr>
+          ${grp("글자와 색")}${line("같을 때 (예: 빨강을 빨간색으로)", con)}${line("다를 때 (예: 빨강을 파란색으로)", inc)}` +
+        (switching ? `${grp("규칙")}${line("글씨 색 고르기", rc)}${line("글자 읽기", rw)}
+          ${grp("규칙 바뀜")}${line("같은 규칙이 이어질 때", rep)}${line("규칙이 바뀐 직후", swi)}` : "") +
+        `</table>
+        <div class="note">해석은 이번 수행 안에서 두 조건을 비교한 것이며, 연령 규준과 비교한 점수가 아닙니다. 기준: 정답률 차이 10%p 미만이고 반응시간이 0.3초 미만 느리면 ‘차이 작음’, 정답률 차이 20%p 이상이거나 1초 이상 느리면 ‘차이 큼’. 평균 반응시간은 맞힌 문제만 계산합니다.</div>
+        <div class="actions"><button onclick="window.print()">인쇄하기</button><button onclick="startGame()">같은 설정으로 다시</button></div>`;
       resultBox.innerHTML = html;
       resultBox.style.display = "block";
       resultBox.scrollIntoView({ behavior: "smooth", block: "start" });

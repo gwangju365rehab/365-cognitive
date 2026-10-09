@@ -31,6 +31,34 @@
     .cat-tab:hover { border-color: #1976d2; background: #e8f2ff; color: #1976d2; }
     .cat-tab.active { background: #1976d2; border-color: #1976d2; color: #fff; }
 
+    #mode-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; width: 100%; max-width: 720px; }
+    #mode-tabs .lbl { font-size: .9rem; font-weight: 700; color: #666; }
+    .mode-tab {
+      padding: 8px 16px; border-radius: 999px; border: 2px solid #ddd;
+      font-size: .92rem; font-weight: 700; background: #fff; color: #555;
+    }
+    .mode-tab.active { background: #37474f; border-color: #37474f; color: #fff; }
+    #mode-tabs.locked .mode-tab { opacity: .5; pointer-events: none; }
+
+    /* 주관식 */
+    #open-box { display: none; width: 100%; max-width: 680px; flex-direction: column; gap: 12px; align-items: center; }
+    .open-guide { width: 100%; border: 2px dashed #c5cdd9; border-radius: 14px; padding: 16px 18px; text-align: center;
+                  font-size: 1.05rem; color: #444; background: #fafbfd; }
+    .btn-reveal { background: #f57c00; color: #fff; }
+    .model-ans { width: 100%; border: 2px solid #1976d2; background: #e8f2ff; border-radius: 14px; padding: 14px 18px; }
+    .model-ans .k { font-size: .9rem; font-weight: 800; color: #1565c0; margin-bottom: 4px; }
+    .model-ans .v { font-size: 1.15rem; font-weight: 800; color: #0d2b55; line-height: 1.6; }
+    .model-ans .ex { margin-top: 8px; padding-top: 8px; border-top: 1px solid #b6cff0; font-size: 1rem; line-height: 1.8; color: #333; }
+    .model-ans .ex b { color: #1565c0; }
+    .rate-wrap { width: 100%; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    .rate-wrap .k { font-size: .95rem; font-weight: 700; color: #555; }
+    .rate-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .rate-btn { padding: 12px 22px; border-radius: 12px; border: 2px solid #dde3ec; background: #fff; font-size: 1.05rem; font-weight: 800; }
+    .rate-btn.on.r0 { background: #388e3c; border-color: #388e3c; color: #fff; }
+    .rate-btn.on.r1 { background: #ef6c00; border-color: #ef6c00; color: #fff; }
+    .rate-btn.on.r2 { background: #d32f2f; border-color: #d32f2f; color: #fff; }
+    .other-opts { font-size: .92rem; color: #666; margin-top: 6px; }
+
     .progress-wrap { width: 100%; max-width: 680px; }
     .progress-bar-bg { width: 100%; height: 10px; border-radius: 999px; background: #f0f4fa; overflow: hidden; }
     .progress-bar-fill { height: 100%; border-radius: 999px; background: #1976d2; transition: width .4s; }
@@ -168,9 +196,15 @@
   <button class="cat-tab" data-cat="public">공공장소</button>
 </div>
 
+<div id="mode-tabs">
+  <span class="lbl">답하는 방식</span>
+  <button class="mode-tab active" data-mode="mc">보기 고르기</button>
+  <button class="mode-tab" data-mode="open">말로 답하기 (주관식)</button>
+</div>
+
 <div class="progress-wrap" id="progress-wrap" style="display:none">
   <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
-  <div class="progress-txt">문제 <span id="prog-cur">1</span> / <span id="prog-tot">10</span> &nbsp;|&nbsp; 정답 <span id="prog-score">0</span>개</div>
+  <div class="progress-txt">문제 <span id="prog-cur">1</span> / <span id="prog-tot">10</span> &nbsp;|&nbsp; <span id="prog-score-lbl">정답</span> <span id="prog-score">0</span>개</div>
 </div>
 
 <div id="situation-card" style="display:none">
@@ -181,6 +215,12 @@
 </div>
 
 <div id="choices"></div>
+
+<div id="open-box">
+  <div class="open-guide">질문에 <b>말로</b> 답해 보세요.<br>답을 들은 뒤 <b>[정답 보기]</b>를 눌러 비교합니다.</div>
+  <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="G.reveal()">정답 보기</button>
+  <div id="open-answer" style="display:none;width:100%;flex-direction:column;gap:12px"></div>
+</div>
 
 <div id="feedback-box">
   <div class="feedback-result"  id="fb-result"></div>
@@ -194,11 +234,12 @@
 </div>
 
 <div id="result-box">
-  <h2>🎉 훈련 완료!</h2>
+  <h2>훈련 완료!</h2>
   <div class="r-row"><span>카테고리</span><span class="r-val" id="r-cat"></span></div>
   <div class="r-row"><span>총 문제</span><span class="r-val"  id="r-total"></span></div>
   <div class="r-row"><span>정답 수</span><span class="r-val"  id="r-correct"></span></div>
-  <div class="r-row"><span>정확도</span><span class="r-val"   id="r-acc"></span></div>
+  <div class="r-row"><span id="r-acc-lbl">정확도</span><span class="r-val"   id="r-acc"></span></div>
+  <div class="r-row" id="r-open-row" style="display:none"><span>평가 내역</span><span class="r-val" id="r-open"></span></div>
   <div class="result-btns">
     <button class="ctrl-btn btn-start" onclick="G.reset();G.start()">다시 훈련</button>
     <button class="ctrl-btn btn-reset" onclick="location.href='index.html'">홈으로</button>
@@ -445,6 +486,10 @@ const Q = [
 // ─────────────────────────────────────────────────────────────
 const G = (() => {
   let queue=[], idx=0, score=0, answered=false, currentCat='all';
+  let answerMode='mc', runMode='mc', rates=[];   // 주관식 평가: 0 적절, 1 부분 적절, 2 부적절
+  const openBox=document.getElementById('open-box'), openAns=document.getElementById('open-answer'), revealBtn=document.getElementById('btn-reveal');
+  const modeTabs=document.getElementById('mode-tabs');
+  const RATE=['적절','부분 적절','부적절'];
   // 각 문항의 셔플된 보기 순서 저장
   let shuffledChoices=[], correctIdxInShuffled=0;
 
@@ -474,7 +519,9 @@ const G = (() => {
   function start() {
     const filtered = currentCat==='all' ? [...Q] : Q.filter(q=>q.cat===currentCat);
     queue = shuffle(filtered);
-    idx=0; score=0; answered=false;
+    idx=0; score=0; answered=false; runMode=answerMode; rates=[];
+    modeTabs.classList.add('locked');
+    document.getElementById('prog-score-lbl').textContent=runMode==='open'?'적절':'정답';
     card.style.display='block';
     progWrap.style.display='block';
     resultBox.style.display='none';
@@ -504,6 +551,16 @@ const G = (() => {
     qEl.textContent      = q.question;
 
     choicesEl.innerHTML='';
+    progFill.style.width=(idx/queue.length*100)+'%';
+    document.getElementById('prog-cur').textContent=idx+1;
+    document.getElementById('prog-score').textContent=score;
+    if (runMode==='open') {
+      openBox.style.display='flex'; revealBtn.style.display='inline-block';
+      openBox.querySelector('.open-guide').style.display='';
+      openAns.style.display='none'; openAns.innerHTML='';
+      return;
+    }
+    openBox.style.display='none';
     const labels=['①','②','③','④'];
     shuffledChoices.forEach((c,i)=>{
       const btn=document.createElement('button');
@@ -546,6 +603,36 @@ const G = (() => {
     nextBtn.style.display='inline-block';
   }
 
+  // 주관식: 정답 보기 → 치료사가 답을 평가 → 다음 문제
+  function reveal() {
+    if (answered) return;
+    answered=true;
+    const q=queue[idx];
+    revealBtn.style.display='none';
+    openBox.querySelector('.open-guide').style.display='none';
+    const others=q.choices.slice(1).map(t=>'· '+t).join('<br>');
+    openAns.innerHTML=`<div class="model-ans"><div class="k">정답</div><div class="v">${q.choices[0]}</div>
+      <div class="ex">${q.explain}</div>
+      <div class="other-opts"><b>객관식의 다른 보기</b><br>${others}</div></div>
+      <div class="rate-wrap"><div class="k">환자의 답을 평가해 주세요 (치료사)</div><div class="rate-btns" id="rate-btns"></div></div>`;
+    openAns.style.display='flex';
+    const rb=document.getElementById('rate-btns');
+    RATE.forEach((r,i)=>{
+      const b=document.createElement('button');
+      b.className='rate-btn'; b.textContent=r;
+      b.onclick=()=>{
+        rates[idx]=i;
+        rb.querySelectorAll('.rate-btn').forEach((x,k)=>x.className='rate-btn'+(k===i?' on r'+i:''));
+        score=rates.filter(x=>x===0).length;
+        document.getElementById('prog-score').textContent=score;
+        progFill.style.width=((idx+1)/queue.length*100)+'%';
+        nextBtn.textContent=idx+1>=queue.length?'결과 보기 →':'다음 문제 →';
+        nextBtn.style.display='inline-block';
+      };
+      rb.appendChild(b);
+    });
+  }
+
   function next() {
     idx++;
     if (idx>=queue.length) { end(); return; }
@@ -556,18 +643,26 @@ const G = (() => {
     card.style.display='none';
     choicesEl.innerHTML='';
     fbBox.style.display='none';
+    openBox.style.display='none';
     nextBtn.style.display='none';
     progFill.style.width='100%';
+    modeTabs.classList.remove('locked');
+    const isOpen=runMode==='open';
+    document.getElementById('r-acc-lbl').textContent=isOpen?'적절 비율':'정확도';
+    document.getElementById('r-open-row').style.display=isOpen?'flex':'none';
+    if (isOpen) document.getElementById('r-open').textContent=RATE.map((r,i)=>`${r} ${rates.filter(x=>x===i).length}`).join(' · ');
 
     document.getElementById('r-cat').textContent    =CAT_LABELS[currentCat];
     document.getElementById('r-total').textContent  =queue.length+'문제';
-    document.getElementById('r-correct').textContent=score+'문제';
+    document.getElementById('r-correct').textContent=score+'문제'+(runMode==='open'?' (적절)':'');
     document.getElementById('r-acc').textContent    =Math.round(score/queue.length*100)+'%';
     resultBox.style.display='block';
   }
 
   function reset() {
-    idx=0; score=0; answered=false;
+    idx=0; score=0; answered=false; rates=[];
+    modeTabs.classList.remove('locked');
+    openBox.style.display='none';
     card.style.display='none';
     choicesEl.innerHTML='';
     fbBox.style.display='none';
@@ -586,7 +681,15 @@ const G = (() => {
     });
   });
 
-  return { start, next, reset };
+  document.querySelectorAll('.mode-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      answerMode=tab.dataset.mode;
+    });
+  });
+
+  return { start, next, reset, reveal };
 })();
 </script>
 </body>
