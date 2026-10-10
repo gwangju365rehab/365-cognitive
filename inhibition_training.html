@@ -101,7 +101,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 #scr-rep{margin-top:50px}
 .resp button{display:inline-flex;align-items:center;justify-content:center;gap:10px}
 .fbline{min-height:2.2rem;text-align:center;font-size:1.25rem;font-weight:800}
-.pause{position:absolute;inset:0;background:rgba(255,255,255,.94);display:grid;place-items:center;z-index:5}
+.pause{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);display:grid;place-items:center;z-index:5}
 
 /* 리포트 */
 .rep h2{margin:0 0 4px;font-size:1.4rem}
@@ -112,6 +112,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .rep td.l,.rep th.l{text-align:left}
 textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid var(--line);border-radius:10px}
 .note{font-size:.85rem;color:var(--sub)}
+#err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
 #hospital-logo{position:fixed;bottom:10px;right:14px;font-size:.8rem;color:#9aa2b2;font-weight:700}
 @media print{
   body{background:#fff;padding:0;font-size:12px}
@@ -188,8 +189,12 @@ textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid v
   </div>
 </div>
 
+<div id="err-box"></div>
 <div id="hospital-logo">광주365재활병원_인지연하팀</div>
 
+<script>
+window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
+</script>
 <script>
 "use strict";
 // ══ 도구 ══════════════════════════════════════════════
@@ -205,8 +210,19 @@ function h(tag, props, ...kids){
     else if(k==='disabled') e.disabled=!!v;
     else e.setAttribute(k,v);
   }
-  kids.flat(Infinity).forEach(c=>{ if(c==null||c===false) return; e.append(c.nodeType?c:document.createTextNode(String(c))); });
+  flatten(kids).forEach(c=>{ if(c==null||c===false) return; e.append(c.nodeType?c:document.createTextNode(String(c))); });
   return e;
+}
+// 구형 브라우저용: 배열 펼치기
+function flatten(a){const out=[];(function f(x){x.forEach(y=>Array.isArray(y)?f(y):out.push(y));})(a);return out;}
+// 누르기: 포인터 이벤트가 없으면 터치·마우스로 받음 (같은 누름이 두 번 처리되지 않게 0.35초 안의 중복은 무시)
+let LASTPRESS=0;
+function bindPress(btn,fn){
+  const fire=e=>{ if(e&&e.cancelable) e.preventDefault(); const t=Date.now(); if(t-LASTPRESS<350) return; LASTPRESS=t; fn(); };
+  if(window.PointerEvent) btn.addEventListener('pointerdown',fire);
+  else { btn.addEventListener('touchstart',fire,{passive:false}); btn.addEventListener('mousedown',fire); }
+  btn.addEventListener('click',()=>{ if(Date.now()-LASTPRESS>350){ LASTPRESS=Date.now(); fn(); } });
+  return btn;
 }
 const $=id=>document.getElementById(id);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -373,11 +389,11 @@ function startBlock(predIdx){
   const top=$('t-top'); top.innerHTML='';
   if(SES.task==='shop') top.append(h('div',{class:'listbox'},h('div',{class:'h'},'이번 장보기 목록'),h('div',{class:'items'},CUR.list.map(x=>h('span',null,x)))));
   const resp=$('resp'); resp.innerHTML='';
-  if(SES.task==='shop') resp.append(h('button',{class:'go',onpointerdown:e=>{e.preventDefault();press('go');}},'담기'));
-  if(SES.task==='cross') resp.append(h('button',{class:'go',onpointerdown:e=>{e.preventDefault();press('go');}},'건너기'));
+  if(SES.task==='shop') resp.append(bindPress(h('button',{class:'go'},'담기'),()=>press('go')));
+  if(SES.task==='cross') resp.append(bindPress(h('button',{class:'go'},'건너기'),()=>press('go')));
   if(SES.task==='sign') resp.append(
-    h('button',{onpointerdown:e=>{e.preventDefault();press('L');},html:arrowSVG('L',40)+' 왼쪽'}),
-    h('button',{onpointerdown:e=>{e.preventDefault();press('R');},html:'오른쪽 '+arrowSVG('R',40)}));
+    bindPress(h('button',{html:arrowSVG('L',40)+' 왼쪽'}),()=>press('L')),
+    bindPress(h('button',{html:'오른쪽 '+arrowSVG('R',40)}),()=>press('R')));
   $('fb').textContent='';
   go('task');
   later(()=>nextTrial(),800);
@@ -397,7 +413,7 @@ function makeTrials(task,cfg,n){
   if(task==='shop'){
     const items=shuffle(SHOP_POOL).slice(0,cfg.k), list=items.map(x=>x.n);
     const nGo=Math.round(n*cfg.go), nNo=n-nGo, nLure=Math.round(nNo*cfg.lure);
-    const lures=items.flatMap(x=>x.lure).filter(x=>!list.includes(x));
+    const lures=[]; items.forEach(x=>x.lure.forEach(l=>{ if(list.indexOf(l)<0) lures.push(l); }));
     const arr=[];
     for(let i=0;i<nGo;i++) arr.push({go:true,name:list[i%list.length],kind:'go'});
     for(let i=0;i<nLure;i++) arr.push({go:false,name:pick(lures),kind:'lure'});
@@ -612,6 +628,13 @@ function showReport(){
   b.append(h('p',{class:'note'},'구성 근거: 억제 과제에 실수 예측·자기 모니터링·피드백·전략 선택을 결합한 메타인지 전략 훈련 방식 (Cicerone et al., 2019; Jeffay et al., 2023).'));
   go('rep');
 }
+
+document.addEventListener('keydown',e=>{
+  if(!CUR||!$('scr-task').classList.contains('on')) return;
+  if(e.key===' '||e.key==='Enter'){ if(SES.task!=='sign'){e.preventDefault();press('go');} }
+  else if(e.key==='ArrowLeft'&&SES.task==='sign'){e.preventDefault();press('L');}
+  else if(e.key==='ArrowRight'&&SES.task==='sign'){e.preventDefault();press('R');}
+});
 
 // ══ 화면이 가려지면 잠시 멈춤 ══════════════════════════════
 document.addEventListener('visibilitychange',()=>{
