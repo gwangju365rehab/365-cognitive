@@ -471,13 +471,13 @@
 <p class="subtitle">박자에 맞춰 타겟만 정확하게 터치하는 지속주의 · 반응속도 훈련</p>
 
 <details id="description" open>
-  <summary><b>📖 규칙 보기 / 숨기기</b></summary>
+  <summary><b>규칙 보기 / 숨기기</b></summary>
   <div class="description-body">
     <b>진행 방법:</b> 모드와 레벨을 고른 뒤 [게임 시작]을 누르고, 화면에 보이는 도형 중 위쪽에 표시된 <b>타겟</b>과 일치하는 것만 터치합니다.
     <table>
       <tr>
         <th style="width:90px;">기본 모드</th>
-        <td>지정한 <b>타겟 모양·색</b>의 도형만 터치. BPM이 있으면 박자에 맞춰 클릭(타이밍 평가).</td>
+        <td>지정한 <b>타겟 모양·색</b>의 도형만 터치. BPM을 고르면 메트로놈 소리에 맞춰 <b>한 박자에 한 번</b> 터치합니다(박자 앞뒤 30% 안이면 정타).</td>
       </tr>
       <tr>
         <th>스트룹 모드</th>
@@ -485,15 +485,15 @@
       </tr>
     </table>
 
-    <div style="margin-top:10px; font-weight:700; color:#1a237e;">📘 기본 모드 난이도</div>
+    <div style="margin-top:10px; font-weight:700; color:#1a237e;">기본 모드 난이도 <span style="font-weight:500;color:#555">(BPM은 레벨과 따로 정하며, 레벨을 바꿔도 꺼지지 않습니다)</span></div>
     <table>
-      <tr><th style="width:60px;">L1</th><td>무박 · 도형 8개 · 느린 속도 · 타겟 비율 50% · 타겟 1회 무작위 (쉬움)</td></tr>
-      <tr><th>L2</th><td>무박 · 도형 12개 · 보통 속도 · 타겟 비율 30% · 도형 소진 시 타겟 무작위 전환 (중간)</td></tr>
-      <tr><th>L3</th><td>BPM 60 · 도형 12개 · 보통 속도 · 타겟 비율 20% · 도형 소진 또는 20초마다 타겟 무작위 전환 (어려움)</td></tr>
-      <tr><th>L4</th><td>무박 · 도형 16개 · 빠른 속도 · 타겟 비율 20% · 도형 소진 또는 10초마다 타겟 무작위 전환 (최고난도)</td></tr>
+      <tr><th style="width:60px;">L1</th><td>도형 8개 · 느린 속도 · 타겟 비율 50% · 타겟 1회 무작위 (쉬움)</td></tr>
+      <tr><th>L2</th><td>도형 12개 · 보통 속도 · 타겟 비율 30% · 도형 소진 시 타겟 무작위 전환 (중간)</td></tr>
+      <tr><th>L3</th><td>BPM이 꺼져 있으면 60으로 켬 · 도형 12개 · 보통 속도 · 타겟 비율 20% · 도형 소진 또는 20초마다 타겟 무작위 전환 (어려움)</td></tr>
+      <tr><th>L4</th><td>도형 16개 · 빠른 속도 · 타겟 비율 20% · 도형 소진 또는 10초마다 타겟 무작위 전환 (최고난도)</td></tr>
     </table>
 
-    <div style="margin-top:10px; font-weight:700; color:#1a237e;">📕 스트룹 모드 난이도</div>
+    <div style="margin-top:10px; font-weight:700; color:#1a237e;">스트룹 모드 난이도 <span style="font-weight:500;color:#555">(메트로놈 없음)</span></div>
     <table>
       <tr><th style="width:60px;">L1</th><td>도형 10개 · 느린 속도 · 시작 시 타겟 무작위, 모양↔색 기준 전환 (쉬움)</td></tr>
       <tr><th>L2</th><td>도형 14개 · 보통 속도 · 시작 시 타겟 무작위, 모양↔색 기준 전환 (중간)</td></tr>
@@ -537,9 +537,9 @@
   <div class="ctrl-group" id="bpm-control">
     <label>BPM:</label>
     <select id="bpm-select">
-      <option value="none">없음(무박)</option>
+      <option value="none" selected>없음(무박)</option>
       <option value="40">40</option>
-      <option value="60" selected>60</option>
+      <option value="60">60</option>
       <option value="80">80</option>
       <option value="100">100</option>
     </select>
@@ -608,16 +608,16 @@
   <div class="acc-item">
     <label for="volume-select">음량:</label>
     <select id="volume-select">
-      <option value="0.1">작게</option>
-      <option value="0.25" selected>보통</option>
-      <option value="0.5">크게</option>
+      <option value="0.25">작게</option>
+      <option value="0.5" selected>보통</option>
+      <option value="0.9">크게</option>
     </select>
   </div>
 </div>
 
 <div id="status">
   <div class="stat">모드: <span class="stat-value" id="mode-label">기본</span></div>
-  <div class="stat">BPM: <span class="stat-value" id="bpm-label">60</span></div>
+  <div class="stat">BPM: <span class="stat-value" id="bpm-label">-</span></div>
   <div class="stat">박자: <span class="stat-value" id="beat-count">0</span>/<span id="max-beats-label">50</span></div>
   <div class="stat">정타: <span class="stat-value" id="hits">0</span></div>
   <div class="stat">실수: <span class="stat-value" id="misses">0</span></div>
@@ -629,7 +629,7 @@
   <div id="target-visual">
     <div id="target-visual-shape">★</div>
     <div id="target-visual-info">
-      <div id="target-visual-label">🎯 현재 타겟</div>
+      <div id="target-visual-label">현재 타겟</div>
       <div id="target-visual-text">노랑 별</div>
       <div id="target-visual-sub">이 자극만 터치하세요</div>
     </div>
@@ -721,8 +721,12 @@ const feedbackAlertBox = $("feedback-alert");
 
 /* ──────────────── 상태 ──────────────── */
 let audioCtx = null;
+let keepAlive = null;       // 안드로이드 기기에서 오디오 출력이 잠들지 않도록 아주 작은 신호 유지
 let animId = null;
-let beatTimerId = null;
+let beatTimerId = null;     // 박자 setTimeout id
+let beatT0 = 0;             // 박자 기준 시각 (performance.now)
+let beatK = 0;              // 다음 박자 번호 (beatT0 기준)
+let lastHitBeat = -1;       // 정타로 인정된 마지막 박자 번호 (한 박자에 한 번)
 let timeTimerId = null;
 
 let mode = "basic";
@@ -767,11 +771,10 @@ let stroopGroupMisses = 0;
 let stroopGroupRounds = 0;
 
 /* ──────────────── 유틸 ──────────────── */
+// 박자 앞뒤 허용 범위: 박자 간격의 30% (최소 200ms)
+// 40 → ±450ms, 60 → ±300ms, 80 → ±225ms, 100 → ±200ms
 function timingFromBpm(b) {
-  if (b <= 50) return 1000;
-  if (b <= 70) return 900;
-  if (b <= 90) return 800;
-  return 700;
+  return Math.max(200, Math.round(60000 / b * 0.3));
 }
 
 function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -922,7 +925,6 @@ function applyBasicLevel(level) {
 
   switch (level) {
     case "B1": // 쉬움: 무작위 1회만 (게임 시작 시)
-      bpmSelect.value = "none";
       countSelect.value = "8";
       speed = 0.4; targetRatio = 0.5;
       basicRandomTarget = true;
@@ -930,15 +932,14 @@ function applyBasicLevel(level) {
       basicRandomInterval = 0;
       break;
     case "B2": // 중간: 도형 소진 시 자동 전환
-      bpmSelect.value = "none";
       countSelect.value = "12";
       speed = 0.7; targetRatio = 0.3;
       basicRandomTarget = true;
       basicRandomOnClear = true;
       basicRandomInterval = 0;
       break;
-    case "B3": // 어려움: 도형 소진 + 20초마다
-      bpmSelect.value = "60";
+    case "B3": // 어려움: 도형 소진 + 20초마다 (메트로놈이 꺼져 있으면 60으로 켬)
+      if (bpmSelect.value === "none") bpmSelect.value = "60";
       countSelect.value = "12";
       speed = 0.7; targetRatio = 0.2;
       basicRandomTarget = true;
@@ -946,7 +947,6 @@ function applyBasicLevel(level) {
       basicRandomInterval = 20000;
       break;
     case "B4": // 최고난도: 도형 소진 + 10초마다
-      bpmSelect.value = "none";
       countSelect.value = "16";
       speed = 1.0; targetRatio = 0.2;
       basicRandomTarget = true;
@@ -965,7 +965,6 @@ function applyBasicLevel(level) {
 
 function applyStroopLevel(level) {
   modeSelect.value = "stroop"; mode = "stroop";
-  bpmSelect.value = "none";
   autoRandomTarget = false;
 
   switch (level) {
@@ -1341,15 +1340,38 @@ function animate() {
 }
 
 /* ──────────────── 오디오 ──────────────── */
+// 버튼을 누를 때(사용자 동작) 오디오를 만들고 깨움. 화면 꺼짐·다른 앱 전환 뒤 'suspended'/'interrupted'가 되면 다시 깨움.
 function initAudio() {
   if (!audioCtx) {
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) { audioCtx = null; }
-  } else if (audioCtx.state === "suspended") {
-    audioCtx.resume();
+    } catch (e) { audioCtx = null; return; }
+  }
+  if (audioCtx.state !== "running") {
+    try { audioCtx.resume(); } catch (e) {}
   }
 }
+
+function startKeepAlive() {
+  if (!audioCtx || keepAlive) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.frequency.value = 30;
+    g.gain.value = 0.0005;   // 들리지 않는 크기
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start();
+    keepAlive = osc;
+  } catch (e) { keepAlive = null; }
+}
+function stopKeepAlive() {
+  if (keepAlive) { try { keepAlive.stop(); keepAlive.disconnect(); } catch (e) {} keepAlive = null; }
+}
+
+// 화면을 누를 때마다 오디오가 멈춰 있으면 다시 깨움
+document.addEventListener("pointerdown", () => {
+  if (audioCtx && audioCtx.state !== "running") { try { audioCtx.resume(); } catch (e) {} }
+}, true);
 
 function getCurrentVolume() {
   const sel = $("volume-select");
@@ -1365,7 +1387,15 @@ function playBeep() {
   if (!audioCtx) return;
   const soundType = getCurrentSoundType();
   if (soundType === "off") return;
+  if (audioCtx.state !== "running") {
+    // 멈춰 있으면 깨운 뒤 바로 울림 (이번 박자 소리를 잃지 않도록)
+    try { audioCtx.resume().then(() => { if (running && !paused) playBeepNow(soundType); }); } catch (e) {}
+    return;
+  }
+  playBeepNow(soundType);
+}
 
+function playBeepNow(soundType) {
   const volume = getCurrentVolume();
   const now = audioCtx.currentTime;
 
@@ -1416,9 +1446,34 @@ function playBeep() {
 }
 
 /* ──────────────── 박자 / 시간 ──────────────── */
-function doBeat() {
+function beatInterval() { return 60000 / bpm; }
+
+// 박자 타이머는 언제나 하나만 돎. 다음 박자 시각 = beatT0 + beatK × 간격
+function startBeatClock(firstDelay) {
+  stopBeatClock();
+  beatT0 = performance.now() + firstDelay;
+  beatK = 0;
+  lastBeatTime = null;   // 새 기준으로 다시 셈
+  lastHitBeat = -1;
+  scheduleNextBeat();
+}
+function stopBeatClock() {
+  if (beatTimerId) { clearTimeout(beatTimerId); beatTimerId = null; }
+}
+function scheduleNextBeat() {
+  const at = beatT0 + beatK * beatInterval();
+  beatTimerId = setTimeout(() => {
+    beatTimerId = null;
+    if (!running || paused) return;
+    doBeat(at);
+    beatK++;
+    if (running && !paused && beatCount < MAX_BEATS) scheduleNextBeat();
+  }, Math.max(0, at - performance.now()));
+}
+
+function doBeat(at) {
   if (!running || paused || !useBeat || mode !== "basic") return;
-  lastBeatTime = performance.now();
+  lastBeatTime = at;          // 실제 박자 시각 (타이머 지연과 무관)
   beatCount++;
   beatCountSpan.textContent = beatCount;
 
@@ -1427,7 +1482,8 @@ function doBeat() {
   setTimeout(() => beatIndicator.classList.remove("on"), 140);
 
   if (beatCount >= MAX_BEATS) {
-    endGameByBeats();
+    // 마지막 박자에도 터치할 시간을 준 뒤 종료
+    setTimeout(() => { if (running && !paused) endGameByBeats(); }, timingWindow + 100);
   }
 }
 
@@ -1447,10 +1503,11 @@ function startTimeTimer() {
 
 /* ──────────────── 게임 종료 ──────────────── */
 function stopAllTimers() {
-  if (beatTimerId) { clearInterval(beatTimerId); beatTimerId = null; }
+  stopBeatClock();
   if (timeTimerId) { clearInterval(timeTimerId); timeTimerId = null; }
   if (basicRandomTimerId) { clearTimeout(basicRandomTimerId); basicRandomTimerId = null; }
   if (animId) { cancelAnimationFrame(animId); animId = null; }
+  stopKeepAlive();
 }
 
 function endGameByBeats() {
@@ -1459,7 +1516,7 @@ function endGameByBeats() {
   stopAllTimers();
   const total = hits + misses;
   const acc = total > 0 ? (hits / total * 100).toFixed(1) : "0.0";
-  const onBeatAcc = (hits / MAX_BEATS * 100).toFixed(1);
+  const onBeatAcc = (Math.min(hits, beatCount) / Math.max(1, beatCount) * 100).toFixed(1);
   showResultAlert(
     "박자 종료!",
     `총 박자: ${beatCount} / ${MAX_BEATS}\n정타 ${hits}회 / 실수 ${misses}회\n전체 정확도 ${acc}%\n박자 내 정타율 ${onBeatAcc}%${getReactionSummary()}`
@@ -1484,9 +1541,11 @@ function endGameByTime() {
   } else {
     const total = hits + misses;
     const acc = total > 0 ? (hits / total * 100).toFixed(1) : "0.0";
+    const beatTxt = useBeat && beatCount > 0
+      ? `\n지나간 박자 ${beatCount}개 중 정타 ${hits}회 (${(Math.min(hits, beatCount) / beatCount * 100).toFixed(1)}%)` : "";
     showResultAlert(
       "시간 종료!",
-      `정타 ${hits}회 / 실수 ${misses}회\n전체 정확도 ${acc}%${getReactionSummary()}`
+      `정타 ${hits}회 / 실수 ${misses}회\n전체 정확도 ${acc}%${beatTxt}${getReactionSummary()}`
     );
   }
   messageDiv.textContent = "시간 종료";
@@ -1525,7 +1584,7 @@ function pauseGame() {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
 
   // 박자 타이머 정지
-  if (beatTimerId) { clearInterval(beatTimerId); beatTimerId = null; }
+  stopBeatClock();
 
   // 시간 타이머 정지
   if (timeTimerId) { clearInterval(timeTimerId); timeTimerId = null; }
@@ -1536,7 +1595,7 @@ function pauseGame() {
   const pBtn = $("pause-btn");
   pBtn.textContent = "재개";
   pBtn.classList.add("resuming");
-  messageDiv.textContent = "⏸ 일시정지 중";
+  messageDiv.textContent = "일시정지 중";
 }
 
 function resumeGame() {
@@ -1552,9 +1611,11 @@ function resumeGame() {
   // 애니메이션 재개
   animId = requestAnimationFrame(animate);
 
-  // 박자 타이머 재개
+  // 박자 재개: 오디오를 깨우고 한 박자 뒤부터 다시 울림
   if (useBeat && mode === "basic") {
-    beatTimerId = setInterval(doBeat, 60000 / bpm);
+    if (beatCount >= MAX_BEATS) { endGameByBeats(); return; }
+    initAudio();
+    startBeatClock(beatInterval());
   }
 
   // 시간 타이머 재개
@@ -1754,32 +1815,41 @@ function handleShapeClick(shapeObj) {
     return;
   }
 
-  // 기본 + BPM 모드: 타이밍 평가
+  // 기본 + BPM 모드: 가장 가까운 박자(앞 박자 또는 다음 박자)와의 차이로 평가
   if (lastBeatTime === null) {
-    hits++;
-    hitsSpan.textContent = hits;
-    showFeedback("✓", "hit");
-    removeShape(shapeObj);
-    return;
+    // 첫 박자 전: 첫 박자에 가까우면 첫 박자로 인정
+    const first = beatT0;
+    if (Math.abs(performance.now() - first) > timingWindow) {
+      misses++;
+      missesSpan.textContent = misses;
+      shakeElement(shapeObj.elem);
+      showFeedback("✗", "miss");
+      messageDiv.textContent = "첫 박자 소리를 듣고 터치하세요";
+      return;
+    }
   }
 
   const now = performance.now();
-  const diff = Math.abs(now - lastBeatTime);
+  const iv = beatInterval();
+  const prevAt = lastBeatTime === null ? beatT0 - iv : lastBeatTime;
+  const prevK = Math.round((prevAt - beatT0) / iv);
+  const dPrev = now - prevAt, dNext = prevAt + iv - now;
+  const nearK = dNext < dPrev ? prevK + 1 : prevK;
+  const diff = Math.min(Math.abs(dPrev), Math.abs(dNext));
 
-  if (diff <= timingWindow) {
+  if (diff <= timingWindow && nearK !== lastHitBeat) {
+    lastHitBeat = nearK;
     hits++;
     hitsSpan.textContent = hits;
     showFeedback("✓", "hit");
     removeShape(shapeObj);
-    messageDiv.textContent = `정타! (오차 ${Math.round(diff)}ms / ±${timingWindow}ms)`;
+    messageDiv.textContent = `정타! (박자와 ${Math.round(diff)}ms 차이 / 허용 ±${timingWindow}ms)`;
 
     const anyTargetLeft = shapes.some(s => isTargetMatch(s.type.id, s.colorId));
     if (!anyTargetLeft && running) {
       if (basicRandomTarget && basicRandomOnClear) {
-        // L3 등: 도형 소진 시 무작위 전환 + 화면 재구성
         setTimeout(() => { if (running) rotateBasicRandomTarget("cleared"); }, 300);
       } else {
-        // 직접설정 또는 무작위 OFF: 타겟 1개 보충
         createTargetShape();
       }
     }
@@ -1788,7 +1858,8 @@ function handleShapeClick(shapeObj) {
     missesSpan.textContent = misses;
     shakeElement(shapeObj.elem);
     showFeedback("✗", "miss");
-    messageDiv.textContent = now < lastBeatTime ? "너무 빨랐습니다" : "너무 늦었습니다";
+    messageDiv.textContent = diff <= timingWindow ? "한 박자에 한 번만 터치하세요"
+      : dNext < dPrev ? "너무 빨랐습니다 (다음 소리에 맞춰 보세요)" : "너무 늦었습니다";
   }
 }
 
@@ -1806,9 +1877,13 @@ function startGame() {
     setRandomTargetForBasic();
   } else {
     updateTargetObjects();
+    if (mode === "basic" && !targetShapeType && !targetColor) {
+      messageDiv.textContent = "타겟 모양이나 색을 하나 이상 선택해주세요.";
+      return;
+    }
     if (mode === "stroop") {
       if (!targetShapeType || !targetColor) {
-        messageDiv.textContent = "⚠️ 스트룹 모드에서는 타겟 모양과 색을 모두 선택해주세요.";
+        messageDiv.textContent = "스트룹 모드에서는 타겟 모양과 색을 모두 선택해주세요.";
         return;
       }
       stroopRule = "shape";
@@ -1826,6 +1901,7 @@ function startGame() {
     useBeat = true;
     bpm = Number(bpmSelect.value);
     timingWindow = timingFromBpm(bpm);
+    if (!audioCtx) messageDiv.textContent = "이 기기에서는 소리를 낼 수 없어 깜빡임으로만 박자를 보여줍니다.";
   }
 
   // 도형 개수
@@ -1845,7 +1921,7 @@ function startGame() {
 
   // 카운터 초기화
   hits = 0; misses = 0; beatCount = 0;
-  lastBeatTime = null;
+  lastBeatTime = null; lastHitBeat = -1;
   lastShapeShownTime = null;
   reactionTimes = [];
   stroopRoundHits = 0; stroopRoundMisses = 0;
@@ -1892,12 +1968,8 @@ function startGame() {
   animId = requestAnimationFrame(animate);
 
   if (useBeat && mode === "basic") {
-    setTimeout(() => {
-      if (running) {
-        doBeat();
-        beatTimerId = setInterval(doBeat, 60000 / bpm);
-      }
-    }, 400);
+    startKeepAlive();
+    startBeatClock(600);   // 오디오가 깨어날 시간을 두고 첫 박자
   }
 
   // 기본 무작위 타겟: 10초 주기 타이머 시작
@@ -1917,6 +1989,14 @@ stopBtn.addEventListener("click", stopGameManual);
 $("pause-btn").addEventListener("click", () => {
   if (paused) resumeGame();
   else pauseGame();
+});
+
+// 화면이 꺼지거나 다른 화면으로 바뀌면 자동 일시정지 (돌아오면 [재개]로 이어서)
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && running && !paused) {
+    pauseGame();
+    messageDiv.textContent = "화면이 바뀌어 일시정지했습니다. [재개]를 누르세요.";
+  }
 });
 
 /* ──────────────── 홈 버튼 ──────────────── */
