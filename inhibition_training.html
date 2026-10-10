@@ -9,7 +9,6 @@
   --ink:#1f2433; --sub:#5b6375; --line:#d5dbe6; --bg:#eef1f6; --card:#fff;
   --pri:#283593; --pri-2:#3f51b5; --pri-soft:#e8eaf6;
   --ok:#2e7d32; --ok-soft:#e8f5e9; --bad:#c62828; --bad-soft:#fdecea;
-  --warn:#b54708; --warn-soft:#fff4e5;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html,body{margin:0}
@@ -18,7 +17,8 @@ body{font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",s
 button{font:inherit;cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.45}
 button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
-.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.wrap{max-width:840px;margin:0 auto;display:flex;flex-direction:column}
+.wrap>*+*{margin-top:14px}
 .screen{display:none}
 .screen.on{display:flex}
 
@@ -28,80 +28,106 @@ button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
 h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:800}
 .lead{text-align:center;color:var(--sub);font-size:1rem;margin:0}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row{display:flex;align-items:center;flex-wrap:wrap}
+.row>*{margin:4px}
 .lbl{font-size:.92rem;font-weight:800;color:var(--sub);margin:4px 0 6px}
-.hint{font-size:.95rem;color:var(--sub);margin:0}
 
-/* 탭 */
-.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.tab{padding:12px 20px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:800;color:var(--sub);min-height:50px}
+/* 탭·난이도 */
+.tabs{display:flex;justify-content:center;flex-wrap:wrap}
+.tab{margin:4px;padding:12px 20px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:800;color:var(--sub);min-height:50px}
 .tab.on{background:var(--pri);border-color:var(--pri);color:#fff}
-.task-head{display:flex;gap:14px;align-items:center}
-.task-head svg{flex:none}
+.task-head{display:flex;align-items:center}
+.task-head svg{flex:none;margin-right:14px}
 .task-head .t{font-size:1.25rem;font-weight:800}
 .task-head .k{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--pri-soft);color:var(--pri);font-size:.82rem;font-weight:800;margin-left:6px;vertical-align:middle}
 .task-head .d{color:var(--sub);font-size:.98rem}
-
-.lv-list{display:flex;flex-direction:column;gap:10px}
-.lv-btn{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;min-height:66px}
+.lv-btn{display:flex;align-items:center;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;min-height:66px;margin-bottom:10px}
 .lv-btn.on{border-color:var(--pri-2);background:var(--pri-soft)}
-.lv-btn .lvn{min-width:84px;text-align:center;padding:8px 0;border-radius:10px;font-weight:800;color:#fff}
+.lv-btn .lvn{flex:none;min-width:84px;text-align:center;padding:8px 0;border-radius:10px;font-weight:800;color:#fff;margin-right:14px}
 .lv1 .lvn{background:#43a047}.lv2 .lvn{background:#1e88e5}.lv3 .lvn{background:#e53935}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{min-width:72px;min-height:48px;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:700}
+.seg{display:flex;flex-wrap:wrap}
+.seg button{margin:3px;min-width:72px;min-height:48px;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:700}
 .seg button.on{border-color:var(--pri-2);background:var(--pri-2);color:#fff}
-.set-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eceff4}
+.set-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eceff4}
 .set-row .nm{font-weight:700}
-
 .big-btn{padding:16px 26px;border-radius:14px;border:none;font-size:1.15rem;font-weight:800;min-height:60px}
 .b-pri{background:var(--pri);color:#fff}
 .b-sec{background:#fff;color:var(--ink);border:2px solid var(--line)}
-.foot{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.foot{display:flex;justify-content:flex-end;flex-wrap:wrap}
+.foot>*{margin-left:10px;margin-top:6px}
 
 /* 전략 카드 */
-.strat{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.strat .st{flex:1 1 180px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.strat{display:flex;flex-wrap:wrap;justify-content:center}
+.strat .st{flex:1 1 180px;margin:5px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;text-align:center}
 .strat .st b{display:block;font-size:1.4rem;color:var(--pri);margin-bottom:4px}
-.strat .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--pri);color:#fff;font-weight:800;margin-bottom:6px}
+.strat .no{display:inline-block;width:32px;height:32px;line-height:32px;border-radius:50%;background:var(--pri);color:#fff;font-weight:800;margin-bottom:6px}
 
-/* 예측·되돌아보기 */
+/* 예측·결과 */
 .q{padding:10px 0;border-top:1px solid #eceff4}
 .q:first-child{border-top:none}
 .q .qt{font-weight:800;margin-bottom:8px}
 .cmp{margin-top:8px;padding:10px 14px;border-radius:12px;background:#f6f7fb;font-weight:700}
 .okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}.subc{color:var(--sub);font-weight:700}
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-@media(max-width:620px){.tiles{grid-template-columns:repeat(2,1fr)}}
-.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
-.tile .v{font-size:1.6rem;font-weight:900;font-variant-numeric:tabular-nums}
+.tiles{display:flex;flex-wrap:wrap;margin:-5px}
+.tile{flex:1 1 150px;margin:5px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tile .v{font-size:1.5rem;font-weight:900;font-variant-numeric:tabular-nums}
 .tile .k{font-size:.85rem;color:var(--sub);font-weight:700}
 .chipq{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--pri-soft);color:var(--pri);font-weight:800;font-size:.9rem}
 
 /* 과제 화면 */
-.tbar{margin-top:46px;display:flex;align-items:center;gap:12px;background:var(--pri);color:#fff;border-radius:16px;padding:12px 16px;flex-wrap:wrap}
+.tbar{margin-top:46px;display:flex;align-items:center;flex-wrap:wrap;background:var(--pri);color:#fff;border-radius:16px;padding:12px 16px}
 .tbar .ttl{flex:1;font-size:1.15rem;font-weight:800}
-.tbar .pg{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px}
-.tbar .quit{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;min-height:40px}
+.tbar .pg{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px;margin-left:8px}
+.tbar .quit{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;min-height:40px;margin-left:8px}
 .cue{text-align:center}
-.listbox{background:#fffdf5;border:2px solid #ead9a6;border-radius:14px;padding:10px 14px;text-align:center}
-.listbox .h{font-weight:800;color:#8a6d1a;font-size:.95rem}
-.listbox .items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
-.listbox .items span{background:#fff;border:2px solid #ead9a6;border-radius:10px;padding:4px 12px;font-weight:800;font-size:1.1rem}
-.stage{background:#fff;border:2px solid var(--line);border-radius:18px;height:320px;display:grid;place-items:center;position:relative;overflow:hidden;user-select:none}
-.fix{font-size:3rem;color:#9aa2b2;font-weight:300}
-.prod{display:flex;flex-direction:column;align-items:center;gap:10px}
-.prod .card{min-width:280px;padding:26px 30px;border-radius:18px;border:3px solid #cfd6e4;background:#fafbfd;text-align:center}
-.prod .card .n{font-size:2.6rem;font-weight:900;letter-spacing:1px}
-.prod .card .c{font-size:.95rem;color:var(--sub);font-weight:700}
-.sign{background:#1b5e20;border:6px solid #fff;outline:3px solid #1b5e20;border-radius:14px;padding:22px 26px;display:flex;gap:6px}
-.resp{display:flex;gap:14px;justify-content:center}
-.resp button{flex:1;max-width:380px;min-height:96px;border-radius:18px;border:none;font-size:1.5rem;font-weight:900;color:#fff;background:var(--pri-2);box-shadow:0 4px 0 #1a237e}
+.stage{background:#fff;border:2px solid var(--line);border-radius:18px;height:340px;position:relative;overflow:hidden;user-select:none;-webkit-user-select:none}
+.fbline{min-height:2.2rem;text-align:center;font-size:1.25rem;font-weight:800}
+.resp{display:flex;justify-content:center}
+.resp button{flex:1;max-width:380px;margin:0 7px;min-height:96px;border-radius:18px;border:none;font-size:1.5rem;font-weight:900;color:#fff;background:var(--pri-2);box-shadow:0 4px 0 #1a237e;
+  display:flex;align-items:center;justify-content:center}
+.resp button svg{margin:0 8px}
 .resp button:active{transform:translateY(3px);box-shadow:0 1px 0 #1a237e}
 .resp button.go{background:#2e7d32;box-shadow:0 4px 0 #1b5e20}
-#scr-rep{margin-top:50px}
-.resp button{display:inline-flex;align-items:center;justify-content:center;gap:10px}
-.fbline{min-height:2.2rem;text-align:center;font-size:1.25rem;font-weight:800}
-.pause{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);display:grid;place-items:center;z-index:5}
+.pause{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;z-index:9}
+
+/* 장보기: 장바구니 목록 */
+.cartbox{background:#fffdf5;border:2px solid #ead9a6;border-radius:14px;padding:10px 14px}
+.cartbox .h{font-weight:800;color:#8a6d1a;font-size:.95rem;text-align:center}
+.cartbox .items{display:flex;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.ci{display:flex;align-items:center;margin:4px 6px;background:#fff;border:2px solid #ead9a6;border-radius:12px;padding:5px 12px;font-weight:800;font-size:1.1rem}
+.ci.full{border-color:#81c784;background:#f1f8e9}
+.ci .q{border:none;padding:0;margin-left:8px;font-size:.95rem;color:var(--sub);font-weight:800}
+.pip{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #9aa2b2;margin-left:4px;vertical-align:middle}
+.pip.on{background:#43a047;border-color:#43a047}
+/* 장보기: 진열대 */
+.shelf{background:linear-gradient(#f7f3ea 0,#f7f3ea 72%,#a1887f 72%,#8d6e63 76%,#efebe9 76%)}
+.shelf .tag{position:absolute;left:16px;top:12px;background:#fff;border:2px solid #d7ccc8;border-radius:10px;padding:2px 10px;font-weight:800;color:#6d4c41;font-size:.9rem}
+.pk{position:absolute;bottom:26%;left:100%;width:210px;height:200px;border-radius:18px;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.12);cursor:pointer;will-change:transform}
+.pk .nm{font-size:1.75rem;font-weight:900;line-height:1.2;margin-top:6px;padding:0 8px;word-break:keep-all}
+.pk .ct{font-size:.85rem;font-weight:800;opacity:.75}
+.pk .sale{white-space:pre-line;position:absolute;top:-14px;right:-14px;width:74px;height:74px;border-radius:50%;background:#e53935;color:#fff;font-weight:900;font-size:1.15rem;
+  display:flex;align-items:center;justify-content:center;transform:rotate(12deg);box-shadow:0 3px 0 #b71c1c;line-height:1.05;text-align:center}
+.pk.bad{animation:shake .3s}
+@keyframes shake{25%{margin-left:-8px}75%{margin-left:8px}}
+
+/* 횡단보도 */
+.road svg{width:100%;height:100%;display:block}
+#rd-person,#rd-car{transition:transform .8s ease-out}
+.blink{animation:blink .45s steps(1) infinite}
+@keyframes blink{50%{opacity:.08}}
+.danger{position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(229,57,53,.25);pointer-events:none}
+
+/* 병원 길 찾기 */
+.dest{text-align:center}
+.dest span{display:inline-block;background:#fdd835;color:#212121;font-weight:900;font-size:1.6rem;border-radius:12px;padding:8px 24px;box-shadow:0 3px 0 #c6a700;min-width:300px}
+.dest span.wait{background:#eceff1;color:#90a4ae;box-shadow:none}
+.wayboard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#0d47a1;border:6px solid #e3f2fd;outline:3px solid #0d47a1;border-radius:14px;padding:8px;min-width:440px}
+.wrow{display:flex;align-items:center;justify-content:space-between;background:#1565c0;color:#fff;border-radius:8px;padding:2px 14px;margin:5px 0;font-size:1.35rem;font-weight:800;min-height:48px}
+.wrow svg{width:36px;height:36px}
+.wrow .tx{flex:1;padding:0 12px}
+.wrow.al-r .tx{text-align:right}
+.wrow.hit{background:#2e7d32}.wrow.miss{background:#c62828}
 
 /* 리포트 */
 .rep h2{margin:0 0 4px;font-size:1.4rem}
@@ -109,17 +135,19 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .rep table{width:100%;border-collapse:collapse;font-size:.92rem;margin:6px 0 12px;background:#fff}
 .rep th,.rep td{border:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:middle}
 .rep th{background:#f3f5fa}
-.rep td.l,.rep th.l{text-align:left}
+.rep td.l{text-align:left}
+#scr-rep{margin-top:50px}
 textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid var(--line);border-radius:10px}
 .note{font-size:.85rem;color:var(--sub)}
 #err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
 #hospital-logo{position:fixed;bottom:10px;right:14px;font-size:.8rem;color:#9aa2b2;font-weight:700}
+@media(max-width:600px){.wayboard{min-width:300px}.wrow{font-size:1.1rem}.pk{width:170px;height:170px}.pk .nm{font-size:1.35rem}}
 @media print{
   body{background:#fff;padding:0;font-size:12px}
-  #home-btn,#back-btn,#hospital-logo,.no-print{display:none!important}
+  #home-btn,#back-btn,#hospital-logo,#err-box,.no-print{display:none!important}
   .panel{border:none;padding:0}
+  #scr-rep{margin-top:0}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -134,9 +162,10 @@ textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid v
   <div class="panel" id="task-info"></div>
   <div class="panel">
     <div class="lbl">난이도</div>
-    <div class="lv-list" id="lv-list"></div>
-    <div class="set-row" style="margin-top:12px"><span class="nm">블록 수</span><span id="set-blocks"></span></div>
+    <div id="lv-list"></div>
+    <div class="set-row"><span class="nm">블록 수</span><span id="set-blocks"></span></div>
     <div class="set-row"><span class="nm">블록당 문제 수</span><span id="set-trials"></span></div>
+    <div class="set-row" id="row-sound"><span class="nm">자동차 경적 소리</span><span id="set-sound"></span></div>
   </div>
   <div class="foot"><button class="big-btn b-pri" onclick="toStrategy()">다음</button></div>
 </div>
@@ -153,14 +182,14 @@ textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid v
     </div>
   </div>
   <div class="panel"><div class="lbl">방법</div><div id="s-how"></div></div>
-  <div class="foot"><button class="big-btn b-pri" onclick="toPredict()">시작하기</button></div>
+  <div class="foot"><button class="big-btn b-sec" onclick="startBlock(null,true)">연습해 보기 (5문제)</button><button class="big-btn b-pri" onclick="toPredict()">시작하기</button></div>
 </div>
 
 <!-- 예측 -->
 <div class="wrap screen" id="scr-pred">
   <div class="tbar"><div class="ttl" id="p-title"></div></div>
   <div class="panel" id="p-body"></div>
-  <div class="foot"><button class="big-btn b-pri" id="p-go" disabled onclick="startBlock()">블록 시작</button></div>
+  <div class="foot"><button class="big-btn b-pri" id="p-go" disabled>블록 시작</button></div>
 </div>
 
 <!-- 과제 -->
@@ -193,11 +222,13 @@ textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid v
 <div id="hospital-logo">광주365재활병원_인지연하팀</div>
 
 <script>
+// 오류가 나면 화면 아래에 표시 (구형 브라우저 진단용)
 window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
 </script>
 <script>
 "use strict";
 // ══ 도구 ══════════════════════════════════════════════
+function flatten(a){const out=[];(function f(x){x.forEach(y=>Array.isArray(y)?f(y):out.push(y));})(a);return out;}
 function h(tag, props, ...kids){
   const e=document.createElement(tag);
   if(props) for(const k in props){
@@ -205,111 +236,144 @@ function h(tag, props, ...kids){
     if(v==null||v===false) continue;
     if(k==='class') e.className=v;
     else if(k==='html') e.innerHTML=v;
-    else if(k.startsWith('on')) e.addEventListener(k.slice(2),v);
+    else if(k.indexOf('on')===0) e.addEventListener(k.slice(2),v);
     else if(k==='style') e.style.cssText=v;
     else if(k==='disabled') e.disabled=!!v;
     else e.setAttribute(k,v);
   }
-  flatten(kids).forEach(c=>{ if(c==null||c===false) return; e.append(c.nodeType?c:document.createTextNode(String(c))); });
+  flatten(kids).forEach(c=>{ if(c==null||c===false) return; e.appendChild(c.nodeType?c:document.createTextNode(String(c))); });
   return e;
 }
-// 구형 브라우저용: 배열 펼치기
-function flatten(a){const out=[];(function f(x){x.forEach(y=>Array.isArray(y)?f(y):out.push(y));})(a);return out;}
-// 누르기: 포인터 이벤트가 없으면 터치·마우스로 받음 (같은 누름이 두 번 처리되지 않게 0.35초 안의 중복은 무시)
+// 누르기: 포인터 이벤트가 없는 구형 브라우저는 터치·마우스로 받음 (0.35초 안의 중복은 무시)
 let LASTPRESS=0;
-function bindPress(btn,fn){
+function bindPress(el,fn){
   const fire=e=>{ if(e&&e.cancelable) e.preventDefault(); const t=Date.now(); if(t-LASTPRESS<350) return; LASTPRESS=t; fn(); };
-  if(window.PointerEvent) btn.addEventListener('pointerdown',fire);
-  else { btn.addEventListener('touchstart',fire,{passive:false}); btn.addEventListener('mousedown',fire); }
-  btn.addEventListener('click',()=>{ if(Date.now()-LASTPRESS>350){ LASTPRESS=Date.now(); fn(); } });
-  return btn;
+  if(window.PointerEvent) el.addEventListener('pointerdown',fire);
+  else { el.addEventListener('touchstart',fire,{passive:false}); el.addEventListener('mousedown',fire); }
+  el.addEventListener('click',()=>{ if(Date.now()-LASTPRESS>350){ LASTPRESS=Date.now(); fn(); } });
+  return el;
 }
 const $=id=>document.getElementById(id);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
 const sec=ms=>ms==null?'-':(ms/1000).toFixed(2)+'초';
 const pct=(n,d)=>d?Math.round(n/d*100)+'%':'-';
+const now=()=>performance.now();
 function seg(options,onPick,cur,fmtFn){
   const s=h('div',{class:'seg'});
-  options.forEach(o=>s.append(h('button',{class:o===cur?'on':'',onclick:()=>onPick(o)},fmtFn?fmtFn(o):o)));
+  options.forEach(o=>s.appendChild(h('button',{class:o===cur?'on':'',onclick:()=>onPick(o)},fmtFn?fmtFn(o):o)));
   return s;
 }
-function todayStr(){const d=new Date();return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
-// 화면이 다른 곳으로 바뀌면 진행 중인 블록을 잠시 멈춤
+function pad2(n){return (n<10?'0':'')+n;}
+function todayStr(){const d=new Date();return d.getFullYear()+'.'+pad2(d.getMonth()+1)+'.'+pad2(d.getDate());}
+function noRepeat(a,key){
+  for(let k=0;k<80;k++){ const t=shuffle(a); let ok=true; for(let i=1;i<t.length;i++) if(key(t[i])===key(t[i-1])){ok=false;break;} if(ok) return t; }
+  return shuffle(a);
+}
 let PAUSED=false;
 
-// ══ SVG 그림 ══════════════════════════════════════════
-const SVG={
-  cart:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#e8f5e9"/><path d="M12 16h5l5 20h18l4-14H20" fill="none" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="42" r="3.2" fill="#2e7d32"/><circle cx="38" cy="42" r="3.2" fill="#2e7d32"/></svg>',
-  walk:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#fdecea"/><rect x="18" y="8" width="20" height="40" rx="5" fill="#37474f"/><circle cx="28" cy="18" r="6" fill="#ef5350"/><circle cx="28" cy="38" r="6" fill="#66bb6a"/></svg>',
-  sign:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#e3f2fd"/><rect x="8" y="16" width="40" height="24" rx="4" fill="#1b5e20"/><path d="M16 28h20m-6-6 6 6-6 6" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-};
-function arrowSVG(dir,size){
-  const s=size||64, r=dir==='L'?'rotate(180 32 32)':'';
-  return `<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true"><g transform="${r}"><path d="M8 32h38" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M34 14l20 18-20 18" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`;
+// ══ 소리 (경적) ══════════════════════════════════════════
+let AC=null;
+function initAudio(){ try{ if(!AC){const C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C();} if(AC&&AC.state!=='running') AC.resume(); }catch(e){} }
+function horn(){
+  if(!SET.sound||!AC) return;
+  try{ const t=AC.currentTime;
+    [0,0.22].forEach(d=>{ const o=AC.createOscillator(), g=AC.createGain(); o.type='square'; o.frequency.value=420;
+      o.connect(g); g.connect(AC.destination); g.gain.setValueAtTime(0.12,t+d); g.gain.exponentialRampToValueAtTime(0.001,t+d+0.18); o.start(t+d); o.stop(t+d+0.2); });
+  }catch(e){}
 }
-function signalSVG(state){ // state: off | green | red
-  const red=state==='red'?'#ef5350':'#4e342e', grn=state==='green'?'#43a047':'#33402f';
-  const fig=(cx,cy,c,walk)=>walk
-    ?`<g fill="${c}"><circle cx="${cx}" cy="${cy-22}" r="8"/><path d="M${cx-6} ${cy-12}h12l6 18-6 2-4-10-2 14 8 18-7 3-8-18-7 18-7-3 9-22 1-10-6 8-6-3z"/></g>`
-    :`<g fill="${c}"><circle cx="${cx}" cy="${cy-22}" r="8"/><rect x="${cx-9}" y="${cy-12}" width="18" height="24" rx="3"/><rect x="${cx-15}" y="${cy-10}" width="5" height="20" rx="2"/><rect x="${cx+10}" y="${cy-10}" width="5" height="20" rx="2"/><rect x="${cx-8}" y="${cy+12}" width="6" height="20" rx="2"/><rect x="${cx+2}" y="${cy+12}" width="6" height="20" rx="2"/></g>`;
-  return `<svg width="150" height="280" viewBox="0 0 150 280" aria-hidden="true">
-    <rect x="15" y="5" width="120" height="270" rx="18" fill="#263238"/>
-    <rect x="30" y="20" width="90" height="115" rx="12" fill="#11181c"/><rect x="30" y="145" width="90" height="115" rx="12" fill="#11181c"/>
-    ${fig(75,82,red,false)}${fig(75,206,grn,true)}</svg>`;
+
+// ══ 그림 ══════════════════════════════════════════════
+const ICON={
+  cart:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#e8f5e9"/><path d="M12 16h5l5 20h18l4-14H20" fill="none" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="42" r="3.2" fill="#2e7d32"/><circle cx="38" cy="42" r="3.2" fill="#2e7d32"/></svg>',
+  walk:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#fdecea"/><rect x="6" y="20" width="44" height="18" fill="#546e7a"/><path d="M12 24h6M22 24h6M32 24h6M12 34h6M22 34h6M32 34h6" stroke="#fff" stroke-width="3"/><rect x="40" y="6" width="10" height="16" rx="2" fill="#263238"/><circle cx="45" cy="11" r="2.6" fill="#ef5350"/><circle cx="45" cy="17" r="2.6" fill="#66bb6a"/></svg>',
+  way:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#e3f2fd"/><rect x="8" y="12" width="40" height="13" rx="3" fill="#1565c0"/><rect x="8" y="30" width="40" height="13" rx="3" fill="#1565c0"/><path d="M14 18.5h14m-4-4 4 4-4 4M42 36.5H28m4-4-4 4 4 4" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+// 상품 분류별 색과 그림
+const CAT={
+  veg:{nm:'채소',bg:'#e8f5e9',fg:'#2e7d32',ic:'<path d="M32 54C14 44 12 22 32 10c20 12 18 34 0 44z" fill="#66bb6a"/><path d="M32 54V18" stroke="#2e7d32" stroke-width="3"/>'},
+  fruit:{nm:'과일',bg:'#ffebee',fg:'#c62828',ic:'<circle cx="32" cy="36" r="18" fill="#ef5350"/><path d="M32 18c0-6 4-9 9-10" stroke="#6d4c41" stroke-width="3" fill="none"/><path d="M33 16c6-6 12-4 14-2-5 5-10 5-14 2z" fill="#66bb6a"/>'},
+  dairy:{nm:'유제품',bg:'#e3f2fd',fg:'#1565c0',ic:'<path d="M20 22l6-10h12l6 10v32H20z" fill="#fff" stroke="#1565c0" stroke-width="3"/><rect x="24" y="32" width="16" height="12" rx="2" fill="#90caf9"/>'},
+  fish:{nm:'수산',bg:'#e0f7fa',fg:'#00838f',ic:'<path d="M8 32c10-14 28-14 38 0-10 14-28 14-38 0z" fill="#4dd0e1"/><path d="M46 32l12-10v20z" fill="#26c6da"/><circle cx="18" cy="30" r="2.5" fill="#004d40"/>'},
+  meat:{nm:'정육',bg:'#fbe9e7',fg:'#bf360c',ic:'<ellipse cx="30" cy="30" rx="18" ry="14" fill="#e57373"/><ellipse cx="30" cy="30" rx="10" ry="7" fill="#ffcdd2"/><rect x="44" y="38" width="12" height="6" rx="3" fill="#efebe9" transform="rotate(35 50 41)"/>'},
+  grain:{nm:'곡물',bg:'#fff8e1',fg:'#8d6e63',ic:'<path d="M14 30h36c0 12-8 20-18 20S14 42 14 30z" fill="#a1887f"/><ellipse cx="32" cy="30" rx="18" ry="5" fill="#fff3e0"/><circle cx="26" cy="27" r="2" fill="#d7ccc8"/><circle cx="34" cy="26" r="2" fill="#d7ccc8"/><circle cx="40" cy="28" r="2" fill="#d7ccc8"/>'},
+  bean:{nm:'두부·달걀',bg:'#fffde7',fg:'#9e7c00',ic:'<rect x="14" y="20" width="36" height="28" rx="5" fill="#fffde7" stroke="#c0a000" stroke-width="3"/><path d="M14 30h36" stroke="#e6d36b" stroke-width="2"/>'},
+  sauce:{nm:'장류',bg:'#efebe9',fg:'#5d4037',ic:'<rect x="16" y="22" width="32" height="30" rx="6" fill="#8d6e63"/><rect x="14" y="16" width="36" height="8" rx="3" fill="#d84315"/>'},
+  bread:{nm:'빵',bg:'#fff3e0',fg:'#e65100',ic:'<path d="M12 30c0-10 8-16 20-16s20 6 20 16v20H12z" fill="#ffb74d"/><path d="M16 30c0-6 6-11 16-11s16 5 16 11v16H16z" fill="#ffe0b2"/>'},
+  snack:{nm:'과자·간식',bg:'#f3e5f5',fg:'#7b1fa2',ic:'<path d="M14 18h36l-4 36H18z" fill="#ba68c8"/><path d="M14 18l6 6 6-6 6 6 6-6 6 6 6-6" fill="none" stroke="#fff" stroke-width="2.5"/>'},
+  drink:{nm:'음료',bg:'#e8eaf6',fg:'#3949ab',ic:'<path d="M26 8h12v8l6 8v30H20V24l6-8z" fill="#7986cb"/><rect x="20" y="32" width="24" height="12" fill="#e8eaf6"/>'},
+};
+const ITEM_IC={
+  '바나나':'<path d="M10 22c4 22 30 34 46 20-14 4-34-4-40-24z" fill="#fdd835" stroke="#c6a700" stroke-width="2.5"/><path d="M10 22l-2-6" stroke="#6d4c41" stroke-width="4" stroke-linecap="round"/>',
+  '당근':'<path d="M22 22l20 6-24 30z" fill="#fb8c00"/><path d="M38 24c2-8 8-12 14-12-2 6-6 10-14 12zM36 22c-2-8 0-14 4-16 2 6 0 12-4 16z" fill="#66bb6a"/>',
+};
+function catIcon(c,s,name){ return `<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true">${ITEM_IC[name]||CAT[c].ic}</svg>`; }
+function arrowSVG(dir,size,color){
+  const s=size||48, r=dir==='L'?'rotate(180 32 32)':'', c=color||'#fff';
+  return `<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true"><g transform="${r}"><path d="M8 32h38" stroke="${c}" stroke-width="9" stroke-linecap="round"/><path d="M34 14l20 18-20 18" fill="none" stroke="${c}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`;
 }
 
 // ══ 과제 정의 ══════════════════════════════════════════
-// 장보기: 목록에 있는 물건만 담기 (반응 억제, Go/No-Go). 비슷한 이름(유혹 자극)이 난이도에 따라 늘어남
+// 장보기 품목: 목록 물건과 이름이 비슷한 물건(유혹 자극)
 const SHOP_POOL=[
-  {n:'두부',lure:['순두부','유부']},{n:'저지방 우유',lure:['딸기 우유','초코 우유']},{n:'달걀',lure:['메추리알']},
-  {n:'현미',lure:['백미','찹쌀']},{n:'시금치',lure:['부추','쑥갓']},{n:'사과',lure:['사과 주스','사과잼']},
-  {n:'고등어',lure:['꽁치','삼치']},{n:'양배추',lure:['양상추','배추']},{n:'식빵',lure:['모닝빵','크림빵']},
-  {n:'된장',lure:['고추장','쌈장']},{n:'바나나',lure:['바나나 우유']},{n:'닭가슴살',lure:['닭다리살','닭날개']},
-  {n:'당근',lure:['당근 주스']},{n:'오이',lure:['오이지','애호박']},{n:'요구르트',lure:['요구르트 젤리']}];
-const SHOP_OTHER=['라면','과자','콜라','아이스크림','소시지','초콜릿','사탕','맥주','젤리','햄','케이크','감자칩'];
+  {n:'두부',c:'bean',lure:[['순두부','bean'],['유부','bean']]},{n:'저지방 우유',c:'dairy',lure:[['딸기 우유','dairy'],['초코 우유','dairy']]},
+  {n:'달걀',c:'bean',lure:[['메추리알','bean']]},{n:'현미',c:'grain',lure:[['백미','grain'],['찹쌀','grain']]},
+  {n:'시금치',c:'veg',lure:[['부추','veg'],['쑥갓','veg']]},{n:'사과',c:'fruit',lure:[['사과 주스','drink'],['사과잼','sauce']]},
+  {n:'고등어',c:'fish',lure:[['꽁치','fish'],['삼치','fish']]},{n:'양배추',c:'veg',lure:[['양상추','veg'],['배추','veg']]},
+  {n:'식빵',c:'bread',lure:[['모닝빵','bread'],['크림빵','bread']]},{n:'된장',c:'sauce',lure:[['고추장','sauce'],['쌈장','sauce']]},
+  {n:'바나나',c:'fruit',lure:[['바나나 우유','dairy']]},{n:'닭가슴살',c:'meat',lure:[['닭다리살','meat'],['닭날개','meat']]},
+  {n:'당근',c:'veg',lure:[['당근 주스','drink']]},{n:'요구르트',c:'dairy',lure:[['요구르트 젤리','snack']]}];
+const SHOP_OTHER=[['라면','snack'],['과자','snack'],['콜라','drink'],['아이스크림','snack'],['소시지','meat'],['초콜릿','snack'],
+  ['사탕','snack'],['맥주','drink'],['젤리','snack'],['햄','meat'],['케이크','bread'],['감자칩','snack']];
+const SALES=['1+1','50%\n할인','오늘만\n특가'];
+// 병원 안내판 목적지 (비슷한 이름끼리 묶음)
+const WAY_GROUPS=[['물리치료실','작업치료실','언어치료실'],['외래 접수','입원 접수'],['영상의학과','재활의학과','신경과'],['약국','수납'],['화장실','휴게실'],['엘리베이터','계단'],['식당','매점']];
+const WAY_ALL=flatten(WAY_GROUPS);
 
 const TASKS={
   shop:{
-    name:'장보기', kind:'반응 억제', icon:SVG.cart,
-    desc:'장보기 목록에 있는 물건이 나오면 [담기]를 누르고, 목록에 없는 물건은 누르지 않고 기다립니다.',
-    check:'목록에 있는 물건인지 확인합니다', doit:'목록에 있을 때만 [담기]를 누릅니다',
-    how:['화면 위에 이번 장보기 목록이 보입니다.','물건이 하나씩 나옵니다. 목록에 있으면 <b>[담기]</b>를 누르세요.','목록에 없는 물건은 <b>아무것도 누르지 말고</b> 지나가게 두세요. 이름이 비슷한 물건에 주의하세요.'],
-    levels:{1:'목록 3개 · 목록과 전혀 다른 물건만 섞임 · 3초 동안 보임',
-            2:'목록 4개 · 이름이 비슷한 물건이 섞임 · 담을 물건이 더 자주 나옴 · 2초',
-            3:'목록 5개 · 비슷한 물건이 많음 · 담을 물건이 대부분 · 1.5초'},
-    cfg:{1:{k:3,go:.5,lure:0,time:3000},2:{k:4,go:.7,lure:.5,time:2000},3:{k:5,go:.75,lure:.8,time:1500}},
-    errWords:{com:'목록에 없는 물건을 담음',om:'목록에 있는 물건을 놓침'},
-    selfOpts:['목록에 없는 물건을 담았다','담아야 할 물건을 놓쳤다','실수가 거의 없었다','잘 모르겠다'],
-    strategies:['목록을 한 번 더 보고 누르기','이름을 끝까지 읽고 누르기','속으로 “잠깐” 하고 누르기','지금처럼 하기'],
+    name:'장보기', kind:'반응 억제 · 충동 조절', icon:ICON.cart,
+    desc:'진열대를 따라 물건이 지나갑니다. 장보기 목록에 있는 물건을 필요한 개수만큼 눌러 담고, 나머지는 그냥 지나가게 둡니다.',
+    check:'목록에 있는지, 몇 개 담았는지 확인합니다', doit:'필요할 때만 물건을 눌러 담습니다',
+    how:['위에 이번 장보기 목록과 필요한 개수가 있습니다.','물건이 오른쪽에서 왼쪽으로 지나갑니다. 필요한 물건이면 <b>물건을 눌러</b> 장바구니에 담으세요.',
+         '<b>필요한 개수를 다 채웠으면</b> 같은 물건이 또 나와도 담지 마세요.','<b>1+1·할인</b> 표시가 붙어 있어도 목록에 없으면 담지 마세요. 이름이 비슷한 물건도 조심하세요.'],
+    levels:{1:'목록 3가지 · 1개씩 · 목록과 전혀 다른 물건만 섞임 · 천천히 지나감',
+            2:'목록 4가지 · 1~2개씩 · 이름이 비슷한 물건과 할인 물건이 섞임 · 다 채운 뒤에도 같은 물건이 나옴',
+            3:'목록 5가지 · 1~2개씩 · 할인·비슷한 물건이 많음 · 빠르게 지나감 · 담은 개수가 화면에 표시되지 않음'},
+    cfg:{1:{k:3,qty:[1],extra:0,lure:0,sale:0,time:4500,hide:false},2:{k:4,qty:[1,2],extra:1,lure:.45,sale:.35,time:3500,hide:false},3:{k:5,qty:[1,2],extra:1,lure:.55,sale:.55,time:2700,hide:true}},
+    errWords:{com:'담지 말아야 할 것을 담음',om:'담아야 할 것을 놓침'},
+    selfOpts:['담지 말아야 할 것을 담았다','담아야 할 것을 놓쳤다','실수가 거의 없었다','잘 모르겠다'],
+    strategies:['할인 표시는 무시하고 목록만 보기','담기 전에 몇 개 담았는지 확인하기','이름을 끝까지 읽고 누르기','지금처럼 하기'],
   },
   cross:{
-    name:'횡단보도', kind:'행동 멈추기', icon:SVG.walk,
-    desc:'초록불이 켜지면 [건너기]를 누르고, 누르기 전에 빨간불로 바뀌면 누르지 않고 멈춥니다.',
-    check:'신호가 끝까지 초록불인지 봅니다', doit:'초록불이면 [건너기], 빨간불로 바뀌면 멈춥니다',
-    how:['신호등이 꺼져 있을 때는 기다리세요. 이때 누르면 실수입니다.','초록불이 켜지면 <b>[건너기]</b>를 누르세요.','가끔 초록불이 켜졌다가 곧 <b>빨간불</b>로 바뀝니다. 그때는 <b>누르지 마세요.</b>'],
-    levels:{1:'빨간불로 바뀌는 때가 4번에 1번 · 아주 빨리 바뀌어 멈추기 쉬움 · 2.5초',
-            2:'4번에 1번 · 바뀌는 시점이 내 실력에 맞춰 조절됨 · 2초',
-            3:'3번에 1번 · 바뀌는 시점이 늦게 시작해 조절됨 · 1.5초'},
-    cfg:{1:{stop:.25,ssd:150,adapt:false,win:2500},2:{stop:.25,ssd:200,adapt:true,win:2000},3:{stop:.33,ssd:300,adapt:true,win:1500}},
-    errWords:{com:'멈춰야 할 때 누름',om:'건너야 할 때 못 누름'},
-    selfOpts:['빨간불인데 눌렀다','초록불인데 못 눌렀다','실수가 거의 없었다','잘 모르겠다'],
-    strategies:['신호를 끝까지 보고 누르기','빨간불로 바뀔 수 있다고 생각하기','신호가 켜지기 전에는 손 떼고 기다리기','지금처럼 하기'],
+    name:'횡단보도', kind:'행동 멈추기', icon:ICON.walk,
+    desc:'초록불이 켜지면 [건너기]를 누릅니다. 초록불이어도 차가 다가오면 누르지 않고 기다립니다.',
+    check:'초록불인지, 차가 오지 않는지 봅니다', doit:'안전할 때만 [건너기]를 누릅니다',
+    how:['빨간불일 때는 기다리세요. 이때 누르면 실수입니다.','초록불이 켜지면 <b>[건너기]</b>를 누르세요. 사람이 길을 건너갑니다.',
+         '초록불이 켜진 뒤 <b>차가 다가오면</b> 누르지 말고 기다리세요.','(어려움) 초록불이 <b>깜빡이면</b> 곧 바뀌는 신호이니 건너지 마세요.'],
+    levels:{1:'4번에 1번 차가 옴 · 차가 아주 일찍 나타나 멈추기 쉬움 · 3초 안에 누름',
+            2:'4번에 1번 차가 옴 · 차가 나타나는 시점이 실력에 맞춰 조절됨 · 2.5초',
+            3:'차가 오거나 초록불이 깜빡이는 경우가 섞임 · 차가 나타나는 시점이 조절됨 · 2초'},
+    cfg:{1:{stop:.25,blink:0,ssd:200,adapt:false,win:3000},2:{stop:.25,blink:0,ssd:250,adapt:true,win:2500},3:{stop:.2,blink:.15,ssd:300,adapt:true,win:2000}},
+    errWords:{com:'멈춰야 할 때 건넘',om:'건너야 할 때 못 건넘'},
+    selfOpts:['멈춰야 할 때 건넜다','건너야 할 때 못 건넜다','실수가 거의 없었다','잘 모르겠다'],
+    strategies:['차가 오는지 끝까지 보고 누르기','초록불이 깜빡이면 기다리기','빨간불일 때는 손을 버튼에서 떼기','지금처럼 하기'],
   },
-  sign:{
-    name:'길 안내 표지판', kind:'간섭 억제', icon:SVG.sign,
-    desc:'표지판의 가운데 화살표 방향만 보고 [왼쪽] 또는 [오른쪽]을 누릅니다. 양옆 화살표는 무시합니다.',
-    check:'가운데 화살표만 봅니다', doit:'가운데 방향의 버튼을 누릅니다',
-    how:['초록색 길 안내 표지판에 화살표가 여러 개 나옵니다.','<b>가운데 화살표</b>가 가리키는 방향의 버튼을 누르세요.','양옆 화살표는 반대 방향일 수 있습니다. <b>양옆은 무시하세요.</b>'],
-    levels:{1:'화살표 3개 · 양옆이 반대인 경우가 적음 · 3초',
-            2:'화살표 5개 · 양옆이 반대인 경우가 절반 · 2.5초',
-            3:'화살표 7개 · 양옆이 반대인 경우가 대부분 · 1.8초'},
-    cfg:{1:{n:3,inc:.3,win:3000},2:{n:5,inc:.5,win:2500},3:{n:7,inc:.65,win:1800}},
-    errWords:{com:'반대 방향을 누름',om:'시간 안에 못 누름'},
-    selfOpts:['반대 방향을 눌렀다','시간 안에 못 눌렀다','실수가 거의 없었다','잘 모르겠다'],
-    strategies:['가운데 화살표만 보기','방향을 속으로 말하고 누르기','양옆이 보이면 한 번 더 확인하기','지금처럼 하기'],
+  way:{
+    name:'병원 길 찾기', kind:'간섭 억제', icon:ICON.way,
+    desc:'병원 안내판에서 가야 할 곳을 찾아, 그 화살표 방향의 버튼을 누릅니다. 다른 줄의 화살표에 끌려가지 않도록 합니다.',
+    check:'가야 할 곳 이름이 적힌 줄을 찾습니다', doit:'그 줄의 화살표 방향을 누릅니다',
+    how:['노란색으로 <b>가야 할 곳</b>이 나옵니다.','안내판에서 그 이름이 적힌 줄을 찾고, <b>그 줄의 화살표 방향</b> 버튼을 누르세요.',
+         '다른 줄 화살표가 모두 반대쪽을 가리킬 수 있습니다. <b>내가 찾은 줄만</b> 보세요.','(어려움) 이름이 비슷한 곳이 있고, 화살표가 글자의 반대편에 붙어 있기도 합니다.'],
+    levels:{1:'안내판 2줄 · 이름이 서로 다름 · 4.5초',
+            2:'안내판 4줄 · 다른 줄 화살표가 반대인 경우가 많음 · 3.5초',
+            3:'안내판 5줄 · 비슷한 이름이 섞임 · 화살표 위치까지 헷갈리게 놓임 · 3초'},
+    cfg:{1:{rows:2,conf:.3,simon:0,similar:false,win:4500},2:{rows:4,conf:.6,simon:0,similar:false,win:3500},3:{rows:5,conf:.65,simon:.5,similar:true,win:3000}},
+    errWords:{com:'반대쪽을 누름',om:'시간 안에 못 고름'},
+    selfOpts:['반대쪽을 눌렀다','시간 안에 못 골랐다','실수가 거의 없었다','잘 모르겠다'],
+    strategies:['가야 할 곳 이름을 먼저 찾기','찾은 줄의 화살표만 보기','방향을 속으로 말하고 누르기','지금처럼 하기'],
   },
 };
 const LV_NAME={1:'쉬움',2:'보통',3:'어려움'};
@@ -318,12 +382,11 @@ const bucket=e=>e===0?0:e<=2?1:e<=5?2:3;
 const ASSIST=['혼자 수행','말로 단서 줌','시범·직접 도움'];
 
 // ══ 상태 ══════════════════════════════════════════════
-const SET={task:'shop',level:1,blocks:3,trials:20};
-let SES=null;   // {task,level,blocks,trials,list:[블록 결과], strategy, assist, memo, t0}
-let CUR=null;   // 진행 중 블록
+const SET={task:'shop',level:1,blocks:3,trials:20,sound:true};
+let SES=null, CUR=null;
 
 function go(name){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  const ss=document.querySelectorAll('.screen'); for(let i=0;i<ss.length;i++) ss[i].classList.remove('on');
   $('scr-'+name).classList.add('on');
   $('back-btn').style.display=name==='home'?'none':'inline-block';
   window.scrollTo(0,0);
@@ -337,71 +400,77 @@ function backBtn(){
 // ══ 시작 화면 ══════════════════════════════════════════
 function renderHome(){
   const tabs=$('tabs'); tabs.innerHTML='';
-  Object.entries(TASKS).forEach(([k,t])=>tabs.append(h('button',{class:'tab'+(SET.task===k?' on':''),onclick:()=>{SET.task=k;renderHome();}},`${t.name}`)));
-  const t=TASKS[SET.task];
-  $('task-info').innerHTML='';
-  $('task-info').append(h('div',{class:'task-head',html:t.icon},
-    h('div',null,h('div',{class:'t'},t.name,h('span',{class:'k'},t.kind)),h('div',{class:'d'},t.desc))));
+  Object.keys(TASKS).forEach(k=>tabs.appendChild(h('button',{class:'tab'+(SET.task===k?' on':''),onclick:()=>{SET.task=k;renderHome();}},TASKS[k].name)));
+  const t=TASKS[SET.task], info=$('task-info'); info.innerHTML='';
+  info.appendChild(h('div',{class:'task-head',html:t.icon},h('div',null,h('div',{class:'t'},t.name,h('span',{class:'k'},t.kind)),h('div',{class:'d'},t.desc))));
   const lv=$('lv-list'); lv.innerHTML='';
-  [1,2,3].forEach(n=>lv.append(h('button',{class:`lv-btn lv${n}`+(SET.level===n?' on':''),onclick:()=>{SET.level=n;renderHome();}},
+  [1,2,3].forEach(n=>lv.appendChild(h('button',{class:'lv-btn lv'+n+(SET.level===n?' on':''),onclick:()=>{SET.level=n;renderHome();}},
     h('span',{class:'lvn'},LV_NAME[n]),h('span',null,t.levels[n]))));
-  const sb=$('set-blocks'); sb.innerHTML=''; sb.append(seg([2,3,4],v=>{SET.blocks=v;renderHome();},SET.blocks,v=>v+'블록'));
-  const st=$('set-trials'); st.innerHTML=''; st.append(seg([15,20,30],v=>{SET.trials=v;renderHome();},SET.trials,v=>v+'문제'));
+  const sb=$('set-blocks'); sb.innerHTML=''; sb.appendChild(seg([2,3,4],v=>{SET.blocks=v;renderHome();},SET.blocks,v=>v+'블록'));
+  const st=$('set-trials'); st.innerHTML=''; st.appendChild(seg([15,20,30],v=>{SET.trials=v;renderHome();},SET.trials,v=>v+'문제'));
+  $('row-sound').style.display=SET.task==='cross'?'':'none';
+  const so=$('set-sound'); so.innerHTML=''; so.appendChild(seg(['켜기','끄기'],v=>{SET.sound=v==='켜기';renderHome();},SET.sound?'켜기':'끄기'));
 }
 
 function toStrategy(){
+  initAudio();
   const t=TASKS[SET.task];
-  SES={task:SET.task,level:SET.level,blocks:SET.blocks,trials:SET.trials,list:[],strategy:null,assist:null,memo:'',t0:Date.now(),done:false};
-  $('s-title').textContent=`${t.name} · ${LV_NAME[SES.level]}`;
+  SES={task:SET.task,level:SET.level,blocks:SET.blocks,trials:SET.trials,list:[],strategy:null,assist:null,memo:'',t0:Date.now(),done:false,practice:null};
+  $('s-title').textContent=t.name+' · '+LV_NAME[SES.level];
   $('s-check').textContent=t.check; $('s-do').textContent=t.doit;
-  $('s-how').innerHTML='<ol style="margin:0;padding-left:22px">'+t.how.map(x=>`<li style="margin:4px 0">${x}</li>`).join('')+'</ol>';
+  const how=t.how.filter(x=>SES.level===3||x.indexOf('(어려움)')<0);
+  $('s-how').innerHTML='<ol style="margin:0;padding-left:22px">'+how.map(x=>`<li style="margin:4px 0">${x}</li>`).join('')+'</ol>';
   go('strat');
 }
 
 // ══ 예측 ══════════════════════════════════════════════
 function toPredict(){
   const t=TASKS[SES.task], b=SES.list.length+1;
-  $('p-title').textContent=`${t.name} · 블록 ${b}/${SES.blocks}`;
-  const body=$('p-body'); body.innerHTML='';
-  let pred=null;
+  $('p-title').textContent=`${t.name} · 블록 ${b}/${SES.blocks} 시작 전`;
+  const body=$('p-body'); let pred=null;
   const draw=()=>{
     body.innerHTML='';
-    if(SES.strategy) body.append(h('div',{class:'q'},h('div',{class:'qt'},'이번 블록에서 쓸 전략'),h('span',{class:'chipq'},SES.strategy)));
-    if(b>1){const last=SES.list[b-2]; body.append(h('div',{class:'q'},h('div',{class:'qt'},'지난 블록'),
-      h('div',null,`실수 ${last.errors}번 (${t.errWords.com} ${last.com}번, ${t.errWords.om} ${last.om}번)`)));}
-    body.append(h('div',{class:'q'},h('div',{class:'qt'},`이번 ${SES.trials}문제에서 몇 번 실수할 것 같나요?`),
+    if(b===1&&SES.practice) body.appendChild(h('div',{class:'q'},h('div',{class:'qt'},'연습 결과'),h('div',null,`${SES.practice.n}문제 중 실수 ${SES.practice.errors}번`)));
+    if(b>1){const L=SES.list[b-2].stats; body.appendChild(h('div',{class:'q'},h('div',{class:'qt'},'지난 블록'),
+      h('div',null,`실수 ${L.errors}번 (${t.errWords.com} ${L.com}번, ${t.errWords.om} ${L.om}번)`)));}
+    if(SES.strategy) body.appendChild(h('div',{class:'q'},h('div',{class:'qt'},'이번 블록에서 쓸 전략'),h('span',{class:'chipq'},SES.strategy)));
+    body.appendChild(h('div',{class:'q'},h('div',{class:'qt'},b===1?'시작하기 전에 예상해 보세요. 이번 블록에서 몇 번 실수할 것 같나요?':'이번 블록에서는 몇 번 실수할 것 같나요?'),
       seg(PRED,v=>{pred=v;draw();},pred)));
     $('p-go').disabled=pred==null;
   };
   draw();
-  $('p-go').onclick=()=>startBlock(PRED.indexOf(pred));
+  $('p-go').onclick=()=>startBlock(PRED.indexOf(pred),false);
   go('pred');
 }
 
 // ══ 블록 진행 ══════════════════════════════════════════
-function startBlock(predIdx){
-  const t=TASKS[SES.task], cfg=t.cfg[SES.level], n=SES.trials;
-  CUR={pred:predIdx,strategy:SES.strategy,trials:makeTrials(SES.task,cfg,n),i:0,rec:[],timers:[],accept:false,onPress:null,
-       ssd:cfg.ssd,list:null,stopped:false};
-  if(SES.task==='shop') CUR.list=CUR.trials.list;
-  $('t-title').textContent=`${t.name} · 블록 ${SES.list.length+1}/${SES.blocks}`;
-  $('t-cue').innerHTML=SES.strategy?`<span class="chipq">전략: ${SES.strategy}</span>`:'';
-  const top=$('t-top'); top.innerHTML='';
-  if(SES.task==='shop') top.append(h('div',{class:'listbox'},h('div',{class:'h'},'이번 장보기 목록'),h('div',{class:'items'},CUR.list.map(x=>h('span',null,x)))));
+function startBlock(predIdx,practice){
+  initAudio();
+  const t=TASKS[SES.task], cfg=t.cfg[SES.level];
+  const n=practice?5:SES.trials;
+  const tr=makeTrials(SES.task,cfg,n,practice);
+  CUR={pred:predIdx,strategy:SES.strategy,trials:tr,i:0,rec:[],timers:[],accept:false,onPress:null,ssd:cfg.ssd,stopped:false,practice:!!practice,
+       list:tr.list||null,taken:{}};
+  $('t-title').textContent=practice?t.name+' · 연습':`${t.name} · 블록 ${SES.list.length+1}/${SES.blocks}`;
+  $('t-cue').innerHTML=SES.strategy&&!practice?`<span class="chipq">전략: ${SES.strategy}</span>`:'';
+  $('t-top').innerHTML='';
+  if(SES.task==='shop') drawCart();
   const resp=$('resp'); resp.innerHTML='';
-  if(SES.task==='shop') resp.append(bindPress(h('button',{class:'go'},'담기'),()=>press('go')));
-  if(SES.task==='cross') resp.append(bindPress(h('button',{class:'go'},'건너기'),()=>press('go')));
-  if(SES.task==='sign') resp.append(
-    bindPress(h('button',{html:arrowSVG('L',40)+' 왼쪽'}),()=>press('L')),
-    bindPress(h('button',{html:'오른쪽 '+arrowSVG('R',40)}),()=>press('R')));
+  if(SES.task==='cross') resp.appendChild(bindPress(h('button',{class:'go'},'건너기'),()=>press('go')));
+  if(SES.task==='way') { resp.appendChild(bindPress(h('button',{html:arrowSVG('L',40)+'왼쪽'}),()=>press('L')));
+                         resp.appendChild(bindPress(h('button',{html:'오른쪽'+arrowSVG('R',40)}),()=>press('R'))); }
+  const st=$('stage'); st.className='stage'; st.innerHTML='';
+  if(SES.task==='shop'){ st.className='stage shelf'; st.appendChild(h('div',{class:'tag'},'진열대')); }
+  if(SES.task==='cross'){ st.className='stage road'; st.innerHTML=roadSVG(); }
   $('fb').textContent='';
   go('task');
-  later(()=>nextTrial(),800);
+  later(nextTrial,900);
 }
 function later(fn,ms){const id=setTimeout(fn,ms);CUR.timers.push(id);return id;}
 function clearTimers(){if(!CUR)return;CUR.timers.forEach(clearTimeout);CUR.timers=[];}
 function stopBlock(){ if(CUR){clearTimers();CUR.stopped=true;CUR=null;} }
 function quitBlock(){
+  if(CUR&&CUR.practice){ stopBlock(); toPredict(); return; }
   if(!confirm('이번 블록을 그만할까요? 지금까지 푼 문제로 결과를 봅니다.')) return;
   const c=CUR; clearTimers(); c.stopped=true;
   if(!c.rec.length){ CUR=null; toPredict(); return; }
@@ -409,139 +478,248 @@ function quitBlock(){
 }
 function press(v){ if(CUR&&CUR.onPress) CUR.onPress(v); }
 
-function makeTrials(task,cfg,n){
+function makeTrials(task,cfg,n,practice){
   if(task==='shop'){
-    const items=shuffle(SHOP_POOL).slice(0,cfg.k), list=items.map(x=>x.n);
-    const nGo=Math.round(n*cfg.go), nNo=n-nGo, nLure=Math.round(nNo*cfg.lure);
-    const lures=[]; items.forEach(x=>x.lure.forEach(l=>{ if(list.indexOf(l)<0) lures.push(l); }));
+    const k=practice?2:cfg.k;
+    const items=shuffle(SHOP_POOL).slice(0,k);
+    const list=items.map(x=>({n:x.n,c:x.c,qty:pick(cfg.qty)}));
+    const names=list.map(x=>x.n);
     const arr=[];
-    for(let i=0;i<nGo;i++) arr.push({go:true,name:list[i%list.length],kind:'go'});
-    for(let i=0;i<nLure;i++) arr.push({go:false,name:pick(lures),kind:'lure'});
-    for(let i=0;i<nNo-nLure;i++) arr.push({go:false,name:pick(SHOP_OTHER),kind:'other'});
-    const t=noRepeat(arr,x=>x.name); t.list=list; return t;
+    list.forEach(x=>{ for(let i=0;i<x.qty+(practice?0:cfg.extra);i++) arr.push({n:x.n,c:x.c,kind:'list',sale:false}); });
+    const nD=Math.max(n-arr.length,Math.round(arr.length*0.7));
+    const lures=[]; items.forEach(x=>x.lure.forEach(l=>{ if(names.indexOf(l[0])<0) lures.push(l); }));
+    for(let i=0;i<nD;i++){
+      const useLure=lures.length&&Math.random()<cfg.lure, src=useLure?pick(lures):pick(SHOP_OTHER);
+      arr.push({n:src[0],c:src[1],kind:useLure?'lure':'other',sale:Math.random()<cfg.sale});
+    }
+    // 목록 물건에도 가끔 할인 표시 (어려움): 할인이라서 담는 것이 아니라 목록이라서 담는 것을 구분
+    if(cfg.sale>.5) arr.forEach(x=>{ if(x.kind==='list'&&Math.random()<.25) x.sale=true; });
+    const t=noRepeat(arr,x=>x.n); t.list=list; return t;
   }
   if(task==='cross'){
-    const nStop=Math.round(n*cfg.stop), arr=[];
-    for(let i=0;i<n;i++) arr.push({stop:i<nStop});
-    let t; do{ t=shuffle(arr); }while(t[0].stop||t[1].stop||runOf(t,x=>x.stop)>2);
+    const nStop=Math.round(n*cfg.stop), nBlink=Math.round(n*cfg.blink), arr=[];
+    for(let i=0;i<n;i++) arr.push({type:i<nStop?'stop':i<nStop+nBlink?'blink':'go'});
+    let t, g=0; do{ t=shuffle(arr); g++; }while(g<200&&(t[0].type!=='go'||t[1].type!=='go'||runOf(t,x=>x.type!=='go')>2));
     return t;
   }
-  const nInc=Math.round(n*cfg.inc), arr=[];
-  for(let i=0;i<n;i++){ const dir=Math.random()<.5?'L':'R'; arr.push({dir,inc:i<nInc}); }
-  return shuffle(arr);
+  // 병원 길 찾기
+  const arr=[];
+  for(let i=0;i<n;i++){
+    const dir=Math.random()<.5?'L':'R', conf=Math.random()<cfg.conf, simon=Math.random()<cfg.simon;
+    let dest, others=[];
+    if(cfg.similar&&Math.random()<.7){ const g=pick(WAY_GROUPS); dest=pick(g); others=g.filter(x=>x!==dest).slice(0,1); }
+    else dest=pick(WAY_ALL);
+    const pool=shuffle(WAY_ALL.filter(x=>x!==dest&&others.indexOf(x)<0));
+    while(others.length<cfg.rows-1) others.push(pool.pop());
+    const rows=shuffle([{tx:dest,dir,target:true}].concat(others.map(o=>({tx:o,dir:conf?(dir==='L'?'R':'L'):dir,target:false}))));
+    // 화살표 위치: 보통은 가리키는 쪽에 붙음. 위치 불일치(simon)면 반대편에 붙음
+    rows.forEach(r=>{ r.side=r.target&&simon?(r.dir==='L'?'R':'L'):r.dir; });
+    arr.push({dest,dir,conf,simon,rows});
+  }
+  return arr;
 }
-function runOf(a,f){let m=0,c=0;a.forEach(x=>{c=f(x)?c+1:0;m=Math.max(m,c);});return m;}
-function noRepeat(a,key){
-  for(let k=0;k<50;k++){ const t=shuffle(a); if(t.every((x,i)=>i===0||key(x)!==key(t[i-1]))) return t; }
-  return shuffle(a);
-}
+function runOf(a,f){let m=0,c=0;a.forEach(x=>{c=f(x)?c+1:0;if(c>m)m=c;});return m;}
 
 function nextTrial(){
   if(!CUR||CUR.stopped) return;
   if(PAUSED){ later(nextTrial,300); return; }
   if(CUR.i>=CUR.trials.length){ endBlock(false); return; }
-  $('t-pg').textContent=`${CUR.i+1} / ${CUR.trials.length}`;
+  $('t-pg').textContent=(CUR.i+1)+' / '+CUR.trials.length;
   $('fb').textContent='';
   const tr=CUR.trials[CUR.i];
-  ({shop:runShop,cross:runCross,sign:runSign})[SES.task](tr,rec=>{
+  ({shop:runShop,cross:runCross,way:runWay})[SES.task](tr,rec=>{
     CUR.accept=false; CUR.onPress=null; clearTimers();
     CUR.rec.push(rec); CUR.i++;
     showFb(rec);
-    later(nextTrial,SES.level===1?1100:800);
+    later(nextTrial,SES.level===1?1300:1000);
   });
 }
 const stage=()=>$('stage');
-function fixation(){ stage().innerHTML='<div class="fix">+</div>'; }
 
-// 장보기 1문제
-function runShop(tr,done){
-  const cfg=TASKS.shop.cfg[SES.level];
-  fixation();
-  later(()=>{
-    stage().innerHTML=''; stage().append(h('div',{class:'prod'},h('div',{class:'card'},h('div',{class:'n'},tr.name))));
-    const t0=performance.now(); CUR.accept=true;
-    CUR.onPress=()=>{ if(!CUR.accept) return; const rt=performance.now()-t0;
-      done({kind:tr.kind,name:tr.name,go:tr.go,resp:true,rt,correct:tr.go,err:tr.go?null:'com'}); };
-    later(()=>done({kind:tr.kind,name:tr.name,go:tr.go,resp:false,rt:null,correct:!tr.go,err:tr.go?'om':null}),cfg.time);
-  },rnd(400,700));
+// ── 장보기 ───────────────────────────────────────────
+function drawCart(){
+  const cfg=TASKS.shop.cfg[SES.level], hide=cfg.hide&&!CUR.practice, top=$('t-top'); top.innerHTML='';
+  const items=h('div',{class:'items'});
+  CUR.list.forEach(x=>{
+    const got=CUR.taken[x.n]||0, full=got>=x.qty;
+    const pips=[]; for(let i=0;i<x.qty;i++) pips.push(h('span',{class:'pip'+(i<got?' on':'')}));
+    items.appendChild(h('div',{class:'ci'+(full&&!hide?' full':'')},x.n,h('span',{class:'q'},x.qty+'개'),hide?null:pips));
+  });
+  top.appendChild(h('div',{class:'cartbox'},h('div',{class:'h'},hide?'장보기 목록 (담은 개수는 스스로 기억하세요)':'장보기 목록 · 담은 개수'),items));
 }
-// 횡단보도 1문제 (멈춤 신호 과제)
+function runShop(tr,done){
+  const cfg=TASKS.shop.cfg[SES.level], st=stage();
+  const old=st.querySelectorAll('.pk'); for(let i=0;i<old.length;i++) old[i].parentNode.removeChild(old[i]);
+  const card=h('div',{class:'pk',style:`background:${CAT[tr.c].bg};border-color:${CAT[tr.c].fg};color:${CAT[tr.c].fg}`,html:catIcon(tr.c,64,tr.n)},
+    h('div',{class:'nm'},tr.n),h('div',{class:'ct'},CAT[tr.c].nm),tr.sale?h('div',{class:'sale'},pick(SALES)):null);
+  st.appendChild(card);
+  const W=st.getBoundingClientRect().width, cw=card.getBoundingClientRect().width;
+  const item=CUR.list.filter(x=>x.n===tr.n)[0];
+  const needNow=()=>item?item.qty-(CUR.taken[tr.n]||0):0;
+  let t0=0, ended=false;
+  const fin=r=>{ if(ended) return; ended=true; done(r); };
+  const base={n:tr.n,kind:tr.kind,sale:tr.sale};
+  later(()=>{
+    card.style.transition=`transform ${cfg.time}ms linear`;
+    card.style.transform=`translateX(${-(W+cw+20)}px)`;
+    t0=now(); CUR.accept=true;
+    bindPress(card,()=>press('take'));
+    CUR.onPress=()=>{
+      if(!CUR.accept) return;
+      const rt=now()-t0, need=needNow();
+      freeze(card);
+      if(need>0){
+        CUR.taken[tr.n]=(CUR.taken[tr.n]||0)+1; drawCart();
+        later(()=>{card.style.transition='transform .45s ease-in, opacity .45s';card.style.transform+=' translateY(-260px) scale(.5)';card.style.opacity='0';},20);
+        fin(Object.assign(base,{go:true,resp:true,rt,correct:true,err:null}));
+      }else{
+        card.classList.add('bad');
+        fin(Object.assign(base,{go:false,over:!!item,resp:true,rt,correct:false,err:'com'}));
+      }
+    };
+    later(()=>{ const need=needNow(); card.remove();
+      fin(Object.assign(base,{go:need>0,over:false,resp:false,rt:null,correct:need<=0,err:need>0?'om':null})); },cfg.time);
+  },40);
+}
+function freeze(el){ const m=getComputedStyle(el).transform; el.style.transition='none'; el.style.transform=(m&&m!=='none')?m:''; }
+
+// ── 횡단보도 ──────────────────────────────────────────
+function roadSVG(){
+  let zebra=''; for(let y=66;y<262;y+=28) zebra+=`<rect x="300" y="${y}" width="160" height="16" fill="#eceff1"/>`;
+  return `<svg viewBox="0 0 760 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <rect width="760" height="58" fill="#cfd8dc"/><rect y="58" width="760" height="212" fill="#546e7a"/><rect y="270" width="760" height="70" fill="#cfd8dc"/>
+  <path d="M0 164h760" stroke="#fdd835" stroke-width="4" stroke-dasharray="30 22"/>${zebra}
+  <rect x="300" y="58" width="160" height="4" fill="#b0bec5"/>
+  <g transform="translate(560 66)"><rect x="40" y="0" width="70" height="132" rx="10" fill="#263238"/><rect x="72" y="132" width="6" height="40" fill="#455a64"/>
+    <rect x="48" y="8" width="54" height="54" rx="7" fill="#11181c"/><rect x="48" y="70" width="54" height="54" rx="7" fill="#11181c"/>
+    <g id="sig-red" fill="#4e342e"><circle cx="75" cy="20" r="6"/><rect x="68" y="27" width="14" height="18" rx="3"/><rect x="69" y="45" width="5" height="12"/><rect x="76" y="45" width="5" height="12"/></g>
+    <g id="sig-green" fill="#2e3b2d"><circle cx="75" cy="82" r="6"/><path d="M71 89h8l5 12-4 2-3-7-1 9 5 12-5 2-5-11-5 11-5-2 7-14v-7l-4 6-4-2z"/></g></g>
+  <g id="rd-car" style="transform:translateX(-340px)"><g transform="translate(0 92)">
+    <rect x="10" y="30" width="230" height="56" rx="16" fill="#e53935"/><path d="M50 30l26-26h86l30 26z" fill="#e53935"/>
+    <path d="M62 30l18-18h34v18zM122 30V12h36l22 18z" fill="#bbdefb"/><rect x="226" y="44" width="16" height="12" rx="3" fill="#fff59d"/>
+    <circle cx="60" cy="88" r="17" fill="#212121"/><circle cx="190" cy="88" r="17" fill="#212121"/><circle cx="60" cy="88" r="7" fill="#9e9e9e"/><circle cx="190" cy="88" r="7" fill="#9e9e9e"/></g></g>
+  <g id="rd-person"><g transform="translate(380 282)"><circle cx="0" cy="-34" r="11" fill="#5d4037"/><rect x="-12" y="-22" width="24" height="30" rx="8" fill="#1e88e5"/>
+    <rect x="-11" y="8" width="9" height="22" rx="4" fill="#37474f"/><rect x="2" y="8" width="9" height="22" rx="4" fill="#37474f"/></g></g>
+  </svg>`;
+}
+function setSignal(s){
+  const r=document.getElementById('sig-red'), g=document.getElementById('sig-green'); if(!r||!g) return;
+  r.setAttribute('fill',s==='red'?'#ef5350':'#4e342e');
+  g.setAttribute('fill',s==='red'?'#2e3b2d':'#43a047');
+  if(s==='blink') g.classList.add('blink'); else g.classList.remove('blink');
+}
+function moveEl(id,tf,dur){ const e=document.getElementById(id); if(!e) return; e.style.transition='transform '+(dur||800)+'ms ease-out'; e.style.transform=tf; }
+function dangerFlash(){ const d=h('div',{class:'danger'}); stage().appendChild(d); setTimeout(()=>{ if(d.parentNode) d.parentNode.removeChild(d); },700); }
+function resetRoad(){
+  const st=stage(); if(!document.getElementById('rd-person')) st.innerHTML=roadSVG();
+  moveEl('rd-person','translateY(0px)',1); moveEl('rd-car','translateX(-340px)',1); setSignal('red');
+}
 function runCross(tr,done){
   const cfg=TASKS.cross.cfg[SES.level];
-  stage().innerHTML=signalSVG('off');
-  const fore=rnd(700,1400); let phase='wait', t0=0, ssd=null;
-  CUR.accept=true;
-  CUR.onPress=()=>{
-    if(phase==='wait'){ done({stop:tr.stop,early:true,resp:true,rt:null,correct:false,err:'com',ssd:null}); return; }
-    const rt=performance.now()-t0;
-    if(!tr.stop) done({stop:false,resp:true,rt,correct:true,err:null,ssd:null});
-    else { stair(false); done({stop:true,resp:true,rt,correct:false,err:'com',ssd}); }
-  };
-  later(()=>{
-    phase='go'; t0=performance.now(); stage().innerHTML=signalSVG('green');
-    if(tr.stop){ ssd=CUR.ssd; later(()=>{ stage().innerHTML=signalSVG('red'); },ssd); }
+  resetRoad();
+  let phase='wait', t0=0, ssd=null, ended=false;
+  const fin=r=>{ if(ended) return; ended=true; done(r); };
+  const stair=ok=>{ if(cfg.adapt) CUR.ssd=Math.max(80,Math.min(cfg.win-400,CUR.ssd+(ok?50:-50))); };
+  later(()=>{   // 화면을 다시 그린 직후 누름은 받지 않음
+    CUR.accept=true;
+    CUR.onPress=()=>{
+      if(!CUR.accept) return;
+      if(phase==='wait'){ dangerFlash(); moveEl('rd-person','translateY(-30px)',300); fin({type:tr.type,early:true,resp:true,rt:null,correct:false,err:'com'}); return; }
+      const rt=now()-t0;
+      if(tr.type==='go'){ moveEl('rd-person','translateY(-250px)',900); fin({type:'go',resp:true,rt,correct:true,err:null}); }
+      else { dangerFlash(); moveEl('rd-person','translateY(-50px)',300); if(tr.type==='stop') stair(false);
+             fin({type:tr.type,resp:true,rt,correct:false,err:'com',ssd}); }
+    };
     later(()=>{
-      if(tr.stop){ stair(true); done({stop:true,resp:false,rt:null,correct:true,err:null,ssd}); }
-      else done({stop:false,resp:false,rt:null,correct:false,err:'om',ssd:null});
-    },cfg.win);
-  },fore);
-  function stair(success){ if(!cfg.adapt) return; CUR.ssd=Math.max(50,Math.min(cfg.win-300,CUR.ssd+(success?50:-50))); }
+      phase='go'; t0=now(); setSignal(tr.type==='blink'?'blink':'green');
+      if(tr.type==='stop'){ ssd=CUR.ssd; later(()=>{ moveEl('rd-car','translateX(20px)',500); horn(); },ssd); }
+      later(()=>{
+        if(tr.type==='go') fin({type:'go',resp:false,rt:null,correct:false,err:'om'});
+        else { if(tr.type==='stop'){ stair(true); moveEl('rd-car','translateX(900px)',900); } else setSignal('red');
+               fin({type:tr.type,resp:false,rt:null,correct:true,err:null,ssd}); }
+      },cfg.win);
+    },rnd(900,1700));
+  },150);
 }
-// 길 안내 표지판 1문제 (플랭커)
-function runSign(tr,done){
-  const cfg=TASKS.sign.cfg[SES.level];
-  fixation();
+
+// ── 병원 길 찾기 ──────────────────────────────────────
+function runWay(tr,done){
+  const cfg=TASKS.way.cfg[SES.level], st=stage();
+  st.innerHTML='';
+  $('t-top').innerHTML=''; $('t-top').appendChild(h('div',{class:'dest'},h('span',{class:'wait'},'다음 안내판을 기다리세요')));
   later(()=>{
-    const fl=tr.inc?(tr.dir==='L'?'R':'L'):tr.dir, mid=(cfg.n-1)/2;
-    const sz=cfg.n>=7?58:cfg.n>=5?66:76;
-    stage().innerHTML=`<div class="sign">${Array.from({length:cfg.n},(_,i)=>arrowSVG(i===mid?tr.dir:fl,sz)).join('')}</div>`;
-    const t0=performance.now(); CUR.accept=true;
-    CUR.onPress=v=>{ if(!CUR.accept) return; const rt=performance.now()-t0, ok=v===tr.dir;
-      done({inc:tr.inc,dir:tr.dir,resp:v,rt,correct:ok,err:ok?null:'com'}); };
-    later(()=>done({inc:tr.inc,dir:tr.dir,resp:null,rt:null,correct:false,err:'om'}),cfg.win);
-  },rnd(400,700));
+    const board=h('div',{class:'wayboard'});
+    tr.rows.forEach(r=>{
+      const ar=h('span',{html:arrowSVG(r.dir,40)}), tx=h('span',{class:'tx'},r.tx);
+      const row=h('div',{class:'wrow'+(r.side==='R'?' al-r':'')});
+      if(r.side==='L'){ row.appendChild(ar); row.appendChild(tx); } else { row.appendChild(tx); row.appendChild(ar); }
+      r.el=row; board.appendChild(row);
+    });
+    st.innerHTML=''; st.appendChild(board);
+    $('t-top').innerHTML=''; $('t-top').appendChild(h('div',{class:'dest'},h('span',null,'가야 할 곳: '+tr.dest)));
+    const t0=now(); CUR.accept=true;
+    const tgt=tr.rows.filter(r=>r.target)[0];
+    CUR.onPress=v=>{ if(!CUR.accept) return; const rt=now()-t0, ok=v===tr.dir;
+      tgt.el.classList.add(ok?'hit':'miss');
+      done({conf:tr.conf,simon:tr.simon,dir:tr.dir,resp:v,rt,correct:ok,err:ok?null:'com'}); };
+    later(()=>{ tgt.el.classList.add('miss'); done({conf:tr.conf,simon:tr.simon,dir:tr.dir,resp:null,rt:null,correct:false,err:'om'}); },cfg.win);
+  },rnd(500,800));
 }
 
 function showFb(rec){
   const fb=$('fb'), lv1=SES.level===1, task=SES.task;
   let txt, ok=rec.correct;
-  if(ok) txt=task==='cross'&&rec.stop?'잘 멈췄어요':'좋아요';
-  else if(task==='shop') txt=rec.err==='com'?(lv1?`잠깐! ‘${rec.name}’은(는) 목록에 없어요`:'목록에 없는 물건이에요'):(lv1?`‘${rec.name}’은(는) 목록에 있어요`:'놓쳤어요');
-  else if(task==='cross') txt=rec.early?'신호가 켜지기 전에 눌렀어요':rec.err==='com'?'빨간불이었어요. 멈춰야 해요':'초록불이었어요';
-  else txt=rec.err==='com'?(lv1?'가운데 화살표 방향을 보세요':'반대 방향이에요'):'시간이 지났어요';
+  if(task==='shop'){
+    if(ok) txt=rec.resp?'담았어요':'잘 지나보냈어요';
+    else if(rec.err==='om') txt=lv1?`‘${rec.n}’은(는) 목록에 있는 물건이에요`:'놓쳤어요';
+    else if(rec.over) txt=`‘${rec.n}’은(는) 이미 필요한 만큼 담았어요`;
+    else if(rec.sale) txt='할인이어도 목록에 없는 물건이에요';
+    else txt=lv1||rec.kind==='lure'?`‘${rec.n}’은(는) 목록에 없어요`:'목록에 없는 물건이에요';
+  }else if(task==='cross'){
+    if(ok) txt=rec.resp?'안전하게 건넜어요':rec.type==='blink'?'깜빡일 때 잘 기다렸어요':'차를 보고 잘 멈췄어요';
+    else if(rec.early) txt='빨간불이에요. 초록불을 기다려요';
+    else if(rec.err==='om') txt='초록불이었어요. 건너도 돼요';
+    else txt=rec.type==='blink'?'깜빡이는 초록불에는 건너지 않아요':'위험해요! 차가 오고 있었어요';
+  }else{
+    if(ok) txt='맞게 찾았어요';
+    else if(rec.err==='om') txt='시간이 지났어요';
+    else txt=lv1?'찾은 줄의 화살표 방향을 다시 보세요':'반대쪽이에요';
+  }
   fb.textContent=txt; fb.style.color=ok?'var(--ok)':'var(--bad)';
-  if(task==='cross') stage().innerHTML=signalSVG('off'); else fixation();
 }
 
-// ══ 블록 결과 계산 ══════════════════════════════════════
+// ══ 블록 결과 ══════════════════════════════════════════
 function blockStats(task,rec){
   const n=rec.length, ok=rec.filter(r=>r.correct).length;
   const com=rec.filter(r=>r.err==='com').length, om=rec.filter(r=>r.err==='om').length;
-  const goRT=rec.filter(r=>r.correct&&r.rt!=null).map(r=>r.rt);
-  const s={n,ok,com,om,errors:com+om,acc:n?ok/n:0,rt:avg(goRT)};
+  const s={n,ok,com,om,errors:com+om,rt:avg(rec.filter(r=>r.correct&&r.rt!=null).map(r=>r.rt))};
   if(task==='shop'){
-    s.lureCom=rec.filter(r=>r.err==='com'&&r.kind==='lure').length;
-    s.otherCom=rec.filter(r=>r.err==='com'&&r.kind==='other').length;
+    s.saleCom=rec.filter(r=>r.err==='com'&&r.sale&&!r.over).length;
+    s.overCom=rec.filter(r=>r.err==='com'&&r.over).length;
+    s.lureCom=rec.filter(r=>r.err==='com'&&!r.over&&!r.sale&&r.kind==='lure').length;
+    s.otherCom=s.com-s.saleCom-s.overCom-s.lureCom;
+    if(CUR&&CUR.list){ s.listN=CUR.list.length; s.listDone=CUR.list.filter(x=>(CUR.taken[x.n]||0)>=x.qty).length; }
   }
   if(task==='cross'){
-    const st=rec.filter(r=>r.stop), succ=st.filter(r=>r.correct).length;
-    s.stops=st.length; s.stopOk=succ; s.early=rec.filter(r=>r.early).length;
-    const ssds=st.filter(r=>r.ssd!=null).map(r=>r.ssd); s.ssd=avg(ssds);
+    const st=rec.filter(r=>r.type==='stop'), bl=rec.filter(r=>r.type==='blink');
+    s.stops=st.length; s.stopOk=st.filter(r=>r.correct).length; s.blinks=bl.length; s.blinkOk=bl.filter(r=>r.correct).length;
+    s.early=rec.filter(r=>r.early).length; s.ssd=avg(st.filter(r=>r.ssd!=null).map(r=>r.ssd));
   }
-  if(task==='sign'){
-    const C=rec.filter(r=>!r.inc), I=rec.filter(r=>r.inc);
-    s.cAcc=C.length?C.filter(r=>r.correct).length/C.length:null; s.iAcc=I.length?I.filter(r=>r.correct).length/I.length:null;
+  if(task==='way'){
+    const C=rec.filter(r=>!r.conf), I=rec.filter(r=>r.conf), S=rec.filter(r=>r.simon);
+    const acc=a=>a.length?a.filter(r=>r.correct).length/a.length:null;
+    s.cAcc=acc(C); s.iAcc=acc(I); s.sAcc=acc(S); s.sN=S.length;
     s.cRT=avg(C.filter(r=>r.correct).map(r=>r.rt)); s.iRT=avg(I.filter(r=>r.correct).map(r=>r.rt));
-    s.cN=C.length; s.iN=I.length;
   }
   return s;
 }
-// 실제로 가장 많이 한 실수 유형 → 자기 판단 보기와 같은 순서(0: 누름, 1: 놓침, 2: 거의 없음)
 function actualType(s){ if(s.errors<=1) return 2; return s.com>=s.om?0:1; }
+function tile(v,k){ return h('div',{class:'tile'},h('div',{class:'v'},v),h('div',{class:'k'},k)); }
 
 function endBlock(partial){
   const c=CUR; c.accept=false; c.onPress=null; clearTimers(); c.stopped=true;
   const t=TASKS[SES.task], s=blockStats(SES.task,c.rec);
+  if(c.practice){ SES.practice={n:s.n,errors:s.errors}; CUR=null; setTimeout(toPredict,600); return; }
   const blk={pred:c.pred,strategy:c.strategy,stats:s,partial,self:null,next:null};
   SES.list.push(blk); CUR=null;
   const last=SES.list.length>=SES.blocks;
@@ -549,102 +727,87 @@ function endBlock(partial){
   const body=$('r-body');
   const draw=()=>{
     body.innerHTML='';
-    const ab=bucket(s.errors), pm=blk.pred==null?null:(ab===blk.pred?'예측과 같아요':ab>blk.pred?'예측보다 실수가 많았어요':'예측보다 실수가 적었어요');
-    body.append(h('div',{class:'tiles'},
-      tile(`${s.ok}/${s.n}`,'맞힘'),tile(s.errors+'번','실수'),tile(sec(s.rt),'평균 반응시간'),
-      SES.task==='cross'?tile(`${s.stopOk}/${s.stops}`,'멈추기 성공'):SES.task==='shop'?tile(s.lureCom+'번','비슷한 이름에 속음'):tile(s.iAcc==null?'-':Math.round(s.iAcc*100)+'%','양옆 반대일 때 정답률')));
-    body.append(h('div',{class:'cmp'},
+    const ab=bucket(s.errors);
+    const extra=SES.task==='shop'?tile(`${s.listDone}/${s.listN}`,'목록 다 채움'):SES.task==='cross'?tile(`${s.stopOk+s.blinkOk}/${s.stops+s.blinks}`,'멈춰야 할 때 멈춤'):tile(s.iAcc==null?'-':Math.round(s.iAcc*100)+'%','다른 줄이 반대일 때 정답률');
+    body.appendChild(h('div',{class:'tiles'},tile(`${s.ok}/${s.n}`,'맞힘'),tile(s.errors+'번','실수'),tile(sec(s.rt),'평균 반응시간'),extra));
+    const detail=SES.task==='shop'&&s.com?` (할인에 끌림 ${s.saleCom}, 더 담음 ${s.overCom}, 비슷한 이름 ${s.lureCom}, 그 밖 ${s.otherCom})`:
+      SES.task==='cross'&&s.early?` (빨간불에 누름 ${s.early}번 포함)`:'';
+    body.appendChild(h('div',{class:'cmp'},
       `예측: ${blk.pred==null?'-':PRED[blk.pred]} → 실제: ${s.errors}번`,h('br'),
-      h('span',{class:ab===blk.pred?'okc':'badc'},pm||''),
-      h('div',{class:'subc',style:'margin-top:4px'},`${t.errWords.com} ${s.com}번 · ${t.errWords.om} ${s.om}번`+(SES.task==='cross'&&s.early?` (신호 전에 누름 ${s.early}번 포함)`:'')+(partial?' · 중간에 그만둠':''))));
-    // 자기 판단
+      h('span',{class:ab===blk.pred?'okc':'badc'},blk.pred==null?'':ab===blk.pred?'예측과 같아요':ab>blk.pred?'예측보다 실수가 많았어요':'예측보다 실수가 적었어요'),
+      h('div',{class:'subc',style:'margin-top:4px'},`${t.errWords.com} ${s.com}번${detail} · ${t.errWords.om} ${s.om}번`+(partial?' · 중간에 그만둠':''))));
     const q1=h('div',{class:'q'},h('div',{class:'qt'},'가장 많이 한 실수는 무엇이었나요?'),
       seg(t.selfOpts,v=>{blk.self=t.selfOpts.indexOf(v);draw();},blk.self==null?null:t.selfOpts[blk.self]));
-    if(blk.self!=null&&blk.self!==3){
-      const at=actualType(s);
-      q1.append(h('div',{class:'cmp'},blk.self===at?h('span',{class:'okc'},'실제 결과와 같아요.'):
-        h('span',{class:'badc'},`실제로는 ‘${t.selfOpts[at]}’에 가까워요.`)));
-    }
-    body.append(q1);
-    if(!last){
-      body.append(h('div',{class:'q'},h('div',{class:'qt'},'다음 블록에서 쓸 전략을 골라 보세요.'),
-        seg(t.strategies,v=>{blk.next=v;draw();},blk.next)));
-    }
-    const ready=blk.self!=null&&(last||blk.next!=null);
-    $('r-next').disabled=!ready;
+    if(blk.self!=null&&blk.self!==3){ const at=actualType(s);
+      q1.appendChild(h('div',{class:'cmp'},blk.self===at?h('span',{class:'okc'},'실제 결과와 같아요.'):h('span',{class:'badc'},`실제로는 ‘${t.selfOpts[at]}’에 가까워요.`))); }
+    body.appendChild(q1);
+    if(!last) body.appendChild(h('div',{class:'q'},h('div',{class:'qt'},'다음 블록에서 쓸 전략을 골라 보세요.'),seg(t.strategies,v=>{blk.next=v;draw();},blk.next)));
+    $('r-next').disabled=!(blk.self!=null&&(last||blk.next!=null));
   };
   draw();
   $('r-next').textContent=last?'전체 결과 보기':'다음 블록';
-  $('r-next').onclick=()=>{ if(last) showReport(); else { SES.strategy=blk.next==='지금처럼 하기'?SES.strategy:blk.next; toPredict(); } };
+  $('r-next').onclick=()=>{ if(last) showReport(); else { if(blk.next!=='지금처럼 하기') SES.strategy=blk.next; toPredict(); } };
   go('rev');
 }
-function tile(v,k){ return h('div',{class:'tile'},h('div',{class:'v'},v),h('div',{class:'k'},k)); }
 
 // ══ 전체 리포트 ══════════════════════════════════════════
 function showReport(){
   SES.done=true;
   const t=TASKS[SES.task], b=$('rep-body'); b.innerHTML='';
-  const L=SES.list, first=L[0].stats, lastS=L[L.length-1].stats;
+  const L=SES.list, f=L[0].stats, l=L[L.length-1].stats;
   const predOk=L.filter(x=>x.pred!=null&&x.pred===bucket(x.stats.errors)).length;
   const selfJ=L.filter(x=>x.self!=null&&x.self!==3), selfOk=selfJ.filter(x=>x.self===actualType(x.stats)).length;
-  b.append(h('h2',null,'잠깐 멈춤 훈련 결과'),
-    h('div',{class:'meta'},`날짜: ${todayStr()}　과제: ${t.name} (${t.kind})　난이도: ${LV_NAME[SES.level]}　${L.length}블록 × ${SES.trials}문제　총 소요 ${Math.round((Date.now()-SES.t0)/60000)}분`));
-  b.append(h('div',{class:'tiles',style:'margin-bottom:10px'},
-    tile(`${first.errors} → ${lastS.errors}`,'실수 (첫 블록 → 마지막)'),
-    tile(`${sec(first.rt)} → ${sec(lastS.rt)}`.replace(/초/g,''),'반응시간(초) 변화'),
-    tile(`${predOk}/${L.length}`,'실수 예측이 맞은 블록'),
-    tile(selfJ.length?`${selfOk}/${selfJ.length}`:'-','실수 유형을 바르게 앎')));
+  b.appendChild(h('h2',null,'잠깐 멈춤 훈련 결과'));
+  b.appendChild(h('div',{class:'meta'},`날짜: ${todayStr()}　과제: ${t.name} (${t.kind})　난이도: ${LV_NAME[SES.level]}　${L.length}블록　총 소요 ${Math.max(1,Math.round((Date.now()-SES.t0)/60000))}분`));
+  b.appendChild(h('div',{class:'tiles',style:'margin-bottom:10px'},
+    tile(`${f.errors} → ${l.errors}`,'실수 (첫 블록 → 마지막)'),tile(`${sec(f.rt)} → ${sec(l.rt)}`,'평균 반응시간'),
+    tile(`${predOk}/${L.length}`,'실수 예측이 맞은 블록'),tile(selfJ.length?`${selfOk}/${selfJ.length}`:'-','실수 유형을 바르게 앎')));
   const tb=h('table');
-  tb.append(h('tr',null,['블록','예측','실제 실수',t.errWords.com,t.errWords.om,'정답률','평균 반응시간','스스로 판단한 실수','사용한 전략'].map(x=>h('th',null,x))));
+  tb.appendChild(h('tr',null,['블록','문제 수','예측','실제 실수',t.errWords.com,t.errWords.om,'정답률','평균 반응시간','스스로 판단한 실수','사용한 전략'].map(x=>h('th',null,x))));
   L.forEach((x,i)=>{const s=x.stats, at=actualType(s);
-    tb.append(h('tr',null,h('td',null,`${i+1}${x.partial?' (중단)':''}`),h('td',null,x.pred==null?'-':PRED[x.pred]),h('td',null,s.errors),
+    tb.appendChild(h('tr',null,h('td',null,(i+1)+(x.partial?' (중단)':'')),h('td',null,s.n),h('td',null,x.pred==null?'-':PRED[x.pred]),h('td',null,s.errors),
       h('td',null,s.com),h('td',null,s.om),h('td',null,pct(s.ok,s.n)),h('td',null,sec(s.rt)),
-      h('td',{class:'l'},x.self==null?'-':t.selfOpts[x.self]+(x.self===3?'':x.self===at?' (일치)':' (불일치)')),
-      h('td',{class:'l'},x.strategy||'-')));});
-  b.append(tb);
-  // 과제별 세부
+      h('td',{class:'l'},x.self==null?'-':t.selfOpts[x.self]+(x.self===3?'':x.self===at?' (일치)':' (불일치)')),h('td',{class:'l'},x.strategy||'-')));});
+  b.appendChild(tb);
   const d=h('table');
   if(SES.task==='shop'){
-    d.append(h('tr',null,['블록','비슷한 이름 물건을 담음','목록과 다른 물건을 담음','목록 물건을 놓침'].map(x=>h('th',null,x))));
-    L.forEach((x,i)=>d.append(h('tr',null,h('td',null,i+1),h('td',null,x.stats.lureCom),h('td',null,x.stats.otherCom),h('td',null,x.stats.om))));
+    d.appendChild(h('tr',null,['블록','목록 다 채움','할인에 끌려 담음','이미 다 담았는데 더 담음','비슷한 이름을 담음','그 밖의 물건을 담음','필요한 물건을 놓침'].map(x=>h('th',null,x))));
+    L.forEach((x,i)=>{const s=x.stats;d.appendChild(h('tr',null,h('td',null,i+1),h('td',null,`${s.listDone}/${s.listN}`),h('td',null,s.saleCom),h('td',null,s.overCom),h('td',null,s.lureCom),h('td',null,s.otherCom),h('td',null,s.om)));});
   }else if(SES.task==='cross'){
-    d.append(h('tr',null,['블록','멈추기 성공','신호 전에 누름','빨간불로 바뀐 시점 (초록불 뒤 평균)'].map(x=>h('th',null,x))));
-    L.forEach((x,i)=>{const s=x.stats;d.append(h('tr',null,h('td',null,i+1),h('td',null,`${s.stopOk}/${s.stops} (${pct(s.stopOk,s.stops)})`),h('td',null,s.early),
-      h('td',null,s.ssd==null?'-':sec(s.ssd))));});
+    d.appendChild(h('tr',null,['블록','차가 올 때 멈춤','깜빡일 때 기다림','빨간불에 누름','차가 나타난 시점 (초록불 뒤 평균)'].map(x=>h('th',null,x))));
+    L.forEach((x,i)=>{const s=x.stats;d.appendChild(h('tr',null,h('td',null,i+1),h('td',null,`${s.stopOk}/${s.stops}`),h('td',null,s.blinks?`${s.blinkOk}/${s.blinks}`:'-'),h('td',null,s.early),h('td',null,s.ssd==null?'-':sec(s.ssd))));});
   }else{
-    d.append(h('tr',null,['블록','양옆 같음: 정답률','양옆 같음: 반응시간','양옆 반대: 정답률','양옆 반대: 반응시간'].map(x=>h('th',null,x))));
-    L.forEach((x,i)=>{const s=x.stats;d.append(h('tr',null,h('td',null,i+1),h('td',null,s.cAcc==null?'-':Math.round(s.cAcc*100)+'%'),h('td',null,sec(s.cRT)),
-      h('td',null,s.iAcc==null?'-':Math.round(s.iAcc*100)+'%'),h('td',null,sec(s.iRT))));});
+    d.appendChild(h('tr',null,['블록','다른 줄이 같은 방향: 정답률','반응시간','다른 줄이 반대 방향: 정답률','반응시간','화살표 위치가 반대: 정답률'].map(x=>h('th',null,x))));
+    const P=v=>v==null?'-':Math.round(v*100)+'%';
+    L.forEach((x,i)=>{const s=x.stats;d.appendChild(h('tr',null,h('td',null,i+1),h('td',null,P(s.cAcc)),h('td',null,sec(s.cRT)),h('td',null,P(s.iAcc)),h('td',null,sec(s.iRT)),h('td',null,s.sN?P(s.sAcc):'-')));});
   }
-  b.append(h('div',{class:'lbl'},'과제별 세부'),d);
-  // 치료사 기록
-  const as=h('div');
-  const drawAs=()=>{as.innerHTML='';as.append(seg(ASSIST,v=>{SES.assist=SES.assist===v?null:v;drawAs();},SES.assist));};
-  drawAs();
+  b.appendChild(h('div',{class:'lbl'},'과제별 세부'));
+  b.appendChild(d);
+  const as=h('div'); const drawAs=()=>{as.innerHTML='';as.appendChild(seg(ASSIST,v=>{SES.assist=SES.assist===v?null:v;drawAs();},SES.assist));}; drawAs();
+  const memoPrint=h('div',{style:'white-space:pre-wrap'});
   const memo=h('textarea',{placeholder:'관찰 내용, 준 단서, 다음 회기 계획 등',oninput:e=>{SES.memo=e.target.value;memoPrint.textContent=e.target.value;}});
-  memo.value=SES.memo; const memoPrint=h('div',{style:'white-space:pre-wrap'});
-  b.append(h('div',{class:'lbl'},'도움 수준 (치료사)'),as,h('div',{class:'lbl',style:'margin-top:10px'},'메모'),h('div',{class:'no-print'},memo),memoPrint);
-  if(SES.task==='cross'&&SES.level>=2) b.append(h('p',{class:'note'},'보통·어려움에서는 잘 멈추면 빨간불이 조금 더 늦게, 못 멈추면 조금 더 빨리 바뀝니다. 바뀐 시점이 늦을수록 더 어려운 조건에서 멈춘 것입니다.'));
-  b.append(h('p',{class:'note'},'구성 근거: 억제 과제에 실수 예측·자기 모니터링·피드백·전략 선택을 결합한 메타인지 전략 훈련 방식 (Cicerone et al., 2019; Jeffay et al., 2023).'));
+  memo.value=SES.memo;
+  b.appendChild(h('div',{class:'lbl'},'도움 수준 (치료사)')); b.appendChild(as);
+  b.appendChild(h('div',{class:'lbl',style:'margin-top:10px'},'메모')); b.appendChild(h('div',{class:'no-print'},memo)); b.appendChild(memoPrint);
+  if(SES.task==='cross'&&SES.level>=2) b.appendChild(h('p',{class:'note'},'보통·어려움에서는 잘 멈추면 차가 조금 더 늦게, 못 멈추면 조금 더 일찍 나타납니다. 차가 나타난 시점이 늦을수록 더 어려운 조건에서 멈춘 것입니다.'));
+  b.appendChild(h('p',{class:'note'},'구성 근거: 억제 과제에 실수 예측·자기 모니터링·피드백·전략 선택을 결합한 메타인지 전략 훈련 방식 (Cicerone et al., 2019; Jeffay et al., 2023).'));
   go('rep');
 }
 
+// ══ 키보드 (스페이스=건너기, ←→=방향, 장보기는 스페이스=담기) ══
 document.addEventListener('keydown',e=>{
   if(!CUR||!$('scr-task').classList.contains('on')) return;
-  if(e.key===' '||e.key==='Enter'){ if(SES.task!=='sign'){e.preventDefault();press('go');} }
-  else if(e.key==='ArrowLeft'&&SES.task==='sign'){e.preventDefault();press('L');}
-  else if(e.key==='ArrowRight'&&SES.task==='sign'){e.preventDefault();press('R');}
+  if((e.key===' '||e.key==='Enter')&&SES.task!=='way'){ e.preventDefault(); press(SES.task==='shop'?'take':'go'); }
+  else if(e.key==='ArrowLeft'&&SES.task==='way'){ e.preventDefault(); press('L'); }
+  else if(e.key==='ArrowRight'&&SES.task==='way'){ e.preventDefault(); press('R'); }
 });
-
 // ══ 화면이 가려지면 잠시 멈춤 ══════════════════════════════
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden&&CUR&&!CUR.stopped){
-    PAUSED=true;
+    PAUSED=true; clearTimers(); CUR.accept=false; CUR.onPress=null;
     const p=h('div',{class:'pause'},h('div',{style:'text-align:center'},h('div',{style:'font-weight:800;font-size:1.2rem;margin-bottom:10px'},'잠시 멈췄습니다'),
-      h('button',{class:'big-btn b-pri',onclick:()=>{p.remove();PAUSED=false;}},'계속하기')));
-    // 진행 중이던 문제는 버리고 다시 시작
-    clearTimers(); CUR.accept=false; CUR.onPress=null;
-    stage().append(p); CUR.timers.push(setTimeout(nextTrial,300));
+      h('button',{class:'big-btn b-pri',onclick:()=>{ if(p.parentNode) p.parentNode.removeChild(p); PAUSED=false; }},'계속하기')));
+    stage().appendChild(p); CUR.timers.push(setTimeout(nextTrial,300));
   }
 });
 
