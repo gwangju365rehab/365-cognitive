@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>잠깐 멈춤 훈련 - 광주365재활병원</title>
+<style>
+:root{
+  --ink:#1f2433; --sub:#5b6375; --line:#d5dbe6; --bg:#eef1f6; --card:#fff;
+  --pri:#283593; --pri-2:#3f51b5; --pri-soft:#e8eaf6;
+  --ok:#2e7d32; --ok-soft:#e8f5e9; --bad:#c62828; --bad-soft:#fdecea;
+  --warn:#b54708; --warn-soft:#fff4e5;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:18px;line-height:1.5;padding:16px 14px 90px}
+button{font:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.screen{display:none}
+.screen.on{display:flex}
+
+#home-btn,#back-btn{position:fixed;top:12px;left:12px;z-index:50;padding:10px 18px;border-radius:999px;border:none;min-height:44px;
+  background:#fff;color:#333;font-weight:700;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+#back-btn{left:112px;background:var(--pri);color:#fff;display:none}
+h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:800}
+.lead{text-align:center;color:var(--sub);font-size:1rem;margin:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lbl{font-size:.92rem;font-weight:800;color:var(--sub);margin:4px 0 6px}
+.hint{font-size:.95rem;color:var(--sub);margin:0}
+
+/* 탭 */
+.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tab{padding:12px 20px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:800;color:var(--sub);min-height:50px}
+.tab.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.task-head{display:flex;gap:14px;align-items:center}
+.task-head svg{flex:none}
+.task-head .t{font-size:1.25rem;font-weight:800}
+.task-head .k{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--pri-soft);color:var(--pri);font-size:.82rem;font-weight:800;margin-left:6px;vertical-align:middle}
+.task-head .d{color:var(--sub);font-size:.98rem}
+
+.lv-list{display:flex;flex-direction:column;gap:10px}
+.lv-btn{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;min-height:66px}
+.lv-btn.on{border-color:var(--pri-2);background:var(--pri-soft)}
+.lv-btn .lvn{min-width:84px;text-align:center;padding:8px 0;border-radius:10px;font-weight:800;color:#fff}
+.lv1 .lvn{background:#43a047}.lv2 .lvn{background:#1e88e5}.lv3 .lvn{background:#e53935}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-width:72px;min-height:48px;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:700}
+.seg button.on{border-color:var(--pri-2);background:var(--pri-2);color:#fff}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eceff4}
+.set-row .nm{font-weight:700}
+
+.big-btn{padding:16px 26px;border-radius:14px;border:none;font-size:1.15rem;font-weight:800;min-height:60px}
+.b-pri{background:var(--pri);color:#fff}
+.b-sec{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.foot{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+
+/* 전략 카드 */
+.strat{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.strat .st{flex:1 1 180px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.strat .st b{display:block;font-size:1.4rem;color:var(--pri);margin-bottom:4px}
+.strat .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--pri);color:#fff;font-weight:800;margin-bottom:6px}
+
+/* 예측·되돌아보기 */
+.q{padding:10px 0;border-top:1px solid #eceff4}
+.q:first-child{border-top:none}
+.q .qt{font-weight:800;margin-bottom:8px}
+.cmp{margin-top:8px;padding:10px 14px;border-radius:12px;background:#f6f7fb;font-weight:700}
+.okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}.subc{color:var(--sub);font-weight:700}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:620px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tile .v{font-size:1.6rem;font-weight:900;font-variant-numeric:tabular-nums}
+.tile .k{font-size:.85rem;color:var(--sub);font-weight:700}
+.chipq{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--pri-soft);color:var(--pri);font-weight:800;font-size:.9rem}
+
+/* 과제 화면 */
+.tbar{margin-top:46px;display:flex;align-items:center;gap:12px;background:var(--pri);color:#fff;border-radius:16px;padding:12px 16px;flex-wrap:wrap}
+.tbar .ttl{flex:1;font-size:1.15rem;font-weight:800}
+.tbar .pg{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px}
+.tbar .quit{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;min-height:40px}
+.cue{text-align:center}
+.listbox{background:#fffdf5;border:2px solid #ead9a6;border-radius:14px;padding:10px 14px;text-align:center}
+.listbox .h{font-weight:800;color:#8a6d1a;font-size:.95rem}
+.listbox .items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.listbox .items span{background:#fff;border:2px solid #ead9a6;border-radius:10px;padding:4px 12px;font-weight:800;font-size:1.1rem}
+.stage{background:#fff;border:2px solid var(--line);border-radius:18px;height:320px;display:grid;place-items:center;position:relative;overflow:hidden;user-select:none}
+.fix{font-size:3rem;color:#9aa2b2;font-weight:300}
+.prod{display:flex;flex-direction:column;align-items:center;gap:10px}
+.prod .card{min-width:280px;padding:26px 30px;border-radius:18px;border:3px solid #cfd6e4;background:#fafbfd;text-align:center}
+.prod .card .n{font-size:2.6rem;font-weight:900;letter-spacing:1px}
+.prod .card .c{font-size:.95rem;color:var(--sub);font-weight:700}
+.sign{background:#1b5e20;border:6px solid #fff;outline:3px solid #1b5e20;border-radius:14px;padding:22px 26px;display:flex;gap:6px}
+.resp{display:flex;gap:14px;justify-content:center}
+.resp button{flex:1;max-width:380px;min-height:96px;border-radius:18px;border:none;font-size:1.5rem;font-weight:900;color:#fff;background:var(--pri-2);box-shadow:0 4px 0 #1a237e}
+.resp button:active{transform:translateY(3px);box-shadow:0 1px 0 #1a237e}
+.resp button.go{background:#2e7d32;box-shadow:0 4px 0 #1b5e20}
+#scr-rep{margin-top:50px}
+.resp button{display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.fbline{min-height:2.2rem;text-align:center;font-size:1.25rem;font-weight:800}
+.pause{position:absolute;inset:0;background:rgba(255,255,255,.94);display:grid;place-items:center;z-index:5}
+
+/* 리포트 */
+.rep h2{margin:0 0 4px;font-size:1.4rem}
+.rep .meta{color:var(--sub);margin-bottom:10px}
+.rep table{width:100%;border-collapse:collapse;font-size:.92rem;margin:6px 0 12px;background:#fff}
+.rep th,.rep td{border:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:middle}
+.rep th{background:#f3f5fa}
+.rep td.l,.rep th.l{text-align:left}
+textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid var(--line);border-radius:10px}
+.note{font-size:.85rem;color:var(--sub)}
+#hospital-logo{position:fixed;bottom:10px;right:14px;font-size:.8rem;color:#9aa2b2;font-weight:700}
+@media print{
+  body{background:#fff;padding:0;font-size:12px}
+  #home-btn,#back-btn,#hospital-logo,.no-print{display:none!important}
+  .panel{border:none;padding:0}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">홈으로</button>
+<button id="back-btn" onclick="backBtn()">처음으로</button>
+
+<!-- 시작 화면 -->
+<div class="wrap screen on" id="scr-home">
+  <h1>잠깐 멈춤 훈련</h1>
+  <p class="lead">일상 장면에서 ‘잠깐 멈추고, 확인하고, 누르기’를 연습합니다. 블록마다 실수를 예측하고 결과와 비교합니다.</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="task-info"></div>
+  <div class="panel">
+    <div class="lbl">난이도</div>
+    <div class="lv-list" id="lv-list"></div>
+    <div class="set-row" style="margin-top:12px"><span class="nm">블록 수</span><span id="set-blocks"></span></div>
+    <div class="set-row"><span class="nm">블록당 문제 수</span><span id="set-trials"></span></div>
+  </div>
+  <div class="foot"><button class="big-btn b-pri" onclick="toStrategy()">다음</button></div>
+</div>
+
+<!-- 전략 안내 -->
+<div class="wrap screen" id="scr-strat">
+  <div class="tbar"><div class="ttl" id="s-title"></div></div>
+  <div class="panel">
+    <div class="lbl">이렇게 해 보세요</div>
+    <div class="strat">
+      <div class="st"><div class="no">1</div><b>잠깐</b>바로 누르지 말고 멈춥니다</div>
+      <div class="st"><div class="no">2</div><b>확인</b><span id="s-check"></span></div>
+      <div class="st"><div class="no">3</div><b>누르기</b><span id="s-do"></span></div>
+    </div>
+  </div>
+  <div class="panel"><div class="lbl">방법</div><div id="s-how"></div></div>
+  <div class="foot"><button class="big-btn b-pri" onclick="toPredict()">시작하기</button></div>
+</div>
+
+<!-- 예측 -->
+<div class="wrap screen" id="scr-pred">
+  <div class="tbar"><div class="ttl" id="p-title"></div></div>
+  <div class="panel" id="p-body"></div>
+  <div class="foot"><button class="big-btn b-pri" id="p-go" disabled onclick="startBlock()">블록 시작</button></div>
+</div>
+
+<!-- 과제 -->
+<div class="wrap screen" id="scr-task">
+  <div class="tbar"><div class="ttl" id="t-title"></div><div class="pg" id="t-pg"></div><button class="quit" onclick="quitBlock()">그만하기</button></div>
+  <div class="cue" id="t-cue"></div>
+  <div id="t-top"></div>
+  <div class="stage" id="stage"></div>
+  <div class="fbline" id="fb"></div>
+  <div class="resp" id="resp"></div>
+</div>
+
+<!-- 블록 결과 -->
+<div class="wrap screen" id="scr-rev">
+  <div class="tbar"><div class="ttl" id="r-title"></div></div>
+  <div class="panel" id="r-body"></div>
+  <div class="foot"><button class="big-btn b-pri" id="r-next" disabled></button></div>
+</div>
+
+<!-- 최종 리포트 -->
+<div class="wrap screen" id="scr-rep">
+  <div class="panel rep" id="rep-body"></div>
+  <div class="row no-print" style="justify-content:center">
+    <button class="big-btn b-sec" onclick="go('home')">처음으로</button>
+    <button class="big-btn b-pri" onclick="window.print()">인쇄하기</button>
+  </div>
+</div>
+
+<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+
+<script>
+"use strict";
+// ══ 도구 ══════════════════════════════════════════════
+function h(tag, props, ...kids){
+  const e=document.createElement(tag);
+  if(props) for(const k in props){
+    const v=props[k];
+    if(v==null||v===false) continue;
+    if(k==='class') e.className=v;
+    else if(k==='html') e.innerHTML=v;
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2),v);
+    else if(k==='style') e.style.cssText=v;
+    else if(k==='disabled') e.disabled=!!v;
+    else e.setAttribute(k,v);
+  }
+  kids.flat(Infinity).forEach(c=>{ if(c==null||c===false) return; e.append(c.nodeType?c:document.createTextNode(String(c))); });
+  return e;
+}
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const sec=ms=>ms==null?'-':(ms/1000).toFixed(2)+'초';
+const pct=(n,d)=>d?Math.round(n/d*100)+'%':'-';
+function seg(options,onPick,cur,fmtFn){
+  const s=h('div',{class:'seg'});
+  options.forEach(o=>s.append(h('button',{class:o===cur?'on':'',onclick:()=>onPick(o)},fmtFn?fmtFn(o):o)));
+  return s;
+}
+function todayStr(){const d=new Date();return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
+// 화면이 다른 곳으로 바뀌면 진행 중인 블록을 잠시 멈춤
+let PAUSED=false;
+
+// ══ SVG 그림 ══════════════════════════════════════════
+const SVG={
+  cart:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#e8f5e9"/><path d="M12 16h5l5 20h18l4-14H20" fill="none" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="42" r="3.2" fill="#2e7d32"/><circle cx="38" cy="42" r="3.2" fill="#2e7d32"/></svg>',
+  walk:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#fdecea"/><rect x="18" y="8" width="20" height="40" rx="5" fill="#37474f"/><circle cx="28" cy="18" r="6" fill="#ef5350"/><circle cx="28" cy="38" r="6" fill="#66bb6a"/></svg>',
+  sign:'<svg width="56" height="56" viewBox="0 0 56 56"><rect width="56" height="56" rx="14" fill="#e3f2fd"/><rect x="8" y="16" width="40" height="24" rx="4" fill="#1b5e20"/><path d="M16 28h20m-6-6 6 6-6 6" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+function arrowSVG(dir,size){
+  const s=size||64, r=dir==='L'?'rotate(180 32 32)':'';
+  return `<svg width="${s}" height="${s}" viewBox="0 0 64 64" aria-hidden="true"><g transform="${r}"><path d="M8 32h38" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M34 14l20 18-20 18" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`;
+}
+function signalSVG(state){ // state: off | green | red
+  const red=state==='red'?'#ef5350':'#4e342e', grn=state==='green'?'#43a047':'#33402f';
+  const fig=(cx,cy,c,walk)=>walk
+    ?`<g fill="${c}"><circle cx="${cx}" cy="${cy-22}" r="8"/><path d="M${cx-6} ${cy-12}h12l6 18-6 2-4-10-2 14 8 18-7 3-8-18-7 18-7-3 9-22 1-10-6 8-6-3z"/></g>`
+    :`<g fill="${c}"><circle cx="${cx}" cy="${cy-22}" r="8"/><rect x="${cx-9}" y="${cy-12}" width="18" height="24" rx="3"/><rect x="${cx-15}" y="${cy-10}" width="5" height="20" rx="2"/><rect x="${cx+10}" y="${cy-10}" width="5" height="20" rx="2"/><rect x="${cx-8}" y="${cy+12}" width="6" height="20" rx="2"/><rect x="${cx+2}" y="${cy+12}" width="6" height="20" rx="2"/></g>`;
+  return `<svg width="150" height="280" viewBox="0 0 150 280" aria-hidden="true">
+    <rect x="15" y="5" width="120" height="270" rx="18" fill="#263238"/>
+    <rect x="30" y="20" width="90" height="115" rx="12" fill="#11181c"/><rect x="30" y="145" width="90" height="115" rx="12" fill="#11181c"/>
+    ${fig(75,82,red,false)}${fig(75,206,grn,true)}</svg>`;
+}
+
+// ══ 과제 정의 ══════════════════════════════════════════
+// 장보기: 목록에 있는 물건만 담기 (반응 억제, Go/No-Go). 비슷한 이름(유혹 자극)이 난이도에 따라 늘어남
+const SHOP_POOL=[
+  {n:'두부',lure:['순두부','유부']},{n:'저지방 우유',lure:['딸기 우유','초코 우유']},{n:'달걀',lure:['메추리알']},
+  {n:'현미',lure:['백미','찹쌀']},{n:'시금치',lure:['부추','쑥갓']},{n:'사과',lure:['사과 주스','사과잼']},
+  {n:'고등어',lure:['꽁치','삼치']},{n:'양배추',lure:['양상추','배추']},{n:'식빵',lure:['모닝빵','크림빵']},
+  {n:'된장',lure:['고추장','쌈장']},{n:'바나나',lure:['바나나 우유']},{n:'닭가슴살',lure:['닭다리살','닭날개']},
+  {n:'당근',lure:['당근 주스']},{n:'오이',lure:['오이지','애호박']},{n:'요구르트',lure:['요구르트 젤리']}];
+const SHOP_OTHER=['라면','과자','콜라','아이스크림','소시지','초콜릿','사탕','맥주','젤리','햄','케이크','감자칩'];
+
+const TASKS={
+  shop:{
+    name:'장보기', kind:'반응 억제', icon:SVG.cart,
+    desc:'장보기 목록에 있는 물건이 나오면 [담기]를 누르고, 목록에 없는 물건은 누르지 않고 기다립니다.',
+    check:'목록에 있는 물건인지 확인합니다', doit:'목록에 있을 때만 [담기]를 누릅니다',
+    how:['화면 위에 이번 장보기 목록이 보입니다.','물건이 하나씩 나옵니다. 목록에 있으면 <b>[담기]</b>를 누르세요.','목록에 없는 물건은 <b>아무것도 누르지 말고</b> 지나가게 두세요. 이름이 비슷한 물건에 주의하세요.'],
+    levels:{1:'목록 3개 · 목록과 전혀 다른 물건만 섞임 · 3초 동안 보임',
+            2:'목록 4개 · 이름이 비슷한 물건이 섞임 · 담을 물건이 더 자주 나옴 · 2초',
+            3:'목록 5개 · 비슷한 물건이 많음 · 담을 물건이 대부분 · 1.5초'},
+    cfg:{1:{k:3,go:.5,lure:0,time:3000},2:{k:4,go:.7,lure:.5,time:2000},3:{k:5,go:.75,lure:.8,time:1500}},
+    errWords:{com:'목록에 없는 물건을 담음',om:'목록에 있는 물건을 놓침'},
+    selfOpts:['목록에 없는 물건을 담았다','담아야 할 물건을 놓쳤다','실수가 거의 없었다','잘 모르겠다'],
+    strategies:['목록을 한 번 더 보고 누르기','이름을 끝까지 읽고 누르기','속으로 “잠깐” 하고 누르기','지금처럼 하기'],
+  },
+  cross:{
+    name:'횡단보도', kind:'행동 멈추기', icon:SVG.walk,
+    desc:'초록불이 켜지면 [건너기]를 누르고, 누르기 전에 빨간불로 바뀌면 누르지 않고 멈춥니다.',
+    check:'신호가 끝까지 초록불인지 봅니다', doit:'초록불이면 [건너기], 빨간불로 바뀌면 멈춥니다',
+    how:['신호등이 꺼져 있을 때는 기다리세요. 이때 누르면 실수입니다.','초록불이 켜지면 <b>[건너기]</b>를 누르세요.','가끔 초록불이 켜졌다가 곧 <b>빨간불</b>로 바뀝니다. 그때는 <b>누르지 마세요.</b>'],
+    levels:{1:'빨간불로 바뀌는 때가 4번에 1번 · 아주 빨리 바뀌어 멈추기 쉬움 · 2.5초',
+            2:'4번에 1번 · 바뀌는 시점이 내 실력에 맞춰 조절됨 · 2초',
+            3:'3번에 1번 · 바뀌는 시점이 늦게 시작해 조절됨 · 1.5초'},
+    cfg:{1:{stop:.25,ssd:150,adapt:false,win:2500},2:{stop:.25,ssd:200,adapt:true,win:2000},3:{stop:.33,ssd:300,adapt:true,win:1500}},
+    errWords:{com:'멈춰야 할 때 누름',om:'건너야 할 때 못 누름'},
+    selfOpts:['빨간불인데 눌렀다','초록불인데 못 눌렀다','실수가 거의 없었다','잘 모르겠다'],
+    strategies:['신호를 끝까지 보고 누르기','빨간불로 바뀔 수 있다고 생각하기','신호가 켜지기 전에는 손 떼고 기다리기','지금처럼 하기'],
+  },
+  sign:{
+    name:'길 안내 표지판', kind:'간섭 억제', icon:SVG.sign,
+    desc:'표지판의 가운데 화살표 방향만 보고 [왼쪽] 또는 [오른쪽]을 누릅니다. 양옆 화살표는 무시합니다.',
+    check:'가운데 화살표만 봅니다', doit:'가운데 방향의 버튼을 누릅니다',
+    how:['초록색 길 안내 표지판에 화살표가 여러 개 나옵니다.','<b>가운데 화살표</b>가 가리키는 방향의 버튼을 누르세요.','양옆 화살표는 반대 방향일 수 있습니다. <b>양옆은 무시하세요.</b>'],
+    levels:{1:'화살표 3개 · 양옆이 반대인 경우가 적음 · 3초',
+            2:'화살표 5개 · 양옆이 반대인 경우가 절반 · 2.5초',
+            3:'화살표 7개 · 양옆이 반대인 경우가 대부분 · 1.8초'},
+    cfg:{1:{n:3,inc:.3,win:3000},2:{n:5,inc:.5,win:2500},3:{n:7,inc:.65,win:1800}},
+    errWords:{com:'반대 방향을 누름',om:'시간 안에 못 누름'},
+    selfOpts:['반대 방향을 눌렀다','시간 안에 못 눌렀다','실수가 거의 없었다','잘 모르겠다'],
+    strategies:['가운데 화살표만 보기','방향을 속으로 말하고 누르기','양옆이 보이면 한 번 더 확인하기','지금처럼 하기'],
+  },
+};
+const LV_NAME={1:'쉬움',2:'보통',3:'어려움'};
+const PRED=['0번','1~2번','3~5번','6번 이상'];
+const bucket=e=>e===0?0:e<=2?1:e<=5?2:3;
+const ASSIST=['혼자 수행','말로 단서 줌','시범·직접 도움'];
+
+// ══ 상태 ══════════════════════════════════════════════
+const SET={task:'shop',level:1,blocks:3,trials:20};
+let SES=null;   // {task,level,blocks,trials,list:[블록 결과], strategy, assist, memo, t0}
+let CUR=null;   // 진행 중 블록
+
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('scr-'+name).classList.add('on');
+  $('back-btn').style.display=name==='home'?'none':'inline-block';
+  window.scrollTo(0,0);
+  if(name==='home') renderHome();
+}
+function backBtn(){
+  if(SES&&!SES.done&&!confirm('처음 화면으로 갈까요? 지금까지 한 내용은 저장되지 않습니다.')) return;
+  stopBlock(); SES=null; go('home');
+}
+
+// ══ 시작 화면 ══════════════════════════════════════════
+function renderHome(){
+  const tabs=$('tabs'); tabs.innerHTML='';
+  Object.entries(TASKS).forEach(([k,t])=>tabs.append(h('button',{class:'tab'+(SET.task===k?' on':''),onclick:()=>{SET.task=k;renderHome();}},`${t.name}`)));
+  const t=TASKS[SET.task];
+  $('task-info').innerHTML='';
+  $('task-info').append(h('div',{class:'task-head',html:t.icon},
+    h('div',null,h('div',{class:'t'},t.name,h('span',{class:'k'},t.kind)),h('div',{class:'d'},t.desc))));
+  const lv=$('lv-list'); lv.innerHTML='';
+  [1,2,3].forEach(n=>lv.append(h('button',{class:`lv-btn lv${n}`+(SET.level===n?' on':''),onclick:()=>{SET.level=n;renderHome();}},
+    h('span',{class:'lvn'},LV_NAME[n]),h('span',null,t.levels[n]))));
+  const sb=$('set-blocks'); sb.innerHTML=''; sb.append(seg([2,3,4],v=>{SET.blocks=v;renderHome();},SET.blocks,v=>v+'블록'));
+  const st=$('set-trials'); st.innerHTML=''; st.append(seg([15,20,30],v=>{SET.trials=v;renderHome();},SET.trials,v=>v+'문제'));
+}
+
+function toStrategy(){
+  const t=TASKS[SET.task];
+  SES={task:SET.task,level:SET.level,blocks:SET.blocks,trials:SET.trials,list:[],strategy:null,assist:null,memo:'',t0:Date.now(),done:false};
+  $('s-title').textContent=`${t.name} · ${LV_NAME[SES.level]}`;
+  $('s-check').textContent=t.check; $('s-do').textContent=t.doit;
+  $('s-how').innerHTML='<ol style="margin:0;padding-left:22px">'+t.how.map(x=>`<li style="margin:4px 0">${x}</li>`).join('')+'</ol>';
+  go('strat');
+}
+
+// ══ 예측 ══════════════════════════════════════════════
+function toPredict(){
+  const t=TASKS[SES.task], b=SES.list.length+1;
+  $('p-title').textContent=`${t.name} · 블록 ${b}/${SES.blocks}`;
+  const body=$('p-body'); body.innerHTML='';
+  let pred=null;
+  const draw=()=>{
+    body.innerHTML='';
+    if(SES.strategy) body.append(h('div',{class:'q'},h('div',{class:'qt'},'이번 블록에서 쓸 전략'),h('span',{class:'chipq'},SES.strategy)));
+    if(b>1){const last=SES.list[b-2]; body.append(h('div',{class:'q'},h('div',{class:'qt'},'지난 블록'),
+      h('div',null,`실수 ${last.errors}번 (${t.errWords.com} ${last.com}번, ${t.errWords.om} ${last.om}번)`)));}
+    body.append(h('div',{class:'q'},h('div',{class:'qt'},`이번 ${SES.trials}문제에서 몇 번 실수할 것 같나요?`),
+      seg(PRED,v=>{pred=v;draw();},pred)));
+    $('p-go').disabled=pred==null;
+  };
+  draw();
+  $('p-go').onclick=()=>startBlock(PRED.indexOf(pred));
+  go('pred');
+}
+
+// ══ 블록 진행 ══════════════════════════════════════════
+function startBlock(predIdx){
+  const t=TASKS[SES.task], cfg=t.cfg[SES.level], n=SES.trials;
+  CUR={pred:predIdx,strategy:SES.strategy,trials:makeTrials(SES.task,cfg,n),i:0,rec:[],timers:[],accept:false,onPress:null,
+       ssd:cfg.ssd,list:null,stopped:false};
+  if(SES.task==='shop') CUR.list=CUR.trials.list;
+  $('t-title').textContent=`${t.name} · 블록 ${SES.list.length+1}/${SES.blocks}`;
+  $('t-cue').innerHTML=SES.strategy?`<span class="chipq">전략: ${SES.strategy}</span>`:'';
+  const top=$('t-top'); top.innerHTML='';
+  if(SES.task==='shop') top.append(h('div',{class:'listbox'},h('div',{class:'h'},'이번 장보기 목록'),h('div',{class:'items'},CUR.list.map(x=>h('span',null,x)))));
+  const resp=$('resp'); resp.innerHTML='';
+  if(SES.task==='shop') resp.append(h('button',{class:'go',onpointerdown:e=>{e.preventDefault();press('go');}},'담기'));
+  if(SES.task==='cross') resp.append(h('button',{class:'go',onpointerdown:e=>{e.preventDefault();press('go');}},'건너기'));
+  if(SES.task==='sign') resp.append(
+    h('button',{onpointerdown:e=>{e.preventDefault();press('L');},html:arrowSVG('L',40)+' 왼쪽'}),
+    h('button',{onpointerdown:e=>{e.preventDefault();press('R');},html:'오른쪽 '+arrowSVG('R',40)}));
+  $('fb').textContent='';
+  go('task');
+  later(()=>nextTrial(),800);
+}
+function later(fn,ms){const id=setTimeout(fn,ms);CUR.timers.push(id);return id;}
+function clearTimers(){if(!CUR)return;CUR.timers.forEach(clearTimeout);CUR.timers=[];}
+function stopBlock(){ if(CUR){clearTimers();CUR.stopped=true;CUR=null;} }
+function quitBlock(){
+  if(!confirm('이번 블록을 그만할까요? 지금까지 푼 문제로 결과를 봅니다.')) return;
+  const c=CUR; clearTimers(); c.stopped=true;
+  if(!c.rec.length){ CUR=null; toPredict(); return; }
+  endBlock(true);
+}
+function press(v){ if(CUR&&CUR.onPress) CUR.onPress(v); }
+
+function makeTrials(task,cfg,n){
+  if(task==='shop'){
+    const items=shuffle(SHOP_POOL).slice(0,cfg.k), list=items.map(x=>x.n);
+    const nGo=Math.round(n*cfg.go), nNo=n-nGo, nLure=Math.round(nNo*cfg.lure);
+    const lures=items.flatMap(x=>x.lure).filter(x=>!list.includes(x));
+    const arr=[];
+    for(let i=0;i<nGo;i++) arr.push({go:true,name:list[i%list.length],kind:'go'});
+    for(let i=0;i<nLure;i++) arr.push({go:false,name:pick(lures),kind:'lure'});
+    for(let i=0;i<nNo-nLure;i++) arr.push({go:false,name:pick(SHOP_OTHER),kind:'other'});
+    const t=noRepeat(arr,x=>x.name); t.list=list; return t;
+  }
+  if(task==='cross'){
+    const nStop=Math.round(n*cfg.stop), arr=[];
+    for(let i=0;i<n;i++) arr.push({stop:i<nStop});
+    let t; do{ t=shuffle(arr); }while(t[0].stop||t[1].stop||runOf(t,x=>x.stop)>2);
+    return t;
+  }
+  const nInc=Math.round(n*cfg.inc), arr=[];
+  for(let i=0;i<n;i++){ const dir=Math.random()<.5?'L':'R'; arr.push({dir,inc:i<nInc}); }
+  return shuffle(arr);
+}
+function runOf(a,f){let m=0,c=0;a.forEach(x=>{c=f(x)?c+1:0;m=Math.max(m,c);});return m;}
+function noRepeat(a,key){
+  for(let k=0;k<50;k++){ const t=shuffle(a); if(t.every((x,i)=>i===0||key(x)!==key(t[i-1]))) return t; }
+  return shuffle(a);
+}
+
+function nextTrial(){
+  if(!CUR||CUR.stopped) return;
+  if(PAUSED){ later(nextTrial,300); return; }
+  if(CUR.i>=CUR.trials.length){ endBlock(false); return; }
+  $('t-pg').textContent=`${CUR.i+1} / ${CUR.trials.length}`;
+  $('fb').textContent='';
+  const tr=CUR.trials[CUR.i];
+  ({shop:runShop,cross:runCross,sign:runSign})[SES.task](tr,rec=>{
+    CUR.accept=false; CUR.onPress=null; clearTimers();
+    CUR.rec.push(rec); CUR.i++;
+    showFb(rec);
+    later(nextTrial,SES.level===1?1100:800);
+  });
+}
+const stage=()=>$('stage');
+function fixation(){ stage().innerHTML='<div class="fix">+</div>'; }
+
+// 장보기 1문제
+function runShop(tr,done){
+  const cfg=TASKS.shop.cfg[SES.level];
+  fixation();
+  later(()=>{
+    stage().innerHTML=''; stage().append(h('div',{class:'prod'},h('div',{class:'card'},h('div',{class:'n'},tr.name))));
+    const t0=performance.now(); CUR.accept=true;
+    CUR.onPress=()=>{ if(!CUR.accept) return; const rt=performance.now()-t0;
+      done({kind:tr.kind,name:tr.name,go:tr.go,resp:true,rt,correct:tr.go,err:tr.go?null:'com'}); };
+    later(()=>done({kind:tr.kind,name:tr.name,go:tr.go,resp:false,rt:null,correct:!tr.go,err:tr.go?'om':null}),cfg.time);
+  },rnd(400,700));
+}
+// 횡단보도 1문제 (멈춤 신호 과제)
+function runCross(tr,done){
+  const cfg=TASKS.cross.cfg[SES.level];
+  stage().innerHTML=signalSVG('off');
+  const fore=rnd(700,1400); let phase='wait', t0=0, ssd=null;
+  CUR.accept=true;
+  CUR.onPress=()=>{
+    if(phase==='wait'){ done({stop:tr.stop,early:true,resp:true,rt:null,correct:false,err:'com',ssd:null}); return; }
+    const rt=performance.now()-t0;
+    if(!tr.stop) done({stop:false,resp:true,rt,correct:true,err:null,ssd:null});
+    else { stair(false); done({stop:true,resp:true,rt,correct:false,err:'com',ssd}); }
+  };
+  later(()=>{
+    phase='go'; t0=performance.now(); stage().innerHTML=signalSVG('green');
+    if(tr.stop){ ssd=CUR.ssd; later(()=>{ stage().innerHTML=signalSVG('red'); },ssd); }
+    later(()=>{
+      if(tr.stop){ stair(true); done({stop:true,resp:false,rt:null,correct:true,err:null,ssd}); }
+      else done({stop:false,resp:false,rt:null,correct:false,err:'om',ssd:null});
+    },cfg.win);
+  },fore);
+  function stair(success){ if(!cfg.adapt) return; CUR.ssd=Math.max(50,Math.min(cfg.win-300,CUR.ssd+(success?50:-50))); }
+}
+// 길 안내 표지판 1문제 (플랭커)
+function runSign(tr,done){
+  const cfg=TASKS.sign.cfg[SES.level];
+  fixation();
+  later(()=>{
+    const fl=tr.inc?(tr.dir==='L'?'R':'L'):tr.dir, mid=(cfg.n-1)/2;
+    const sz=cfg.n>=7?58:cfg.n>=5?66:76;
+    stage().innerHTML=`<div class="sign">${Array.from({length:cfg.n},(_,i)=>arrowSVG(i===mid?tr.dir:fl,sz)).join('')}</div>`;
+    const t0=performance.now(); CUR.accept=true;
+    CUR.onPress=v=>{ if(!CUR.accept) return; const rt=performance.now()-t0, ok=v===tr.dir;
+      done({inc:tr.inc,dir:tr.dir,resp:v,rt,correct:ok,err:ok?null:'com'}); };
+    later(()=>done({inc:tr.inc,dir:tr.dir,resp:null,rt:null,correct:false,err:'om'}),cfg.win);
+  },rnd(400,700));
+}
+
+function showFb(rec){
+  const fb=$('fb'), lv1=SES.level===1, task=SES.task;
+  let txt, ok=rec.correct;
+  if(ok) txt=task==='cross'&&rec.stop?'잘 멈췄어요':'좋아요';
+  else if(task==='shop') txt=rec.err==='com'?(lv1?`잠깐! ‘${rec.name}’은(는) 목록에 없어요`:'목록에 없는 물건이에요'):(lv1?`‘${rec.name}’은(는) 목록에 있어요`:'놓쳤어요');
+  else if(task==='cross') txt=rec.early?'신호가 켜지기 전에 눌렀어요':rec.err==='com'?'빨간불이었어요. 멈춰야 해요':'초록불이었어요';
+  else txt=rec.err==='com'?(lv1?'가운데 화살표 방향을 보세요':'반대 방향이에요'):'시간이 지났어요';
+  fb.textContent=txt; fb.style.color=ok?'var(--ok)':'var(--bad)';
+  if(task==='cross') stage().innerHTML=signalSVG('off'); else fixation();
+}
+
+// ══ 블록 결과 계산 ══════════════════════════════════════
+function blockStats(task,rec){
+  const n=rec.length, ok=rec.filter(r=>r.correct).length;
+  const com=rec.filter(r=>r.err==='com').length, om=rec.filter(r=>r.err==='om').length;
+  const goRT=rec.filter(r=>r.correct&&r.rt!=null).map(r=>r.rt);
+  const s={n,ok,com,om,errors:com+om,acc:n?ok/n:0,rt:avg(goRT)};
+  if(task==='shop'){
+    s.lureCom=rec.filter(r=>r.err==='com'&&r.kind==='lure').length;
+    s.otherCom=rec.filter(r=>r.err==='com'&&r.kind==='other').length;
+  }
+  if(task==='cross'){
+    const st=rec.filter(r=>r.stop), succ=st.filter(r=>r.correct).length;
+    s.stops=st.length; s.stopOk=succ; s.early=rec.filter(r=>r.early).length;
+    const ssds=st.filter(r=>r.ssd!=null).map(r=>r.ssd); s.ssd=avg(ssds);
+  }
+  if(task==='sign'){
+    const C=rec.filter(r=>!r.inc), I=rec.filter(r=>r.inc);
+    s.cAcc=C.length?C.filter(r=>r.correct).length/C.length:null; s.iAcc=I.length?I.filter(r=>r.correct).length/I.length:null;
+    s.cRT=avg(C.filter(r=>r.correct).map(r=>r.rt)); s.iRT=avg(I.filter(r=>r.correct).map(r=>r.rt));
+    s.cN=C.length; s.iN=I.length;
+  }
+  return s;
+}
+// 실제로 가장 많이 한 실수 유형 → 자기 판단 보기와 같은 순서(0: 누름, 1: 놓침, 2: 거의 없음)
+function actualType(s){ if(s.errors<=1) return 2; return s.com>=s.om?0:1; }
+
+function endBlock(partial){
+  const c=CUR; c.accept=false; c.onPress=null; clearTimers(); c.stopped=true;
+  const t=TASKS[SES.task], s=blockStats(SES.task,c.rec);
+  const blk={pred:c.pred,strategy:c.strategy,stats:s,partial,self:null,next:null};
+  SES.list.push(blk); CUR=null;
+  const last=SES.list.length>=SES.blocks;
+  $('r-title').textContent=`${t.name} · 블록 ${SES.list.length}/${SES.blocks} 결과`;
+  const body=$('r-body');
+  const draw=()=>{
+    body.innerHTML='';
+    const ab=bucket(s.errors), pm=blk.pred==null?null:(ab===blk.pred?'예측과 같아요':ab>blk.pred?'예측보다 실수가 많았어요':'예측보다 실수가 적었어요');
+    body.append(h('div',{class:'tiles'},
+      tile(`${s.ok}/${s.n}`,'맞힘'),tile(s.errors+'번','실수'),tile(sec(s.rt),'평균 반응시간'),
+      SES.task==='cross'?tile(`${s.stopOk}/${s.stops}`,'멈추기 성공'):SES.task==='shop'?tile(s.lureCom+'번','비슷한 이름에 속음'):tile(s.iAcc==null?'-':Math.round(s.iAcc*100)+'%','양옆 반대일 때 정답률')));
+    body.append(h('div',{class:'cmp'},
+      `예측: ${blk.pred==null?'-':PRED[blk.pred]} → 실제: ${s.errors}번`,h('br'),
+      h('span',{class:ab===blk.pred?'okc':'badc'},pm||''),
+      h('div',{class:'subc',style:'margin-top:4px'},`${t.errWords.com} ${s.com}번 · ${t.errWords.om} ${s.om}번`+(SES.task==='cross'&&s.early?` (신호 전에 누름 ${s.early}번 포함)`:'')+(partial?' · 중간에 그만둠':''))));
+    // 자기 판단
+    const q1=h('div',{class:'q'},h('div',{class:'qt'},'가장 많이 한 실수는 무엇이었나요?'),
+      seg(t.selfOpts,v=>{blk.self=t.selfOpts.indexOf(v);draw();},blk.self==null?null:t.selfOpts[blk.self]));
+    if(blk.self!=null&&blk.self!==3){
+      const at=actualType(s);
+      q1.append(h('div',{class:'cmp'},blk.self===at?h('span',{class:'okc'},'실제 결과와 같아요.'):
+        h('span',{class:'badc'},`실제로는 ‘${t.selfOpts[at]}’에 가까워요.`)));
+    }
+    body.append(q1);
+    if(!last){
+      body.append(h('div',{class:'q'},h('div',{class:'qt'},'다음 블록에서 쓸 전략을 골라 보세요.'),
+        seg(t.strategies,v=>{blk.next=v;draw();},blk.next)));
+    }
+    const ready=blk.self!=null&&(last||blk.next!=null);
+    $('r-next').disabled=!ready;
+  };
+  draw();
+  $('r-next').textContent=last?'전체 결과 보기':'다음 블록';
+  $('r-next').onclick=()=>{ if(last) showReport(); else { SES.strategy=blk.next==='지금처럼 하기'?SES.strategy:blk.next; toPredict(); } };
+  go('rev');
+}
+function tile(v,k){ return h('div',{class:'tile'},h('div',{class:'v'},v),h('div',{class:'k'},k)); }
+
+// ══ 전체 리포트 ══════════════════════════════════════════
+function showReport(){
+  SES.done=true;
+  const t=TASKS[SES.task], b=$('rep-body'); b.innerHTML='';
+  const L=SES.list, first=L[0].stats, lastS=L[L.length-1].stats;
+  const predOk=L.filter(x=>x.pred!=null&&x.pred===bucket(x.stats.errors)).length;
+  const selfJ=L.filter(x=>x.self!=null&&x.self!==3), selfOk=selfJ.filter(x=>x.self===actualType(x.stats)).length;
+  b.append(h('h2',null,'잠깐 멈춤 훈련 결과'),
+    h('div',{class:'meta'},`날짜: ${todayStr()}　과제: ${t.name} (${t.kind})　난이도: ${LV_NAME[SES.level]}　${L.length}블록 × ${SES.trials}문제　총 소요 ${Math.round((Date.now()-SES.t0)/60000)}분`));
+  b.append(h('div',{class:'tiles',style:'margin-bottom:10px'},
+    tile(`${first.errors} → ${lastS.errors}`,'실수 (첫 블록 → 마지막)'),
+    tile(`${sec(first.rt)} → ${sec(lastS.rt)}`.replace(/초/g,''),'반응시간(초) 변화'),
+    tile(`${predOk}/${L.length}`,'실수 예측이 맞은 블록'),
+    tile(selfJ.length?`${selfOk}/${selfJ.length}`:'-','실수 유형을 바르게 앎')));
+  const tb=h('table');
+  tb.append(h('tr',null,['블록','예측','실제 실수',t.errWords.com,t.errWords.om,'정답률','평균 반응시간','스스로 판단한 실수','사용한 전략'].map(x=>h('th',null,x))));
+  L.forEach((x,i)=>{const s=x.stats, at=actualType(s);
+    tb.append(h('tr',null,h('td',null,`${i+1}${x.partial?' (중단)':''}`),h('td',null,x.pred==null?'-':PRED[x.pred]),h('td',null,s.errors),
+      h('td',null,s.com),h('td',null,s.om),h('td',null,pct(s.ok,s.n)),h('td',null,sec(s.rt)),
+      h('td',{class:'l'},x.self==null?'-':t.selfOpts[x.self]+(x.self===3?'':x.self===at?' (일치)':' (불일치)')),
+      h('td',{class:'l'},x.strategy||'-')));});
+  b.append(tb);
+  // 과제별 세부
+  const d=h('table');
+  if(SES.task==='shop'){
+    d.append(h('tr',null,['블록','비슷한 이름 물건을 담음','목록과 다른 물건을 담음','목록 물건을 놓침'].map(x=>h('th',null,x))));
+    L.forEach((x,i)=>d.append(h('tr',null,h('td',null,i+1),h('td',null,x.stats.lureCom),h('td',null,x.stats.otherCom),h('td',null,x.stats.om))));
+  }else if(SES.task==='cross'){
+    d.append(h('tr',null,['블록','멈추기 성공','신호 전에 누름','빨간불로 바뀐 시점 (초록불 뒤 평균)'].map(x=>h('th',null,x))));
+    L.forEach((x,i)=>{const s=x.stats;d.append(h('tr',null,h('td',null,i+1),h('td',null,`${s.stopOk}/${s.stops} (${pct(s.stopOk,s.stops)})`),h('td',null,s.early),
+      h('td',null,s.ssd==null?'-':sec(s.ssd))));});
+  }else{
+    d.append(h('tr',null,['블록','양옆 같음: 정답률','양옆 같음: 반응시간','양옆 반대: 정답률','양옆 반대: 반응시간'].map(x=>h('th',null,x))));
+    L.forEach((x,i)=>{const s=x.stats;d.append(h('tr',null,h('td',null,i+1),h('td',null,s.cAcc==null?'-':Math.round(s.cAcc*100)+'%'),h('td',null,sec(s.cRT)),
+      h('td',null,s.iAcc==null?'-':Math.round(s.iAcc*100)+'%'),h('td',null,sec(s.iRT))));});
+  }
+  b.append(h('div',{class:'lbl'},'과제별 세부'),d);
+  // 치료사 기록
+  const as=h('div');
+  const drawAs=()=>{as.innerHTML='';as.append(seg(ASSIST,v=>{SES.assist=SES.assist===v?null:v;drawAs();},SES.assist));};
+  drawAs();
+  const memo=h('textarea',{placeholder:'관찰 내용, 준 단서, 다음 회기 계획 등',oninput:e=>{SES.memo=e.target.value;memoPrint.textContent=e.target.value;}});
+  memo.value=SES.memo; const memoPrint=h('div',{style:'white-space:pre-wrap'});
+  b.append(h('div',{class:'lbl'},'도움 수준 (치료사)'),as,h('div',{class:'lbl',style:'margin-top:10px'},'메모'),h('div',{class:'no-print'},memo),memoPrint);
+  if(SES.task==='cross'&&SES.level>=2) b.append(h('p',{class:'note'},'보통·어려움에서는 잘 멈추면 빨간불이 조금 더 늦게, 못 멈추면 조금 더 빨리 바뀝니다. 바뀐 시점이 늦을수록 더 어려운 조건에서 멈춘 것입니다.'));
+  b.append(h('p',{class:'note'},'구성 근거: 억제 과제에 실수 예측·자기 모니터링·피드백·전략 선택을 결합한 메타인지 전략 훈련 방식 (Cicerone et al., 2019; Jeffay et al., 2023).'));
+  go('rep');
+}
+
+// ══ 화면이 가려지면 잠시 멈춤 ══════════════════════════════
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden&&CUR&&!CUR.stopped){
+    PAUSED=true;
+    const p=h('div',{class:'pause'},h('div',{style:'text-align:center'},h('div',{style:'font-weight:800;font-size:1.2rem;margin-bottom:10px'},'잠시 멈췄습니다'),
+      h('button',{class:'big-btn b-pri',onclick:()=>{p.remove();PAUSED=false;}},'계속하기')));
+    // 진행 중이던 문제는 버리고 다시 시작
+    clearTimers(); CUR.accept=false; CUR.onPress=null;
+    stage().append(p); CUR.timers.push(setTimeout(nextTrial,300));
+  }
+});
+
+renderHome();
+</script>
+</body>
+</html>
