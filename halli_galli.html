@@ -195,21 +195,20 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
   </div>
 </div>
 <script>
-// 비밀번호: 365 (이 탭을 닫기 전까지 다시 묻지 않음)
+// 비밀번호: 365 (들어올 때마다 물음)
 var LOCK_PW='365';
 function unlock(){
   var v=document.getElementById('lock-pw').value.trim();
   if(v===LOCK_PW){
     document.getElementById('lock').style.display='none';
-    try{ sessionStorage.setItem('hg_unlock','1'); }catch(e){}
   } else {
     document.getElementById('lock-msg').textContent='비밀번호가 맞지 않아요';
     document.getElementById('lock-pw').value='';
   }
 }
 (function(){
-  var ok=false; try{ ok=sessionStorage.getItem('hg_unlock')==='1'; }catch(e){}
-  if(ok) document.getElementById('lock').style.display='none';
+  try{ sessionStorage.removeItem('hg_unlock'); }catch(e){}
+  document.getElementById('lock').style.display='flex';
   document.getElementById('lock-pw').addEventListener('keydown',function(e){ if(e.key==='Enter'||e.keyCode===13) unlock(); });
 })();
 </script>
