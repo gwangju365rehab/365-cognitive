@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>사회적 상호작용 훈련 - 광주365재활병원</title>
+<style>
+:root{--ink:#1f2433;--sub:#5b6375;--line:#d5dbe6;--bg:#eef1f6;--card:#fff;--pri:#6a1b9a;--pri-2:#8e24aa;--pri-soft:#f3e5f5;--ok:#2e7d32;--ok-soft:#e8f5e9;--bad:#c62828;--bad-soft:#fdecea}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--ink);font-size:18px;line-height:1.55;padding:16px 14px 90px}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column}
+.wrap>*+*{margin-top:14px}
+.screen{display:none}.screen.on{display:flex}
+#home-btn,#back-btn{position:fixed;top:12px;left:12px;z-index:50;padding:10px 18px;border-radius:999px;border:none;min-height:44px;background:#fff;color:#333;font-weight:700;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+#back-btn{left:112px;background:var(--pri);color:#fff;display:none}
+h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#4a148c;font-weight:800}
+.lead{text-align:center;color:var(--sub);font-size:1rem;margin:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.lbl{font-size:.95rem;font-weight:800;color:var(--sub);margin:0 0 8px}
+.tabs{display:flex;justify-content:center;flex-wrap:wrap}
+.tab{margin:4px;padding:12px 20px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:800;color:var(--sub);min-height:52px}
+.tab.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.tab small{font-weight:700;opacity:.8}
+.how{display:flex;align-items:center}
+.how .ic{flex:none;width:96px;margin-right:16px}
+.how .t{font-size:1.2rem;font-weight:800}
+.how .d{color:var(--sub)}
+.lv-btn{display:flex;align-items:center;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;min-height:66px;margin-bottom:10px}
+.lv-btn.on{border-color:var(--pri-2);background:var(--pri-soft)}
+.lv-btn .lvn{flex:none;min-width:84px;text-align:center;padding:8px 0;border-radius:10px;font-weight:800;color:#fff;margin-right:14px}
+.lv1 .lvn{background:#43a047}.lv2 .lvn{background:#1e88e5}.lv3 .lvn{background:#e53935}
+.lv-btn .t{font-weight:800}.lv-btn .d{color:var(--sub);font-size:.95rem}
+.big-btn{padding:16px 26px;border-radius:14px;border:none;font-size:1.15rem;font-weight:800;min-height:60px}
+.b-pri{background:var(--pri);color:#fff}.b-sec{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.big-btn:disabled{opacity:.4;cursor:default}
+.foot{display:flex;justify-content:flex-end;flex-wrap:wrap}.foot>*{margin-left:10px;margin-top:6px}
+details.ev summary{cursor:pointer;font-weight:800;color:var(--sub)}
+details.ev ul{margin:8px 0 0;padding-left:20px;font-size:.92rem;color:var(--sub)}
+
+/* 전략 카드·예측 */
+.steps{display:flex;flex-wrap:wrap;margin:-5px}
+.step{flex:1 1 170px;margin:5px;border:2px solid var(--line);border-radius:14px;padding:12px;text-align:center;background:#fafbfd}
+.step .n{display:inline-block;width:32px;height:32px;line-height:32px;border-radius:50%;background:var(--pri);color:#fff;font-weight:900;margin-bottom:4px}
+.step b{display:block;font-size:1.1rem}
+.step span{font-size:.92rem;color:var(--sub)}
+.seg{display:flex;flex-wrap:wrap;justify-content:center}
+.seg button{margin:4px;min-width:120px;min-height:56px;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:800}
+.seg button.on{border-color:var(--pri-2);background:var(--pri-2);color:#fff}
+
+/* 과제 화면 */
+.tbar{margin-top:46px;display:flex;align-items:center;flex-wrap:wrap;background:var(--pri);color:#fff;border-radius:16px;padding:12px 16px}
+.tbar .ttl{flex:1;font-size:1.15rem;font-weight:800}
+.tbar .pg{font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px;margin-left:8px}
+.scene{display:flex;align-items:center;background:#fff;border:2px solid var(--line);border-radius:18px;padding:12px 16px}
+.scene .face{flex:none;width:190px}
+.scene .face svg{display:block;width:100%;height:auto}
+.scene .txt{flex:1;margin-left:16px}
+.scene .who{display:inline-block;font-weight:800;color:var(--pri);background:var(--pri-soft);border-radius:999px;padding:2px 12px;font-size:.92rem;margin-bottom:6px}
+.scene .sit{color:var(--sub);font-size:1rem;margin-bottom:8px}
+.bubble{position:relative;background:#fff8e1;border:2px solid #ffe082;border-radius:16px;padding:10px 16px;font-size:1.25rem;font-weight:800}
+.bubble.act{background:#f5f5f5;border-color:#e0e0e0;color:#555;font-weight:700;font-style:italic}
+.story{font-size:1.2rem;line-height:1.7}
+.qtxt{font-weight:900;font-size:1.2rem;text-align:center;margin:4px 0}
+.opts{display:flex;flex-direction:column}
+.opts.grid{flex-direction:row;flex-wrap:wrap;justify-content:center}
+.opt{margin:5px 0;min-height:64px;border-radius:14px;border:3px solid var(--line);background:#fff;font-size:1.12rem;font-weight:700;text-align:left;padding:10px 16px}
+.opts.grid .opt{flex:1 1 180px;max-width:260px;margin:5px;text-align:center;font-size:1.3rem;font-weight:900}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);opacity:.75}
+.opt:disabled{cursor:default;color:var(--ink)}
+.opt.wrong:disabled{color:#8e1b1b}
+.bubble+.bubble{margin-top:8px}
+.fb{border-radius:14px;padding:12px 16px;font-size:1.08rem;font-weight:700;display:none}
+.fb.on{display:block}
+.fb.ok{background:var(--ok-soft);color:#1b5e20;border:2px solid #a5d6a7}
+.fb.bad{background:var(--bad-soft);color:#8e1b1b;border:2px solid #ef9a9a}
+.fb .tag{display:inline-block;background:#fff;border-radius:999px;padding:1px 10px;font-size:.88rem;font-weight:800;margin-right:6px;border:1px solid currentColor}
+.next{display:none;justify-content:center}.next.on{display:flex}
+
+/* 결과 */
+.tiles{display:flex;flex-wrap:wrap;margin:-5px}
+.tile{flex:1 1 150px;margin:5px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tile .v{font-size:1.5rem;font-weight:900}.tile .k{font-size:.88rem;color:var(--sub);font-weight:700}
+.rep h2{margin:0 0 4px;font-size:1.4rem}.rep h3{margin:16px 0 6px;font-size:1.08rem}
+.rep .meta{color:var(--sub);margin-bottom:10px}
+.rep table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:.98rem}
+.rep th,.rep td{border:1px solid var(--line);padding:7px 8px;text-align:center;vertical-align:middle}
+.rep th{background:#f3f5fa}.rep td.l{text-align:left}
+.box{border:2px dashed #ce93d8;border-radius:12px;padding:10px 14px;background:#fcf7fd}
+.chk{display:inline-block;width:16px;height:16px;border:2px solid #777;border-radius:3px;vertical-align:middle;margin:0 3px 0 10px}
+.note{font-size:.88rem;color:var(--sub)}
+#scr-rep,#scr-mid{margin-top:50px}
+#err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
+@media(max-width:640px){.scene{flex-direction:column}.scene .txt{margin:10px 0 0}.scene .face{width:160px}}
+@media print{body{background:#fff;padding:0;font-size:12px}#home-btn,#back-btn,#err-box,.no-print{display:none!important}.panel{border:none;padding:0}#scr-rep{margin-top:0}}
+</style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">홈으로</button>
+<button id="back-btn" onclick="backBtn()">처음으로</button>
+
+<!-- 시작 -->
+<div class="wrap screen on" id="scr-home">
+  <h1>사회적 상호작용 훈련</h1>
+  <p class="lead">표정 읽기 → 마음 읽기 → 대화 기술 순서로 연습합니다. 화면 연습 뒤에는 치료사와 역할극, 실생활 과제로 이어 갑니다.</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="panel"><div class="how" id="how"></div></div>
+  <div class="panel"><div class="lbl">난이도</div><div id="levels"></div></div>
+  <div class="panel">
+    <details class="ev"><summary>근거와 사용 원칙</summary>
+      <ul>
+        <li>INCOG 2.0 (Togher 등, 2023): 감정 인식·관점 취하기·마음 이론·사회적 행동을 겨냥한 사회인지 중재 권고(Level A). 컴퓨터만으로 하는 훈련은 실생활 일반화 근거가 없어 권고하지 않음 → 이 프로그램은 치료사가 함께 쓰는 도구로 설계함.</li>
+        <li>Cicerone 등 (2019): 외상성 뇌손상 후 화용·대화 기술과 얼굴 표정 감정 인식 중재는 Practice Standard.</li>
+        <li>T-ScEmo (Westerhof-Evers 등): 감정 인식 → 관점 취하기·마음 이론 → 사회적 행동 조절 3모듈, 목표 설정·자기 점검·역할극·가족 참여.</li>
+        <li>대화 기술 모듈의 오답은 ESI(Evaluation of Social Interaction) 사회적 상호작용 기술 항목(OTPF-4 수행기술)으로 분류함. 공식 ESI 채점을 대신하지 않음.</li>
+      </ul>
+    </details>
+  </div>
+  <div class="foot"><button class="big-btn b-pri" onclick="toStrategy()">시작하기</button></div>
+</div>
+
+<!-- 전략·예측 -->
+<div class="wrap screen" id="scr-mid">
+  <div class="panel">
+    <div class="lbl" id="st-title">이렇게 봅니다</div>
+    <div class="steps" id="st-steps"></div>
+  </div>
+  <div class="panel">
+    <div class="qtxt" id="pred-q">몇 개나 맞힐 수 있을 것 같나요?</div>
+    <div class="seg" id="pred"></div>
+  </div>
+  <div class="foot"><button class="big-btn b-pri" id="go-btn" onclick="startSession()" disabled>시작</button></div>
+</div>
+
+<!-- 과제 -->
+<div class="wrap screen" id="scr-game">
+  <div class="tbar"><div class="ttl" id="g-title"></div><div class="pg" id="g-pg"></div></div>
+  <div class="scene" id="scene"></div>
+  <div class="qtxt" id="qtxt"></div>
+  <div class="opts" id="opts"></div>
+  <div class="fb" id="fb"></div>
+  <div class="next" id="next"><button class="big-btn b-pri" id="next-btn" onclick="advance()">다음</button></div>
+</div>
+
+<!-- 결과 -->
+<div class="wrap screen" id="scr-rep">
+  <div class="panel rep" id="rep"></div>
+  <div class="foot no-print">
+    <button class="big-btn b-sec" onclick="window.print()">인쇄</button>
+    <button class="big-btn b-sec" onclick="go('home')">처음으로</button>
+    <button class="big-btn b-pri" onclick="toStrategy()">같은 단계 다시</button>
+  </div>
+</div>
+<div id="err-box"></div>
+
+<script>
+window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
+</script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+(function(){ try{ if(window.parent&&window.parent!==window&&typeof window.parent.goHome==='function') $('home-btn').style.display='none'; }catch(e){} })();
+
+// ══ 얼굴 그리기 ═══════════════════════════════════════════
+const PEOPLE={
+  gm:{nm:'할머니',skin:'#f3cfb0',line:'#c99a78',hair:'#d6d6d6',brow:'#9e9e9e',style:'bun',old:true,cloth:'#8d6e63'},
+  gp:{nm:'할아버지',skin:'#eec29c',line:'#c08e66',hair:'#cfcfcf',brow:'#8f8f8f',style:'bald',old:true,cloth:'#546e7a'},
+  mw:{nm:'중년 여성',skin:'#f6d3b6',line:'#cfa07c',hair:'#3e2a20',brow:'#3e2a20',style:'bob',cloth:'#ad1457'},
+  mm:{nm:'중년 남성',skin:'#e8b98f',line:'#b9875c',hair:'#262626',brow:'#262626',style:'short',cloth:'#37474f'},
+  yw:{nm:'젊은 여성',skin:'#f8dcc4',line:'#d4a98a',hair:'#5d4037',brow:'#4e342e',style:'long',cloth:'#00897b'},
+  ym:{nm:'젊은 남성',skin:'#f0c7a2',line:'#c4956d',hair:'#4e342e',brow:'#3e2723',style:'short2',cloth:'#1565c0'}
+};
+const NEU={bi:0,bo:0,open:1,smile:0,c:0,mo:0,w:1,up:0,asym:0,blush:0,gx:0,gy:0,frown:0,wrink:0};
+const EMO={
+  neutral:{},
+  happy:{bi:-2,bo:-3,open:.8,smile:1,c:1,mo:.45,w:1.15},
+  sad:{bi:-9,bo:5,open:.72,c:-.85,w:.9,gy:2},
+  angry:{bi:9,bo:-3,open:.68,c:-.35,mo:.16,w:.95,frown:1},
+  surprise:{bi:-13,bo:-11,open:1.5,mo:1,w:.75},
+  fear:{bi:-11,bo:-1,open:1.5,c:-.2,mo:.8,w:1.25},
+  disgust:{bi:6,bo:1,open:.62,c:-.5,mo:.22,up:1,asym:.4,wrink:1},
+  embarrassed:{bi:-4,bo:1,open:.8,c:.35,blush:1,gx:-4,gy:3},
+  contempt:{bi:1,bo:-2,open:.82,asym:1,c:0}
+};
+let FID=0;
+function faceSVG(pid,emo,t,opt){
+  opt=opt||{};
+  const P=PEOPLE[pid], E=EMO[emo]||{}, p={};
+  if(t==null) t=1;
+  for(const k in NEU) p[k]=NEU[k]+((E[k]!=null?E[k]:NEU[k])-NEU[k])*t;
+  const id='f'+(FID++);
+  let s='<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg"><defs>';
+  [76,124].forEach((x,i)=>{ s+='<clipPath id="'+id+'e'+i+'"><ellipse cx="'+x+'" cy="104" rx="12" ry="'+Math.max(1.6,7*p.open)+'"/></clipPath>'; });
+  s+='</defs>';
+  // 머리 뒤쪽 머리카락
+  if(P.style==='bob') s+='<path d="M38 150 Q26 34 100 32 Q174 34 162 150 Q160 160 148 158 L150 96 L50 96 L52 158 Q40 160 38 150Z" fill="'+P.hair+'"/>';
+  if(P.style==='long') s+='<path d="M36 205 Q20 40 100 32 Q180 40 164 205 Z" fill="'+P.hair+'"/>';
+  if(P.style==='bun') s+='<circle cx="100" cy="34" r="20" fill="'+P.hair+'" stroke="#bdbdbd" stroke-width="2"/>';
+  // 목·어깨
+  s+='<rect x="82" y="168" width="36" height="30" fill="'+P.skin+'"/>';
+  s+='<path d="M24 220 Q32 186 100 184 Q168 186 176 220 Z" fill="'+P.cloth+'"/>';
+  s+='<path d="M84 186 Q100 200 116 186" fill="none" stroke="rgba(0,0,0,.2)" stroke-width="3"/>';
+  // 귀·얼굴
+  s+='<ellipse cx="41" cy="112" rx="9" ry="14" fill="'+P.skin+'" stroke="'+P.line+'" stroke-width="2"/><ellipse cx="159" cy="112" rx="9" ry="14" fill="'+P.skin+'" stroke="'+P.line+'" stroke-width="2"/>';
+  s+='<ellipse cx="100" cy="108" rx="60" ry="70" fill="'+P.skin+'" stroke="'+P.line+'" stroke-width="2"/>';
+  // 앞머리
+  const fr={
+    short:'M40 104 Q34 36 100 34 Q166 36 160 104 Q156 70 138 62 Q100 52 62 62 Q44 70 40 104Z',
+    short2:'M40 100 Q36 30 104 32 Q166 38 160 100 Q154 66 120 58 Q118 66 96 64 Q60 62 46 76 Q42 86 40 100Z',
+    bob:'M42 100 Q44 38 100 38 Q156 38 158 100 Q140 64 100 64 Q66 64 42 100Z',
+    long:'M42 104 Q44 36 104 36 Q158 40 158 104 Q148 70 112 58 Q88 74 42 104Z',
+    bun:'M42 98 Q44 44 100 42 Q156 44 158 98 Q144 66 100 62 Q56 66 42 98Z',
+    bald:'M42 112 Q38 74 56 62 Q50 82 50 112Z M158 112 Q162 74 144 62 Q150 82 150 112Z'
+  }[P.style];
+  s+='<path d="'+fr+'" fill="'+P.hair+'"'+(P.old?' stroke="#bdbdbd" stroke-width="1.5"':'')+'/>';
+  if(P.style==='bald') s+='<path d="M60 50 Q100 36 140 50" fill="none" stroke="#e0b48f" stroke-width="3" opacity=".6"/>';
+  // 주름(노인)
+  if(P.old){ s+='<path d="M76 70 Q100 64 124 70 M80 77 Q100 72 120 77" fill="none" stroke="'+P.line+'" stroke-width="1.6" opacity=".8"/>'+
+    '<path d="M66 140 Q70 152 78 158 M134 140 Q130 152 122 158" fill="none" stroke="'+P.line+'" stroke-width="1.6" opacity=".7"/>'; }
+  // 눈
+  [[76,-1],[124,1]].forEach((e,i)=>{
+    const x=e[0], ry=Math.max(1.6,7*p.open);
+    s+='<ellipse cx="'+x+'" cy="104" rx="12" ry="'+ry+'" fill="#fff"/>';
+    s+='<g clip-path="url(#'+id+'e'+i+')"><circle cx="'+(x+p.gx)+'" cy="'+(104+p.gy)+'" r="6" fill="#3e2723"/><circle cx="'+(x+p.gx+2)+'" cy="'+(102+p.gy)+'" r="1.8" fill="#fff"/></g>';
+    s+='<path d="M'+(x-12)+' 104 Q'+x+' '+(104-ry*1.9)+' '+(x+12)+' 104" fill="none" stroke="#3b2a20" stroke-width="2.6" stroke-linecap="round"/>';
+    if(p.smile>.05) s+='<ellipse cx="'+x+'" cy="'+(116-7*p.smile)+'" rx="17" ry="8" fill="'+P.skin+'"/><path d="M'+(x-11)+' '+(110-6*p.smile)+' Q'+x+' '+(104-6*p.smile)+' '+(x+11)+' '+(110-6*p.smile)+'" fill="none" stroke="'+P.line+'" stroke-width="1.6" opacity="'+p.smile+'"/>';
+    if(P.old) s+='<path d="M'+(x+e[1]*15)+' 100 l'+(e[1]*6)+' -3 M'+(x+e[1]*15)+' 106 l'+(e[1]*6)+' 2" stroke="'+P.line+'" stroke-width="1.4"/>';
+  });
+  // 눈썹
+  [[88,62],[112,138]].forEach(b=>{
+    const yi=84+p.bi, yo=84+p.bo, mx=(b[0]+b[1])/2, my=Math.min(yi,yo)-3;
+    s+='<path d="M'+b[0]+' '+yi+' Q'+mx+' '+my+' '+b[1]+' '+yo+'" fill="none" stroke="'+P.brow+'" stroke-width="5.5" stroke-linecap="round"/>';
+  });
+  if(p.frown>.3) s+='<path d="M96 86 L97 95 M104 86 L103 95" stroke="'+P.line+'" stroke-width="1.8" opacity="'+p.frown+'"/>';
+  // 코
+  s+='<path d="M100 110 Q97 126 91 133 Q100 138 109 133" fill="none" stroke="'+P.line+'" stroke-width="2.2" stroke-linecap="round"/>';
+  if(p.wrink>.3) s+='<path d="M92 114 l6 3 M108 114 l-6 3 M93 120 l5 2 M107 120 l-5 2" stroke="'+P.line+'" stroke-width="1.6" opacity="'+p.wrink+'"/>';
+  // 볼 홍조
+  if(p.blush>.05) s+='<ellipse cx="66" cy="128" rx="14" ry="8" fill="#ff8a80" opacity="'+(.5*p.blush)+'"/><ellipse cx="134" cy="128" rx="14" ry="8" fill="#ff8a80" opacity="'+(.5*p.blush)+'"/>';
+  // 입
+  const w=22*p.w, Lx=100-w, Rx=100+w, Ly=156-10*p.c, Ry=156-10*p.c-8*p.asym;
+  if(emo==='surprise'&&p.mo>.3){
+    s+='<ellipse cx="100" cy="160" rx="'+(7+6*p.mo)+'" ry="'+(5+12*p.mo)+'" fill="#5d1f1f" stroke="#8d3b3b" stroke-width="2.5"/>';
+  } else if(p.mo<.1){
+    s+='<path d="M'+Lx+' '+Ly+' Q100 '+(156+12*p.c-6*p.up)+' '+Rx+' '+Ry+'" fill="none" stroke="#8d3b3b" stroke-width="3.6" stroke-linecap="round"/>';
+  } else {
+    const yu=156+8*p.c-4*p.mo-12*p.up, yl=156+14*p.c+26*p.mo;
+    s+='<path d="M'+Lx+' '+Ly+' Q100 '+yu+' '+Rx+' '+Ry+' Q100 '+yl+' '+Lx+' '+Ly+'Z" fill="#5d1f1f" stroke="#8d3b3b" stroke-width="2.5" stroke-linejoin="round"/>';
+    if(emo==='happy'||emo==='angry'||emo==='disgust') s+='<path d="M'+(Lx+4)+' '+(Ly+1)+' Q100 '+(yu+2)+' '+(Rx-4)+' '+(Ry+1)+' Q100 '+(yu+12)+' '+(Lx+4)+' '+(Ly+1)+'Z" fill="#fff"/>';
+  }
+  // 눈물
+  if(opt.tear) s+='<path d="M64 114 Q60 124 64 128 Q68 124 64 114Z" fill="#81d4fa" stroke="#4fc3f7"/>';
+  s+='</svg>';
+  return s;
+}
+
+// ══ 모듈 1: 표정 읽기 ═══════════════════════════════════════
+const EMO_NM={happy:'기쁨',sad:'슬픔',angry:'화남',surprise:'놀람',fear:'두려움',disgust:'싫음(역겨움)'};
+const EMO_CUE={
+  happy:'입꼬리가 올라가고 눈가가 웃고 있어요 (볼이 올라가 눈이 가늘어짐).',
+  sad:'눈썹 안쪽이 올라가고 입꼬리가 내려갔어요. 시선도 아래를 향해요.',
+  angry:'눈썹이 가운데로 모여 내려오고 미간에 주름이 생겼어요. 눈을 가늘게 떴어요.',
+  surprise:'눈썹이 높이 올라가고 눈이 커졌어요. 입이 동그랗게 벌어졌어요.',
+  fear:'눈이 크게 뜨이고 눈썹 안쪽이 올라갔어요. 입은 옆으로 당겨지며 벌어졌어요.',
+  disgust:'코에 주름이 지고 윗입술이 올라갔어요. 입꼬리가 한쪽으로 처졌어요.'
+};
+// 3단계: 말과 표정이 다를 때 진짜 마음 읽기
+const M1_CTX=[
+  {p:'gm',e:'sad',t:.6,sit:'딸이 바빠서 이번 주 면회를 못 온다고 전화했습니다.',say:'괜찮다, 바쁜데 신경 쓰지 마라.',ans:'서운하고 아쉽다',ds:['정말 아무렇지 않다','화가 많이 났다','기분이 아주 좋다'],why:'말은 "괜찮다"지만 눈썹 안쪽이 올라가고 입꼬리가 내려갔어요. 상대를 배려해서 서운한 마음을 감춘 거예요.'},
+  {p:'mm',e:'angry',t:.55,sit:'같은 병실 환자가 밤늦게까지 TV를 크게 틀어 놓았습니다.',say:'TV 보시는 거 좋죠, 좋은데요...',ans:'불편하고 짜증이 난다',ds:['TV가 재미있다','미안한 마음이다','무서운 마음이다'],why:'"좋죠"라고 말하지만 눈썹이 모이고 입이 굳었어요. 말끝을 흐리는 것도 불편함의 신호예요.'},
+  {p:'yw',e:'embarrassed',t:.9,sit:'동료들이 갑자기 생일 축하 노래를 불러 주었습니다.',say:'어머, 왜 이래요~',ans:'쑥스럽지만 기쁘다',ds:['정말 화가 났다','슬프다','무섭다'],why:'볼이 붉어지고 시선을 피하며 살짝 웃어요. "왜 이래요"는 싫다는 뜻이 아니라 쑥스러움의 표현이에요.'},
+  {p:'gp',e:'fear',t:.5,sit:'치료사가 "오늘 검사 결과 이야기 좀 할까요?"라고 했습니다.',say:'네... 뭐, 그러죠.',ans:'걱정되고 불안하다',ds:['신이 난다','지루하다','화가 난다'],why:'눈이 커지고 눈썹 안쪽이 올라갔어요. 말끝을 흐리는 것도 결과가 걱정된다는 신호예요.'},
+  {p:'ym',e:'disgust',t:.65,sit:'점심 반찬으로 평소 싫어하는 생선조림이 나왔습니다.',say:'아... 네, 잘 먹을게요.',ans:'먹기 싫다',ds:['정말 맛있겠다','감동했다','슬프다'],why:'코에 주름이 지고 윗입술이 올라갔어요. 예의상 "잘 먹겠다"고 했지만 표정은 싫다는 뜻이에요.'},
+  {p:'mw',e:'contempt',t:.85,sit:'모임에서 한 사람이 자기 자랑을 30분째 하고 있습니다.',say:'와, 정말 대단하시네요.',ans:'속으로는 탐탁지 않다',ds:['진심으로 감탄했다','무섭다','슬프다'],why:'한쪽 입꼬리만 올라간 표정이에요. 진짜 웃음은 양쪽 입꼬리와 눈가가 함께 올라가요.'},
+  {p:'mm',e:'angry',t:.75,sit:'약 시간이 30분 넘게 지났는데 약이 이제 왔습니다.',say:'아니 괜찮습니다. 바쁘시니까요.',ans:'화가 났지만 참고 있다',ds:['정말 괜찮다','고마운 마음뿐이다','놀랐다'],why:'"괜찮다"고 하지만 미간에 주름이 지고 입을 꽉 다물었어요. 화를 참고 있는 얼굴이에요.'},
+  {p:'gm',e:'happy',t:.55,sit:'재활 운동 중 처음으로 지팡이 없이 열 걸음을 걸었습니다.',say:'아이고, 내가 이걸 하네.',ans:'기쁘고 뿌듯하다',ds:['속상하다','화가 난다','창피하다'],why:'"아이고"는 한숨이 아니라 감탄이에요. 입꼬리와 볼이 올라간 표정이 기쁨을 보여 줘요.'},
+  {p:'mw',e:'surprise',t:.8,sit:'오랫동안 못 본 친구가 연락도 없이 병문안을 왔습니다.',say:'어머! 연락도 없이 어떻게 왔어?',ans:'놀랍고 반갑다',ds:['오지 말았으면 했다','무섭다','지루하다'],why:'눈과 입이 크게 벌어진 놀란 얼굴이에요. "어떻게 왔어?"는 따지는 말이 아니라 반가움이에요.'},
+  {p:'gp',e:'sad',t:.45,sit:'손자가 시험에 떨어졌다고 풀이 죽어 이야기합니다.',say:'괜찮아, 다음에 잘 보면 되지.',ans:'손자가 안쓰럽고 마음이 아프다',ds:['손자에게 화가 났다','아무 느낌이 없다','기분이 좋다'],why:'위로하는 말 속에 눈썹 안쪽이 올라간 걱정스러운 표정이 보여요. 손자를 안쓰러워하는 마음이에요.'}
+];
+function genM1(level){
+  const out=[];
+  if(level===3){ shuffle(M1_CTX).slice(0,8).forEach(c=>out.push({kind:'ctx',c:c})); return out; }
+  const emos=level===1?['happy','sad','angry','surprise']:['happy','sad','angry','surprise','fear','disgust'];
+  const n=level===1?8:10, pids=Object.keys(PEOPLE);
+  let pool=[]; while(pool.length<n) pool=pool.concat(shuffle(emos));
+  pool=pool.slice(0,n);
+  pool.forEach(e=>{
+    const t=level===1?1:(.55+Math.random()*.3);
+    out.push({kind:'face',e:e,p:pick(pids),t:t,emos:emos});
+  });
+  return out;
+}
+
+// ══ 모듈 2: 마음 읽기 ═══════════════════════════════════════
+const M2={
+  1:[
+    {p:'gm',e:'neutral',story:'김 할머니는 안경을 침대 옆 <b>서랍</b>에 넣고 화장실에 갔습니다. 그 사이 간호사가 서랍을 정리하면서 안경을 <b>탁자 위</b>로 옮겨 두었습니다.',q:'할머니는 돌아와서 안경을 어디부터 찾을까요?',ans:'서랍',ds:['탁자 위','화장실','간호사실'],why:'할머니는 안경이 옮겨지는 걸 보지 못했어요. 그래서 자기가 마지막으로 둔 서랍부터 찾아요. 내가 아는 것과 상대가 아는 것은 다를 수 있어요.'},
+    {p:'gp',e:'sad',t:.6,story:'박 할아버지는 아들이 오후에 온다고 해서 오후 내내 창밖만 보고 있었습니다. 저녁이 되도록 아들은 오지 않았습니다.',q:'할아버지는 지금 어떤 마음일까요?',ans:'실망스럽고 서운하다',ds:['신이 난다','편안하고 느긋하다','화장실이 급하다'],why:'기다리던 사람이 오지 않으면 실망하고 서운해요. 기대했던 것과 실제가 다를 때 생기는 마음이에요.'},
+    {p:'ym',e:'neutral',story:'최 씨는 물리치료실이 <b>2층</b>이라고 알고 있습니다. 그런데 오늘부터 치료실이 <b>3층</b>으로 옮겼고, 최 씨는 아직 이 소식을 듣지 못했습니다.',q:'최 씨는 엘리베이터에서 몇 층 버튼을 누를까요?',ans:'2층',ds:['3층','1층','아무 층도 안 누른다'],why:'최 씨는 바뀐 사실을 몰라요. 사람은 자기가 알고 있는 정보대로 행동해요.'},
+    {p:'mw',e:'happy',t:.8,story:'정 씨는 손주가 그린 그림을 선물로 받았습니다. 정 씨는 그림을 냉장고에 붙여 두고, 오는 사람마다 보여 줍니다.',q:'정 씨는 그 그림을 어떻게 생각할까요?',ans:'자랑스럽고 소중하다',ds:['귀찮다','버리고 싶다','아무 생각이 없다'],why:'잘 보이는 곳에 붙이고 사람들에게 보여 주는 행동에서 소중히 여기는 마음을 알 수 있어요.'},
+    {p:'yw',e:'neutral',story:'영희는 친구 몰래 깜짝 생일 파티를 준비했습니다. 친구는 아무것도 모른 채 집 현관문을 열었습니다.',q:'친구는 문을 열기 전에 무엇을 예상했을까요?',ans:'평소처럼 아무도 없는 집',ds:['생일 파티','선물 꾸러미','화가 난 영희'],why:'친구는 파티 준비를 몰랐어요. 그래서 평소와 같은 집을 예상했고, 그래서 깜짝 놀라게 돼요.'},
+    {p:'mm',e:'sad',t:.5,story:'이 씨는 점심으로 짜장면을 먹고 싶다고 말했습니다. 그런데 배달된 것은 짬뽕이었습니다.',q:'이 씨의 기분은 어떨까요?',ans:'조금 아쉽다',ds:['아주 기쁘다','무섭다','부끄럽다'],why:'원하던 것과 다른 것이 오면 아쉬워요. 상대가 원했던 것이 무엇인지 기억하면 마음을 짐작할 수 있어요.'}
+  ],
+  2:[
+    {p:'yw',e:'happy',t:.6,story:'은주는 이모에게 받은 스웨터가 마음에 들지 않았습니다. 하지만 이모 앞에서 "너무 예뻐요, 고마워요!"라고 말했습니다.',q:'은주는 왜 그렇게 말했을까요?',ans:'이모의 마음을 상하게 하고 싶지 않아서',ds:['스웨터가 정말 마음에 들어서','이모를 놀리려고','다른 선물을 더 받으려고'],why:'상대의 기분을 배려한 "선의의 거짓말"이에요. 말과 속마음이 다를 수 있다는 걸 알아야 해요.'},
+    {p:'gm',e:'neutral',story:'병실에서 옆 침대 할머니가 "여기 창문 쪽이 좀 춥네요"라고 말했습니다. 창문은 열려 있고, 창가 자리는 내 자리입니다.',q:'할머니의 말에 숨은 뜻은 무엇일까요?',ans:'창문을 닫아 주면 좋겠다',ds:['그냥 날씨 이야기를 하고 싶다','자리를 바꾸자는 뜻이다','에어컨을 켜 달라는 뜻이다'],why:'직접 부탁하기 어려울 때 돌려서 말해요. 상황(열린 창문, 내 자리)을 함께 보면 숨은 부탁을 알 수 있어요.'},
+    {p:'mw',e:'neutral',story:'엄마가 과자를 찬장 안에 숨겼습니다. 민수는 문틈으로 그 모습을 몰래 보았습니다. 엄마는 민수가 보지 못했다고 생각합니다.',q:'엄마는 "민수가 과자 있는 곳을 안다"고 생각할까요?',ans:'아니다. 민수는 모른다고 생각한다',ds:['그렇다. 민수가 안다고 생각한다','엄마도 과자가 어디 있는지 모른다','민수는 과자를 싫어한다'],why:'민수는 알지만, 엄마는 민수가 안다는 걸 몰라요. "다른 사람이 무엇을 안다고 생각하는지"까지 따라가는 연습이에요.'},
+    {p:'gp',e:'sad',t:.4,story:'치료사가 "오늘 많이 피곤해 보이시네요. 조금 쉬었다 할까요?"라고 물었습니다. 할아버지는 사실 힘들었지만 "아니요, 괜찮아요. 계속할게요"라고 했습니다.',q:'할아버지가 그렇게 말한 이유로 가장 알맞은 것은?',ans:'약해 보이고 싶지 않거나 빨리 좋아지고 싶어서',ds:['치료사가 싫어서','하나도 힘들지 않아서','빨리 병실에 가고 싶어서'],why:'힘들어도 괜찮다고 말하는 데는 이유가 있어요. 말의 내용보다 그렇게 말한 마음(의도)을 생각해 봐요.'},
+    {p:'gm',e:'happy',t:.5,story:'옆 침대 할머니가 의사인 아들 이야기를 한참 하더니, "그 댁 자제분은 뭐 하세요?"라고 물었습니다.',q:'할머니가 이 질문을 한 이유로 가장 알맞은 것은?',ans:'대화를 주고받으며 나에게도 관심을 보이려고',ds:['자기 아들이 더 낫다고 하려고','대화를 끝내려고','화가 나서'],why:'자기 이야기를 한 뒤 상대에게 묻는 것은 대화를 주고받으려는 신호예요. 모든 질문이 비교나 공격은 아니에요.'},
+    {p:'ym',e:'embarrassed',t:.6,story:'지훈이 동료에게 "오늘 회의 자료 다 봤어?"라고 물었습니다. 동료는 머리를 긁으며 "음... 지금 보려고 했지"라고 대답했습니다.',q:'동료의 대답에서 알 수 있는 것은?',ans:'아직 자료를 보지 않았다',ds:['이미 꼼꼼히 다 봤다','회의가 취소되었다','지훈을 싫어한다'],why:'"지금 보려고 했다"는 아직 안 봤다는 뜻이에요. 머리를 긁는 몸짓도 멋쩍은 마음을 보여 줘요.'}
+  ],
+  3:[
+    {p:'mm',e:'angry',t:.4,story:'비가 쏟아지는 날, 우산 없이 흠뻑 젖은 동료가 사무실에 들어오며 말했습니다. "와, 날씨 한번 끝내주네."',q:'동료의 말은 무슨 뜻일까요?',ans:'날씨가 정말 나쁘다는 걸 비꼬아 말했다',ds:['날씨가 좋아서 기쁘다','비 오는 날을 좋아한다','우산을 빌려 달라는 뜻이다'],why:'상황(흠뻑 젖음)과 말(끝내준다)이 반대예요. 이렇게 반대로 말하는 것을 "비꼬는 말"이라고 해요.'},
+    {p:'gp',e:'sad',t:.5,story:'김 씨가 머리를 새로 자르고 왔습니다. 박 씨가 반갑게 말했습니다. "어? 머리 잘랐네. 난 예전 머리가 훨씬 젊어 보이던데." 김 씨는 말없이 웃었습니다.',q:'박 씨의 말에서 문제가 된 부분은 무엇일까요?',ans:'김 씨가 서운할 수 있는 말을 했다',ds:['머리 자른 것을 알아본 것','칭찬을 너무 많이 한 것','아무 문제도 없다'],why:'박 씨는 악의 없이 말했지만 상대가 서운할 수 있는 말이었어요(실언). 말없이 웃는 건 기분이 좋다는 뜻이 아닐 수 있어요.'},
+    {p:'mm',e:'neutral',story:'회식 메뉴를 정하는데 팀장님이 말했습니다. "나는 아무거나 괜찮아. 근데 회는 좀 그렇다."',q:'팀장님이 원하는 것은 무엇일까요?',ans:'회가 아닌 다른 메뉴',ds:['정말 아무 메뉴나','회','회식을 안 하는 것'],why:'"아무거나"라고 했지만 뒤에 붙은 말이 진짜 마음이에요. 말의 앞부분보다 뒷부분에 숨은 조건을 들어야 해요.'},
+    {p:'mw',e:'neutral',story:'손님이 저녁 늦게까지 이야기를 하고 있습니다. 집주인이 시계를 보며 말했습니다. "어머, 벌써 시간이 이렇게 됐네요."',q:'집주인의 말에 숨은 뜻은 무엇일까요?',ans:'이제 그만 돌아가 주면 좋겠다',ds:['시계가 고장 났다','손님이 더 있다 갔으면 좋겠다','저녁을 같이 먹자'],why:'직접 "가 달라"고 하기 어려워 시간 이야기로 돌려 말한 거예요. 시계를 보는 몸짓도 단서예요.'},
+    {p:'yw',e:'happy',t:.7,story:'병문안 온 친구가 말했습니다. "얼굴 좋아 보이네! 병원 밥이 잘 맞나 봐." 사실 환자는 입원 후 살이 많이 빠진 상태였습니다.',q:'친구가 이렇게 말한 의도로 가장 알맞은 것은?',ans:'기운 내라고 일부러 좋게 말했다',ds:['환자를 놀리려고','병원 밥을 먹고 싶어서','정말 살이 쪄 보여서'],why:'사실과 다르지만 상대를 위하는 마음으로 한 말이에요. 같은 "사실과 다른 말"이라도 비꼬는 말과 위로하는 말은 의도가 달라요.'},
+    {p:'ym',e:'contempt',t:.8,story:'지영이 발표를 엉망으로 하고 들어오자, 한 동료가 웃음을 참으며 말했습니다. "와, 오늘 발표 정말 인상적이었어."',q:'동료의 말은 어떤 말일까요?',ans:'비꼬는 말',ds:['진심 어린 칭찬','따뜻한 위로','사과하는 말'],why:'발표가 엉망이었다는 상황, 웃음을 참는 표정, 한쪽만 올라간 입꼬리가 모두 비꼬는 말이라는 단서예요.'}
+  ]
+};
+
+// ══ 모듈 3: 대화 기술 (ESI 사회적 상호작용 기술) ═════════════════
+const ESI={
+  approaches:['다가가 시작하기','Approaches/starts'], concludes:['마무리하기','Concludes/disengages'],
+  speech:['또렷이 말하기','Produces speech'], turns:['몸을 상대에게 향하기','Turns toward'], looks:['상대 바라보기','Looks'],
+  places:['알맞은 거리 두기','Places self'], touches:['알맞게 접촉하기','Touches'], regulates:['충동 조절하기','Regulates'],
+  questions:['알맞게 질문·요청하기','Questions'], replies:['알맞게 대답하기','Replies'], discloses:['알맞게 내 이야기하기','Discloses'],
+  emotion:['감정을 알맞게 표현하기','Expresses emotion'], disagrees:['다른 의견을 알맞게 말하기','Disagrees'], thanks:['고마움 표현하기','Thanks'],
+  transitions:['자연스럽게 화제 바꾸기','Transitions'], timesdur:['알맞은 길이로 말하기','Times duration'], taketurns:['차례 주고받기','Takes turns'],
+  matches:['상대에 맞는 말씨','Matches language'], clarifies:['확인·명료화하기','Clarifies'], acknow:['인정·격려하기','Acknowledges and encourages'],
+  empath:['공감하기','Empathizes'], heeds:['대화 목적 지키기','Heeds'], accomm:['문제 상황 조정하기','Accommodates'], benefits:['다음에 반영하기','Benefits']
+};
+// 잘못 고르면 상대의 반응
+const REACT={
+  regulates:['angry',.7,'(표정이 굳는다)'], matches:['angry',.5,'(기분이 상한 표정이다)'], emotion:['angry',.5,'(당황하며 기분이 상했다)'],
+  looks:['sad',.5,'(내 말을 듣고 있나 싶어 머쓱해한다)'], turns:['sad',.5,'(머쓱해한다)'], replies:['sad',.4,'(대화가 끊겼다)'],
+  concludes:['surprise',.5,'(어리둥절해한다)'], approaches:['sad',.4,'(어색한 분위기가 흐른다)'],
+  heeds:['surprise',.5,'(무슨 이야기인지 어리둥절해한다)'], transitions:['surprise',.5,'(갑자기 바뀐 이야기에 당황한다)'], timesdur:['neutral',1,'(지루한 듯 시계를 본다)'],
+  empath:['sad',.6,'(서운한 표정이다)'], acknow:['sad',.4,'(조금 서운해한다)'], thanks:['sad',.3,'(조금 서운해한다)'],
+  disagrees:['neutral',1,'(문제가 해결되지 않은 채 지나갔다)'], clarifies:['neutral',1,'(서로 다르게 알고 있는 채로 지나갔다)'], questions:['neutral',1,'(필요한 것을 얻지 못했다)'],
+  touches:['surprise',.8,'(깜짝 놀라 몸을 뒤로 뺀다)'], places:['surprise',.8,'(깜짝 놀라 몸을 뒤로 뺀다)'],
+  discloses:['surprise',.5,'(당황스러워한다)'], accomm:['sad',.5,'(문제가 그대로 남았다)'], benefits:['sad',.5,'(마음이 풀리지 않았다)'], speech:['neutral',1,'(무슨 말인지 못 알아들었다)'], taketurns:['sad',.4,'(말할 틈이 없다)']
+};
+const M3={
+  1:[
+    {title:'간호사에게 부탁하기',p:'yw',who:'간호사',turns:[
+      {sit:'목이 마른데 물병이 비었습니다. 간호사가 병실에 들어왔습니다.',e:'neutral',say:'필요하신 거 있으세요?',o:[
+        {t:'선생님, 물이 다 떨어졌는데 한 병 가져다주실 수 있을까요?',ok:'questions'},
+        {t:'물!',x:'matches',why:'너무 짧아서 명령처럼 들려요. 상대와 상황에 맞게 정중하게 말해요.'},
+        {t:'(대답 없이 TV를 계속 본다)',x:'looks',why:'상대를 보지 않고 대답도 하지 않았어요. 필요한 것도 얻지 못해요.'},
+        {t:'어제 우리 딸이 왔는데요, 그 애가 물을 사 왔었거든요. 근데 그게...',x:'heeds',why:'부탁하려던 목적에서 벗어나 이야기가 길어졌어요.'}]},
+      {e:'happy',t:.7,say:'네, 금방 가져다드릴게요.',o:[
+        {t:'고맙습니다.',ok:'thanks'},
+        {t:'(아무 말 없이 고개를 돌린다)',x:'thanks',why:'도움을 받으면 고마움을 말로 표현해요.'},
+        {t:'빨리 좀 와요.',x:'matches',why:'재촉하는 말투는 상대를 불편하게 해요.'}]}]},
+    {title:'새 룸메이트에게 인사하기',p:'mm',who:'옆 침대 환자',turns:[
+      {sit:'옆 침대에 새 환자가 들어왔고, 눈이 마주쳤습니다.',e:'neutral',say:'(가볍게 고개 숙여 인사한다)',act:true,o:[
+        {t:'안녕하세요, 창가 쪽 쓰는 사람이에요. 앞으로 잘 부탁드려요.',ok:'approaches'},
+        {t:'(못 본 척 커튼을 친다)',x:'approaches',why:'인사를 받고도 반응하지 않으면 관계를 시작하기 어려워요.'},
+        {t:'어디가 아파서 왔어요? 많이 다쳤어요?',x:'questions',why:'처음 만난 사람에게 아픈 곳부터 캐묻는 건 부담스러운 질문이에요.'},
+        {t:'(바짝 다가가 어깨를 툭 치며) 반가워요!',x:'touches',why:'처음 만난 사이에 몸을 대면 상대가 놀랄 수 있어요. 거리를 두고 인사해요.'}]},
+      {e:'happy',t:.7,say:'네, 반갑습니다. 잘 지내 봐요.',o:[
+        {t:'네, 혹시 불편한 거 있으면 편하게 말씀하세요.',ok:'acknow'},
+        {t:'(대답 없이 휴대폰을 본다)',x:'looks',why:'상대가 말을 걸면 바라보고 대답해요.'},
+        {t:'근데 저 코를 엄청 골고 TV도 새벽까지 봐요. 다른 방 가셔도 돼요.',x:'discloses',why:'첫 만남에서 상대를 밀어내는 말은 관계를 어렵게 해요.'}]}]},
+    {title:'치료 끝나고 인사하기',p:'yw',who:'치료사',turns:[
+      {sit:'치료가 끝났습니다. 다음 환자가 문 앞에서 기다리고 있습니다.',e:'happy',t:.6,say:'오늘 수고 많으셨어요. 내일 같은 시간에 봬요.',o:[
+        {t:'네, 선생님도 수고하셨어요. 내일 봬요.',ok:'concludes'},
+        {t:'(말없이 바로 나간다)',x:'concludes',why:'대화를 마칠 때는 인사로 마무리해요.'},
+        {t:'근데 선생님, 저번에 말한 우리 손자 있잖아요. 걔가 이번에...',x:'timesdur',why:'다음 환자가 기다리는 상황이에요. 지금은 이야기를 길게 시작할 때가 아니에요.'}]}]},
+    {title:'주문이 잘못 나왔을 때',p:'ym',who:'식당 직원',turns:[
+      {sit:'김치찌개를 주문했는데 비빔밥이 나왔습니다.',e:'neutral',say:'주문하신 비빔밥 나왔습니다.',o:[
+        {t:'저기, 제가 시킨 건 김치찌개였던 것 같은데 한 번 확인해 주실 수 있을까요?',ok:'clarifies'},
+        {t:'(그냥 먹는다)',x:'disagrees',why:'잘못된 걸 말하지 않으면 원하는 것을 얻지 못해요. 다른 점은 정중히 말해요.'},
+        {t:'이거 아니잖아요! 장사를 이렇게 해요?',x:'regulates',why:'화를 바로 터뜨리면 상대도 방어적이 돼요. 먼저 확인을 부탁해요.'},
+        {t:'(직원을 보지 않고 작게 중얼거린다) 이거 안 시켰는데...',x:'speech',why:'상대가 들을 수 있게 또렷이 말해야 전달돼요.'}]},
+      {e:'embarrassed',t:.9,say:'아, 죄송합니다! 바로 바꿔 드릴게요.',o:[
+        {t:'네, 괜찮아요. 천천히 해 주세요.',ok:'acknow'},
+        {t:'다음부터 똑바로 하세요.',x:'matches',why:'상대가 이미 사과했어요. 훈계하는 말투는 분위기를 나쁘게 해요.'},
+        {t:'(대답 없이 한숨을 크게 쉰다)',x:'emotion',why:'한숨으로 불만을 드러내기보다 말로 마무리해요.'}]}]}
+  ],
+  2:[
+    {title:'힘들어하는 딸의 이야기 듣기',p:'mw',who:'면회 온 딸',turns:[
+      {sit:'면회 온 딸이 피곤한 얼굴로 앉았습니다.',e:'sad',t:.6,say:'엄마, 나 요즘 회사 일 때문에 너무 힘들어.',o:[
+        {t:'그랬구나, 요즘 많이 힘들었겠네. 무슨 일 있었어?',ok:'empath'},
+        {t:'나는 여기서 더 힘들어. 밥도 맛없고...',x:'empath',why:'상대의 힘듦을 받아 주지 않고 내 이야기로 돌렸어요.'},
+        {t:'그깟 회사 그만둬.',x:'replies',why:'충분히 듣기 전에 단정적으로 답하면 대화가 끊겨요.'},
+        {t:'(TV를 보면서) 응, 응.',x:'looks',why:'상대를 보지 않고 건성으로 대답했어요.'}]},
+      {e:'angry',t:.45,say:'팀장님이 사람들 앞에서 내 보고서를 지적했어.',o:[
+        {t:'사람들 앞에서 그러면 정말 속상했겠다.',ok:'empath'},
+        {t:'네가 뭘 잘못했겠지.',x:'empath',why:'먼저 상대의 감정을 알아주는 게 공감이에요. 잘잘못은 나중이에요.'},
+        {t:'그 팀장 이름이 뭐야? 내가 당장 전화할게!',x:'regulates',why:'감정이 앞서 성급하게 행동하려 했어요.'}]},
+      {e:'happy',t:.5,say:'엄마랑 얘기하니까 좀 낫다.',o:[
+        {t:'그래, 힘든 일 있으면 언제든 얘기해.',ok:'acknow'},
+        {t:'그래, 그럼 이제 내 얘기 좀 하자. 오늘 물리치료에서...',x:'transitions',why:'상대 이야기가 마무리되자마자 갑자기 화제를 바꿨어요.'},
+        {t:'(대답 없이 크게 하품한다)',x:'emotion',why:'관심 없어 보이는 행동은 상대를 서운하게 해요.'}]}]},
+    {title:'밤늦은 TV 소리',p:'mm',who:'옆 침대 환자',turns:[
+      {sit:'밤 10시. 옆 환자가 TV를 크게 틀어 놓아 잠을 못 자고 있습니다.',e:'happy',t:.5,say:'(TV를 보며 웃고 있다)',act:true,o:[
+        {t:'저, 죄송한데 제가 잠이 안 와서요. 소리를 조금만 줄여 주실 수 있을까요?',ok:'disagrees'},
+        {t:'아 좀! 시끄러워 죽겠네!',x:'regulates',why:'짜증을 그대로 터뜨리면 상대도 화가 나요.'},
+        {t:'(이불을 뒤집어쓰고 참다가, 다음 날 간호사에게만 불평한다)',x:'disagrees',why:'불편한 점을 당사자에게 직접, 정중하게 말하지 않았어요.'},
+        {t:'(일어나서 리모컨을 가져와 TV를 끈다)',x:'regulates',why:'허락 없이 행동하면 갈등이 커져요.'}]},
+      {e:'angry',t:.4,say:'아, 이 정도면 작은 거 아니에요? 이것만 보고 끌게요.',o:[
+        {t:'네, 그럼 끝나면 꺼 주세요. 혹시 이어폰이 있으시면 더 좋을 것 같아요.',ok:'accomm'},
+        {t:'작긴 뭐가 작아요!',x:'disagrees',why:'다른 의견을 공격적으로 말하면 문제가 풀리지 않아요.'},
+        {t:'...네. (돌아누워 속으로 화를 삭인다)',x:'accomm',why:'문제를 조정하지 못하고 넘어갔어요. 서로 받아들일 방법을 제안해 봐요.'}]},
+      {e:'happy',t:.6,say:'아, 이어폰이 있긴 하네. 그렇게 할게요.',o:[
+        {t:'감사합니다. 편히 보세요.',ok:'thanks'},
+        {t:'진작 그러시지.',x:'matches',why:'상대가 양보했는데 비꼬는 말투는 관계를 상하게 해요.'}]}]},
+    {title:'치료 시간 바꾸기',p:'yw',who:'치료사',turns:[
+      {sit:'내일 오전 10시에 가족이 서류 일로 오기로 했습니다.',e:'neutral',say:'내일 치료는 오전 10시로 잡혔어요.',o:[
+        {t:'아, 내일 10시에 가족이 오기로 해서요. 혹시 오후로 바꿀 수 있을까요?',ok:'questions'},
+        {t:'네. (그리고 다음 날 치료에 가지 않는다)',x:'replies',why:'문제가 있는데 대답만 하고 넘어갔어요.'},
+        {t:'왜 맨날 마음대로 시간을 정해요?',x:'regulates',why:'따지는 말투보다 내 사정을 설명하고 요청해요.'},
+        {t:'가족이 오는데 그게 보험 서류 때문이고요, 그 보험이 원래는...',x:'timesdur',why:'요청에 필요한 것보다 훨씬 길게 설명했어요.'}]},
+      {e:'happy',t:.5,say:'오후 2시는 가능해요. 괜찮으세요?',o:[
+        {t:'네, 2시 좋아요. 바꿔 주셔서 고맙습니다.',ok:'thanks'},
+        {t:'(대답 없이 고개만 끄덕이고 다른 데를 본다)',x:'looks',why:'상대를 보고 확실히 대답해야 약속이 분명해져요.'},
+        {t:'2시든 뭐든 상관없어요. 다 귀찮아요.',x:'emotion',why:'도와준 상대에게 귀찮은 마음을 그대로 드러냈어요.'}]}]},
+    {title:'병문안 온 친구와 대화하기',p:'mw',who:'친구',turns:[
+      {sit:'오랜 친구가 병문안을 왔습니다.',e:'happy',t:.8,say:'얼굴 보니까 좋네! 요즘 좀 어때?',o:[
+        {t:'많이 좋아졌어. 걷는 연습도 하고 있어. 너는 요즘 어떻게 지내?',ok:'taketurns'},
+        {t:'말도 마. 첫날 응급실에서부터... (20분 동안 혼자 이야기한다)',x:'timesdur',why:'혼자 너무 오래 이야기하면 상대가 말할 틈이 없어요.'},
+        {t:'그냥 그래.',x:'replies',why:'짧게만 답하면 대화가 이어지지 않아요.'},
+        {t:'너는 왜 이제야 왔어?',x:'emotion',why:'서운함을 따지듯 표현하면 반가운 자리가 어색해져요.'}]},
+      {e:'sad',t:.6,say:'나도 요즘 남편이 아파서 정신이 없었어.',o:[
+        {t:'그랬구나, 많이 힘들었겠다. 남편분은 좀 어떠셔?',ok:'empath'},
+        {t:'그래? 근데 나 어제 MRI 찍었는데 있잖아...',x:'transitions',why:'상대의 힘든 이야기를 듣자마자 내 이야기로 바꿨어요.'},
+        {t:'아프면 병원 가야지.',x:'empath',why:'당연한 말보다 상대의 마음을 먼저 알아줘요.'}]}]}
+  ],
+  3:[
+    {title:'무리한 부탁 거절하기',p:'mm',who:'아들',turns:[
+      {sit:'아직 혼자 걷기도 힘든데, 아들이 부탁을 합니다.',e:'neutral',say:'엄마, 퇴원하면 바로 우리 애들 좀 봐 줄 수 있어?',o:[
+        {t:'봐 주고 싶은데 아직 혼자 걷는 것도 힘들어. 몇 주 더 회복하고 다시 얘기하자.',ok:'disagrees'},
+        {t:'그래, 봐 줄게. (속으로는 걱정이 된다)',x:'disagrees',why:'무리인 줄 알면서 거절하지 못했어요. 이유와 함께 정중히 거절해요.'},
+        {t:'너는 엄마 아픈 게 안 보이니?',x:'regulates',why:'서운함을 공격하듯 표현하면 상대도 상처받아요.'},
+        {t:'(대답을 피하며) 근데 밥은 먹었니?',x:'heeds',why:'중요한 이야기를 피하면 문제가 남아요.'}]},
+      {e:'embarrassed',t:.8,say:'아... 그렇지. 내가 생각이 짧았네. 미안해.',o:[
+        {t:'아니야, 너 힘든 것도 알아. 나아지면 꼭 도와줄게.',ok:'empath'},
+        {t:'그래, 생각 좀 하고 살아.',x:'regulates',why:'상대가 사과했는데 다시 몰아붙이면 관계가 상해요.'},
+        {t:'(말없이 등을 돌린다)',x:'turns',why:'몸을 돌리면 대화를 거부하는 뜻으로 보여요.'}]}]},
+    {title:'불편한 점 말하기',p:'yw',who:'배식 직원',turns:[
+      {sit:'3일째 국이 식은 채로 나오고 있습니다.',e:'neutral',say:'식사 왔습니다.',o:[
+        {t:'고맙습니다. 그런데 요즘 국이 계속 식어서 오는데, 따뜻하게 받을 방법이 있을까요?',ok:'disagrees'},
+        {t:'또 식었네. 이걸 먹으라고 주는 거예요?',x:'regulates',why:'비난하는 말은 상대를 방어적으로 만들어요.'},
+        {t:'(아무 말 없이 받고, 나중에 가족에게만 불평한다)',x:'disagrees',why:'바꿀 수 있는 사람에게 직접 말해야 해결돼요.'},
+        {t:'국이 식었어요. 그리고 반찬도 싱겁고, 밥도 질고, 어제는 숟가락도 없었고...',x:'heeds',why:'한꺼번에 여러 불만을 쏟으면 핵심이 흐려져요. 한 가지씩 말해요.'}]},
+      {e:'embarrassed',t:.7,say:'아, 죄송해요. 배식 순서상 마지막이라 그럴 수 있어요. 영양팀에 말씀드려 볼게요.',o:[
+        {t:'네, 그렇게 해 주시면 고맙겠어요. 바쁘신 거 알아요.',ok:'acknow'},
+        {t:'말만 하지 말고 꼭 해요.',x:'matches',why:'상대가 해결하려고 하는데 몰아붙이는 말투예요.'},
+        {t:'그럼 내 걸 제일 먼저 가져다줘요.',x:'accomm',why:'나만 좋은 방법보다 서로 가능한 방법을 찾아요.'}]}]},
+    {title:'약속 내용 확인하기',p:'mw',who:'친구 (전화)',turns:[
+      {sit:'전화로 약속을 정하는데, 시간과 장소를 정확히 듣지 못했습니다.',e:'happy',t:.6,say:'그럼 그때 거기서 보자!',o:[
+        {t:'잠깐, 그때가 토요일 2시 맞지? 거기는 시장 앞 다방 말하는 거야?',ok:'clarifies'},
+        {t:'응, 알았어! (사실은 모른다)',x:'clarifies',why:'모르는 채로 넘어가면 약속이 어긋나요. 확인해요.'},
+        {t:'뭐라는 거야, 똑바로 말해.',x:'matches',why:'확인이 필요할 때도 부드럽게 물어요.'},
+        {t:'(대답 없이 전화를 끊는다)',x:'concludes',why:'인사 없이 대화를 끊었어요.'}]},
+      {e:'happy',t:.7,say:'아 맞다, 말을 안 했네. 토요일 2시, 시장 앞 다방!',o:[
+        {t:'알았어. 토요일 2시, 시장 앞 다방. 그때 봐!',ok:'concludes'},
+        {t:'그래... 근데 너 지난번에도 늦었잖아.',x:'transitions',why:'약속을 마무리할 때 지난 일을 꺼내 분위기를 바꿨어요.'}]}]},
+    {title:'내가 실수했을 때',p:'gp',who:'같은 치료실 환자',turns:[
+      {sit:'아까 치료실에서 순서를 기다리다 이 할아버지에게 짜증을 냈습니다.',e:'sad',t:.55,say:'아까는 좀 서운하더라고.',o:[
+        {t:'그러셨군요. 기다리다 예민해서 제가 말이 심했어요. 죄송해요. 다음엔 조심할게요.',ok:'benefits'},
+        {t:'제가 뭘요? 그쪽이 먼저 새치기했잖아요.',x:'benefits',why:'내 행동을 돌아보지 않으면 같은 문제가 반복돼요.'},
+        {t:'(못 들은 척한다)',x:'replies',why:'상대가 마음을 꺼냈는데 대답하지 않았어요.'},
+        {t:'아휴, 그런 걸로 서운해하시면 어떡해요.',x:'empath',why:'상대의 감정을 가볍게 여겼어요.'}]},
+      {e:'happy',t:.6,say:'아니야, 그렇게 말해 주니 고맙네.',o:[
+        {t:'네, 내일 치료실에서 또 뵈어요.',ok:'concludes'},
+        {t:'그러니까요, 저도 그렇게 나쁜 사람 아니에요. 사실 제가 예전에...',x:'timesdur',why:'마무리할 때 이야기를 다시 길게 시작했어요.'}]}]}
+  ]
+};
+
+// ══ 모듈 정의 ═══════════════════════════════════════════════
+const MODS={
+  m1:{tab:'1. 표정 읽기',title:'표정과 말로 감정 읽기',d:'얼굴의 눈썹·눈·입을 보고 감정을 알아맞힙니다. 3단계에서는 말과 표정이 다를 때 진짜 마음을 읽습니다.',
+      lv:{1:'기본 감정 4가지 · 뚜렷한 표정 · 8문제',2:'감정 6가지 · 은은한 표정 · 10문제',3:'상황 + 말 + 표정 · 말과 표정이 다를 때 진짜 마음 · 8문제'},
+      steps:[['눈썹','안쪽이 올라갔나, 모였나'],['눈','커졌나, 가늘어졌나'],['입','입꼬리가 올라갔나, 내려갔나'],['상황과 말','말과 표정이 같은가, 다른가']]},
+  m2:{tab:'2. 마음 읽기',title:'상대의 생각과 속뜻 읽기',d:'짧은 이야기를 읽고 인물이 무엇을 알고, 생각하고, 원하는지 추론합니다.',
+      lv:{1:'인물이 아는 것·원하는 것 · 6문제',2:'선의의 거짓말·돌려 말하기·"다른 사람이 아는 것"까지 · 6문제',3:'비꼬는 말·실언·숨은 조건 · 6문제'},
+      steps:[['누가 무엇을 봤나','인물이 알고 있는 정보는?'],['무엇을 원하나','인물의 바람과 목적은?'],['말과 상황 비교','말 그대로인가, 숨은 뜻이 있나'],['내가 그 사람이라면','그 자리에서 어떤 마음일까']]},
+  m3:{tab:'3. 대화 기술',title:'상황에 맞게 대화하기',d:'병동과 일상 장면에서 가장 알맞은 말과 행동을 고릅니다. 잘못 고르면 상대의 반응과 함께 어떤 사회적 상호작용 기술이 필요했는지 알려 줍니다.',
+      lv:{1:'부탁·인사·마무리 · 장면 4개',2:'공감·차례 주고받기·요청 · 장면 4개',3:'거절·불만 말하기·확인·사과 · 장면 4개'},
+      steps:[['멈추기','바로 말하지 말고 한 번 멈추기'],['상대 보기','표정과 상황 살피기'],['목적 생각','이 대화로 무엇을 하려는가'],['말하기','정중하게, 알맞은 길이로']]}
+};
+const SET={mod:'m1',level:1,pred:null};
+const PRED=[{k:'90',t:'거의 다'},{k:'70',t:'대부분'},{k:'40',t:'절반 정도'},{k:'0',t:'절반 미만'}];
+
+function renderHome(){
+  const tabs=$('tabs'); tabs.innerHTML='';
+  Object.keys(MODS).forEach(m=>{
+    const b=document.createElement('button'); b.className='tab'+(SET.mod===m?' on':''); b.textContent=MODS[m].tab;
+    b.onclick=()=>{ SET.mod=m; SET.level=1; renderHome(); }; tabs.appendChild(b);
+  });
+  const M=MODS[SET.mod];
+  const ic=SET.mod==='m1'?faceSVG('yw','happy',1):SET.mod==='m2'?faceSVG('gp','neutral',1):faceSVG('mw','sad',.5);
+  $('how').innerHTML='<div class="ic">'+ic+'</div><div><div class="t">'+M.title+'</div><div class="d">'+M.d+'</div></div>';
+  const lv=$('levels'); lv.innerHTML='';
+  [1,2,3].forEach(n=>{
+    const b=document.createElement('button'); b.className='lv-btn lv'+n+(SET.level===n?' on':'');
+    b.innerHTML='<span class="lvn">LEVEL '+n+'</span><span><span class="t">'+['쉬움','중간','어려움'][n-1]+'</span><br><span class="d">'+M.lv[n]+'</span></span>';
+    b.onclick=()=>{ SET.level=n; renderHome(); }; lv.appendChild(b);
+  });
+}
+function go(n){
+  ['home','mid','game','rep'].forEach(x=>$('scr-'+x).classList.toggle('on',x===n));
+  $('back-btn').style.display=n==='home'?'none':'inline-block';
+  window.scrollTo(0,0); if(n==='home') renderHome();
+}
+function backBtn(){ if(S&&!S.done&&$('scr-game').classList.contains('on')&&!confirm('처음 화면으로 갈까요? 지금 하던 내용은 저장되지 않습니다.')) return; go('home'); }
+
+function toStrategy(){
+  const M=MODS[SET.mod];
+  $('st-title').textContent=M.tab.replace(/^\d\. /,'')+' — 이 순서로 봅니다';
+  $('st-steps').innerHTML=M.steps.map((s,i)=>'<div class="step"><div class="n">'+(i+1)+'</div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>').join('');
+  SET.pred=null; $('go-btn').disabled=true;
+  const box=$('pred'); box.innerHTML='';
+  PRED.forEach(p=>{ const b=document.createElement('button'); b.textContent=p.t; b.onclick=()=>{ SET.pred=p.k; Array.prototype.forEach.call(box.children,c=>c.classList.toggle('on',c===b)); $('go-btn').disabled=false; }; box.appendChild(b); });
+  go('mid');
+}
+
+// ══ 진행 ═══════════════════════════════════════════════════
+let S=null;
+function startSession(){
+  const m=SET.mod, L=SET.level;
+  let items;
+  if(m==='m1') items=genM1(L);
+  else if(m==='m2') items=shuffle(M2[L]).map(x=>({kind:'story',c:x}));
+  else items=shuffle(M3[L]).map(x=>({kind:'dlg',c:x}));
+  S={mod:m,level:L,pred:SET.pred,items:items,i:0,turn:0,res:[],skillMiss:{},skillOk:{},done:false,t0:Date.now()};
+  $('g-title').textContent=MODS[m].tab.replace(/^\d\. /,'')+' · LEVEL '+L;
+  go('game'); show();
+}
+function sceneHTML(pid,emo,t,who,sit,say,isAct,opt,react){
+  return '<div class="face">'+faceSVG(pid,emo,t,opt)+'</div><div class="txt">'+(who?'<div class="who">'+who+'</div>':'')+
+    (sit?'<div class="sit">'+sit+'</div>':'')+(say?'<div class="bubble'+(isAct?' act':'')+'">'+(isAct?say:'"'+say+'"')+'</div>':'')+
+    (react?'<div class="bubble act" style="background:#fdecea;border-color:#ef9a9a;color:#8e1b1b">'+react+'</div>':'')+'</div>';
+}
+function setOpts(list,grid,onPick){
+  const box=$('opts'); box.innerHTML=''; box.className='opts'+(grid?' grid':'');
+  list.forEach((o,idx)=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=o.t||o;
+    b.onclick=()=>onPick(idx,b); box.appendChild(b);
+  });
+}
+function fb(html,ok){ const f=$('fb'); f.innerHTML=html; f.className='fb on '+(ok?'ok':'bad'); }
+function clearFb(){ $('fb').className='fb'; $('next').classList.remove('on'); }
+
+function show(){
+  clearFb();
+  const it=S.items[S.i];
+  $('g-pg').textContent=(S.i+1)+' / '+S.items.length;
+  S.first=true; S.tStart=Date.now();
+  if(it.kind==='face'){
+    $('scene').innerHTML='<div class="face" style="margin:0 auto;width:250px">'+faceSVG(it.p,it.e,it.t)+'</div>';
+    $('qtxt').textContent='이 사람은 어떤 기분일까요?';
+    const opts=shuffle(it.emos).map(e=>({t:EMO_NM[e],v:e}));
+    setOpts(opts,true,(idx,b)=>answer(opts[idx].v===it.e,b,()=>
+      '<b>'+EMO_NM[it.e]+'</b> — '+EMO_CUE[it.e], ()=>'다시 볼까요? 눈썹 → 눈 → 입 순서로 살펴보세요.',{cat:it.e}));
+  } else if(it.kind==='ctx'){
+    const c=it.c;
+    $('scene').innerHTML=sceneHTML(c.p,c.e,c.t,PEOPLE[c.p].nm,c.sit,c.say);
+    $('qtxt').textContent='이 사람의 진짜 마음은?';
+    const opts=shuffle([c.ans].concat(c.ds));
+    setOpts(opts,false,(idx,b)=>answer(opts[idx]===c.ans,b,()=>'<b>'+c.ans+'</b> — '+c.why,()=>'다시 볼까요? 말만 듣지 말고 표정과 상황을 함께 보세요.',{cat:'ctx'}));
+  } else if(it.kind==='story'){
+    const c=it.c;
+    $('scene').innerHTML='<div class="face" style="width:150px">'+faceSVG(c.p,c.e,c.t==null?1:c.t)+'</div><div class="txt"><div class="story">'+c.story+'</div></div>';
+    $('qtxt').textContent=c.q;
+    const opts=shuffle([c.ans].concat(c.ds));
+    setOpts(opts,false,(idx,b)=>answer(opts[idx]===c.ans,b,()=>'<b>'+c.ans+'</b> — '+c.why,()=>'다시 볼까요? 인물이 무엇을 알고, 무엇을 원하는지 생각해 보세요.',{cat:'story'}));
+  } else showTurn();
+}
+function showTurn(){
+  const it=S.items[S.i], d=it.c, tn=d.turns[S.turn];
+  S.first=true; S.tStart=Date.now();
+  const who=d.who+' · '+d.title+(d.turns.length>1?' ('+(S.turn+1)+'/'+d.turns.length+')':'');
+  const base=react=>{ $('scene').innerHTML=react?sceneHTML(d.p,react[0],react[1],who,tn.sit||'',tn.say,tn.act,null,'상대 반응: '+react[2]):sceneHTML(d.p,tn.e,tn.t==null?.8:tn.t,who,tn.sit||'',tn.say,tn.act); };
+  base(null);
+  $('qtxt').textContent='나라면 어떻게 할까요?';
+  const opts=shuffle(tn.o);
+  setOpts(opts,false,(idx,b)=>{
+    const o=opts[idx];
+    if(o.ok){
+      base(null);
+      answer(true,b,()=>'<span class="tag">'+ESI[o.ok][0]+'</span>좋아요. 상황에 맞는 말이에요.',null,{skill:o.ok,dlg:true});
+    } else {
+      // 상대 반응 보여 주기
+      base(REACT[o.x]||['sad',.5,'']);
+      answer(false,b,null,()=>'<span class="tag">'+ESI[o.x][0]+'</span>'+o.why+' 다른 답을 골라 보세요.',{skill:o.x,dlg:true});
+    }
+  });
+}
+function answer(ok,btn,okMsg,badMsg,meta){
+  if(btn.disabled) return;
+  if(S.first){ S.res.push({mod:S.mod,ok:ok,meta:meta,rt:Date.now()-S.tStart}); S.first=false; }
+  if(meta.dlg){
+    if(ok){ S.skillOk[meta.skill]=(S.skillOk[meta.skill]||0)+1; }
+    else { S.skillMiss[meta.skill]=(S.skillMiss[meta.skill]||0)+1; }
+  }
+  if(ok){
+    btn.classList.add('right');
+    Array.prototype.forEach.call($('opts').children,c=>c.disabled=true);
+    fb(okMsg(),true);
+    $('next').classList.add('on');
+    $('next-btn').textContent=(S.i===S.items.length-1&&!moreTurns())?'결과 보기':'다음';
+  } else {
+    btn.classList.add('wrong'); btn.disabled=true;
+    fb(badMsg(),false);
+  }
+}
+function moreTurns(){ const it=S.items[S.i]; return it.kind==='dlg'&&S.turn<it.c.turns.length-1; }
+function advance(){
+  if(moreTurns()){ S.turn++; clearFb(); showTurn(); return; }
+  S.i++; S.turn=0;
+  if(S.i>=S.items.length){ S.done=true; report(); } else show();
+}
+
+// ══ 결과 ═══════════════════════════════════════════════════
+function report(){
+  const R=S.res, n=R.length, ok=R.filter(r=>r.ok).length, pc=Math.round(ok/n*100);
+  const M=MODS[S.mod], d=new Date();
+  const predTxt=PRED.filter(p=>p.k===S.pred)[0].t;
+  const actualBucket=pc>=90?'90':pc>=70?'70':pc>=40?'40':'0';
+  const same=actualBucket===S.pred, over=Number(S.pred)>Number(actualBucket);
+  let h='<h2>사회적 상호작용 훈련 결과 · '+M.tab.replace(/^\d\. /,'')+'</h2><div class="meta">'+d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' · LEVEL '+S.level+' · '+(S.mod==='m3'?'대화 '+n+'번':n+'문제')+'</div>';
+  h+='<div class="tiles"><div class="tile"><div class="v">'+pc+'%</div><div class="k">처음에 바로 맞힌 비율</div></div>'+
+     '<div class="tile"><div class="v">'+predTxt+'</div><div class="k">시작 전 예상</div></div>'+
+     '<div class="tile"><div class="v" style="font-size:1.15rem;line-height:2.25rem">'+(same?'예상과 같음':over?'예상보다 낮음':'예상보다 높음')+'</div><div class="k">예상과 실제</div></div></div>';
+  if(S.mod==='m1'){
+    if(S.level<3){
+      h+='<h3>감정별 결과</h3><table><tr><th>감정</th><th>나온 수</th><th>바로 맞힘</th><th>단서</th></tr>';
+      Object.keys(EMO_NM).forEach(e=>{
+        const r=R.filter(x=>x.meta.cat===e); if(!r.length) return;
+        h+='<tr><td class="l"><b>'+EMO_NM[e]+'</b></td><td>'+r.length+'</td><td>'+r.filter(x=>x.ok).length+'</td><td class="l" style="font-size:.88rem">'+EMO_CUE[e]+'</td></tr>';
+      });
+      h+='</table>';
+    }
+  }
+  if(S.mod==='m3'){
+    const keys=Object.keys(ESI).filter(k=>S.skillMiss[k]||S.skillOk[k]);
+    keys.sort((a,b)=>(S.skillMiss[b]||0)-(S.skillMiss[a]||0));
+    h+='<h3>사회적 상호작용 기술 (ESI 항목 기준)</h3><table><tr><th>기술</th><th>ESI 항목</th><th>잘 고름</th><th>놓침</th></tr>';
+    keys.forEach(k=>{ h+='<tr><td class="l">'+ESI[k][0]+'</td><td style="font-size:.88rem">'+ESI[k][1]+'</td><td>'+(S.skillOk[k]||0)+'</td><td>'+(S.skillMiss[k]?'<b style="color:#c62828">'+S.skillMiss[k]+'</b>':'0')+'</td></tr>'; });
+    h+='</table>';
+    const miss=keys.filter(k=>S.skillMiss[k]);
+    h+='<h3>치료사 역할극 관찰 (같은 장면으로)</h3><div class="box"><div class="note" style="margin-bottom:6px">화면에서 놓친 기술을 치료사와 역할극으로 다시 해 보고 관찰합니다. 공식 ESI 채점이 아닌 회기 내 관찰 기록입니다.</div>';
+    (miss.length?miss:keys.slice(0,3)).forEach(k=>{ h+='<div style="padding:4px 0;border-top:1px solid #eee">'+ESI[k][0]+' <span class="note">('+ESI[k][1]+')</span><span style="float:right"><span class="chk"></span>스스로 함<span class="chk"></span>단서 필요<span class="chk"></span>어려움</span></div>'; });
+    h+='</div>';
+  }
+  const hw={
+    m1:['오늘 가족·직원·다른 환자의 표정을 3번 살펴보고, 눈썹·눈·입 단서로 감정을 말해 보기','TV 드라마를 소리 없이 1분 보고 인물의 감정 맞혀 보기'],
+    m2:['TV 드라마 한 장면을 보고 "저 사람은 지금 무엇을 알고, 무엇을 원할까?" 말해 보기','오늘 들은 말 중 돌려 말한 말(숨은 부탁)을 하나 찾아 치료사에게 이야기하기'],
+    m3:['오늘 연습한 대화 하나를 병동에서 실제로 1번 해 보기 (예: 정중히 부탁하기)','해 본 뒤 상대 반응이 어땠는지 치료사와 함께 돌아보기']
+  }[S.mod];
+  h+='<h3>실생활 과제</h3><div class="box">'+hw.map(x=>'<div style="padding:3px 0"><span class="chk" style="margin-left:0"></span> '+x+'</div>').join('')+'</div>';
+  h+='<h3>가족·대화 상대에게</h3><div class="note">말과 표정을 천천히, 분명하게 보여 주세요. 돌려 말하기보다 원하는 것을 직접 말해 주시고, 대화 중 실수가 있으면 그 자리에서 짧고 차분하게 알려 주세요.</div>';
+  $('rep').innerHTML=h; go('rep');
+}
+renderHome();
+</script>
+</body>
+</html>
