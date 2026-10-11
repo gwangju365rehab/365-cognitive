@@ -180,6 +180,40 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 
 <div id="err-box"></div>
 
+<!-- 비밀번호 잠금 -->
+<div id="lock" style="position:fixed;left:0;right:0;top:0;bottom:0;z-index:200;background:#eef1f6;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="panel" style="max-width:420px;width:100%;text-align:center">
+    <div style="font-size:1.3rem;font-weight:900;color:#1a237e;margin-bottom:6px">할리갈리 억제훈련</div>
+    <div class="note" style="margin-bottom:14px">준비 중인 프로그램입니다. 비밀번호를 입력하세요.</div>
+    <input id="lock-pw" type="password" inputmode="numeric" autocomplete="off"
+      style="font:inherit;font-size:1.4rem;text-align:center;width:100%;padding:12px;border:2px solid #d5dbe6;border-radius:12px;margin-bottom:10px"/>
+    <div id="lock-msg" style="min-height:1.6rem;color:#c62828;font-weight:800"></div>
+    <div class="foot" style="justify-content:center">
+      <button class="big-btn b-sec" onclick="location.href='index.html'">홈으로</button>
+      <button class="big-btn b-pri" onclick="unlock()">확인</button>
+    </div>
+  </div>
+</div>
+<script>
+// 비밀번호: 365 (이 탭을 닫기 전까지 다시 묻지 않음)
+var LOCK_PW='365';
+function unlock(){
+  var v=document.getElementById('lock-pw').value.trim();
+  if(v===LOCK_PW){
+    document.getElementById('lock').style.display='none';
+    try{ sessionStorage.setItem('hg_unlock','1'); }catch(e){}
+  } else {
+    document.getElementById('lock-msg').textContent='비밀번호가 맞지 않아요';
+    document.getElementById('lock-pw').value='';
+  }
+}
+(function(){
+  var ok=false; try{ ok=sessionStorage.getItem('hg_unlock')==='1'; }catch(e){}
+  if(ok) document.getElementById('lock').style.display='none';
+  document.getElementById('lock-pw').addEventListener('keydown',function(e){ if(e.key==='Enter'||e.keyCode===13) unlock(); });
+})();
+</script>
+
 <script>
 window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
 </script>
