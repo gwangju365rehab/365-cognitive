@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>할리갈리 억제훈련 - 광주365재활병원</title>
+<style>
+:root{
+  --ink:#1f2433; --sub:#5b6375; --line:#d5dbe6; --bg:#eef1f6; --card:#fff;
+  --pri:#283593; --pri-2:#3f51b5; --pri-soft:#e8eaf6;
+  --ok:#2e7d32; --ok-soft:#e8f5e9; --bad:#c62828; --bad-soft:#fdecea;
+  --felt:#1b6b45;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:18px;line-height:1.5;padding:16px 14px 90px}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column}
+.wrap>*+*{margin-top:14px}
+.screen{display:none}
+.screen.on{display:flex}
+
+#home-btn,#back-btn{position:fixed;top:12px;left:12px;z-index:50;padding:10px 18px;border-radius:999px;border:none;min-height:44px;
+  background:#fff;color:#333;font-weight:700;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+#back-btn{left:112px;background:var(--pri);color:#fff;display:none}
+h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:800}
+.lead{text-align:center;color:var(--sub);font-size:1rem;margin:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.lbl{font-size:.95rem;font-weight:800;color:var(--sub);margin:0 0 8px}
+
+/* 규칙 예시 */
+.ex-row{display:flex;flex-wrap:wrap;justify-content:center}
+.ex{flex:1 1 230px;max-width:270px;margin:6px;border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fafbfd}
+.ex .mini{display:flex;justify-content:center;margin-bottom:6px}
+.ex .mini .card{margin:0 4px}
+.ex .ans{display:inline-block;padding:3px 14px;border-radius:999px;font-weight:900;color:#fff}
+.ex .ans.go{background:var(--ok)}.ex .ans.no{background:var(--bad)}
+.ex .why{font-size:.92rem;color:var(--sub);font-weight:700;margin-top:4px}
+
+/* 난이도 */
+.lv-btn{display:flex;align-items:center;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;min-height:66px;margin-bottom:10px}
+.lv-btn.on{border-color:var(--pri-2);background:var(--pri-soft)}
+.lv-btn .lvn{flex:none;min-width:84px;text-align:center;padding:8px 0;border-radius:10px;font-weight:800;color:#fff;margin-right:14px}
+.lv1 .lvn{background:#43a047}.lv2 .lvn{background:#1e88e5}.lv3 .lvn{background:#e53935}
+.lv-btn .t{font-weight:800}
+.lv-btn .d{color:var(--sub);font-size:.95rem}
+.seg{display:flex;flex-wrap:wrap}
+.seg button{margin:3px;min-width:72px;min-height:48px;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:700}
+.seg button.on{border-color:var(--pri-2);background:var(--pri-2);color:#fff}
+.set-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eceff4}
+.set-row:first-child{border-top:none}
+.set-row .nm{font-weight:700}
+.big-btn{padding:16px 26px;border-radius:14px;border:none;font-size:1.15rem;font-weight:800;min-height:60px}
+.b-pri{background:var(--pri);color:#fff}
+.b-sec{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.foot{display:flex;justify-content:flex-end;flex-wrap:wrap}
+.foot>*{margin-left:10px;margin-top:6px}
+
+/* 게임 화면 */
+.tbar{margin-top:46px;display:flex;align-items:center;flex-wrap:wrap;background:var(--pri);color:#fff;border-radius:16px;padding:12px 16px}
+.tbar .ttl{flex:1;font-size:1.15rem;font-weight:800}
+.tbar .pg{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px;margin-left:8px}
+.tbar .tb{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;min-height:42px;margin-left:8px}
+.table{position:relative;background:var(--felt);background-image:radial-gradient(circle at 50% 40%,#23845a 0,#1b6b45 70%);border-radius:22px;padding:22px 12px;
+  min-height:300px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;box-shadow:inset 0 0 0 6px #14532f}
+.pile{position:relative;margin:8px 10px;width:150px;height:210px}
+.pile .back{position:absolute;left:6px;top:6px;width:150px;height:210px;border-radius:14px;background:#8e2430;border:3px solid #fff;
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.15) 0 6px,transparent 6px 12px)}
+.pile .slot{position:absolute;left:0;top:0;width:150px;height:210px;border-radius:14px;border:3px dashed rgba(255,255,255,.35)}
+.card{position:relative;width:150px;height:210px;border-radius:14px;background:#fff;border:3px solid #cfd6e0;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.pile .card{position:absolute;left:0;top:0}
+.card .fr{position:absolute;width:44%;height:auto;transform:translate(-50%,-50%)}
+.card.stop{background:#37474f;border-color:#263238}
+.card.flip{animation:flip .28s ease-out}
+@keyframes flip{0%{transform:scale(.6) rotateY(80deg);opacity:.3}100%{transform:none;opacity:1}}
+.mini .card{width:66px;height:92px;border-width:2px;border-radius:8px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.table.win{box-shadow:inset 0 0 0 6px #14532f,0 0 0 6px #66bb6a}
+.table.lose{box-shadow:inset 0 0 0 6px #14532f,0 0 0 6px #ef5350}
+.fb{min-height:2.6rem;text-align:center;font-size:1.35rem;font-weight:900}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}.fb.mid{color:#ef6c00}
+.bell-wrap{display:flex;justify-content:center}
+#bell{width:210px;height:150px;border-radius:24px;border:none;background:#fff8e1;box-shadow:0 6px 0 #c49000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.25rem;color:#6d4c00;user-select:none;-webkit-user-select:none}
+#bell:active,#bell.hit{transform:translateY(4px);box-shadow:0 2px 0 #c49000}
+#bell svg{width:92px;height:92px}
+.pause{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(238,241,246,.95);display:none;align-items:center;justify-content:center;z-index:60;flex-direction:column}
+.pause.on{display:flex}
+.pause .msg{font-size:1.5rem;font-weight:900;margin-bottom:16px;text-align:center}
+.count{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:5rem;font-weight:900;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.3)}
+
+/* 결과 */
+.tiles{display:flex;flex-wrap:wrap;margin:-5px}
+.tile{flex:1 1 150px;margin:5px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tile .v{font-size:1.6rem;font-weight:900;font-variant-numeric:tabular-nums}
+.tile .k{font-size:.88rem;color:var(--sub);font-weight:700}
+.rep h2{margin:0 0 4px;font-size:1.4rem}
+.rep .meta{color:var(--sub);margin-bottom:10px}
+.rep table{width:100%;border-collapse:collapse;font-size:1rem;margin:6px 0 12px;background:#fff}
+.rep th,.rep td{border:1px solid var(--line);padding:8px;text-align:center;vertical-align:middle}
+.rep th{background:#f3f5fa}
+.rep td.l{text-align:left;font-weight:700}
+.okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
+.note{font-size:.88rem;color:var(--sub)}
+#err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
+@media(max-width:700px){
+  .pile,.pile .back,.pile .slot,.table .card{width:118px;height:165px}
+  #bell{width:180px;height:130px}
+}
+@media print{
+  body{background:#fff;padding:0;font-size:12px}
+  #home-btn,#back-btn,#err-box,.no-print{display:none!important}
+  .panel{border:none;padding:0}
+}
+</style>
+</head>
+<body>
+<button id="home-btn" onclick="location.href='index.html'">홈으로</button>
+<button id="back-btn" onclick="backBtn()">처음으로</button>
+
+<!-- 시작 화면 -->
+<div class="wrap screen on" id="scr-home">
+  <h1>할리갈리 억제훈련</h1>
+  <p class="lead">같은 과일이 <b>딱 5개</b>일 때만 종을 칩니다. 4개·6개, 다른 과일끼리 합친 5개에는 손을 멈춥니다.</p>
+
+  <div class="panel">
+    <div class="lbl">규칙</div>
+    <div class="ex-row" id="examples"></div>
+  </div>
+
+  <div class="panel">
+    <div class="lbl">난이도</div>
+    <div id="levels"></div>
+  </div>
+
+  <div class="panel">
+    <div class="set-row"><span class="nm">카드 수</span><div class="seg" id="seg-len"></div></div>
+    <div class="set-row"><span class="nm">넘기는 속도</span><div class="seg" id="seg-speed"></div></div>
+    <div class="set-row"><span class="nm">소리</span><div class="seg" id="seg-sound"></div></div>
+  </div>
+
+  <div class="foot"><button class="big-btn b-pri" onclick="startGame()">시작하기</button></div>
+</div>
+
+<!-- 게임 화면 -->
+<div class="wrap screen" id="scr-game">
+  <div class="tbar">
+    <div class="ttl" id="g-title">할리갈리</div>
+    <div class="pg" id="g-left">남은 카드 0장</div>
+    <button class="tb" onclick="pauseGame()">일시정지</button>
+  </div>
+  <div class="table" id="table"></div>
+  <div class="fb" id="fb"></div>
+  <div class="bell-wrap"><button id="bell" aria-label="종 치기"></button></div>
+  <p class="lead note" style="margin-top:20px">종 버튼을 누르거나 키보드 스페이스바를 누릅니다.</p>
+</div>
+
+<!-- 결과 화면 -->
+<div class="wrap screen" id="scr-rep">
+  <div class="panel rep" id="rep"></div>
+  <div class="foot no-print">
+    <button class="big-btn b-sec" onclick="window.print()">인쇄</button>
+    <button class="big-btn b-sec" onclick="go('home')">처음으로</button>
+    <button class="big-btn b-pri" onclick="startGame()">같은 난이도로 다시</button>
+  </div>
+</div>
+
+<div class="pause" id="pause">
+  <div class="msg">일시정지</div>
+  <div>
+    <button class="big-btn b-sec" onclick="quitGame()">그만하기</button>
+    <button class="big-btn b-pri" onclick="resumeGame()">계속하기</button>
+  </div>
+</div>
+
+<div id="err-box"></div>
+
+<script>
+window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
+</script>
+<script>
+"use strict";
+// ══ 도구 ══════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const pct=(a,b)=>b?Math.round(a/b*100):null;
+let LASTPRESS=0;
+function bindPress(el,fn){
+  const fire=e=>{ if(e&&e.cancelable) e.preventDefault(); const t=Date.now(); if(t-LASTPRESS<250) return; LASTPRESS=t; fn(); };
+  if(window.PointerEvent) el.addEventListener('pointerdown',fire);
+  else { el.addEventListener('touchstart',fire,{passive:false}); el.addEventListener('mousedown',fire); }
+  el.addEventListener('click',()=>{ if(Date.now()-LASTPRESS>250){ LASTPRESS=Date.now(); fn(); } });
+  return el;
+}
+(function(){ // 통합 화면(iframe) 안에서는 내부 홈 버튼 숨김
+  try{ if(window.parent&&window.parent!==window&&typeof window.parent.goHome==='function') $('home-btn').style.display='none'; }catch(e){}
+})();
+
+// ══ 과일 그림 (이모지 대신 SVG) ═══════════════════════════
+const FRUITS={
+  banana:{nm:'바나나',svg:'<svg viewBox="0 0 40 40"><path d="M7 9 C7 27 21 36 35 29 C33 27 31 27 29 28 C19 30 12 22 12 9 Z" fill="#fdd835" stroke="#b28704" stroke-width="2" stroke-linejoin="round"/><path d="M7 9 L8 5 L12 6 L12 9" fill="#6d4c41" stroke="#4e342e" stroke-width="1.5" stroke-linejoin="round"/></svg>'},
+  strawberry:{nm:'딸기',svg:'<svg viewBox="0 0 40 40"><path d="M7 15 C7 28 17 37 20 37 C23 37 33 28 33 15 C27 12 13 12 7 15 Z" fill="#e53935" stroke="#9e1b1b" stroke-width="2"/><path d="M9 15 L15 8 L20 13 L25 8 L31 15 C25 12 15 12 9 15 Z" fill="#43a047" stroke="#1b5e20" stroke-width="1.5" stroke-linejoin="round"/><g fill="#fff59d"><circle cx="14" cy="20" r="1.4"/><circle cx="20" cy="19" r="1.4"/><circle cx="26" cy="20" r="1.4"/><circle cx="17" cy="26" r="1.4"/><circle cx="23" cy="26" r="1.4"/><circle cx="20" cy="32" r="1.4"/></g></svg>'},
+  lime:{nm:'라임',svg:'<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#558b2f" stroke="#33691e" stroke-width="2"/><circle cx="20" cy="20" r="12" fill="#c5e1a5"/><g stroke="#7cb342" stroke-width="2"><line x1="20" y1="8" x2="20" y2="32"/><line x1="9.6" y1="14" x2="30.4" y2="26"/><line x1="9.6" y1="26" x2="30.4" y2="14"/></g><circle cx="20" cy="20" r="2" fill="#f1f8e9"/></svg>'},
+  plum:{nm:'자두',svg:'<svg viewBox="0 0 40 40"><path d="M20 10 C8 8 4 20 8 29 C12 37 28 37 32 29 C36 20 32 8 20 10 Z" fill="#7b1fa2" stroke="#4a148c" stroke-width="2"/><path d="M20 11 C18 18 18 26 20 34" fill="none" stroke="#4a148c" stroke-width="1.6"/><path d="M20 10 L21 4" stroke="#5d4037" stroke-width="2.2" stroke-linecap="round"/><path d="M21 6 C25 2 30 3 31 5 C28 8 24 8 21 6 Z" fill="#43a047"/><ellipse cx="13" cy="18" rx="2.5" ry="4" fill="#ce93d8" opacity=".7"/></svg>'}
+};
+const STOP_SVG='<svg viewBox="0 0 100 100" style="position:absolute;left:10%;top:22%;width:80%"><polygon points="30,4 70,4 96,30 96,70 70,96 30,96 4,70 4,30" fill="#e53935" stroke="#fff" stroke-width="5"/><text x="50" y="61" text-anchor="middle" font-size="30" font-weight="900" fill="#fff" font-family="Malgun Gothic,sans-serif">금지</text></svg>';
+const BELL_SVG='<svg viewBox="0 0 64 64"><path d="M32 8 C20 8 14 18 14 30 L14 40 L8 48 L56 48 L50 40 L50 30 C50 18 44 8 32 8 Z" fill="#ffca28" stroke="#b28704" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="7" r="4" fill="#ffca28" stroke="#b28704" stroke-width="3"/><circle cx="32" cy="53" r="5" fill="#b28704"/><path d="M22 22 C23 17 26 14 30 13" fill="none" stroke="#fff8e1" stroke-width="3" stroke-linecap="round"/></svg>';
+const POS={1:[[50,50]],2:[[30,27],[70,73]],3:[[27,22],[50,50],[73,78]],4:[[30,26],[70,26],[30,74],[70,74]],5:[[29,22],[71,22],[50,50],[29,78],[71,78]]};
+
+function cardEl(c,anim){
+  const d=document.createElement('div');
+  d.className='card'+(c.stop?' stop':'')+(anim?' flip':'');
+  if(c.stop){ d.innerHTML=STOP_SVG; return d; }
+  let html='';
+  POS[c.n].forEach(p=>{ html+='<div class="fr" style="left:'+p[0]+'%;top:'+p[1]+'%">'+FRUITS[c.f].svg+'</div>'; });
+  d.innerHTML=html;
+  return d;
+}
+
+// ══ 난이도·설정 ══════════════════════════════════════════
+const LEVELS={
+  1:{name:'LEVEL 1',sub:'쉬움',piles:2,fruits:['banana','strawberry'],iv:3000,pT:.30,pL:.25,lures:['near','mix','mix'],
+     d:'카드 2장 · 과일 2종 · 3초마다 한 장'},
+  2:{name:'LEVEL 2',sub:'중간',piles:3,fruits:['banana','strawberry','lime','plum'],iv:2400,pT:.30,pL:.35,lures:['near','mix','mix'],
+     d:'카드 3장 · 과일 4종 · 4개·6개 유혹이 더 자주'},
+  3:{name:'LEVEL 3',sub:'어려움',piles:4,fruits:['banana','strawberry','lime','plum'],iv:1900,pT:.30,pL:.40,lures:['near','mix','mix','stop'],
+     d:'카드 4장 · 빠르게 · 금지 카드가 보이면 5개라도 멈춤'}
+};
+const LENS=[{k:30,t:'30장'},{k:45,t:'45장'},{k:60,t:'60장'}];
+const SPEEDS=[{k:1.25,t:'느리게'},{k:1,t:'기본'},{k:.8,t:'빠르게'}];
+const SET={level:1,len:45,speed:1,sound:true};
+
+const CAT={
+  target:{nm:'같은 과일 5개',act:'눌러야 함'},
+  near:{nm:'같은 과일 4개 또는 6개',act:'참아야 함'},
+  mix:{nm:'다른 과일끼리 합쳐 5개',act:'참아야 함'},
+  stop:{nm:'5개지만 금지 카드 있음',act:'참아야 함'},
+  neutral:{nm:'그 밖의 경우',act:'참아야 함'}
+};
+
+function seg(id,items,key){
+  const box=$(id); box.innerHTML='';
+  items.forEach(it=>{
+    const b=document.createElement('button'); b.textContent=it.t;
+    if(SET[key]===it.k) b.className='on';
+    b.onclick=()=>{ SET[key]=it.k; seg(id,items,key); };
+    box.appendChild(b);
+  });
+}
+function renderHome(){
+  const lv=$('levels'); lv.innerHTML='';
+  [1,2,3].forEach(n=>{
+    const L=LEVELS[n];
+    const b=document.createElement('button');
+    b.className='lv-btn lv'+n+(SET.level===n?' on':'');
+    b.innerHTML='<span class="lvn">'+L.name+'</span><span><span class="t">'+L.sub+'</span><br><span class="d">'+L.d+'</span></span>';
+    b.onclick=()=>{ SET.level=n; renderHome(); };
+    lv.appendChild(b);
+  });
+  seg('seg-len',LENS,'len'); seg('seg-speed',SPEEDS,'speed');
+  seg('seg-sound',[{k:true,t:'켜기'},{k:false,t:'끄기'}],'sound');
+  // 규칙 예시
+  const ex=[
+    {cards:[{f:'banana',n:2},{f:'banana',n:3}],go:true,why:'바나나 2+3 = 5'},
+    {cards:[{f:'strawberry',n:4},{f:'lime',n:1}],go:false,why:'딸기 4개 (5가 아님)'},
+    {cards:[{f:'banana',n:2},{f:'strawberry',n:3}],go:false,why:'다른 과일끼리 합친 5'}
+  ];
+  if(SET.level===3) ex.push({cards:[{f:'plum',n:5},{stop:true}],go:false,why:'금지 카드가 있으면 멈춤'});
+  const box=$('examples'); box.innerHTML='';
+  ex.forEach(e=>{
+    const d=document.createElement('div'); d.className='ex';
+    const m=document.createElement('div'); m.className='mini';
+    e.cards.forEach(c=>m.appendChild(cardEl(c)));
+    d.appendChild(m);
+    d.insertAdjacentHTML('beforeend','<span class="ans '+(e.go?'go':'no')+'">'+(e.go?'종 치기':'참기')+'</span><div class="why">'+e.why+'</div>');
+    box.appendChild(d);
+  });
+}
+function go(name){
+  const ss=document.querySelectorAll('.screen'); for(let i=0;i<ss.length;i++) ss[i].classList.remove('on');
+  $('scr-'+name).classList.add('on');
+  $('back-btn').style.display=name==='home'?'none':'inline-block';
+  window.scrollTo(0,0);
+  if(name==='home') renderHome();
+}
+function backBtn(){
+  if(G&&G.running&&!confirm('처음 화면으로 갈까요? 지금 하던 내용은 저장되지 않습니다.')) return;
+  stopTimers(); if(G) G.running=false; $('pause').classList.remove('on'); go('home');
+}
+
+// ══ 소리 ══════════════════════════════════════════════
+let AC=null;
+function initAudio(){
+  try{ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state!=='running') AC.resume(); }catch(e){ AC=null; }
+}
+function tone(freqs,dur,type,vol){
+  if(!SET.sound||!AC) return;
+  try{
+    if(AC.state!=='running') AC.resume();
+    const t=AC.currentTime;
+    freqs.forEach((f,i)=>{
+      const o=AC.createOscillator(), g=AC.createGain();
+      o.type=type||'sine'; o.frequency.value=f;
+      o.connect(g); g.connect(AC.destination);
+      const s=t+i*0.09;
+      g.gain.setValueAtTime(vol||.35,s); g.gain.exponentialRampToValueAtTime(.001,s+dur);
+      o.start(s); o.stop(s+dur+.02);
+    });
+  }catch(e){}
+}
+const sDing=()=>tone([1318,1760],.5,'triangle',.4);
+const sBuzz=()=>tone([180],.3,'square',.15);
+const sFlip=()=>tone([620],.05,'triangle',.12);
+
+// ══ 카드 만들기 ═══════════════════════════════════════════
+// 지금 펼쳐진 카드들이 어떤 상황인지 판정
+function evalTable(tb){
+  const tot={}; let stop=false, all=0, types=0, five=null, near=null;
+  tb.forEach(c=>{ if(!c) return; if(c.stop){ stop=true; return; } tot[c.f]=(tot[c.f]||0)+c.n; all+=c.n; });
+  for(const k in tot){ types++; if(tot[k]===5) five=k; if(tot[k]===4||tot[k]===6) near=near||k; }
+  if(five&&!stop) return {cat:'target',f:five,tot:tot};
+  if(five&&stop) return {cat:'stop',f:five,tot:tot};
+  if(near) return {cat:'near',f:near,tot:tot};
+  const ks=Object.keys(tot);
+  for(let i=0;i<ks.length;i++) for(let j=i+1;j<ks.length;j++) if(tot[ks[i]]+tot[ks[j]]===5) return {cat:'mix',pair:[ks[i],ks[j]],tot:tot};
+  return {cat:'neutral',tot:tot};
+}
+function nextCard(pileIdx){
+  const L=LEVELS[SET.level];
+  const r=Math.random();
+  let want;
+  if(r<L.pT) want='target';
+  else if(r<L.pT+L.pL) want=pick(L.lures);
+  else want='neutral';
+  const cands=[];
+  L.fruits.forEach(f=>{ for(let n=1;n<=5;n++) cands.push({f:f,n:n}); });
+  if(L.lures.indexOf('stop')>=0 && (want==='stop' || (want==='neutral'&&Math.random()<.15))) cands.push({stop:true});
+  const tryCat=cat=>{
+    const ok=cands.filter(c=>{ const tb=G.table.slice(); tb[pileIdx]=c; return evalTable(tb).cat===cat; });
+    return ok.length?pick(ok):null;
+  };
+  // 금지 카드 장면: 먼저 금지 카드를 깔고, 그 카드가 보이는 동안 5개를 만듦
+  const stopOn=G.table.some((x,i)=>x&&x.stop&&i!==pileIdx);
+  if(want==='stop'&&!stopOn&&!(G.table[pileIdx]&&G.table[pileIdx].stop)) return {stop:true};
+  if(stopOn&&want==='target'&&Math.random()<.6) want='stop';
+  let c=tryCat(want);
+  if(!c){
+    const order=want==='target'?['neutral','mix','near']:['near','mix','stop','neutral'].filter(x=>x!==want&&(x==='neutral'||L.lures.indexOf(x)>=0));
+    for(let i=0;i<order.length&&!c;i++) c=tryCat(order[i]);
+  }
+  if(!c) c=pick(cands.filter(x=>!x.stop));
+  return c;
+}
+
+// ══ 게임 진행 ═══════════════════════════════════════════
+let G=null;
+function stopTimers(){ if(G){ clearTimeout(G.timer); G.timer=null; } }
+function startGame(){
+  initAudio();
+  if(G){ G.running=false; stopTimers(); }
+  const L=LEVELS[SET.level];
+  G={level:SET.level,L:L,iv:Math.round(L.iv*SET.speed),total:SET.len,dealt:0,turn:0,
+     table:new Array(L.piles).fill(null),state:null,running:true,paused:false,timer:null,
+     n:{target:0,near:0,mix:0,stop:0,neutral:0},fa:{target:0,near:0,mix:0,stop:0,neutral:0},
+     hits:0,omit:0,rts:[],log:[],t0:Date.now()};
+  $('g-title').textContent='할리갈리 · '+L.name+' '+L.sub;
+  go('game');
+  drawTable(-1);
+  setFb('','');
+  G.state={cat:'neutral',start:performance.now(),rung:false,info:{cat:'neutral',tot:{}},empty:true};
+  countdown(3);
+}
+function countdown(n){
+  const t=$('table');
+  let el=t.querySelector('.count'); if(!el){ el=document.createElement('div'); el.className='count'; t.appendChild(el); }
+  el.textContent=n;
+  G.timer=setTimeout(()=>{
+    if(n>1) countdown(n-1);
+    else { el.parentNode&&el.parentNode.removeChild(el); flip(); }
+  },800);
+}
+function drawTable(animIdx){
+  const t=$('table'); t.innerHTML='';
+  G.table.forEach((c,i)=>{
+    const p=document.createElement('div'); p.className='pile';
+    if(c) p.appendChild(cardEl(c,i===animIdx));
+    else { const s=document.createElement('div'); s.className='slot'; p.appendChild(s); }
+    t.appendChild(p);
+  });
+  $('g-left').textContent='남은 카드 '+(G.total-G.dealt)+'장';
+}
+let FBAT=0;
+function setFb(txt,cls){ FBAT=Date.now(); const f=$('fb'); f.textContent=txt; f.className='fb'+(cls?' '+cls:''); }
+function flashTable(cls){ const t=$('table'); t.classList.remove('win','lose'); t.classList.add(cls); setTimeout(()=>t.classList.remove(cls),600); }
+
+function describe(info){
+  const tot=info.tot||{}, parts=[];
+  for(const k in tot) parts.push(FRUITS[k].nm+' '+tot[k]+'개');
+  return parts.join(', ');
+}
+// 이전 장면을 마감: 5개를 놓쳤는지, 유혹을 잘 참았는지
+function closeState(){
+  const s=G.state; if(!s||s.empty) return false;
+  if(s.cat==='target'&&!s.rung){
+    G.omit++; G.log.push({cat:'target',res:'omit'});
+    setFb('놓쳤어요 — '+FRUITS[s.info.f].nm+' 5개였어요','mid');
+    return true;
+  }
+  if(!s.rung) G.log.push({cat:s.cat,res:'ok'});
+  return false;
+}
+function flip(){
+  if(!G||!G.running||G.paused) return;
+  const said=closeState();
+  if(G.dealt>=G.total){ endGame(); return; }
+  const p=G.turn%G.L.piles; G.turn++;
+  const c=nextCard(p);
+  G.table[p]=c; G.dealt++;
+  const info=evalTable(G.table);
+  G.n[info.cat]++;
+  G.state={cat:info.cat,start:performance.now(),rung:false,info:info};
+  drawTable(p); sFlip();
+  if(!said&&Date.now()-FBAT>1200) setFb('','');
+  G.timer=setTimeout(flip,G.iv);
+}
+function ring(){
+  if(!G||!G.running||G.paused) return;
+  const b=$('bell'); b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),120);
+  const s=G.state; if(!s||s.rung) return;
+  s.rung=true;
+  if(s.cat==='target'){
+    const rt=performance.now()-s.start;
+    G.hits++; G.rts.push(rt); G.log.push({cat:'target',res:'hit',rt:rt});
+    sDing(); flashTable('win');
+    setFb('정답! '+FRUITS[s.info.f].nm+' 5개 ('+(rt/1000).toFixed(2)+'초)','ok');
+    clearTimeout(G.timer);
+    G.state={cat:'neutral',empty:true,rung:true};
+    G.timer=setTimeout(()=>{
+      if(!G.running) return;
+      G.table=G.table.map(()=>null); drawTable(-1);
+      G.state={cat:'neutral',start:performance.now(),rung:false,info:{cat:'neutral',tot:{}},empty:true};
+      G.timer=setTimeout(flip,Math.round(G.iv*.7));
+    },800);
+  } else {
+    const cat=s.empty?'neutral':s.cat;
+    G.fa[cat]++; G.log.push({cat:cat,res:'fa'});
+    sBuzz(); flashTable('lose');
+    const why={near:'같은 과일이 5개가 아니에요 ('+describe(s.info)+')',
+               mix:'다른 과일끼리 합친 5개예요 ('+describe(s.info)+')',
+               stop:'금지 카드가 있어요',
+               neutral:'같은 과일 5개가 없어요'}[cat];
+    setFb('참아야 해요 — '+why,'bad');
+  }
+}
+bindPress($('bell'),ring);
+$('bell').innerHTML=BELL_SVG+'<span>종 치기</span>';
+document.addEventListener('keydown',e=>{
+  if(!$('scr-game').classList.contains('on')) return;
+  if(e.key===' '||e.key==='Enter'||e.keyCode===32||e.keyCode===13){ e.preventDefault(); if(!e.repeat) ring(); }
+});
+function pauseGame(){
+  if(!G||!G.running) return;
+  G.paused=true; clearTimeout(G.timer);
+  $('pause').classList.add('on');
+}
+function resumeGame(){
+  $('pause').classList.remove('on');
+  if(!G||!G.running) return;
+  G.paused=false; initAudio();
+  // 일시정지 중 화면을 본 시간은 반응시간에 넣지 않도록 지금 장면을 새로 시작
+  if(G.state&&!G.state.rung) G.state.start=performance.now();
+  G.timer=setTimeout(flip,G.iv);
+}
+function quitGame(){ $('pause').classList.remove('on'); if(G){ G.running=false; stopTimers(); } endGame(true); }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&G&&G.running&&!G.paused) pauseGame(); });
+
+// ══ 결과 ═══════════════════════════════════════════════
+function endGame(quit){
+  if(!G) return;
+  G.running=false; stopTimers();
+  const L=G.L, lureCats=['near','mix','stop'].filter(c=>L.lures.indexOf(c)>=0);
+  const nT=G.n.target, nL=lureCats.reduce((s,c)=>s+G.n[c],0);
+  const faL=lureCats.reduce((s,c)=>s+G.fa[c],0), faAll=faL+G.fa.neutral;
+  const rt=avg(G.rts);
+  const d=new Date();
+  const ds=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+  let h='<h2>할리갈리 억제훈련 결과</h2><div class="meta">'+ds+' · '+L.name+' ('+L.sub+') · 카드 '+G.dealt+'장 · '+(G.iv/1000).toFixed(1)+'초 간격'+(quit?' · 중간에 그만둠':'')+'</div>';
+  h+='<div class="tiles">'+
+    tile(pct(G.hits,nT),'%','5개일 때 친 비율')+
+    tile(pct(nL-faL,nL),'%','유혹을 참은 비율')+
+    tile(faAll,'번','잘못 친 횟수')+
+    tile(G.omit,'번','놓친 횟수')+
+    tile(rt==null?null:(rt/1000).toFixed(2),'초','평균 반응시간')+
+  '</div>';
+  h+='<table><tr><th>장면</th><th>해야 할 일</th><th>나온 횟수</th><th>잘한 횟수</th><th>실수</th></tr>';
+  h+=row('target',nT,G.hits,G.omit,'놓침');
+  lureCats.forEach(c=>{ h+=row(c,G.n[c],G.n[c]-G.fa[c],G.fa[c],'잘못 침'); });
+  h+='<tr><td class="l">'+CAT.neutral.nm+'</td><td>참아야 함</td><td>-</td><td>-</td><td>'+(G.fa.neutral?'<span class="badc">잘못 침 '+G.fa.neutral+'</span>':'0')+'</td></tr>';
+  h+='</table>';
+  h+='<div class="note">잘못 친 횟수가 많으면 충동 억제가, 놓친 횟수가 많으면 주의 유지나 처리 속도가 더 어려운 것으로 볼 수 있습니다. 다음 회기에는 넘기는 속도나 단계를 조정해 보세요.</div>';
+  $('rep').innerHTML=h;
+  go('rep');
+  function tile(v,u,k){ return '<div class="tile"><div class="v">'+(v==null?'-':v+'<small style="font-size:.9rem">'+u+'</small>')+'</div><div class="k">'+k+'</div></div>'; }
+  function row(c,n,ok,bad,badName){
+    return '<tr><td class="l">'+CAT[c].nm+'</td><td>'+CAT[c].act+'</td><td>'+n+'</td><td class="okc">'+ok+'</td><td>'+(bad?'<span class="badc">'+badName+' '+bad+'</span>':'0')+'</td></tr>';
+  }
+}
+
+renderHome();
+</script>
+</body>
+</html>

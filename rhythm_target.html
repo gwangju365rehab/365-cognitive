@@ -1,2023 +1,492 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>리듬-타겟 훈련 - 광주365재활병원</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; }
-  * { -webkit-tap-highlight-color: rgba(0,0,0,0.08); touch-action: manipulation; }
+:root{
+  --ink:#1f2433; --sub:#5b6375; --line:#d5dbe6; --bg:#eef1f6; --card:#fff;
+  --pri:#0277bd; --pri-2:#0288d1; --pri-soft:#e1f5fe;
+  --ok:#2e7d32; --bad:#c62828;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:18px;line-height:1.5;padding:16px 14px 90px}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column}
+.wrap>*+*{margin-top:14px}
+.screen{display:none}
+.screen.on{display:flex}
 
-  body {
-    margin: 0;
-    padding: 16px 16px 80px;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #f5f7fa;
-    color: #222;
-    gap: 12px;
-  }
+#home-btn,#back-btn{position:fixed;top:12px;left:12px;z-index:50;padding:10px 18px;border-radius:999px;border:none;min-height:44px;
+  background:#fff;color:#333;font-weight:700;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+#back-btn{left:112px;background:var(--pri);color:#fff;display:none}
+h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#01579b;font-weight:800}
+.lead{text-align:center;color:var(--sub);font-size:1rem;margin:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.lbl{font-size:.95rem;font-weight:800;color:var(--sub);margin:0 0 8px}
 
-  h1 {
-    margin: 0 0 2px;
-    font-size: 1.8rem;
-    font-weight: 800;
-    text-align: center;
-    color: #1a237e;
-  }
-  .subtitle {
-    font-size: 0.92rem;
-    color: #666;
-    text-align: center;
-    margin: 0;
-  }
+.tabs{display:flex;justify-content:center;flex-wrap:wrap}
+.tab{margin:4px;padding:12px 22px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:800;color:var(--sub);min-height:52px}
+.tab.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.how{display:flex;align-items:center}
+.how .ic{flex:none;margin-right:16px}
+.how .t{font-size:1.2rem;font-weight:800}
+.how .d{color:var(--sub);font-size:1rem}
+.lv-btn{display:flex;align-items:center;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;min-height:66px;margin-bottom:10px}
+.lv-btn.on{border-color:var(--pri-2);background:var(--pri-soft)}
+.lv-btn .lvn{flex:none;min-width:84px;text-align:center;padding:8px 0;border-radius:10px;font-weight:800;color:#fff;margin-right:14px}
+.lv1 .lvn{background:#43a047}.lv2 .lvn{background:#1e88e5}.lv3 .lvn{background:#e53935}
+.lv-btn .t{font-weight:800}
+.lv-btn .d{color:var(--sub);font-size:.95rem}
+.seg{display:flex;flex-wrap:wrap}
+.seg button{margin:3px;min-width:66px;min-height:48px;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:700}
+.seg button.on{border-color:var(--pri-2);background:var(--pri-2);color:#fff}
+.set-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid #eceff4}
+.set-row:first-child{border-top:none}
+.set-row .nm{font-weight:700}
+.big-btn{padding:16px 26px;border-radius:14px;border:none;font-size:1.15rem;font-weight:800;min-height:60px}
+.b-pri{background:var(--pri);color:#fff}
+.b-sec{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.foot{display:flex;justify-content:flex-end;flex-wrap:wrap}
+.foot>*{margin-left:10px;margin-top:6px}
 
-  /* 홈 버튼 (통합 환경 대응) */
-  #home-btn {
-    position: fixed; top: 14px; left: 14px; z-index: 100;
-    padding: 10px 18px; border-radius: 999px; border: none;
-    background: #eee; color: #333; font-weight: 600; font-size: 14px;
-    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    min-height: 44px;
-  }
-  #home-btn:hover { background: #ddd; }
+/* 훈련 화면 */
+.tbar{margin-top:46px;display:flex;align-items:center;flex-wrap:wrap;background:var(--pri);color:#fff;border-radius:16px;padding:12px 16px}
+.tbar .ttl{flex:1;font-size:1.15rem;font-weight:800}
+.tbar .pg{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(0,0,0,.2);padding:6px 12px;border-radius:10px;margin-left:8px}
+.tbar .tb{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;min-height:42px;margin-left:8px}
+#dot{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.3);margin-left:10px;transition:background .08s}
+#dot.on{background:#ffeb3b}
+.tgt{display:flex;align-items:center;justify-content:center;background:#fff;border:3px solid var(--line);border-radius:16px;padding:8px 16px;transition:background .2s,border-color .2s}
+.tgt .lab{font-weight:800;color:var(--sub);margin-right:14px}
+.tgt .nm{font-weight:900;font-size:1.5rem;margin-left:12px}
+.tgt.changed{background:#fff8e1;border-color:#ffb300}
+.tgt .chg{display:none;margin-left:12px;background:#ffb300;color:#fff;border-radius:999px;padding:2px 12px;font-weight:900}
+.tgt.changed .chg{display:inline-block}
+.stage{position:relative;height:440px;background:#fff;border:4px solid var(--line);border-radius:20px;overflow:hidden;user-select:none;-webkit-user-select:none;transition:border-color .08s,box-shadow .08s}
+.stage.pulse{border-color:#ffb300;box-shadow:0 0 0 5px rgba(255,179,0,.35)}
+.it{position:absolute;transform:translate(-50%,-50%);cursor:pointer;transition:left .25s,top .25s}
+.it svg{display:block;width:100%;height:100%}
+.it.hit{animation:pop .3s}
+.it.bad{animation:shake .3s}
+@keyframes pop{50%{transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes shake{25%{margin-left:-8px}75%{margin-left:8px}}
+.count{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:6rem;font-weight:900;color:#0277bd;background:rgba(255,255,255,.85);border-radius:30px;padding:0 40px;z-index:5;pointer-events:none}
+.fb{min-height:2.4rem;text-align:center;font-size:1.3rem;font-weight:900}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}.fb.mid{color:#ef6c00}
+.pause{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(238,241,246,.95);display:none;align-items:center;justify-content:center;z-index:60;flex-direction:column}
+.pause.on{display:flex}
+.pause .msg{font-size:1.5rem;font-weight:900;margin-bottom:16px;text-align:center}
 
-  /* 설명 박스 (접기/펼치기) */
-  #description {
-    font-size: 13px;
-    line-height: 1.65;
-    color: #555;
-    max-width: 900px;
-    background: #fff;
-    border: 1px solid #e0e4f0;
-    border-radius: 12px;
-    width: 100%;
-    overflow: hidden;
-  }
-  #description > summary {
-    list-style: none;
-    cursor: pointer;
-    padding: 12px 18px;
-    font-size: 14px;
-    color: #1a237e;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-  }
-  #description > summary::-webkit-details-marker { display: none; }
-  #description > summary::before {
-    content: "▶";
-    font-size: 11px;
-    color: #1976d2;
-    transition: transform 0.2s;
-    display: inline-block;
-  }
-  #description[open] > summary::before {
-    transform: rotate(90deg);
-  }
-  #description > summary:hover {
-    background: #f7f9fc;
-  }
-  #description .description-body {
-    padding: 4px 18px 14px;
-    border-top: 1px solid #eef1f8;
-  }
-  #description b { color: #1a237e; }
-  #description table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-    font-size: 12.5px;
-  }
-  #description th, #description td {
-    border: 1px solid #e0e4f0;
-    padding: 6px 10px;
-    text-align: left;
-    vertical-align: top;
-  }
-  #description th {
-    background: #eef1f8;
-    color: #1a237e;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  /* 컨트롤 패널 */
-  #controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 14px;
-    justify-content: center;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #e0e4f0;
-    border-radius: 12px;
-    padding: 12px 18px;
-    width: 100%;
-    max-width: 1000px;
-    font-size: 14px;
-  }
-  #controls label { font-weight: 600; color: #444; }
-  #controls select {
-    padding: 7px 10px;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: #f7f9fc;
-    cursor: pointer;
-    min-height: 38px;
-  }
-  #controls .ctrl-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  #start-btn {
-    padding: 10px 22px;
-    font-size: 15px;
-    border-radius: 999px;
-    border: none;
-    background: #1976d2;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    min-height: 44px;
-  }
-  #start-btn:hover { background: #1565c0; }
-  #stop-btn {
-    padding: 10px 22px;
-    font-size: 15px;
-    border-radius: 999px;
-    border: none;
-    background: #e0e0e0;
-    color: #333;
-    font-weight: 700;
-    cursor: pointer;
-    min-height: 44px;
-  }
-  #stop-btn:hover { background: #d0d0d0; }
-  #stop-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-  /* 접근성 옵션 */
-  #accessibility-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 16px;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 1000px;
-    font-size: 13px;
-    color: #555;
-    padding: 6px 12px;
-  }
-  #accessibility-controls .acc-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  #accessibility-controls select {
-    padding: 4px 8px;
-    font-size: 13px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    background: #f7f9fc;
-    cursor: pointer;
-    min-height: 32px;
-  }
-
-  #pause-btn {
-    padding: 10px 22px;
-    font-size: 15px;
-    border-radius: 999px;
-    border: none;
-    background: #fbc02d;
-    color: #333;
-    font-weight: 700;
-    cursor: pointer;
-    min-height: 44px;
-  }
-  #pause-btn:hover { background: #f9a825; }
-  #pause-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  #pause-btn.resuming { background: #43a047; color: #fff; }
-  #pause-btn.resuming:hover { background: #388e3c; }
-
-  /* 상태 표시줄 */
-  #status {
-    font-size: 13.5px;
-    color: #555;
-    background: #fff;
-    border: 1px solid #e0e4f0;
-    border-radius: 10px;
-    padding: 10px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 18px;
-    justify-content: center;
-    width: 100%;
-    max-width: 1000px;
-  }
-  #status .stat { display: inline-flex; gap: 4px; align-items: baseline; }
-  #status .stat-value { font-weight: 700; color: #1976d2; min-width: 1.5em; text-align: right; }
-
-  /* 상단 패널: 타겟 + 스트룹 규칙 */
-  #top-panel {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: center;
-    gap: 14px;
-    width: 100%;
-    max-width: 1000px;
-    flex-wrap: wrap;
-  }
-
-  #target-visual {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 18px;
-    background: #fff;
-    border: 2px solid #c5cae9;
-    border-radius: 16px;
-    padding: 14px 24px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-    min-width: 260px;
-    flex: 1;
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  #target-visual.active {
-    border-color: #1976d2;
-    box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.15), 0 4px 16px rgba(25, 118, 210, 0.2);
-  }
-  #target-visual.active #target-visual-shape {
-    font-size: 84px;
-    transition: font-size 0.3s;
-  }
-  #target-visual-shape {
-    font-size: 72px;
-    line-height: 1;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-    min-width: 80px;
-    text-align: center;
-  }
-  #target-visual-info { display: flex; flex-direction: column; gap: 3px; }
-  #target-visual-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #888;
-    letter-spacing: 0.05em;
-  }
-  #target-visual-text {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1a237e;
-    white-space: pre-line;
-  }
-  #target-visual-sub { font-size: 12px; color: #aaa; }
-
-  #stroop-rule-panel {
-    display: none;
-    padding: 14px 24px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #283593, #1565c0);
-    color: #fff;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(40,53,147,0.3);
-    min-width: 240px;
-    flex: 1;
-  }
-  #stroop-rule-title {
-    font-size: 11px;
-    opacity: 0.8;
-    margin-bottom: 4px;
-    letter-spacing: 0.05em;
-  }
-  #stroop-rule-text {
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 4px;
-  }
-  #stroop-rule-sub {
-    font-size: 12px;
-    opacity: 0.9;
-    line-height: 1.5;
-  }
-
-  /* 게임 영역 */
-  #game-area {
-    width: min(1000px, 98vw);
-    height: 600px;
-    border: 2px solid #c5cae9;
-    border-radius: 14px;
-    background: #fff;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    touch-action: manipulation;
-  }
-
-  .shape {
-    position: absolute;
-    width: 110px;
-    height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 78px;
-    cursor: pointer;
-    user-select: none;
-    touch-action: manipulation;
-    will-change: transform;
-    transition: opacity 0.15s, transform 0.15s;
-  }
-  .shape.fading {
-    opacity: 0;
-    transform: scale(0.5);
-    pointer-events: none;
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25%      { transform: translateX(-8px); }
-    50%      { transform: translateX(8px); }
-    75%      { transform: translateX(-8px); }
-  }
-  .shape.shake { animation: shake 0.22s; }
-
-  /* 박자 깜빡임 */
-  #beat-indicator {
-    position: absolute;
-    top: 10px; right: 14px;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: #ddd;
-    transition: background 0.12s, transform 0.12s;
-    box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
-  }
-  #beat-indicator.on {
-    background: #1976d2;
-    transform: scale(1.25);
-  }
-
-  #message {
-    min-height: 24px;
-    font-size: 14px;
-    color: #555;
-    text-align: center;
-    white-space: pre-line;
-  }
-
-  /* 큰 알림 (규칙 전환) */
-  #stroop-alert {
-    position: fixed;
-    top: 38%; left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 22px 44px;
-    background: rgba(0,0,0,0.78);
-    color: #fff;
-    font-size: 36px;
-    font-weight: 800;
-    border-radius: 14px;
-    text-align: center;
-    display: none;
-    z-index: 9999;
-    transition: opacity 0.25s;
-    white-space: pre-line;
-  }
-
-  /* 정/오답 피드백 */
-  #feedback-alert {
-    position: fixed;
-    top: 55%; left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 14px 30px;
-    color: #fff;
-    font-size: 30px;
-    font-weight: 800;
-    border-radius: 12px;
-    text-align: center;
-    display: none;
-    z-index: 9998;
-    transition: opacity 0.18s;
-    pointer-events: none;
-  }
-
-  /* 결과 패널 (게임 끝 후 계속 노출) */
-  #result-alert {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 26px 40px;
-    background: rgba(26,35,126,0.96);
-    color: #fff;
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.6;
-    border-radius: 18px;
-    text-align: center;
-    display: none;
-    z-index: 10000;
-    white-space: pre-line;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    min-width: 320px;
-  }
-  #result-alert .result-title {
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 12px;
-    color: #fff176;
-  }
-  #result-alert .result-close {
-    margin-top: 18px;
-    padding: 10px 26px;
-    font-size: 15px;
-    background: #fff;
-    color: #1a237e;
-    border: none;
-    border-radius: 999px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  /* 병원 로고 */
-  #hospital-logo {
-    position: fixed;
-    bottom: 10px; right: 10px;
-    font-size: 12px;
-    color: #666;
-    padding: 5px 10px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 4px;
-    font-weight: 500;
-    z-index: 9999;
-  }
-
-  @media (max-width: 760px) {
-    #game-area { height: 480px; }
-    h1 { font-size: 1.45rem; }
-  }
+/* 결과 */
+.tiles{display:flex;flex-wrap:wrap;margin:-5px}
+.tile{flex:1 1 140px;margin:5px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tile .v{font-size:1.6rem;font-weight:900;font-variant-numeric:tabular-nums}
+.tile .k{font-size:.88rem;color:var(--sub);font-weight:700}
+.rep h2{margin:0 0 4px;font-size:1.4rem}
+.rep h3{margin:14px 0 4px;font-size:1.05rem}
+.rep .meta{color:var(--sub);margin-bottom:10px}
+.rep table{width:100%;border-collapse:collapse;font-size:1rem;margin:6px 0 12px;background:#fff}
+.rep th,.rep td{border:1px solid var(--line);padding:8px;text-align:center;vertical-align:middle}
+.rep th{background:#f3f5fa}
+.rep td.l{text-align:left;font-weight:700}
+.bar{height:14px;background:#eceff4;border-radius:7px;overflow:hidden;min-width:120px}
+.bar i{display:block;height:100%;background:#29b6f6}
+.note{font-size:.88rem;color:var(--sub)}
+#err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
+@media(max-width:700px){ .stage{height:380px} .tgt .nm{font-size:1.2rem} }
+@media print{
+  body{background:#fff;padding:0;font-size:12px}
+  #home-btn,#back-btn,#err-box,.no-print{display:none!important}
+  .panel{border:none;padding:0}
+}
 </style>
 </head>
 <body>
+<button id="home-btn" onclick="location.href='index.html'">홈으로</button>
+<button id="back-btn" onclick="backBtn()">처음으로</button>
 
-<button id="home-btn">← 홈</button>
-
-<h1>리듬-타겟 훈련</h1>
-<p class="subtitle">박자에 맞춰 타겟만 정확하게 터치하는 지속주의 · 반응속도 훈련</p>
-
-<details id="description" open>
-  <summary><b>규칙 보기 / 숨기기</b></summary>
-  <div class="description-body">
-    <b>진행 방법:</b> 모드와 레벨을 고른 뒤 [게임 시작]을 누르고, 화면에 보이는 도형 중 위쪽에 표시된 <b>타겟</b>과 일치하는 것만 터치합니다.
-    <table>
-      <tr>
-        <th style="width:90px;">기본 모드</th>
-        <td>지정한 <b>타겟 모양·색</b>의 도형만 터치. BPM을 고르면 메트로놈 소리에 맞춰 <b>한 박자에 한 번</b> 터치합니다(박자 앞뒤 30% 안이면 정타).</td>
-      </tr>
-      <tr>
-        <th>스트룹 모드</th>
-        <td>현재 <b>기준(모양 또는 색)</b>에 맞는 도형을 모두 터치하면 다음 라운드로 진행. 라운드마다 기준이 전환됩니다. (라운드 묶음 채점)</td>
-      </tr>
-    </table>
-
-    <div style="margin-top:10px; font-weight:700; color:#1a237e;">기본 모드 난이도 <span style="font-weight:500;color:#555">(BPM은 레벨과 따로 정하며, 레벨을 바꿔도 꺼지지 않습니다)</span></div>
-    <table>
-      <tr><th style="width:60px;">L1</th><td>도형 8개 · 느린 속도 · 타겟 비율 50% · 타겟 1회 무작위 (쉬움)</td></tr>
-      <tr><th>L2</th><td>도형 12개 · 보통 속도 · 타겟 비율 30% · 도형 소진 시 타겟 무작위 전환 (중간)</td></tr>
-      <tr><th>L3</th><td>BPM이 꺼져 있으면 60으로 켬 · 도형 12개 · 보통 속도 · 타겟 비율 20% · 도형 소진 또는 20초마다 타겟 무작위 전환 (어려움)</td></tr>
-      <tr><th>L4</th><td>도형 16개 · 빠른 속도 · 타겟 비율 20% · 도형 소진 또는 10초마다 타겟 무작위 전환 (최고난도)</td></tr>
-    </table>
-
-    <div style="margin-top:10px; font-weight:700; color:#1a237e;">스트룹 모드 난이도 <span style="font-weight:500;color:#555">(메트로놈 없음)</span></div>
-    <table>
-      <tr><th style="width:60px;">L1</th><td>도형 10개 · 느린 속도 · 시작 시 타겟 무작위, 모양↔색 기준 전환 (쉬움)</td></tr>
-      <tr><th>L2</th><td>도형 14개 · 보통 속도 · 시작 시 타겟 무작위, 모양↔색 기준 전환 (중간)</td></tr>
-      <tr><th>L3</th><td>도형 18개 · 빠른 속도 · 시작 시 타겟 무작위, 모양↔색 기준 전환 (어려움)</td></tr>
-      <tr><th>L4</th><td>도형 18개 · 빠른 속도 · 타겟·기준 모두 라운드마다 무작위 (최고난도)</td></tr>
-    </table>
+<!-- 시작 화면 -->
+<div class="wrap screen on" id="scr-home">
+  <h1>리듬-타겟 훈련</h1>
+  <p class="lead">메트로놈 소리에 맞춰 한 박자에 한 번 타겟을 누릅니다.</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="panel"><div class="how" id="how"></div></div>
+  <div class="panel">
+    <div class="lbl">난이도</div>
+    <div id="levels"></div>
   </div>
-</details>
-
-<div id="controls">
-  <div class="ctrl-group">
-    <label>모드:</label>
-    <select id="mode-select">
-      <option value="basic" selected>기본</option>
-      <option value="stroop">스트룹</option>
-    </select>
+  <div class="panel">
+    <div class="set-row"><span class="nm">박자 속도</span><div class="seg" id="seg-bpm"></div></div>
+    <div class="set-row"><span class="nm">훈련 시간</span><div class="seg" id="seg-time"></div></div>
+    <div class="set-row"><span class="nm">소리</span><div class="seg" id="seg-sound"></div></div>
+    <div class="set-row"><span class="nm">음량</span><div class="seg" id="seg-vol"></div></div>
   </div>
-
-  <div class="ctrl-group" id="level-basic-group">
-    <label>레벨:</label>
-    <select id="level-basic-select">
-      <option value="B1" selected>LEVEL 1 (쉬움)</option>
-      <option value="B2">LEVEL 2 (중간)</option>
-      <option value="B3">LEVEL 3 (어려움)</option>
-      <option value="B4">LEVEL 4 (최고난도)</option>
-      <option value="custom">직접 설정</option>
-    </select>
-  </div>
-
-  <div class="ctrl-group" id="level-stroop-group" style="display:none;">
-    <label>레벨:</label>
-    <select id="level-stroop-select">
-      <option value="S1" selected>LEVEL 1 (쉬움)</option>
-      <option value="S2">LEVEL 2 (중간)</option>
-      <option value="S3">LEVEL 3 (어려움)</option>
-      <option value="S4">LEVEL 4 (무작위 타겟)</option>
-      <option value="custom">직접 설정</option>
-    </select>
-  </div>
-
-  <div class="ctrl-group" id="bpm-control">
-    <label>BPM:</label>
-    <select id="bpm-select">
-      <option value="none" selected>없음(무박)</option>
-      <option value="40">40</option>
-      <option value="60">60</option>
-      <option value="80">80</option>
-      <option value="100">100</option>
-    </select>
-  </div>
-
-  <div class="ctrl-group" id="count-control">
-    <label>도형 수:</label>
-    <select id="count-select">
-      <option value="8">8개</option>
-      <option value="10">10개</option>
-      <option value="12" selected>12개</option>
-      <option value="14">14개</option>
-      <option value="16">16개</option>
-      <option value="18">18개</option>
-      <option value="20">20개</option>
-    </select>
-  </div>
-
-  <div class="ctrl-group">
-    <label>제한시간:</label>
-    <select id="time-select">
-      <option value="none" selected>제한 없음</option>
-      <option value="30">30초</option>
-      <option value="60">60초</option>
-      <option value="90">90초</option>
-      <option value="120">2분</option>
-      <option value="180">3분</option>
-    </select>
-  </div>
-
-  <div class="ctrl-group" id="round-control" style="display:none;">
-    <label>라운드 수:</label>
-    <select id="round-select">
-      <option value="3">3라운드</option>
-      <option value="5" selected>5라운드</option>
-      <option value="7">7라운드</option>
-      <option value="10">10라운드</option>
-    </select>
-  </div>
-
-  <div class="ctrl-group" id="target-shape-control">
-    <label>타겟 모양:</label>
-    <select id="target-shape-select"></select>
-  </div>
-
-  <div class="ctrl-group" id="target-color-control">
-    <label>타겟 색:</label>
-    <select id="target-color-select"></select>
-  </div>
-
-  <button id="start-btn">게임 시작</button>
-  <button id="pause-btn" disabled>일시정지</button>
-  <button id="stop-btn" disabled>중지</button>
+  <div class="foot"><button class="big-btn b-pri" onclick="startGame()">시작하기</button></div>
 </div>
 
-<div id="accessibility-controls">
-  <div class="acc-item">
-    <label for="sound-select">소리:</label>
-    <select id="sound-select">
-      <option value="off">끔</option>
-      <option value="soft" selected>부드러운 톤</option>
-      <option value="click">메트로놈 클릭</option>
-      <option value="beep">기본 비프</option>
-    </select>
+<!-- 훈련 화면 -->
+<div class="wrap screen" id="scr-game">
+  <div class="tbar">
+    <div class="ttl" id="g-title">리듬-타겟</div>
+    <div id="dot"></div>
+    <div class="pg" id="g-left">0:00</div>
+    <button class="tb" onclick="pauseGame()">일시정지</button>
   </div>
-  <div class="acc-item">
-    <label for="volume-select">음량:</label>
-    <select id="volume-select">
-      <option value="0.25">작게</option>
-      <option value="0.5" selected>보통</option>
-      <option value="0.9">크게</option>
-    </select>
+  <div class="tgt" id="tgt"></div>
+  <div class="stage" id="stage"></div>
+  <div class="fb" id="fb"></div>
+</div>
+
+<!-- 결과 화면 -->
+<div class="wrap screen" id="scr-rep">
+  <div class="panel rep" id="rep"></div>
+  <div class="foot no-print">
+    <button class="big-btn b-sec" onclick="window.print()">인쇄</button>
+    <button class="big-btn b-sec" onclick="go('home')">처음으로</button>
+    <button class="big-btn b-pri" onclick="startGame()">같은 설정으로 다시</button>
   </div>
 </div>
 
-<div id="status">
-  <div class="stat">모드: <span class="stat-value" id="mode-label">기본</span></div>
-  <div class="stat">BPM: <span class="stat-value" id="bpm-label">-</span></div>
-  <div class="stat">박자: <span class="stat-value" id="beat-count">0</span>/<span id="max-beats-label">50</span></div>
-  <div class="stat">정타: <span class="stat-value" id="hits">0</span></div>
-  <div class="stat">실수: <span class="stat-value" id="misses">0</span></div>
-  <div class="stat">라운드: <span class="stat-value" id="round-label">-</span></div>
-  <div class="stat">시간: <span class="stat-value" id="time-remaining">-</span></div>
-</div>
-
-<div id="top-panel">
-  <div id="target-visual">
-    <div id="target-visual-shape">★</div>
-    <div id="target-visual-info">
-      <div id="target-visual-label">현재 타겟</div>
-      <div id="target-visual-text">노랑 별</div>
-      <div id="target-visual-sub">이 자극만 터치하세요</div>
-    </div>
-  </div>
-
-  <div id="stroop-rule-panel">
-    <div id="stroop-rule-title">스트룹 · 현재 기준</div>
-    <div id="stroop-rule-text">모양 기준</div>
-    <div id="stroop-rule-sub">
-      타겟을 모두 맞추면 기준이 전환됩니다<br>(설정한 라운드 수만큼 묶음 점수)
-    </div>
+<div class="pause" id="pause">
+  <div class="msg" id="pause-msg">일시정지</div>
+  <div>
+    <button class="big-btn b-sec" onclick="quitGame()">그만하기</button>
+    <button class="big-btn b-pri" onclick="resumeGame()">계속하기</button>
   </div>
 </div>
-
-<div id="game-area">
-  <div id="beat-indicator"></div>
-</div>
-
-<div id="message"></div>
-
-<div id="stroop-alert"></div>
-<div id="feedback-alert"></div>
-<div id="result-alert"></div>
-
-<div id="hospital-logo">광주365재활병원_인지연하팀</div>
+<div id="err-box"></div>
 
 <script>
+window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
+</script>
+<script>
 "use strict";
-
-/* ──────────────── 상수 ──────────────── */
-const AREA_WIDTH = 1000;
-const AREA_HEIGHT = 600;
-const SHAPE_SIZE = 110;
-
-const SHAPES = [
-  { id: "circle",   name: "동그라미", symbol: "●" },
-  { id: "square",   name: "네모",     symbol: "■" },
-  { id: "triangle", name: "세모",     symbol: "▲" },
-  { id: "star",     name: "별",       symbol: "★" }
-];
-
-const COLORS = [
-  { id: "red",    name: "빨강", css: "#e53935", label: "빨" },
-  { id: "blue",   name: "파랑", css: "#1e88e5", label: "파" },
-  { id: "green",  name: "초록", css: "#43a047", label: "초" },
-  { id: "yellow", name: "노랑", css: "#fdd835", label: "노" }
-];
-
-const MAX_BEATS = 50;
-let stroopGroupSize = 5; // 사용자 설정 가능
-
-/* ──────────────── DOM ──────────────── */
-const $ = id => document.getElementById(id);
-const modeSelect     = $("mode-select");
-const levelBasicSel  = $("level-basic-select");
-const levelStroopSel = $("level-stroop-select");
-const levelBasicGroup  = $("level-basic-group");
-const levelStroopGroup = $("level-stroop-group");
-const bpmSelect      = $("bpm-select");
-const bpmControl     = $("bpm-control");
-const countSelect    = $("count-select");
-const timeSelect     = $("time-select");
-const roundSelect    = $("round-select");
-const targetShapeSel = $("target-shape-select");
-const targetColorSel = $("target-color-select");
-const startBtn       = $("start-btn");
-const stopBtn        = $("stop-btn");
-
-const modeLabel      = $("mode-label");
-const bpmLabel       = $("bpm-label");
-const beatCountSpan  = $("beat-count");
-const maxBeatsLabel  = $("max-beats-label");
-const hitsSpan       = $("hits");
-const missesSpan     = $("misses");
-const roundLabel     = $("round-label");
-const timeRemaining  = $("time-remaining");
-const messageDiv     = $("message");
-const gameArea       = $("game-area");
-const beatIndicator  = $("beat-indicator");
-
-const targetShapeView = $("target-visual-shape");
-const targetTextView  = $("target-visual-text");
-const stroopRulePanel = $("stroop-rule-panel");
-const stroopRuleText  = $("stroop-rule-text");
-
-const resultAlertBox  = $("result-alert");
-const stroopAlertBox  = $("stroop-alert");
-const feedbackAlertBox = $("feedback-alert");
-
-/* ──────────────── 상태 ──────────────── */
-let audioCtx = null;
-let keepAlive = null;       // 안드로이드 기기에서 오디오 출력이 잠들지 않도록 아주 작은 신호 유지
-let animId = null;
-let beatTimerId = null;     // 박자 setTimeout id
-let beatT0 = 0;             // 박자 기준 시각 (performance.now)
-let beatK = 0;              // 다음 박자 번호 (beatT0 기준)
-let lastHitBeat = -1;       // 정타로 인정된 마지막 박자 번호 (한 박자에 한 번)
-let timeTimerId = null;
-
-let mode = "basic";
-let stroopRule = "shape";
-let autoRandomTarget = false;     // 스트룹 모드용
-let basicRandomTarget = false;    // 기본 모드: 타겟 무작위 사용 여부
-let basicRandomOnClear = false;   // 도형 소진 시 자동 전환
-let basicRandomInterval = 0;      // 자동 전환 주기 (ms). 0이면 시간 자동전환 안 함
-let basicRandomTimerId = null;
-
-let useBeat = true;
-let bpm = 60;
-let speed = 0.7;
-let numShapes = 12;
-let targetRatio = 0.3;
-let timingWindow = 900;
-
-let hits = 0;
-let misses = 0;
-let beatCount = 0;
-let lastBeatTime = null;
-let running = false;
-let paused = false;
-let pausedAtTime = 0;       // 일시정지 시점의 performance.now() (반응시간 보정용)
-
-// 반응 시간 측정용
-let lastShapeShownTime = null; // 도형이 생성된 시점 (마지막)
-let reactionTimes = [];        // 정타들의 반응시간 (ms)
-
-let timeLimitSec = 0;
-let remainingTime = 0;
-
-let targetShapeType = null;
-let targetColor = null;
-
-let shapes = [];
-
-let stroopRoundHits = 0;
-let stroopRoundMisses = 0;
-let stroopGroupHits = 0;
-let stroopGroupMisses = 0;
-let stroopGroupRounds = 0;
-
-/* ──────────────── 유틸 ──────────────── */
-// 박자 앞뒤 허용 범위: 박자 간격의 30% (최소 200ms)
-// 40 → ±450ms, 60 → ±300ms, 80 → ±225ms, 100 → ±200ms
-function timingFromBpm(b) {
-  return Math.max(200, Math.round(60000 / b * 0.3));
+// ══ 도구 ══════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const pct=(a,b)=>b?Math.round(a/b*100):null;
+let LASTPRESS=0;
+function bindPress(el,fn){
+  const fire=e=>{ if(e&&e.cancelable) e.preventDefault(); const t=Date.now(); if(t-LASTPRESS<120) return; LASTPRESS=t; fn(e); };
+  if(window.PointerEvent) el.addEventListener('pointerdown',fire);
+  else { el.addEventListener('touchstart',fire,{passive:false}); el.addEventListener('mousedown',fire); }
+  return el;
 }
+(function(){ try{ if(window.parent&&window.parent!==window&&typeof window.parent.goHome==='function') $('home-btn').style.display='none'; }catch(e){} })();
+const mmss=s=>{ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60); };
 
-function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+// ══ 도형 (SVG) ═══════════════════════════════════════════
+const COLORS={red:{nm:'빨강',c:'#e53935',s:'#8e0000'},blue:{nm:'파랑',c:'#1e88e5',s:'#0d3c78'},green:{nm:'초록',c:'#43a047',s:'#1b5e20'},yellow:{nm:'노랑',c:'#fdd835',s:'#9a7d00'}};
+const SHAPES={
+  circle:{nm:'동그라미',p:'<circle cx="50" cy="50" r="42"/>'},
+  square:{nm:'네모',p:'<rect x="10" y="10" width="80" height="80" rx="6"/>'},
+  tri:{nm:'세모',p:'<polygon points="50,7 94,88 6,88"/>'},
+  star:{nm:'별',p:'<polygon points="50,5 61,37 95,37 68,57 78,91 50,71 22,91 32,57 5,37 39,37"/>'},
+  diamond:{nm:'마름모',p:'<polygon points="50,4 94,50 50,96 6,50"/>'}
+};
+const shapeSVG=(sh,co)=>'<svg viewBox="0 0 100 100"><g fill="'+COLORS[co].c+'" stroke="'+COLORS[co].s+'" stroke-width="5" stroke-linejoin="round">'+SHAPES[sh].p+'</g></svg>';
+const nameOf=t=>COLORS[t.co].nm+' '+SHAPES[t.sh].nm;
 
-function randomPos() {
-  return {
-    x: Math.random() * (AREA_WIDTH - SHAPE_SIZE),
-    y: Math.random() * (AREA_HEIGHT - SHAPE_SIZE)
-  };
-}
+// ══ 모드·난이도 ═══════════════════════════════════════════
+const MODES={
+  sus:{tab:'지속주의',title:'한 타겟 꾸준히 누르기',
+       d:'화면의 도형 하나를 소리에 맞춰 계속 누릅니다. 끝까지 박자를 놓치지 않고 집중을 유지하는 연습입니다.',
+       lv:{1:{bpm:40,sec:60,win:.35,size:210,move:0,d:'40 BPM · 1분 · 박자 허용 범위 넓게'},
+           2:{bpm:60,sec:120,win:.28,size:180,move:0,d:'60 BPM · 2분 · 허용 범위 보통'},
+           3:{bpm:60,sec:180,win:.22,size:150,move:8,d:'60 BPM · 3분 · 8박자마다 타겟 위치가 바뀜'}}},
+  sel:{tab:'선택주의',title:'바뀌는 타겟 골라 누르기',
+       d:'여러 도형 중 위에 보이는 타겟만 소리에 맞춰 누릅니다. 타겟은 중간중간 바뀌고, 도형 자리도 섞입니다.',
+       lv:{1:{bpm:40,sec:60,win:.35,items:4,dist:'easy',change:12,shuf:0,d:'도형 4개 · 모양·색이 모두 다른 방해 도형 · 12박자마다 타겟 바뀜'},
+           2:{bpm:45,sec:90,win:.28,items:6,dist:'mixed',change:8,shuf:4,d:'도형 6개 · 비슷한 방해 도형 섞임 · 8박자마다 타겟 바뀜 · 4박자마다 자리 섞임'},
+           3:{bpm:50,sec:120,win:.22,items:8,dist:'hard',change:6,shuf:2,d:'도형 8개 · 색이나 모양이 같은 방해 도형 · 6박자마다 타겟 바뀜 · 2박자마다 자리 섞임'}}}
+};
+const SET={mode:'sus',level:1,bpm:0,sec:0,sound:'soft',vol:.6};
+const BPMS=[{k:0,t:'레벨 기본'},{k:40,t:'40'},{k:50,t:'50'},{k:60,t:'60'},{k:80,t:'80'}];
+const TIMES=[{k:0,t:'레벨 기본'},{k:60,t:'1분'},{k:120,t:'2분'},{k:180,t:'3분'}];
+const SOUNDS=[{k:'soft',t:'부드러운 톤'},{k:'click',t:'클릭'},{k:'beep',t:'비프'},{k:'off',t:'끔(화면만)'}];
+const VOLS=[{k:.3,t:'작게'},{k:.6,t:'보통'},{k:1,t:'크게'}];
 
-function randomNonOverlapPos() {
-  for (let tries = 0; tries < 120; tries++) {
-    const pos = randomPos();
-    let overlap = false;
-    for (const s of shapes) {
-      if (Math.abs(pos.x - s.x) < SHAPE_SIZE &&
-          Math.abs(pos.y - s.y) < SHAPE_SIZE) {
-        overlap = true; break;
-      }
-    }
-    if (!overlap) return pos;
-  }
-  return randomPos();
-}
-
-function randomVel() {
-  const ang = Math.random() * Math.PI * 2;
-  return { dx: Math.cos(ang) * speed, dy: Math.sin(ang) * speed };
-}
-
-/* ──────────────── 셀렉터 초기화 ──────────────── */
-function initSelectors() {
-  targetShapeSel.innerHTML = "";
-  const optNoneShape = document.createElement("option");
-  optNoneShape.value = "none";
-  optNoneShape.textContent = "없음 (모양 무시)";
-  targetShapeSel.appendChild(optNoneShape);
-  SHAPES.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.id;
-    opt.textContent = `${s.name} (${s.symbol})`;
-    targetShapeSel.appendChild(opt);
+function seg(id,items,key){
+  const box=$(id); box.innerHTML='';
+  items.forEach(it=>{
+    const b=document.createElement('button'); b.textContent=it.t; if(SET[key]===it.k) b.className='on';
+    b.onclick=()=>{ SET[key]=it.k; seg(id,items,key); }; box.appendChild(b);
   });
-
-  targetColorSel.innerHTML = "";
-  const optNoneColor = document.createElement("option");
-  optNoneColor.value = "none";
-  optNoneColor.textContent = "없음 (색 무시)";
-  targetColorSel.appendChild(optNoneColor);
-  COLORS.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.name;
-    targetColorSel.appendChild(opt);
+}
+function renderHome(){
+  const tabs=$('tabs'); tabs.innerHTML='';
+  ['sus','sel'].forEach(m=>{
+    const b=document.createElement('button'); b.className='tab'+(SET.mode===m?' on':''); b.textContent=MODES[m].tab;
+    b.onclick=()=>{ SET.mode=m; SET.level=1; renderHome(); }; tabs.appendChild(b);
   });
-
-  targetShapeSel.value = "star";
-  targetColorSel.value = "yellow";
-
-  updateTargetObjects();
-  updateTargetVisual();
-  updateStroopPanel();
-  updateLevelGroupVisibility();
-  // 기본 셀렉트는 L1이 selected이므로, 페이지 첫 로드 시 L1 프리셋 적용
-  applyBasicLevel("B1");
-}
-
-function updateTargetObjects() {
-  const sv = targetShapeSel.value;
-  const cv = targetColorSel.value;
-  targetShapeType = sv === "none" ? null : SHAPES.find(s => s.id === sv) || null;
-  targetColor = cv === "none" ? null : COLORS.find(c => c.id === cv) || null;
-}
-
-function getTargetDescription() {
-  if (targetShapeType && targetColor)  return `${targetColor.name} ${targetShapeType.name}`;
-  if (targetShapeType && !targetColor) return `${targetShapeType.name} (색 무관)`;
-  if (!targetShapeType && targetColor) return `${targetColor.name} (모양 무관)`;
-  return "타겟 미지정";
-}
-
-function updateTargetVisual() {
-  if (!targetShapeType && !targetColor) {
-    targetShapeView.textContent = "?";
-    targetShapeView.style.color = "#bbb";
-    targetTextView.textContent = "타겟 없음\n(모양 또는 색을 선택하세요)";
-    return;
-  }
-  const symbol = targetShapeType ? targetShapeType.symbol : "?";
-  const colorCss = targetColor ? targetColor.css : "#666";
-  targetShapeView.textContent = symbol;
-  targetShapeView.style.color = colorCss;
-  targetTextView.textContent = getTargetDescription();
-}
-
-function updateStroopPanel() {
-  if (mode !== "stroop") {
-    stroopRulePanel.style.display = "none";
-    return;
-  }
-  stroopRulePanel.style.display = "block";
-  stroopRuleText.textContent = stroopRule === "shape" ? "모양 기준" : "색 기준";
-}
-
-function updateBpmVisibility() {
-  // 호환용: updateAdvancedVisibility가 BPM 가시성을 관리함
-  updateAdvancedVisibility();
-}
-
-function updateStatusLabels() {
-  modeLabel.textContent = mode === "basic" ? "기본" : "스트룹";
-
-  if (mode === "stroop" || bpmSelect.value === "none") {
-    bpmLabel.textContent = "-";
-    beatCountSpan.textContent = "-";
-    maxBeatsLabel.textContent = "-";
-  } else {
-    bpmLabel.textContent = bpmSelect.value;
-    beatCountSpan.textContent = beatCount;
-    maxBeatsLabel.textContent = MAX_BEATS;
-  }
-
-  if (mode === "stroop") {
-    roundLabel.textContent = running
-      ? `${stroopGroupRounds + 1}/${stroopGroupSize}`
-      : `-/${stroopGroupSize}`;
-  } else {
-    roundLabel.textContent = "-";
-  }
-
-  if (timeLimitSec > 0 && running) {
-    timeRemaining.textContent = `${remainingTime}초`;
-  } else if (timeSelect.value !== "none") {
-    timeRemaining.textContent = `${timeSelect.value}초`;
-  } else {
-    timeRemaining.textContent = "-";
-  }
-}
-
-/* ──────────────── 레벨 프리셋 ──────────────── */
-function applyBasicLevel(level) {
-  autoRandomTarget = false;
-  basicRandomTarget = false;
-  basicRandomOnClear = false;
-  basicRandomInterval = 0;
-  modeSelect.value = "basic"; mode = "basic";
-
-  switch (level) {
-    case "B1": // 쉬움: 무작위 1회만 (게임 시작 시)
-      countSelect.value = "8";
-      speed = 0.4; targetRatio = 0.5;
-      basicRandomTarget = true;
-      basicRandomOnClear = false;
-      basicRandomInterval = 0;
-      break;
-    case "B2": // 중간: 도형 소진 시 자동 전환
-      countSelect.value = "12";
-      speed = 0.7; targetRatio = 0.3;
-      basicRandomTarget = true;
-      basicRandomOnClear = true;
-      basicRandomInterval = 0;
-      break;
-    case "B3": // 어려움: 도형 소진 + 20초마다 (메트로놈이 꺼져 있으면 60으로 켬)
-      if (bpmSelect.value === "none") bpmSelect.value = "60";
-      countSelect.value = "12";
-      speed = 0.7; targetRatio = 0.2;
-      basicRandomTarget = true;
-      basicRandomOnClear = true;
-      basicRandomInterval = 20000;
-      break;
-    case "B4": // 최고난도: 도형 소진 + 10초마다
-      countSelect.value = "16";
-      speed = 1.0; targetRatio = 0.2;
-      basicRandomTarget = true;
-      basicRandomOnClear = true;
-      basicRandomInterval = 10000;
-      break;
-    default:
-      return;
-  }
-  updateBpmVisibility();
-  updateStroopPanel();
-  updateLevelGroupVisibility();
-  updateAdvancedVisibility();
-  updateStatusLabels();
-}
-
-function applyStroopLevel(level) {
-  modeSelect.value = "stroop"; mode = "stroop";
-  autoRandomTarget = false;
-
-  switch (level) {
-    case "S1":
-      countSelect.value = "10";
-      speed = 0.5; targetRatio = 0.3;
-      break;
-    case "S2":
-      countSelect.value = "14";
-      speed = 0.7; targetRatio = 0.3;
-      break;
-    case "S3":
-      countSelect.value = "18";
-      speed = 1.0; targetRatio = 0.3;
-      break;
-    case "S4": // 라운드마다 무작위
-      countSelect.value = "18";
-      speed = 1.0; targetRatio = 0.3;
-      autoRandomTarget = true;
-      break;
-    default:
-      return;
-  }
-
-  // S1~S3: 시작 시점에 무작위 타겟을 셀렉트에 미리 세팅
-  if (level !== "S4") {
-    const randShape = randomItem(SHAPES);
-    const randColor = randomItem(COLORS);
-    targetShapeSel.value = randShape.id;
-    targetColorSel.value = randColor.id;
-    updateTargetObjects();
-    updateTargetVisual();
-  }
-
-  updateBpmVisibility();
-  updateStroopPanel();
-  updateLevelGroupVisibility();
-  updateAdvancedVisibility();
-  updateStatusLabels();
-}
-
-function updateLevelGroupVisibility() {
-  if (mode === "basic") {
-    levelBasicGroup.style.display = "inline-flex";
-    levelStroopGroup.style.display = "none";
-  } else {
-    levelBasicGroup.style.display = "none";
-    levelStroopGroup.style.display = "inline-flex";
-  }
-}
-
-function isCustomLevel() {
-  if (mode === "basic") return levelBasicSel.value === "custom";
-  return levelStroopSel.value === "custom";
-}
-
-function updateAdvancedVisibility() {
-  const show = isCustomLevel();
-  const bpmCtl = $("bpm-control");
-  const countCtl = $("count-control");
-  const shapeCtl = $("target-shape-control");
-  const colorCtl = $("target-color-control");
-  const roundCtl = $("round-control");
-
-  // BPM은 기본 모드에서는 항상 표시
-  bpmCtl.style.display = mode === "basic" ? "inline-flex" : "none";
-
-  // 라운드 수는 스트룹 모드에서 항상 표시
-  roundCtl.style.display = mode === "stroop" ? "inline-flex" : "none";
-
-  // 도형 수·타겟 모양·색은 직접 설정 시에만
-  countCtl.style.display = show ? "inline-flex" : "none";
-  shapeCtl.style.display = show ? "inline-flex" : "none";
-  colorCtl.style.display = show ? "inline-flex" : "none";
-}
-
-/* ──────────────── 컨트롤 이벤트 ──────────────── */
-levelBasicSel.addEventListener("change", () => {
-  const v = levelBasicSel.value;
-  if (v === "custom") {
-    basicRandomTarget = false;
-    basicRandomOnClear = false;
-    basicRandomInterval = 0;
-    updateAdvancedVisibility();
-    return;
-  }
-  applyBasicLevel(v);
-});
-
-levelStroopSel.addEventListener("change", () => {
-  const v = levelStroopSel.value;
-  if (v === "custom") {
-    autoRandomTarget = false;
-    updateAdvancedVisibility();
-    return;
-  }
-  applyStroopLevel(v);
-});
-
-function resetLevelToCustom() {
-  if (mode === "basic") {
-    if (levelBasicSel.value !== "custom") {
-      levelBasicSel.value = "custom";
-      basicRandomTarget = false;
-      basicRandomOnClear = false;
-      basicRandomInterval = 0;
-      updateAdvancedVisibility();
-    }
-  } else {
-    if (levelStroopSel.value !== "custom") {
-      levelStroopSel.value = "custom";
-      autoRandomTarget = false;
-      updateAdvancedVisibility();
-    }
-  }
-}
-
-modeSelect.addEventListener("change", () => {
-  mode = modeSelect.value;
-  updateBpmVisibility();
-  updateStroopPanel();
-  updateLevelGroupVisibility();
-  updateAdvancedVisibility();
-  updateStatusLabels();
-});
-
-bpmSelect.addEventListener("change", () => {
-  // BPM은 레벨과 독립 — 변경해도 레벨 셀렉트는 그대로 유지
-  updateStatusLabels();
-});
-
-countSelect.addEventListener("change", resetLevelToCustom);
-timeSelect.addEventListener("change", () => {
-  // 제한시간은 레벨과 독립 — 변경해도 레벨 셀렉트는 그대로 유지
-  updateStatusLabels();
-});
-
-roundSelect.addEventListener("change", () => {
-  // 라운드 수도 레벨과 독립
-  stroopGroupSize = Number(roundSelect.value);
-  updateStatusLabels();
-});
-
-targetShapeSel.addEventListener("change", () => {
-  resetLevelToCustom();
-  updateTargetObjects();
-  updateTargetVisual();
-});
-targetColorSel.addEventListener("change", () => {
-  resetLevelToCustom();
-  updateTargetObjects();
-  updateTargetVisual();
-});
-
-/* ──────────────── 알림 표시 ──────────────── */
-function showStroopAlert(text) {
-  stroopAlertBox.textContent = text;
-  stroopAlertBox.style.display = "block";
-  stroopAlertBox.style.opacity = "1";
-  clearTimeout(showStroopAlert._t1);
-  clearTimeout(showStroopAlert._t2);
-  showStroopAlert._t1 = setTimeout(() => { stroopAlertBox.style.opacity = "0"; }, 900);
-  showStroopAlert._t2 = setTimeout(() => { stroopAlertBox.style.display = "none"; }, 1200);
-}
-
-function showFeedback(text, type) {
-  feedbackAlertBox.textContent = text;
-  feedbackAlertBox.style.background =
-    type === "hit" ? "rgba(46,204,113,0.92)" : "rgba(231,76,60,0.92)";
-  feedbackAlertBox.style.display = "block";
-  feedbackAlertBox.style.opacity = "1";
-  clearTimeout(showFeedback._t1);
-  clearTimeout(showFeedback._t2);
-  showFeedback._t1 = setTimeout(() => { feedbackAlertBox.style.opacity = "0"; }, 450);
-  showFeedback._t2 = setTimeout(() => { feedbackAlertBox.style.display = "none"; }, 700);
-}
-
-function showResultAlert(titleText, bodyText) {
-  resultAlertBox.innerHTML = "";
-  const title = document.createElement("div");
-  title.className = "result-title";
-  title.textContent = titleText;
-  const body = document.createElement("div");
-  body.textContent = bodyText;
-
-  const btnRow = document.createElement("div");
-  btnRow.style.cssText = "display:flex; gap:10px; justify-content:center; margin-top:18px;";
-
-  const restartBtn = document.createElement("button");
-  restartBtn.className = "result-close";
-  restartBtn.textContent = "다시 시작";
-  restartBtn.style.background = "#1976d2";
-  restartBtn.style.color = "#fff";
-  restartBtn.addEventListener("click", () => {
-    resultAlertBox.style.display = "none";
-    startGame();
+  const M=MODES[SET.mode];
+  const icon=SET.mode==='sus'
+    ? '<div style="width:70px;height:70px">'+shapeSVG('circle','blue')+'</div>'
+    : '<div style="display:flex;width:110px;flex-wrap:wrap"><div style="width:52px;height:52px;margin:1px">'+shapeSVG('star','red')+'</div><div style="width:52px;height:52px;margin:1px;opacity:.45">'+shapeSVG('star','blue')+'</div><div style="width:52px;height:52px;margin:1px;opacity:.45">'+shapeSVG('tri','red')+'</div><div style="width:52px;height:52px;margin:1px;opacity:.45">'+shapeSVG('square','green')+'</div></div>';
+  $('how').innerHTML='<div class="ic">'+icon+'</div><div><div class="t">'+M.title+'</div><div class="d">'+M.d+'</div></div>';
+  const lv=$('levels'); lv.innerHTML='';
+  [1,2,3].forEach(n=>{
+    const b=document.createElement('button');
+    b.className='lv-btn lv'+n+(SET.level===n?' on':'');
+    b.innerHTML='<span class="lvn">LEVEL '+n+'</span><span><span class="t">'+['쉬움','중간','어려움'][n-1]+'</span><br><span class="d">'+M.lv[n].d+'</span></span>';
+    b.onclick=()=>{ SET.level=n; renderHome(); }; lv.appendChild(b);
   });
+  seg('seg-bpm',BPMS,'bpm'); seg('seg-time',TIMES,'sec'); seg('seg-sound',SOUNDS,'sound'); seg('seg-vol',VOLS,'vol');
+}
+function go(name){
+  const ss=document.querySelectorAll('.screen'); for(let i=0;i<ss.length;i++) ss[i].classList.remove('on');
+  $('scr-'+name).classList.add('on');
+  $('back-btn').style.display=name==='home'?'none':'inline-block';
+  window.scrollTo(0,0);
+  if(name==='home') renderHome();
+}
+function backBtn(){
+  if(S&&S.running&&!confirm('처음 화면으로 갈까요? 지금 하던 내용은 저장되지 않습니다.')) return;
+  stopAll(); if(S) S.running=false; $('pause').classList.remove('on'); go('home');
+}
 
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "result-close";
-  closeBtn.textContent = "닫기";
-  closeBtn.style.marginTop = "0";
-  closeBtn.addEventListener("click", () => {
-    resultAlertBox.style.display = "none";
+// ══ 소리 ══════════════════════════════════════════════
+let AC=null, KEEP=null;
+function initAudio(){
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state!=='running') AC.resume();
+    if(!KEEP){ // 소리가 끊기지 않도록 들리지 않는 아주 작은 소리를 계속 흘림
+      const o=AC.createOscillator(), g=AC.createGain(); o.frequency.value=30; g.gain.value=.0005;
+      o.connect(g); g.connect(AC.destination); o.start(); KEEP=o;
+    }
+  }catch(e){}
+}
+document.addEventListener(window.PointerEvent?'pointerdown':'touchstart',()=>{ if(AC&&AC.state!=='running'){ try{AC.resume();}catch(e){} } },true);
+// at: performance.now() 기준 시각 → 오디오 시각으로 바꿔 정확히 울림
+function playAt(at,kind){
+  if(!AC||SET.sound==='off') return;
+  try{
+    if(AC.state!=='running') AC.resume();
+    const t=Math.max(AC.currentTime,AC.currentTime+(at-performance.now())/1000);
+    const v=SET.vol;
+    if(kind==='change'){ [880,1175].forEach((f,i)=>osc(f,'triangle',v*.6,t+i*.1,.15)); return; }
+    const hi=kind==='count';
+    if(SET.sound==='click'){
+      const n=Math.floor(AC.sampleRate*.03), buf=AC.createBuffer(1,n,AC.sampleRate), d=buf.getChannelData(0);
+      for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+      const src=AC.createBufferSource(), g=AC.createGain(); src.buffer=buf; g.gain.value=v*(hi?1:.8);
+      src.connect(g); g.connect(AC.destination); src.start(t); return;
+    }
+    if(SET.sound==='beep') osc(hi?1320:880,'sine',v*.7,t,.2);
+    else osc(hi?784:523,'triangle',v,t,.18);
+  }catch(e){}
+}
+function osc(f,type,v,t,dur){
+  const o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.value=f;
+  o.connect(g); g.connect(AC.destination);
+  g.gain.setValueAtTime(Math.max(.001,v),t); g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.start(t); o.stop(t+dur+.02);
+}
+
+// ══ 화면 배치 ═══════════════════════════════════════════
+const SLOTS=[];
+[1,3,5].forEach(r=>[1,3,5].forEach(c=>SLOTS.push([c/6*100,r/6*100])));
+function randTarget(prev){
+  let t; do{ t={sh:pick(Object.keys(SHAPES)),co:pick(Object.keys(COLORS))}; } while(prev&&prev.sh===t.sh&&prev.co===t.co);
+  return t;
+}
+// 방해 도형: easy=모양·색 모두 다름, hard=모양이나 색 하나만 같음, mixed=반반
+function distractor(t,kind){
+  const shs=Object.keys(SHAPES), cos=Object.keys(COLORS);
+  const both=()=>({sh:pick(shs.filter(s=>s!==t.sh)),co:pick(cos.filter(c=>c!==t.co))});
+  const one=()=>Math.random()<.5?{sh:t.sh,co:pick(cos.filter(c=>c!==t.co))}:{sh:pick(shs.filter(s=>s!==t.sh)),co:t.co};
+  if(kind==='easy') return both();
+  if(kind==='hard') return one();
+  return Math.random()<.5?both():one();
+}
+function layout(){
+  const st=$('stage'); st.innerHTML='';
+  const P=S.P;
+  let items;
+  if(S.mode==='sus') items=[{sh:S.target.sh,co:S.target.co,isT:true,size:P.size}];
+  else {
+    items=[{sh:S.target.sh,co:S.target.co,isT:true}];
+    for(let i=1;i<P.items;i++) items.push(distractor(S.target,P.dist));
+    const size=P.items<=4?140:P.items<=6?128:116;
+    items.forEach(it=>it.size=size);
+  }
+  let slots;
+  if(S.mode==='sus') slots=(P.move&&S.moved)?[pick(SLOTS.filter(s=>!(s[0]===S.lastSlot[0]&&s[1]===S.lastSlot[1])))]:[[50,50]];
+  else slots=shuffle(SLOTS).slice(0,items.length);
+  items.forEach((it,i)=>{
+    const s=slots[i]; if(it.isT) S.lastSlot=s;
+    const jx=S.mode==='sel'?(Math.random()*6-3):0, jy=S.mode==='sel'?(Math.random()*6-3):0;
+    const d=document.createElement('div'); d.className='it';
+    d.style.width=d.style.height=it.size+'px';
+    d.style.left=(s[0]+jx)+'%'; d.style.top=(s[1]+jy)+'%';
+    d.innerHTML=shapeSVG(it.sh,it.co);
+    if(it.isT) d.setAttribute('data-t','1');
+    bindPress(d,e=>{ if(e&&e.stopPropagation) e.stopPropagation(); tap(it.isT,d); });
+    st.appendChild(d);
   });
-
-  btnRow.appendChild(restartBtn);
-  btnRow.appendChild(closeBtn);
-
-  resultAlertBox.appendChild(title);
-  resultAlertBox.appendChild(body);
-  resultAlertBox.appendChild(btnRow);
-  resultAlertBox.style.display = "block";
-  resultAlertBox.style.opacity = "1";
 }
-
-function hideResultAlert() {
-  resultAlertBox.style.display = "none";
+function showTarget(changed){
+  const t=$('tgt');
+  t.innerHTML='<span class="lab">'+(S.mode==='sus'?'이 도형을 박자마다':'지금 타겟')+'</span><span style="width:56px;height:56px;display:inline-block">'+shapeSVG(S.target.sh,S.target.co)+'</span><span class="nm">'+nameOf(S.target)+'</span><span class="chg">바뀜!</span>';
+  t.classList.remove('changed');
+  if(changed){ void t.offsetWidth; t.classList.add('changed'); setTimeout(()=>t.classList.remove('changed'),1800); }
 }
-
-/* ──────────────── 타겟 판정 ──────────────── */
-function isTargetMatch(shapeId, colorId) {
-  const reqShape = !!targetShapeType;
-  const reqColor = !!targetColor;
-  if (!reqShape && !reqColor) return false;
-
-  if (mode === "basic") {
-    const shapeOK = !reqShape || (shapeId === targetShapeType.id);
-    const colorOK = !reqColor || (colorId === targetColor.id);
-    return shapeOK && colorOK;
-  }
-  if (stroopRule === "shape") {
-    if (!targetShapeType) return false;
-    return shapeId === targetShapeType.id;
-  }
-  if (!targetColor) return false;
-  return colorId === targetColor.id;
-}
-
-/* ──────────────── 도형 생성 ──────────────── */
-function createShapeElement(shapeType, colorObj) {
-  const elem = document.createElement("div");
-  elem.className = "shape";
-  elem.textContent = shapeType.symbol;
-  elem.style.color = colorObj.css;
-
-  const pos = randomNonOverlapPos();
-  elem.style.left = pos.x + "px";
-  elem.style.top  = pos.y + "px";
-
-  const vel = randomVel();
-
-  const shapeObj = {
-    elem, type: shapeType, colorId: colorObj.id,
-    x: pos.x, y: pos.y, dx: vel.dx, dy: vel.dy
-  };
-
-  elem.addEventListener("click", () => handleShapeClick(shapeObj));
-  gameArea.appendChild(elem);
-  shapes.push(shapeObj);
-}
-
-function createTargetShape() {
-  let shapeType, colorObj;
-  if (mode === "basic") {
-    shapeType = targetShapeType || randomItem(SHAPES);
-    colorObj  = targetColor    || randomItem(COLORS);
-  } else {
-    if (stroopRule === "shape") {
-      shapeType = targetShapeType;
-      const otherColors = COLORS.filter(c => c.id !== targetColor.id);
-      colorObj = randomItem(otherColors);
-    } else {
-      colorObj = targetColor;
-      const otherShapes = SHAPES.filter(s => s.id !== targetShapeType.id);
-      shapeType = randomItem(otherShapes);
-    }
-  }
-  createShapeElement(shapeType, colorObj);
-}
-
-function createDistractorShape() {
-  let shapeType = randomItem(SHAPES);
-  let colorObj  = randomItem(COLORS);
-
-  if (mode === "basic") {
-    let tries = 0;
-    while (isTargetMatch(shapeType.id, colorObj.id) && tries < 25) {
-      shapeType = randomItem(SHAPES);
-      colorObj  = randomItem(COLORS);
-      tries++;
-    }
-    if (isTargetMatch(shapeType.id, colorObj.id)) {
-      if (targetShapeType) shapeType = randomItem(SHAPES.filter(s => s.id !== targetShapeType.id));
-      if (targetColor)     colorObj  = randomItem(COLORS.filter(c => c.id !== targetColor.id));
-    }
-  } else {
-    if (stroopRule === "shape") {
-      const otherShapes = SHAPES.filter(s => s.id !== targetShapeType.id);
-      shapeType = randomItem(otherShapes);
-      colorObj = randomItem(COLORS);
-    } else {
-      const otherColors = COLORS.filter(c => c.id !== targetColor.id);
-      colorObj = randomItem(otherColors);
-      shapeType = randomItem(SHAPES);
-    }
-  }
-  createShapeElement(shapeType, colorObj);
-}
-
-function createShapes() {
-  // beat-indicator 외 모든 도형 제거
-  shapes.forEach(s => {
-    if (s.elem.parentNode) s.elem.parentNode.removeChild(s.elem);
-  });
-  shapes = [];
-
-  let targetCount;
-  if (mode === "basic") {
-    targetCount = useBeat
-      ? Math.max(2, Math.round(numShapes * 0.2))
-      : Math.max(2, Math.round(numShapes * targetRatio));
-  } else {
-    targetCount = Math.max(2, Math.round(numShapes * targetRatio));
-  }
-  targetCount = Math.min(numShapes - 1, targetCount);
-
-  for (let i = 0; i < targetCount; i++) createTargetShape();
-  const remaining = numShapes - targetCount;
-  for (let i = 0; i < remaining; i++) createDistractorShape();
-
-  // 새 화면이 나타난 시점 — 반응시간 측정 기준
-  lastShapeShownTime = performance.now();
-}
-
-/* ──────────────── 애니메이션 ──────────────── */
-function resolveCollisions() {
-  const minDist = SHAPE_SIZE;
-  for (let i = 0; i < shapes.length; i++) {
-    for (let j = i + 1; j < shapes.length; j++) {
-      const s1 = shapes[i], s2 = shapes[j];
-      const dx = s2.x - s1.x, dy = s2.y - s1.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 0 && dist < minDist) {
-        const overlap = (minDist - dist) / 2;
-        const nx = dx / dist, ny = dy / dist;
-        s1.x -= nx * overlap; s1.y -= ny * overlap;
-        s2.x += nx * overlap; s2.y += ny * overlap;
-        s1.x = Math.max(0, Math.min(s1.x, AREA_WIDTH - SHAPE_SIZE));
-        s1.y = Math.max(0, Math.min(s1.y, AREA_HEIGHT - SHAPE_SIZE));
-        s2.x = Math.max(0, Math.min(s2.x, AREA_WIDTH - SHAPE_SIZE));
-        s2.y = Math.max(0, Math.min(s2.y, AREA_HEIGHT - SHAPE_SIZE));
-      }
-    }
-  }
-}
-
-function animate() {
-  shapes.forEach(s => {
-    s.x += s.dx;
-    s.y += s.dy;
-    if (s.x <= 0 || s.x >= AREA_WIDTH - SHAPE_SIZE) s.dx *= -1;
-    if (s.y <= 0 || s.y >= AREA_HEIGHT - SHAPE_SIZE) s.dy *= -1;
-    s.x = Math.max(0, Math.min(s.x, AREA_WIDTH - SHAPE_SIZE));
-    s.y = Math.max(0, Math.min(s.y, AREA_HEIGHT - SHAPE_SIZE));
-  });
-  resolveCollisions();
-  shapes.forEach(s => {
-    s.elem.style.left = s.x + "px";
-    s.elem.style.top  = s.y + "px";
-  });
-  if (running) animId = requestAnimationFrame(animate);
-}
-
-/* ──────────────── 오디오 ──────────────── */
-// 버튼을 누를 때(사용자 동작) 오디오를 만들고 깨움. 화면 꺼짐·다른 앱 전환 뒤 'suspended'/'interrupted'가 되면 다시 깨움.
-function initAudio() {
-  if (!audioCtx) {
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) { audioCtx = null; return; }
-  }
-  if (audioCtx.state !== "running") {
-    try { audioCtx.resume(); } catch (e) {}
-  }
-}
-
-function startKeepAlive() {
-  if (!audioCtx || keepAlive) return;
-  try {
-    const osc = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    osc.frequency.value = 30;
-    g.gain.value = 0.0005;   // 들리지 않는 크기
-    osc.connect(g); g.connect(audioCtx.destination);
-    osc.start();
-    keepAlive = osc;
-  } catch (e) { keepAlive = null; }
-}
-function stopKeepAlive() {
-  if (keepAlive) { try { keepAlive.stop(); keepAlive.disconnect(); } catch (e) {} keepAlive = null; }
-}
-
-// 화면을 누를 때마다 오디오가 멈춰 있으면 다시 깨움
-document.addEventListener("pointerdown", () => {
-  if (audioCtx && audioCtx.state !== "running") { try { audioCtx.resume(); } catch (e) {} }
-}, true);
-
-function getCurrentVolume() {
-  const sel = $("volume-select");
-  return sel ? Number(sel.value) : 0.25;
-}
-
-function getCurrentSoundType() {
-  const sel = $("sound-select");
-  return sel ? sel.value : "soft";
-}
-
-function playBeep() {
-  if (!audioCtx) return;
-  const soundType = getCurrentSoundType();
-  if (soundType === "off") return;
-  if (audioCtx.state !== "running") {
-    // 멈춰 있으면 깨운 뒤 바로 울림 (이번 박자 소리를 잃지 않도록)
-    try { audioCtx.resume().then(() => { if (running && !paused) playBeepNow(soundType); }); } catch (e) {}
-    return;
-  }
-  playBeepNow(soundType);
-}
-
-function playBeepNow(soundType) {
-  const volume = getCurrentVolume();
-  const now = audioCtx.currentTime;
-
-  if (soundType === "click") {
-    // 메트로놈 클릭: 짧고 높은 노이즈 펄스
-    const bufferSize = audioCtx.sampleRate * 0.03;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
-    }
-    const src = audioCtx.createBufferSource();
-    src.buffer = buffer;
-    const gain = audioCtx.createGain();
-    gain.gain.value = volume * 0.8;
-    src.connect(gain);
-    gain.connect(audioCtx.destination);
-    src.start(now);
-    return;
-  }
-
-  if (soundType === "soft") {
-    // 부드러운 톤: 삼각파 + 빠른 감쇠
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "triangle";
-    osc.frequency.value = 523; // C5 (부드러운 중음역)
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    gain.gain.setValueAtTime(volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-    osc.start(now);
-    osc.stop(now + 0.2);
-    return;
-  }
-
-  // 기본 비프 (예전 스타일)
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = 880;
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  gain.gain.setValueAtTime(volume, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-  osc.start(now);
-  osc.stop(now + 0.25);
-}
-
-/* ──────────────── 박자 / 시간 ──────────────── */
-function beatInterval() { return 60000 / bpm; }
-
-// 박자 타이머는 언제나 하나만 돎. 다음 박자 시각 = beatT0 + beatK × 간격
-function startBeatClock(firstDelay) {
-  stopBeatClock();
-  beatT0 = performance.now() + firstDelay;
-  beatK = 0;
-  lastBeatTime = null;   // 새 기준으로 다시 셈
-  lastHitBeat = -1;
-  scheduleNextBeat();
-}
-function stopBeatClock() {
-  if (beatTimerId) { clearTimeout(beatTimerId); beatTimerId = null; }
-}
-function scheduleNextBeat() {
-  const at = beatT0 + beatK * beatInterval();
-  beatTimerId = setTimeout(() => {
-    beatTimerId = null;
-    if (!running || paused) return;
-    doBeat(at);
-    beatK++;
-    if (running && !paused && beatCount < MAX_BEATS) scheduleNextBeat();
-  }, Math.max(0, at - performance.now()));
-}
-
-function doBeat(at) {
-  if (!running || paused || !useBeat || mode !== "basic") return;
-  lastBeatTime = at;          // 실제 박자 시각 (타이머 지연과 무관)
-  beatCount++;
-  beatCountSpan.textContent = beatCount;
-
-  playBeep();
-  beatIndicator.classList.add("on");
-  setTimeout(() => beatIndicator.classList.remove("on"), 140);
-
-  if (beatCount >= MAX_BEATS) {
-    // 마지막 박자에도 터치할 시간을 준 뒤 종료
-    setTimeout(() => { if (running && !paused) endGameByBeats(); }, timingWindow + 100);
-  }
-}
-
-function startTimeTimer() {
-  timeTimerId = setInterval(() => {
-    if (!running) {
-      clearInterval(timeTimerId); timeTimerId = null; return;
-    }
-    remainingTime--;
-    timeRemaining.textContent = (remainingTime >= 0 ? remainingTime : 0) + "초";
-    if (remainingTime <= 0) {
-      clearInterval(timeTimerId); timeTimerId = null;
-      endGameByTime();
-    }
-  }, 1000);
-}
-
-/* ──────────────── 게임 종료 ──────────────── */
-function stopAllTimers() {
-  stopBeatClock();
-  if (timeTimerId) { clearInterval(timeTimerId); timeTimerId = null; }
-  if (basicRandomTimerId) { clearTimeout(basicRandomTimerId); basicRandomTimerId = null; }
-  if (animId) { cancelAnimationFrame(animId); animId = null; }
-  stopKeepAlive();
-}
-
-function endGameByBeats() {
-  if (!running) return;
-  running = false;
-  stopAllTimers();
-  const total = hits + misses;
-  const acc = total > 0 ? (hits / total * 100).toFixed(1) : "0.0";
-  const onBeatAcc = (Math.min(hits, beatCount) / Math.max(1, beatCount) * 100).toFixed(1);
-  showResultAlert(
-    "박자 종료!",
-    `총 박자: ${beatCount} / ${MAX_BEATS}\n정타 ${hits}회 / 실수 ${misses}회\n전체 정확도 ${acc}%\n박자 내 정타율 ${onBeatAcc}%${getReactionSummary()}`
-  );
-  messageDiv.textContent = "박자 종료";
-  finalizeUI();
-}
-
-function endGameByTime() {
-  if (!running) return;
-  running = false;
-  stopAllTimers();
-  if (mode === "stroop") {
-    const totalHits = stroopGroupHits + stroopRoundHits;
-    const totalMisses = stroopGroupMisses + stroopRoundMisses;
-    const total = totalHits + totalMisses;
-    const acc = total > 0 ? (totalHits / total * 100).toFixed(1) : "0.0";
-    showResultAlert(
-      "시간 종료!",
-      `완료 라운드: ${stroopGroupRounds}라운드\n정타 ${totalHits}회 / 실수 ${totalMisses}회\n전체 정확도 ${acc}%${getReactionSummary()}`
-    );
-  } else {
-    const total = hits + misses;
-    const acc = total > 0 ? (hits / total * 100).toFixed(1) : "0.0";
-    const beatTxt = useBeat && beatCount > 0
-      ? `\n지나간 박자 ${beatCount}개 중 정타 ${hits}회 (${(Math.min(hits, beatCount) / beatCount * 100).toFixed(1)}%)` : "";
-    showResultAlert(
-      "시간 종료!",
-      `정타 ${hits}회 / 실수 ${misses}회\n전체 정확도 ${acc}%${beatTxt}${getReactionSummary()}`
-    );
-  }
-  messageDiv.textContent = "시간 종료";
-  finalizeUI();
-}
-
-function endGameByStroopGroup() {
-  if (!running) return;
-  running = false;
-  stopAllTimers();
-  const total = stroopGroupHits + stroopGroupMisses;
-  const acc = total > 0 ? (stroopGroupHits / total * 100).toFixed(1) : "0.0";
-  showResultAlert(
-    `${stroopGroupSize}라운드 완료!`,
-    `정타 ${stroopGroupHits}회 / 실수 ${stroopGroupMisses}회\n전체 정확도 ${acc}%${getReactionSummary()}`
-  );
-  messageDiv.textContent = `${stroopGroupSize}라운드 완료`;
-  finalizeUI();
-}
-
-function stopGameManual() {
-  if (!running) return;
-  running = false;
-  paused = false;
-  stopAllTimers();
-  messageDiv.textContent = "게임을 중지했습니다";
-  finalizeUI();
-}
-
-function pauseGame() {
-  if (!running || paused) return;
-  paused = true;
-  pausedAtTime = performance.now();
-
-  // 애니메이션 정지 (도형 그대로 멈춤)
-  if (animId) { cancelAnimationFrame(animId); animId = null; }
-
-  // 박자 타이머 정지
-  stopBeatClock();
-
-  // 시간 타이머 정지
-  if (timeTimerId) { clearInterval(timeTimerId); timeTimerId = null; }
-
-  // 무작위 타겟 타이머 정지 (남은 시간 저장은 단순화 위해 생략 - 재개 시 새 주기로)
-  if (basicRandomTimerId) { clearTimeout(basicRandomTimerId); basicRandomTimerId = null; }
-
-  const pBtn = $("pause-btn");
-  pBtn.textContent = "재개";
-  pBtn.classList.add("resuming");
-  messageDiv.textContent = "일시정지 중";
-}
-
-function resumeGame() {
-  if (!running || !paused) return;
-  paused = false;
-
-  const pauseDuration = performance.now() - pausedAtTime;
-
-  // lastBeatTime 보정 (BPM 모드 타이밍 정확성)
-  if (lastBeatTime !== null) lastBeatTime += pauseDuration;
-  if (lastShapeShownTime !== null) lastShapeShownTime += pauseDuration;
-
-  // 애니메이션 재개
-  animId = requestAnimationFrame(animate);
-
-  // 박자 재개: 오디오를 깨우고 한 박자 뒤부터 다시 울림
-  if (useBeat && mode === "basic") {
-    if (beatCount >= MAX_BEATS) { endGameByBeats(); return; }
-    initAudio();
-    startBeatClock(beatInterval());
-  }
-
-  // 시간 타이머 재개
-  if (timeLimitSec > 0) {
-    startTimeTimer();
-  }
-
-  // 무작위 타겟 타이머 재개
-  if (mode === "basic" && basicRandomTarget) {
-    startBasicRandomTimer();
-  }
-
-  const pBtn = $("pause-btn");
-  pBtn.textContent = "일시정지";
-  pBtn.classList.remove("resuming");
-  messageDiv.textContent = "게임 재개";
-}
-
-function finalizeUI() {
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-  const pBtn = $("pause-btn");
-  pBtn.disabled = true;
-  pBtn.textContent = "일시정지";
-  pBtn.classList.remove("resuming");
-  paused = false;
-  $("target-visual").classList.remove("active");
-  updateStatusLabels();
-}
-
-function getReactionSummary() {
-  if (reactionTimes.length === 0) return "";
-  const avg = reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length;
-  const min = Math.min(...reactionTimes);
-  const max = Math.max(...reactionTimes);
-  return `\n평균 반응시간: ${Math.round(avg)}ms (최단 ${Math.round(min)}ms, 최장 ${Math.round(max)}ms, n=${reactionTimes.length})`;
-}
-
-/* ──────────────── 라운드 진행 (스트룹) ──────────────── */
-function setRandomTargetForBasic() {
-  // 이전 타겟과 겹치지 않도록 랜덤 (조금 더 변별감 있게)
-  const prevShape = targetShapeType ? targetShapeType.id : null;
-  const prevColor = targetColor ? targetColor.id : null;
-
-  const shapePool = SHAPES.filter(s => s.id !== prevShape);
-  const colorPool = COLORS.filter(c => c.id !== prevColor);
-
-  targetShapeType = randomItem(shapePool.length ? shapePool : SHAPES);
-  targetColor = randomItem(colorPool.length ? colorPool : COLORS);
-
-  targetShapeSel.value = targetShapeType.id;
-  targetColorSel.value = targetColor.id;
-
-  updateTargetVisual();
-  showStroopAlert(`새 타겟\n${targetColor.name} ${targetShapeType.name}`);
-}
-
-function rotateBasicRandomTarget(reason) {
-  // reason: "timer" | "cleared"
-  if (!running || mode !== "basic" || !basicRandomTarget) return;
-  setRandomTargetForBasic();
-  createShapes();
-  startBasicRandomTimer(); // 타이머 리셋 (interval이 0이면 아무것도 안 함)
-  messageDiv.textContent = reason === "timer"
-    ? `타겟이 자동 전환되었습니다 (${basicRandomInterval / 1000}초)`
-    : "타겟을 모두 맞췄습니다! 새 타겟으로 전환";
-}
-
-function startBasicRandomTimer() {
-  if (basicRandomTimerId) {
-    clearTimeout(basicRandomTimerId);
-    basicRandomTimerId = null;
-  }
-  if (!running || mode !== "basic" || !basicRandomTarget) return;
-  if (basicRandomInterval <= 0) return; // L1, L2는 시간 자동전환 없음
-  basicRandomTimerId = setTimeout(() => {
-    basicRandomTimerId = null;
-    rotateBasicRandomTarget("timer");
-  }, basicRandomInterval);
-}
-
-function toggleStroopRule() {
-  stroopRule = stroopRule === "shape" ? "color" : "shape";
-  updateStroopPanel();
-  showStroopAlert(stroopRule === "shape" ? "모양 기준" : "색 기준");
-}
-
-function setRandomTargetAndRuleForStroop() {
-  targetShapeType = randomItem(SHAPES);
-  targetColor = randomItem(COLORS);
-  targetShapeSel.value = targetShapeType.id;
-  targetColorSel.value = targetColor.id;
-  stroopRule = Math.random() < 0.5 ? "shape" : "color";
-
-  updateTargetVisual();
-  updateStroopPanel();
-
-  const ruleText = stroopRule === "shape" ? "모양 기준" : "색 기준";
-  showStroopAlert(`새 라운드\n타겟: ${targetColor.name} ${targetShapeType.name}\n${ruleText}`);
-}
-
-function nextStroopRound() {
-  stroopGroupHits += stroopRoundHits;
-  stroopGroupMisses += stroopRoundMisses;
-  stroopGroupRounds++;
-  stroopRoundHits = 0;
-  stroopRoundMisses = 0;
-
-  if (stroopGroupRounds >= stroopGroupSize) {
-    endGameByStroopGroup();
-    return;
-  }
-
-  if (autoRandomTarget) {
-    setRandomTargetAndRuleForStroop();
-  } else {
-    toggleStroopRule();
-  }
-  createShapes();
-  updateStatusLabels();
-  messageDiv.textContent = `라운드 ${stroopGroupRounds + 1}/${stroopGroupSize} 시작`;
-}
-
-/* ──────────────── 클릭 처리 ──────────────── */
-function removeShape(shapeObj) {
-  shapeObj.elem.classList.add("fading");
-  shapes = shapes.filter(s => s !== shapeObj);
-  setTimeout(() => {
-    if (shapeObj.elem.parentNode) shapeObj.elem.parentNode.removeChild(shapeObj.elem);
-  }, 180);
-}
-
-function shakeElement(elem) {
-  if (!elem) return;
-  elem.classList.add("shake");
-  setTimeout(() => elem.classList.remove("shake"), 230);
-}
-
-function handleShapeClick(shapeObj) {
-  if (!running || paused) return;
-
-  const isTarget = isTargetMatch(shapeObj.type.id, shapeObj.colorId);
-
-  if (!isTarget) {
-    misses++;
-    missesSpan.textContent = misses;
-    if (mode === "stroop") stroopRoundMisses++;
-    shakeElement(shapeObj.elem);
-    showFeedback("✗", "miss");
-    messageDiv.textContent = "타겟이 아닙니다";
-    return;
-  }
-
-  // 반응시간 측정 (도형이 등장한 시점부터 클릭까지)
-  if (lastShapeShownTime !== null) {
-    const rt = performance.now() - lastShapeShownTime;
-    if (rt > 0 && rt < 30000) { // 30초 이상은 이상치 제외
-      reactionTimes.push(rt);
-    }
-  }
-  lastShapeShownTime = performance.now(); // 다음 측정을 위해 갱신
-
-  // 타겟 맞춤
-  if (mode === "stroop") {
-    hits++;
-    hitsSpan.textContent = hits;
-    stroopRoundHits++;
-    showFeedback("✓", "hit");
-    removeShape(shapeObj);
-
-    const anyTargetLeft = shapes.some(s => isTargetMatch(s.type.id, s.colorId));
-    if (!anyTargetLeft) {
-      nextStroopRound();
-    }
-    return;
-  }
-
-  // 기본 모드 무박
-  if (!useBeat) {
-    hits++;
-    hitsSpan.textContent = hits;
-    showFeedback("✓", "hit");
-    removeShape(shapeObj);
-    messageDiv.textContent = "정답!";
-
-    const anyTargetLeft = shapes.some(s => isTargetMatch(s.type.id, s.colorId));
-    if (!anyTargetLeft && running) {
-      if (basicRandomTarget && basicRandomOnClear) {
-        // L2~L4: 도형 소진 시 무작위 전환
-        setTimeout(() => { if (running) rotateBasicRandomTarget("cleared"); }, 400);
-      } else {
-        // L1 또는 직접설정: 같은 타겟으로 새 화면
-        messageDiv.textContent = "모두 맞췄습니다! 다음 화면 →";
-        setTimeout(() => { if (running) createShapes(); }, 400);
-      }
-    }
-    return;
-  }
-
-  // 기본 + BPM 모드: 가장 가까운 박자(앞 박자 또는 다음 박자)와의 차이로 평가
-  if (lastBeatTime === null) {
-    // 첫 박자 전: 첫 박자에 가까우면 첫 박자로 인정
-    const first = beatT0;
-    if (Math.abs(performance.now() - first) > timingWindow) {
-      misses++;
-      missesSpan.textContent = misses;
-      shakeElement(shapeObj.elem);
-      showFeedback("✗", "miss");
-      messageDiv.textContent = "첫 박자 소리를 듣고 터치하세요";
-      return;
-    }
-  }
-
-  const now = performance.now();
-  const iv = beatInterval();
-  const prevAt = lastBeatTime === null ? beatT0 - iv : lastBeatTime;
-  const prevK = Math.round((prevAt - beatT0) / iv);
-  const dPrev = now - prevAt, dNext = prevAt + iv - now;
-  const nearK = dNext < dPrev ? prevK + 1 : prevK;
-  const diff = Math.min(Math.abs(dPrev), Math.abs(dNext));
-
-  if (diff <= timingWindow && nearK !== lastHitBeat) {
-    lastHitBeat = nearK;
-    hits++;
-    hitsSpan.textContent = hits;
-    showFeedback("✓", "hit");
-    removeShape(shapeObj);
-    messageDiv.textContent = `정타! (박자와 ${Math.round(diff)}ms 차이 / 허용 ±${timingWindow}ms)`;
-
-    const anyTargetLeft = shapes.some(s => isTargetMatch(s.type.id, s.colorId));
-    if (!anyTargetLeft && running) {
-      if (basicRandomTarget && basicRandomOnClear) {
-        setTimeout(() => { if (running) rotateBasicRandomTarget("cleared"); }, 300);
-      } else {
-        createTargetShape();
-      }
-    }
-  } else {
-    misses++;
-    missesSpan.textContent = misses;
-    shakeElement(shapeObj.elem);
-    showFeedback("✗", "miss");
-    messageDiv.textContent = diff <= timingWindow ? "한 박자에 한 번만 터치하세요"
-      : dNext < dPrev ? "너무 빨랐습니다 (다음 소리에 맞춰 보세요)" : "너무 늦었습니다";
-  }
-}
-
-/* ──────────────── 게임 시작 ──────────────── */
-function startGame() {
-  hideResultAlert();
+let FBAT=0;
+function setFb(txt,cls){ FBAT=Date.now(); const f=$('fb'); f.textContent=txt; f.className='fb'+(cls?' '+cls:''); }
+
+// ══ 박자 진행 ═══════════════════════════════════════════
+// 박자 k의 시각 = T0 + k×간격. k<countUntil 은 준비 박자(채점 안 함)
+let S=null;
+function stopAll(){ if(!S) return; S.timers.forEach(clearTimeout); S.timers=[]; }
+function later(fn,ms){ const id=setTimeout(fn,Math.max(0,ms)); S.timers.push(id); return id; }
+
+function startGame(){
   initAudio();
-  stopAllTimers();
-
-  // 타겟 설정
-  if (mode === "stroop" && autoRandomTarget) {
-    setRandomTargetAndRuleForStroop();
-  } else if (mode === "basic" && basicRandomTarget) {
-    // 기본 모드 L4: 첫 타겟을 무작위로
-    setRandomTargetForBasic();
-  } else {
-    updateTargetObjects();
-    if (mode === "basic" && !targetShapeType && !targetColor) {
-      messageDiv.textContent = "타겟 모양이나 색을 하나 이상 선택해주세요.";
-      return;
-    }
-    if (mode === "stroop") {
-      if (!targetShapeType || !targetColor) {
-        messageDiv.textContent = "스트룹 모드에서는 타겟 모양과 색을 모두 선택해주세요.";
-        return;
-      }
-      stroopRule = "shape";
-      showStroopAlert("모양 기준");
-      updateStroopPanel();
-    }
-  }
-
-  // BPM / useBeat
-  if (mode === "stroop") {
-    useBeat = false;
-  } else if (bpmSelect.value === "none") {
-    useBeat = false;
-  } else {
-    useBeat = true;
-    bpm = Number(bpmSelect.value);
-    timingWindow = timingFromBpm(bpm);
-    if (!audioCtx) messageDiv.textContent = "이 기기에서는 소리를 낼 수 없어 깜빡임으로만 박자를 보여줍니다.";
-  }
-
-  // 도형 개수
-  numShapes = Number(countSelect.value);
-
-  // 라운드 수 (스트룹 모드)
-  stroopGroupSize = Number(roundSelect.value);
-
-  // 제한시간
-  if (timeSelect.value === "none") {
-    timeLimitSec = 0;
-    remainingTime = 0;
-  } else {
-    timeLimitSec = Number(timeSelect.value);
-    remainingTime = timeLimitSec;
-  }
-
-  // 카운터 초기화
-  hits = 0; misses = 0; beatCount = 0;
-  lastBeatTime = null; lastHitBeat = -1;
-  lastShapeShownTime = null;
-  reactionTimes = [];
-  stroopRoundHits = 0; stroopRoundMisses = 0;
-  stroopGroupHits = 0; stroopGroupMisses = 0; stroopGroupRounds = 0;
-  hitsSpan.textContent = "0";
-  missesSpan.textContent = "0";
-  paused = false;
-  const pBtn = $("pause-btn");
-  pBtn.textContent = "일시정지";
-  pBtn.classList.remove("resuming");
-
-  // 시작 메시지
-  if (mode === "stroop") {
-    messageDiv.textContent = autoRandomTarget
-      ? "스트룹 (무작위 타겟·기준) 시작! 화면의 타겟을 모두 터치하세요."
-      : "스트룹 시작! 현재 기준에 맞는 도형을 모두 터치하세요.";
-  } else if (basicRandomTarget) {
-    let msg = "기본 (무작위 타겟) 시작! ";
-    if (basicRandomInterval > 0 && basicRandomOnClear) {
-      msg += `도형 소진 또는 ${basicRandomInterval / 1000}초마다 타겟이 바뀝니다.`;
-    } else if (basicRandomOnClear) {
-      msg += "도형을 모두 맞추면 타겟이 바뀝니다.";
-    } else {
-      msg += "이번 게임 동안 같은 타겟이 유지됩니다.";
-    }
-    messageDiv.textContent = msg;
-  } else if (useBeat) {
-    messageDiv.textContent = `기본 (BPM ${bpm}) 시작! 박자에 맞춰 타겟만 터치하세요.`;
-  } else {
-    messageDiv.textContent = "기본 (무박) 시작! 타겟을 자유 속도로 터치하세요.";
-  }
-
-  updateTargetVisual();
-  createShapes();
-
-  running = true;
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-  $("pause-btn").disabled = false;
-  $("target-visual").classList.add("active");
-  lastShapeShownTime = performance.now();
-
-  updateStatusLabels();
-  animId = requestAnimationFrame(animate);
-
-  if (useBeat && mode === "basic") {
-    startKeepAlive();
-    startBeatClock(600);   // 오디오가 깨어날 시간을 두고 첫 박자
-  }
-
-  // 기본 무작위 타겟: 10초 주기 타이머 시작
-  if (mode === "basic" && basicRandomTarget) {
-    startBasicRandomTimer();
-  }
-
-  if (timeLimitSec > 0) {
-    timeRemaining.textContent = remainingTime + "초";
-    startTimeTimer();
-  }
+  if(S){ stopAll(); S.running=false; }
+  const M=MODES[SET.mode], base=M.lv[SET.level];
+  const P=Object.assign({},base);
+  if(SET.bpm) P.bpm=SET.bpm;
+  if(SET.sec) P.sec=SET.sec;
+  const iv=60000/P.bpm;
+  S={mode:SET.mode,level:SET.level,P:P,iv:iv,W:iv*P.win,N:Math.max(8,Math.round(P.sec*P.bpm/60)),
+     rec:[],off:[],extra:0,finalized:-1,running:true,paused:false,timers:[],target:randTarget(null),moved:false,lastSlot:[50,50],changes:[0]};
+  $('g-title').textContent=M.tab+' · LEVEL '+SET.level+' · '+P.bpm+' BPM';
+  go('game');
+  showTarget(false); layout(); setFb('소리를 듣고 박자를 느껴 보세요','mid');
+  runFrom(0,4);
 }
-
-startBtn.addEventListener("click", startGame);
-stopBtn.addEventListener("click", stopGameManual);
-
-$("pause-btn").addEventListener("click", () => {
-  if (paused) resumeGame();
-  else pauseGame();
-});
-
-// 화면이 꺼지거나 다른 화면으로 바뀌면 자동 일시정지 (돌아오면 [재개]로 이어서)
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden && running && !paused) {
-    pauseGame();
-    messageDiv.textContent = "화면이 바뀌어 일시정지했습니다. [재개]를 누르세요.";
-  }
-});
-
-/* ──────────────── 홈 버튼 ──────────────── */
-(function setupHomeButton() {
-  const btn = $("home-btn");
-  const inIframe = window.parent && window.parent !== window;
-  const hasParentGoHome = inIframe && typeof window.parent.goHome === "function";
-
-  if (hasParentGoHome) {
-    // 통합 환경: 외부에서 이미 홈 버튼을 제공하므로 내부 버튼 숨김
-    btn.style.display = "none";
+function runFrom(kStart,countIn){
+  S.countUntil=kStart;
+  S.T0=performance.now()+700+countIn*S.iv-kStart*S.iv;
+  updateClock(kStart);
+  sched(kStart-countIn);
+}
+function sched(k){
+  const at=S.T0+k*S.iv;
+  later(()=>beat(k,at),at-performance.now()-40);
+}
+function beat(k,at){
+  if(!S.running||S.paused) return;
+  const isCount=k<S.countUntil;
+  playAt(at,isCount?'count':'beat');
+  later(()=>{ // 화면 깜빡임은 실제 박자 시각에
+    $('dot').classList.add('on'); $('stage').classList.add('pulse');
+    setTimeout(()=>{ $('dot').classList.remove('on'); $('stage').classList.remove('pulse'); },130);
+    const st=$('stage'); let c=st.querySelector('.count');
+    if(isCount){ if(!c){ c=document.createElement('div'); c.className='count'; st.appendChild(c); } c.textContent=S.countUntil-k; }
+    else if(c){ c.parentNode.removeChild(c); if(k===S.countUntil) setFb('',''); }
+  },at-performance.now());
+  if(!isCount) later(()=>finalize(k),at+S.W+30-performance.now());
+  if(k<S.N-1) sched(k+1);
+}
+function updateClock(k){ $('g-left').textContent='남은 시간 '+mmss((S.N-k)*S.iv/1000); }
+// 박자 k의 허용 시간이 끝남 → 안 눌렀으면 놓침, 그 다음 화면 변화
+function finalize(k){
+  if(!S.running) return;
+  if(!S.rec[k]){ S.rec[k]={t:'omit'}; if(Date.now()-FBAT>600) setFb('놓쳤어요','mid'); }
+  S.finalized=k; updateClock(k+1);
+  if(k>=S.N-1){ later(endGame,400); return; }
+  const n=k+1, P=S.P;
+  if(S.mode==='sel'){
+    if(n%P.change===0){ S.target=randTarget(S.target); S.changes.push(n); showTarget(true); layout(); playAt(performance.now(),'change'); setFb('타겟이 바뀌었어요','mid'); }
+    else if(P.shuf&&n%P.shuf===0) layout();
+  } else if(P.move&&n%P.move===0){ S.moved=true; layout(); }
+}
+function tap(isT,el){
+  if(!S||!S.running||S.paused) return;
+  const now=performance.now();
+  const k=Math.round((now-S.T0)/S.iv), diff=now-(S.T0+k*S.iv);
+  if(k<S.countUntil){ setFb('준비 소리예요. 숫자가 끝나면 시작해요','mid'); return; }
+  if(k>=S.N) return;
+  if(Math.abs(diff)>S.W){
+    S.off.push(diff);
+    setFb(diff<0?'조금 빨라요 — 소리에 맞춰요':'조금 늦어요 — 소리에 맞춰요','mid');
     return;
   }
+  if(S.rec[k]){ S.extra++; setFb('한 박자에 한 번만 눌러요','mid'); return; }
+  if(isT){
+    S.rec[k]={t:'hit',d:diff};
+    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+    setFb('좋아요','ok');
+  } else {
+    S.rec[k]={t:'wrong'};
+    el.classList.remove('bad'); void el.offsetWidth; el.classList.add('bad');
+    setFb('타겟이 아니에요 — '+nameOf(S.target)+'를 누르세요','bad');
+  }
+}
+// 도형 밖을 누르면 안내만
+bindPress($('stage'),()=>{ if(S&&S.running&&!S.paused) setFb('도형을 눌러 주세요','mid'); });
 
-  btn.addEventListener("click", () => {
-    location.href = "index.html";
+function pauseGame(){
+  if(!S||!S.running||S.paused) return;
+  S.paused=true; stopAll();
+  // 아직 허용 시간이 안 끝난 박자는 지우고, 다시 시작할 때 그 박자부터
+  for(let k=S.finalized+1;k<S.rec.length;k++) S.rec[k]=undefined;
+  const c=$('stage').querySelector('.count'); if(c) c.parentNode.removeChild(c);
+  $('pause').classList.add('on');
+}
+function resumeGame(){
+  $('pause').classList.remove('on');
+  if(!S||!S.running) return;
+  initAudio(); S.paused=false;
+  runFrom(Math.max(0,S.finalized+1),2);
+}
+function quitGame(){ $('pause').classList.remove('on'); if(S){ stopAll(); endGame(true); } }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&S&&S.running&&!S.paused) pauseGame(); });
+
+// ══ 결과 ═══════════════════════════════════════════════
+function endGame(quit){
+  if(!S||!S.running) return;
+  S.running=false; stopAll();
+  const done=S.finalized+1, R=S.rec.slice(0,done);
+  const cnt=t=>R.filter(r=>r&&r.t===t).length;
+  const hits=cnt('hit'), omit=cnt('omit'), wrong=cnt('wrong');
+  const ds=R.filter(r=>r&&r.t==='hit').map(r=>r.d);
+  const mAbs=avg(ds.map(Math.abs)), mSig=avg(ds);
+  const d=new Date(), P=S.P, M=MODES[S.mode];
+  const when=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+  let h='<h2>리듬-타겟 훈련 결과 · '+M.tab+'</h2><div class="meta">'+when+' · LEVEL '+S.level+' · '+P.bpm+' BPM · '+done+'/'+S.N+'박자'+(quit?' · 중간에 그만둠':'')+'</div>';
+  const tile=(v,u,k)=>'<div class="tile"><div class="v">'+(v==null?'-':v+'<small style="font-size:.9rem">'+u+'</small>')+'</div><div class="k">'+k+'</div></div>';
+  let tend='-';
+  if(mSig!=null) tend=Math.abs(mSig)<40?'박자에 잘 맞음':'평균 '+(Math.abs(mSig)/1000).toFixed(2)+'초 '+(mSig<0?'빠르게':'늦게');
+  h+='<div class="tiles">'+tile(pct(hits,done),'%','박자 맞춰 누른 비율')+tile(omit,'번','놓친 박자')+
+     (S.mode==='sel'?tile(wrong,'번','다른 도형 누름'):'')+
+     tile(S.off.length,'번','박자에서 벗어난 누름')+
+     tile(mAbs==null?null:(mAbs/1000).toFixed(2),'초','박자와 평균 차이')+
+     '<div class="tile"><div class="v" style="font-size:1.1rem;line-height:2.4rem">'+tend+'</div><div class="k">누르는 타이밍</div></div></div>';
+  h+='<h3>시간 흐름에 따른 변화</h3><table><tr><th>구간</th><th>박자 맞춰 누른 비율</th><th>놓침</th>'+(S.mode==='sel'?'<th>다른 도형</th>':'')+'</tr>';
+  const parts=[['처음 1/3',0,Math.round(done/3)],['중간 1/3',Math.round(done/3),Math.round(done*2/3)],['마지막 1/3',Math.round(done*2/3),done]];
+  parts.forEach(p=>{
+    const sg=R.slice(p[1],p[2]), n=sg.length, hh=sg.filter(r=>r&&r.t==='hit').length;
+    const rate=pct(hh,n);
+    h+='<tr><td class="l">'+p[0]+'</td><td><div style="display:flex;align-items:center"><div class="bar" style="flex:1;margin-right:10px"><i style="width:'+(rate||0)+'%"></i></div><b>'+(rate==null?'-':rate+'%')+'</b></div></td><td>'+sg.filter(r=>r&&r.t==='omit').length+'</td>'+
+       (S.mode==='sel'?'<td>'+sg.filter(r=>r&&r.t==='wrong').length+'</td>':'')+'</tr>';
   });
-})();
+  h+='</table>';
+  if(S.mode==='sel'){
+    const after=[], rest=[];
+    R.forEach((r,k)=>{ if(!r) return; const isAfter=S.changes.some(c=>c>0&&(k===c||k===c+1)); (isAfter?after:rest).push(r); });
+    const ra=pct(after.filter(r=>r.t==='hit').length,after.length), rr=pct(rest.filter(r=>r.t==='hit').length,rest.length);
+    h+='<h3>타겟이 바뀐 직후</h3><table><tr><th>박자</th><th>박자 맞춰 누른 비율</th></tr>'+
+       '<tr><td class="l">타겟 바뀐 직후 2박자</td><td><b>'+(ra==null?'-':ra+'%')+'</b></td></tr>'+
+       '<tr><td class="l">그 밖의 박자</td><td><b>'+(rr==null?'-':rr+'%')+'</b></td></tr></table>';
+  }
+  h+='<div class="note">'+(S.mode==='sus'
+    ? '마지막 구간으로 갈수록 비율이 떨어지면 집중을 오래 유지하기 어려운 것으로 볼 수 있습니다.'
+    : '다른 도형을 누른 횟수는 방해 자극을 걸러내는 능력, 타겟이 바뀐 직후 비율은 새 타겟으로 주의를 옮기는 속도를 보여 줍니다.')+'</div>';
+  $('rep').innerHTML=h;
+  go('rep');
+}
 
-/* ──────────────── 초기화 ──────────────── */
-initSelectors();
+renderHome();
 </script>
 </body>
 </html>
