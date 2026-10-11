@@ -132,6 +132,14 @@
     .tower.shake {
       animation: shake 0.4s ease-in-out;
     }
+    .disk { cursor: pointer; }
+    .disk.selected {
+      transform: translateY(-34px);
+      outline: 4px solid #ffeb3b;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.35);
+    }
+    .disk.shake { animation: shake 0.4s ease-in-out; }
+    .tower.drop-ok { background: rgba(76,175,80,0.08); border-radius: 12px; }
 
     .disk {
       width: 80%;
@@ -347,7 +355,7 @@
     <b>규칙:</b> 왼쪽 기둥에 있는 모든 원반을 오른쪽 기둥으로 옮기세요.<br>
     <b>1.</b> 한 번에 하나의 원반만 이동할 수 있습니다.<br>
     <b>2.</b> 큰 원반 위에 작은 원반만 놓을 수 있습니다.<br>
-    <b>3.</b> 원반을 클릭하여 이동시킬 수 있습니다.
+    <b>3.</b> 옮길 원반(맨 위)을 직접 누르고, 놓을 기둥을 누르세요. 맨 위가 아닌 원반을 누르거나 큰 원반을 작은 원반 위에 놓으려 하면 규칙 오류로 기록됩니다.
   </div>
 
   <div id="level-panel">
@@ -377,7 +385,8 @@
   <div id="status">
     이동 횟수: <span id="move-count">0</span> / 
     최소 이동 횟수: <span id="min-moves">15</span><br>
-    소요 시간: <span id="elapsed-time">00:00</span>
+    소요 시간: <span id="elapsed-time">00:00</span> / 
+    규칙 오류: <span id="error-count">0</span>
   </div>
 
   <div id="message"></div>
@@ -390,6 +399,8 @@
     const state = {
       disks: 4, // 기본 난이도: 중간
       moves: 0,
+      errors: 0,          // 규칙 오류: 맨 위가 아닌 원반을 집음 + 큰 원반을 작은 원반 위에 놓으려 함
+      errTop: 0, errBig: 0,
       selectedDisk: null,
       selectedTower: null,
       towers: [[], [], []],
@@ -486,13 +497,15 @@
       overlay.style.display = 'none';
       state.gameStarted = true;
       startTimer();
-      setMessage('원반을 클릭하여 이동하세요.');
+      setMessage('옮길 원반을 직접 눌러 집으세요.');
     }
 
     // 게임 초기화 함수
     function initGame() {
       // 상태 초기화
       state.moves = 0;
+      state.errors = 0; state.errTop = 0; state.errBig = 0;
+      document.getElementById('error-count').textContent = '0';
       state.selectedDisk = null;
       state.selectedTower = null;
       state.towers = [[], [], []];
@@ -557,8 +570,9 @@
       const diskToMove = fromTowerDisks[fromTowerDisks.length - 1];
       
       if (toTowerDisks.length > 0 && diskToMove > toTowerDisks[toTowerDisks.length - 1]) {
-        // 잘못된 이동 시도 - 타워 흔들기 애니메이션 추가
+        // 잘못된 이동 시도 - 타워 흔들기 애니메이션 + 오류 기록 (자동 풀기 제외)
         shakeTower(toTower);
+        if (!state.isAutoSolving) addError('big');
         setMessage('큰 원반을 작은 원반 위에 놓을 수 없습니다!', 'error');
         return false;
       }
@@ -579,13 +593,10 @@
       if (state.towers[2].length === state.disks) {
         stopTimer(); // 타이머 정지
         
-        setMessage(`축하합니다! ${state.moves}번 이동으로 완료했습니다!`, 'success');
-        
-        // 최소 이동 횟수로 클리어했는지 확인
         const minMoves = calculateMinMoves(state.disks);
-        if (state.moves === minMoves) {
-          setMessage(`축하합니다! 최소 이동 횟수(${minMoves}번)로 완료했습니다! 소요 시간: ${formatTime(state.elapsedSeconds)}`, 'success');
-        }
+        const errTxt = state.errors ? ` 규칙 오류 ${state.errors}번 (맨 위가 아닌 원반 집기 ${state.errTop}번, 큰 원반을 작은 원반 위에 ${state.errBig}번).` : ' 규칙 오류 없이 해냈어요.';
+        setMessage((state.moves === minMoves ? `축하합니다! 최소 이동 횟수(${minMoves}번)로 완료했습니다!` : `축하합니다! ${state.moves}번 이동으로 완료했습니다! (최소 ${minMoves}번)`)
+          + ` 소요 시간: ${formatTime(state.elapsedSeconds)}.` + errTxt, 'success');
         
         if (state.isAutoSolving) {
           clearInterval(state.autoSolveInterval);
@@ -662,40 +673,53 @@
       }, 500); // 0.5초 간격
     }
 
-    // 타워 클릭 이벤트
+    // 오류 기록
+    function addError(kind) {
+      state.errors++;
+      if (kind === 'top') state.errTop++; else state.errBig++;
+      document.getElementById('error-count').textContent = state.errors;
+    }
+    function clearSelection() {
+      if (state.selectedTower !== null) {
+        const d = towers[state.selectedTower].lastChild;
+        if (d) d.classList.remove('selected');
+      }
+      towers.forEach(t => t.classList.remove('drop-ok'));
+      state.selectedTower = null;
+    }
+    function tryMoveTo(toTower) {
+      const fromTower = state.selectedTower;
+      clearSelection();
+      if (fromTower === toTower) { setMessage('선택을 취소했습니다. 옮길 원반을 다시 누르세요.'); return; }
+      moveDisk(fromTower, toTower);
+    }
+
+    // 원반 터치: 맨 위 원반만 집을 수 있음
     towers.forEach((tower, index) => {
-      tower.addEventListener('click', () => {
+      tower.addEventListener('click', (e) => {
         if (!state.gameStarted || state.isAutoSolving) return;
-        
-        // 디스크가 선택되지 않은 경우
+        const disk = e.target.closest ? e.target.closest('.disk') : null;
+
+        // 아직 집은 원반이 없을 때
         if (state.selectedTower === null) {
-          // 빈 타워는 선택할 수 없음
-          if (state.towers[index].length === 0) {
-            shakeTower(index); // 빈 타워 클릭 시 흔들기
-            setMessage('이동할 원반이 없습니다!', 'error');
+          if (!disk) {
+            setMessage('옮길 원반을 직접 눌러 집으세요.');
             return;
           }
-          
-          state.selectedTower = index;
-          tower.style.opacity = '0.7';
-          setMessage('원반을 놓을 기둥을 선택하세요.');
-        } 
-        // 디스크가 이미 선택된 경우
-        else {
-          const fromTower = state.selectedTower;
-          const toTower = index;
-          
-          // 선택 해제
-          towers[fromTower].style.opacity = '1';
-          state.selectedTower = null;
-          
-          // 이동 시도
-          const moveSuccess = moveDisk(fromTower, toTower);
-          
-          if (!moveSuccess && fromTower !== toTower) {
-            setMessage('이동할 수 없습니다!', 'error');
+          if (disk !== tower.lastChild) {
+            disk.classList.remove('shake'); void disk.offsetWidth; disk.classList.add('shake');
+            addError('top');
+            setMessage('맨 위에 있는 원반만 옮길 수 있어요!', 'error');
+            return;
           }
+          state.selectedTower = index;
+          disk.classList.add('selected');
+          towers.forEach((t, i) => { if (i !== index) t.classList.add('drop-ok'); });
+          setMessage(`${disk.dataset.size}번 원반을 집었어요. 놓을 기둥을 누르세요.`);
+          return;
         }
+        // 이미 원반을 집었을 때: 원반이나 기둥 어디를 눌러도 그 기둥으로 옮김 (같은 기둥이면 취소)
+        tryMoveTo(index);
       });
     });
 
