@@ -32,7 +32,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 
 /* 규칙 예시 */
 .ex-row{display:flex;flex-wrap:wrap;justify-content:center}
-.ex{flex:1 1 230px;max-width:270px;margin:6px;border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fafbfd}
+.ex{flex:1 1 180px;max-width:250px;margin:6px;border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fafbfd}
 .ex .mini{display:flex;justify-content:center;margin-bottom:6px}
 .ex .mini .card{margin:0 4px}
 .ex .ans{display:inline-block;padding:3px 14px;border-radius:999px;font-weight:900;color:#fff}
@@ -78,6 +78,9 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .mini .card{width:66px;height:92px;border-width:2px;border-radius:8px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
 .table.win{box-shadow:inset 0 0 0 6px #14532f,0 0 0 6px #66bb6a}
 .table.lose{box-shadow:inset 0 0 0 6px #14532f,0 0 0 6px #ef5350}
+.tgtbox{display:none;align-items:center;justify-content:center;background:#fff;border:3px solid #ffb300;border-radius:16px;padding:8px 16px;font-weight:900;font-size:1.35rem}
+.tgtbox.on{display:flex}
+.tgtbox .fr{width:64px;height:64px;margin:0 12px}
 .fb{min-height:2.6rem;text-align:center;font-size:1.35rem;font-weight:900}
 .fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}.fb.mid{color:#ef6c00}
 .bell-wrap{display:flex;justify-content:center}
@@ -122,10 +125,10 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 <!-- 시작 화면 -->
 <div class="wrap screen on" id="scr-home">
   <h1>할리갈리 억제훈련</h1>
-  <p class="lead">같은 과일이 <b>딱 5개</b>일 때만 종을 칩니다. 4개·6개, 다른 과일끼리 합친 5개에는 손을 멈춥니다.</p>
+  <p class="lead" id="lead"></p>
 
   <div class="panel">
-    <div class="lbl">규칙</div>
+    <div class="lbl" id="rule-lbl">규칙</div>
     <div class="ex-row" id="examples"></div>
   </div>
 
@@ -150,6 +153,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
     <div class="pg" id="g-left">남은 카드 0장</div>
     <button class="tb" onclick="pauseGame()">일시정지</button>
   </div>
+  <div class="tgtbox" id="g-target"></div>
   <div class="table" id="table"></div>
   <div class="fb" id="fb"></div>
   <div class="bell-wrap"><button id="bell" aria-label="종 치기"></button></div>
@@ -221,12 +225,12 @@ function cardEl(c,anim){
 
 // ══ 난이도·설정 ══════════════════════════════════════════
 const LEVELS={
-  1:{name:'LEVEL 1',sub:'쉬움',piles:2,fruits:['banana','strawberry'],iv:3000,pT:.30,pL:.25,lures:['near','mix','mix'],
-     d:'카드 2장 · 과일 2종 · 3초마다 한 장'},
-  2:{name:'LEVEL 2',sub:'중간',piles:3,fruits:['banana','strawberry','lime','plum'],iv:2400,pT:.30,pL:.35,lures:['near','mix','mix'],
-     d:'카드 3장 · 과일 4종 · 4개·6개 유혹이 더 자주'},
-  3:{name:'LEVEL 3',sub:'어려움',piles:4,fruits:['banana','strawberry','lime','plum'],iv:1900,pT:.30,pL:.40,lures:['near','mix','mix','stop'],
-     d:'카드 4장 · 빠르게 · 금지 카드가 보이면 5개라도 멈춤'}
+  1:{name:'LEVEL 1',sub:'쉬움',mode:'pick',piles:1,fruits:['banana','strawberry','lime','plum'],iv:2500,pT:.35,pL:.65,lures:['other'],
+     d:'카드 1장 · 정해진 과일이 나오면 개수와 상관없이 종 치기 (셈 필요 없음)'},
+  2:{name:'LEVEL 2',sub:'중간',piles:2,fruits:['banana','strawberry'],iv:3000,pT:.30,pL:.30,lures:['near','mix','mix'],
+     d:'카드 2장 · 과일 2종 · 같은 과일이 딱 5개일 때 종 치기'},
+  3:{name:'LEVEL 3',sub:'어려움',piles:3,fruits:['banana','strawberry','lime','plum'],iv:2200,pT:.30,pL:.40,lures:['near','mix','mix','stop'],
+     d:'카드 3장 · 과일 4종 · 금지 카드가 보이면 5개라도 멈춤'}
 };
 const LENS=[{k:30,t:'30장'},{k:45,t:'45장'},{k:60,t:'60장'}];
 const SPEEDS=[{k:1.25,t:'느리게'},{k:1,t:'기본'},{k:.8,t:'빠르게'}];
@@ -237,7 +241,8 @@ const CAT={
   near:{nm:'같은 과일 4개 또는 6개',act:'참아야 함'},
   mix:{nm:'다른 과일끼리 합쳐 5개',act:'참아야 함'},
   stop:{nm:'5개지만 금지 카드 있음',act:'참아야 함'},
-  neutral:{nm:'그 밖의 경우',act:'참아야 함'}
+  neutral:{nm:'그 밖의 경우',act:'참아야 함'},
+  other:{nm:'다른 과일',act:'참아야 함'}
 };
 
 function seg(id,items,key){
@@ -262,7 +267,17 @@ function renderHome(){
   seg('seg-len',LENS,'len'); seg('seg-speed',SPEEDS,'speed');
   seg('seg-sound',[{k:true,t:'켜기'},{k:false,t:'끄기'}],'sound');
   // 규칙 예시
-  const ex=[
+  const pickMode=LEVELS[SET.level].mode==='pick';
+  $('lead').innerHTML=pickMode
+    ? '정해진 <b>과일 그림</b>이 나오면 종을 칩니다. 개수는 세지 않아도 됩니다. 다른 과일에는 손을 멈춥니다.'
+    : '같은 과일이 <b>딱 5개</b>일 때만 종을 칩니다. 4개·6개, 다른 과일끼리 합친 5개에는 손을 멈춥니다.';
+  $('rule-lbl').textContent=pickMode?'규칙 (예: 오늘의 과일이 딸기일 때)':'규칙';
+  const ex=pickMode?[
+    {cards:[{f:'strawberry',n:3}],go:true,why:'딸기 → 종 치기'},
+    {cards:[{f:'strawberry',n:1}],go:true,why:'딸기 1개여도 종 치기'},
+    {cards:[{f:'banana',n:4}],go:false,why:'다른 과일 → 참기'},
+    {cards:[{f:'plum',n:2}],go:false,why:'다른 과일 → 참기'}
+  ]:[
     {cards:[{f:'banana',n:2},{f:'banana',n:3}],go:true,why:'바나나 2+3 = 5'},
     {cards:[{f:'strawberry',n:4},{f:'lime',n:1}],go:false,why:'딸기 4개 (5가 아님)'},
     {cards:[{f:'banana',n:2},{f:'strawberry',n:3}],go:false,why:'다른 과일끼리 합친 5'}
@@ -317,6 +332,11 @@ const sFlip=()=>tone([620],.05,'triangle',.12);
 // ══ 카드 만들기 ═══════════════════════════════════════════
 // 지금 펼쳐진 카드들이 어떤 상황인지 판정
 function evalTable(tb){
+  if(G&&G.L&&G.L.mode==='pick'){ // 1단계: 과일 종류만 봄
+    const c=tb.filter(x=>x)[0]; if(!c) return {cat:'neutral',tot:{}};
+    const tot={}; tot[c.f]=c.n;
+    return {cat:c.f===G.tf?'target':'other',f:c.f,tot:tot};
+  }
   const tot={}; let stop=false, all=0, types=0, five=null, near=null;
   tb.forEach(c=>{ if(!c) return; if(c.stop){ stop=true; return; } tot[c.f]=(tot[c.f]||0)+c.n; all+=c.n; });
   for(const k in tot){ types++; if(tot[k]===5) five=k; if(tot[k]===4||tot[k]===6) near=near||k; }
@@ -334,6 +354,10 @@ function nextCard(pileIdx){
   if(r<L.pT) want='target';
   else if(r<L.pT+L.pL) want=pick(L.lures);
   else want='neutral';
+  if(L.mode==='pick'){
+    const n=1+Math.floor(Math.random()*5);
+    return want==='target'?{f:G.tf,n:n}:{f:pick(L.fruits.filter(f=>f!==G.tf)),n:n};
+  }
   const cands=[];
   L.fruits.forEach(f=>{ for(let n=1;n<=5;n++) cands.push({f:f,n:n}); });
   if(L.lures.indexOf('stop')>=0 && (want==='stop' || (want==='neutral'&&Math.random()<.15))) cands.push({stop:true});
@@ -363,9 +387,12 @@ function startGame(){
   const L=LEVELS[SET.level];
   G={level:SET.level,L:L,iv:Math.round(L.iv*SET.speed),total:SET.len,dealt:0,turn:0,
      table:new Array(L.piles).fill(null),state:null,running:true,paused:false,timer:null,
-     n:{target:0,near:0,mix:0,stop:0,neutral:0},fa:{target:0,near:0,mix:0,stop:0,neutral:0},
+     n:{target:0,near:0,mix:0,stop:0,neutral:0,other:0},fa:{target:0,near:0,mix:0,stop:0,neutral:0,other:0},tf:pick(L.fruits),
      hits:0,omit:0,rts:[],log:[],t0:Date.now()};
   $('g-title').textContent='할리갈리 · '+L.name+' '+L.sub;
+  const tg=$('g-target');
+  if(L.mode==='pick'){ tg.innerHTML='이 과일이 나오면 종<span class="fr">'+FRUITS[G.tf].svg+'</span>'+FRUITS[G.tf].nm; tg.classList.add('on'); }
+  else tg.classList.remove('on');
   go('game');
   drawTable(-1);
   setFb('','');
@@ -405,7 +432,7 @@ function closeState(){
   const s=G.state; if(!s||s.empty) return false;
   if(s.cat==='target'&&!s.rung){
     G.omit++; G.log.push({cat:'target',res:'omit'});
-    setFb('놓쳤어요 — '+FRUITS[s.info.f].nm+' 5개였어요','mid');
+    setFb('놓쳤어요 — '+FRUITS[s.info.f].nm+(G.L.mode==='pick'?'였어요':' 5개였어요'),'mid');
     return true;
   }
   if(!s.rung) G.log.push({cat:s.cat,res:'ok'});
@@ -434,7 +461,7 @@ function ring(){
     const rt=performance.now()-s.start;
     G.hits++; G.rts.push(rt); G.log.push({cat:'target',res:'hit',rt:rt});
     sDing(); flashTable('win');
-    setFb('정답! '+FRUITS[s.info.f].nm+' 5개 ('+(rt/1000).toFixed(2)+'초)','ok');
+    setFb('정답! '+FRUITS[s.info.f].nm+(G.L.mode==='pick'?'':' 5개')+' ('+(rt/1000).toFixed(2)+'초)','ok');
     clearTimeout(G.timer);
     G.state={cat:'neutral',empty:true,rung:true};
     G.timer=setTimeout(()=>{
@@ -450,7 +477,8 @@ function ring(){
     const why={near:'같은 과일이 5개가 아니에요 ('+describe(s.info)+')',
                mix:'다른 과일끼리 합친 5개예요 ('+describe(s.info)+')',
                stop:'금지 카드가 있어요',
-               neutral:'같은 과일 5개가 없어요'}[cat];
+               other:'타겟 과일이 아니에요 ('+(s.info.f?FRUITS[s.info.f].nm:'')+')',
+               neutral:G.L.mode==='pick'?'아직 카드가 없어요':'같은 과일 5개가 없어요'}[cat];
     setFb('참아야 해요 — '+why,'bad');
   }
 }
@@ -480,7 +508,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden&&G&&G.runn
 function endGame(quit){
   if(!G) return;
   G.running=false; stopTimers();
-  const L=G.L, lureCats=['near','mix','stop'].filter(c=>L.lures.indexOf(c)>=0);
+  const L=G.L, lureCats=['near','mix','stop','other'].filter(c=>L.lures.indexOf(c)>=0);
   const nT=G.n.target, nL=lureCats.reduce((s,c)=>s+G.n[c],0);
   const faL=lureCats.reduce((s,c)=>s+G.fa[c],0), faAll=faL+G.fa.neutral;
   const rt=avg(G.rts);
@@ -488,23 +516,23 @@ function endGame(quit){
   const ds=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
   let h='<h2>할리갈리 억제훈련 결과</h2><div class="meta">'+ds+' · '+L.name+' ('+L.sub+') · 카드 '+G.dealt+'장 · '+(G.iv/1000).toFixed(1)+'초 간격'+(quit?' · 중간에 그만둠':'')+'</div>';
   h+='<div class="tiles">'+
-    tile(pct(G.hits,nT),'%','5개일 때 친 비율')+
+    tile(pct(G.hits,nT),'%',L.mode==='pick'?'타겟 과일일 때 친 비율':'5개일 때 친 비율')+
     tile(pct(nL-faL,nL),'%','유혹을 참은 비율')+
     tile(faAll,'번','잘못 친 횟수')+
     tile(G.omit,'번','놓친 횟수')+
     tile(rt==null?null:(rt/1000).toFixed(2),'초','평균 반응시간')+
   '</div>';
   h+='<table><tr><th>장면</th><th>해야 할 일</th><th>나온 횟수</th><th>잘한 횟수</th><th>실수</th></tr>';
-  h+=row('target',nT,G.hits,G.omit,'놓침');
+  h+=row('target',nT,G.hits,G.omit,'놓침',L.mode==='pick'?'타겟 과일 ('+FRUITS[G.tf].nm+')':null);
   lureCats.forEach(c=>{ h+=row(c,G.n[c],G.n[c]-G.fa[c],G.fa[c],'잘못 침'); });
-  h+='<tr><td class="l">'+CAT.neutral.nm+'</td><td>참아야 함</td><td>-</td><td>-</td><td>'+(G.fa.neutral?'<span class="badc">잘못 침 '+G.fa.neutral+'</span>':'0')+'</td></tr>';
+  if(L.mode!=='pick'||G.fa.neutral) h+='<tr><td class="l">'+CAT.neutral.nm+'</td><td>참아야 함</td><td>-</td><td>-</td><td>'+(G.fa.neutral?'<span class="badc">잘못 침 '+G.fa.neutral+'</span>':'0')+'</td></tr>';
   h+='</table>';
   h+='<div class="note">잘못 친 횟수가 많으면 충동 억제가, 놓친 횟수가 많으면 주의 유지나 처리 속도가 더 어려운 것으로 볼 수 있습니다. 다음 회기에는 넘기는 속도나 단계를 조정해 보세요.</div>';
   $('rep').innerHTML=h;
   go('rep');
   function tile(v,u,k){ return '<div class="tile"><div class="v">'+(v==null?'-':v+'<small style="font-size:.9rem">'+u+'</small>')+'</div><div class="k">'+k+'</div></div>'; }
-  function row(c,n,ok,bad,badName){
-    return '<tr><td class="l">'+CAT[c].nm+'</td><td>'+CAT[c].act+'</td><td>'+n+'</td><td class="okc">'+ok+'</td><td>'+(bad?'<span class="badc">'+badName+' '+bad+'</span>':'0')+'</td></tr>';
+  function row(c,n,ok,bad,badName,label){
+    return '<tr><td class="l">'+(label||CAT[c].nm)+'</td><td>'+CAT[c].act+'</td><td>'+n+'</td><td class="okc">'+ok+'</td><td>'+(bad?'<span class="badc">'+badName+' '+bad+'</span>':'0')+'</td></tr>';
   }
 }
 
