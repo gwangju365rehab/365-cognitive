@@ -2076,8 +2076,9 @@ function finishActivity(){
 }
 
 function leaveActivity(){
-  if(RUN && !confirm('지금 나가면 이 활동의 진행 내용이 저장되지 않습니다. 나갈까요?')) return;
-  clearInterval(TIMER); RUN=null; go('home');
+  const leave=()=>{ clearInterval(TIMER); RUN=null; go('home'); };
+  if(RUN){ askConfirm('지금 나가면 이 활동의 진행 내용이<br>저장되지 않습니다. 나갈까요?',leave); return; }
+  leave();
 }
 
 function showReport(){
@@ -2113,6 +2114,22 @@ function showReport(){
 function todayStr(){const d=new Date();return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
 document.getElementById('today').textContent=todayStr();
 renderHome();
+</script>
+<script>
+// 확인 창: 일부 병원 브라우저는 confirm() 창을 막아서 항상 '취소'로 처리되므로 화면 안 창으로 대신함
+function askConfirm(msg,onYes){
+  var old=document.getElementById('ask-ov'); if(old) old.parentNode.removeChild(old);
+  var ov=document.createElement('div'); ov.id='ask-ov';
+  ov.style.cssText='position:fixed;left:0;right:0;top:0;bottom:0;z-index:300;background:rgba(30,35,50,.45);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;text-align:center;font-family:inherit">'+
+    '<div style="font-size:1.15rem;font-weight:800;margin-bottom:16px;line-height:1.5">'+msg+'</div>'+
+    '<div style="display:flex;justify-content:center">'+
+    '<button id="ask-no" style="flex:1;margin:0 6px;min-height:56px;border-radius:12px;border:2px solid #d5dbe6;background:#fff;font:inherit;font-weight:800">아니요</button>'+
+    '<button id="ask-yes" style="flex:1;margin:0 6px;min-height:56px;border-radius:12px;border:none;background:#c62828;color:#fff;font:inherit;font-weight:800">네, 나갈게요</button></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('ask-no').onclick=function(){ ov.parentNode.removeChild(ov); };
+  document.getElementById('ask-yes').onclick=function(){ ov.parentNode.removeChild(ov); onYes(); };
+}
 </script>
 </body>
 </html>

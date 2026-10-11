@@ -195,8 +195,8 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
   </div>
 </div>
 <script>
-// 비밀번호: 365 (들어올 때마다 물음)
-var LOCK_PW='365';
+// 비밀번호: 970705 (들어올 때마다 물음)
+var LOCK_PW='970705';
 function unlock(){
   var v=document.getElementById('lock-pw').value.trim();
   if(v===LOCK_PW){
@@ -334,8 +334,9 @@ function go(name){
   if(name==='home') renderHome();
 }
 function backBtn(){
-  if(G&&G.running&&!confirm('처음 화면으로 갈까요? 지금 하던 내용은 저장되지 않습니다.')) return;
-  stopTimers(); if(G) G.running=false; $('pause').classList.remove('on'); go('home');
+  const leave=()=>{ stopTimers(); if(G) G.running=false; $('pause').classList.remove('on'); go('home'); };
+  if(G&&G.running){ pauseGame(); askConfirm('처음 화면으로 갈까요?<br>지금 하던 내용은 저장되지 않습니다.',leave); return; }
+  leave();
 }
 
 // ══ 소리 ══════════════════════════════════════════════
@@ -570,6 +571,22 @@ function endGame(quit){
 }
 
 renderHome();
+</script>
+<script>
+// 확인 창: 일부 병원 브라우저는 confirm() 창을 막아서 항상 '취소'로 처리되므로 화면 안 창으로 대신함
+function askConfirm(msg,onYes){
+  var old=document.getElementById('ask-ov'); if(old) old.parentNode.removeChild(old);
+  var ov=document.createElement('div'); ov.id='ask-ov';
+  ov.style.cssText='position:fixed;left:0;right:0;top:0;bottom:0;z-index:300;background:rgba(30,35,50,.45);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;text-align:center;font-family:inherit">'+
+    '<div style="font-size:1.15rem;font-weight:800;margin-bottom:16px;line-height:1.5">'+msg+'</div>'+
+    '<div style="display:flex;justify-content:center">'+
+    '<button id="ask-no" style="flex:1;margin:0 6px;min-height:56px;border-radius:12px;border:2px solid #d5dbe6;background:#fff;font:inherit;font-weight:800">아니요</button>'+
+    '<button id="ask-yes" style="flex:1;margin:0 6px;min-height:56px;border-radius:12px;border:none;background:#c62828;color:#fff;font:inherit;font-weight:800">네, 나갈게요</button></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('ask-no').onclick=function(){ ov.parentNode.removeChild(ov); };
+  document.getElementById('ask-yes').onclick=function(){ ov.parentNode.removeChild(ov); onYes(); };
+}
 </script>
 </body>
 </html>

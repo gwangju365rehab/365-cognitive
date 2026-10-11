@@ -156,6 +156,39 @@ details.ev ul{margin:8px 0 0;padding-left:20px;font-size:.92rem;color:var(--sub)
 </div>
 <div id="err-box"></div>
 
+<!-- 비밀번호 잠금 -->
+<div id="lock" style="position:fixed;left:0;right:0;top:0;bottom:0;z-index:200;background:#eef1f6;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="panel" style="max-width:420px;width:100%;text-align:center">
+    <div style="font-size:1.3rem;font-weight:900;color:#4a148c;margin-bottom:6px">사회적 상호작용 훈련</div>
+    <div class="note" style="margin-bottom:14px">준비 중인 프로그램입니다. 비밀번호를 입력하세요.</div>
+    <input id="lock-pw" type="password" inputmode="numeric" autocomplete="off"
+      style="font:inherit;font-size:1.4rem;text-align:center;width:100%;padding:12px;border:2px solid #d5dbe6;border-radius:12px;margin-bottom:10px"/>
+    <div id="lock-msg" style="min-height:1.6rem;color:#c62828;font-weight:800"></div>
+    <div class="foot" style="justify-content:center">
+      <button class="big-btn b-sec" onclick="location.href='index.html'">홈으로</button>
+      <button class="big-btn b-pri" onclick="unlock()">확인</button>
+    </div>
+  </div>
+</div>
+<script>
+// 비밀번호: 970705 (들어올 때마다 물음)
+var LOCK_PW='970705';
+function unlock(){
+  var v=document.getElementById('lock-pw').value.trim();
+  if(v===LOCK_PW){
+    document.getElementById('lock').style.display='none';
+  } else {
+    document.getElementById('lock-msg').textContent='비밀번호가 맞지 않아요';
+    document.getElementById('lock-pw').value='';
+  }
+}
+(function(){
+  try{ sessionStorage.removeItem('hg_unlock'); }catch(e){}
+  document.getElementById('lock').style.display='flex';
+  document.getElementById('lock-pw').addEventListener('keydown',function(e){ if(e.key==='Enter'||e.keyCode===13) unlock(); });
+})();
+</script>
+
 <script>
 window.onerror=function(msg,src,line){var b=document.getElementById('err-box');if(b){b.style.display='block';b.textContent='오류: '+msg+' (줄 '+line+') — 이 화면을 사진으로 보내 주세요.';}};
 </script>
@@ -511,7 +544,10 @@ function go(n){
   $('back-btn').style.display=n==='home'?'none':'inline-block';
   window.scrollTo(0,0); if(n==='home') renderHome();
 }
-function backBtn(){ if(S&&!S.done&&$('scr-game').classList.contains('on')&&!confirm('처음 화면으로 갈까요? 지금 하던 내용은 저장되지 않습니다.')) return; go('home'); }
+function backBtn(){
+  if(S&&!S.done&&$('scr-game').classList.contains('on')){ askConfirm('처음 화면으로 갈까요?<br>지금 하던 내용은 저장되지 않습니다.',()=>go('home')); return; }
+  go('home');
+}
 
 function toStrategy(){
   const M=MODS[SET.mod];
@@ -662,6 +698,22 @@ function report(){
   $('rep').innerHTML=h; go('rep');
 }
 renderHome();
+</script>
+<script>
+// 확인 창: 일부 병원 브라우저는 confirm() 창을 막아서 항상 '취소'로 처리되므로 화면 안 창으로 대신함
+function askConfirm(msg,onYes){
+  var old=document.getElementById('ask-ov'); if(old) old.parentNode.removeChild(old);
+  var ov=document.createElement('div'); ov.id='ask-ov';
+  ov.style.cssText='position:fixed;left:0;right:0;top:0;bottom:0;z-index:300;background:rgba(30,35,50,.45);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;text-align:center;font-family:inherit">'+
+    '<div style="font-size:1.15rem;font-weight:800;margin-bottom:16px;line-height:1.5">'+msg+'</div>'+
+    '<div style="display:flex;justify-content:center">'+
+    '<button id="ask-no" style="flex:1;margin:0 6px;min-height:56px;border-radius:12px;border:2px solid #d5dbe6;background:#fff;font:inherit;font-weight:800">아니요</button>'+
+    '<button id="ask-yes" style="flex:1;margin:0 6px;min-height:56px;border-radius:12px;border:none;background:#c62828;color:#fff;font:inherit;font-weight:800">네, 나갈게요</button></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('ask-no').onclick=function(){ ov.parentNode.removeChild(ov); };
+  document.getElementById('ask-yes').onclick=function(){ ov.parentNode.removeChild(ov); onYes(); };
+}
 </script>
 </body>
 </html>
