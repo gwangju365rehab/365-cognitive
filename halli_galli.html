@@ -71,7 +71,8 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .pile .slot{position:absolute;left:0;top:0;width:150px;height:210px;border-radius:14px;border:3px dashed rgba(255,255,255,.35)}
 .card{position:relative;width:150px;height:210px;border-radius:14px;background:#fff;border:3px solid #cfd6e0;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 .pile .card{position:absolute;left:0;top:0}
-.card .fr{position:absolute;width:44%;height:auto;transform:translate(-50%,-50%)}
+.card .fr{position:absolute;width:50%;height:auto;transform:translate(-50%,-50%)}
+.card .fr svg,.tgtbox .fr svg,.mini .fr svg{display:block;width:100%;height:auto}
 .card.stop{background:#37474f;border-color:#263238}
 .card.flip{animation:flip .28s ease-out}
 @keyframes flip{0%{transform:scale(.6) rotateY(80deg);opacity:.3}100%{transform:none;opacity:1}}
@@ -238,12 +239,45 @@ function bindPress(el,fn){
 })();
 
 // ══ 과일 그림 (이모지 대신 SVG) ═══════════════════════════
+// 과일 그림: 그라데이션·광택·그림자를 넣은 SVG (그라데이션 정의는 문서에 한 번만 넣고 같이 씀)
+const FRUIT_DEFS='<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>'+
+  '<linearGradient id="gBan" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff176"/><stop offset=".45" stop-color="#fdd835"/><stop offset="1" stop-color="#e0a100"/></linearGradient>'+
+  '<radialGradient id="gStr" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#ff8a80"/><stop offset=".45" stop-color="#e53935"/><stop offset="1" stop-color="#9a0f16"/></radialGradient>'+
+  '<radialGradient id="gLim" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#e6f5a8"/><stop offset=".35" stop-color="#9ccc3c"/><stop offset="1" stop-color="#3f7a12"/></radialGradient>'+
+  '<radialGradient id="gPlm" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#b968e0"/><stop offset=".45" stop-color="#7b1fa2"/><stop offset="1" stop-color="#3b0a5c"/></radialGradient>'+
+  '<linearGradient id="gLeaf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc34a"/><stop offset="1" stop-color="#2e7d32"/></linearGradient>'+
+  '</defs></svg>';
+const SHADOW='<ellipse cx="52" cy="94" rx="30" ry="4.5" fill="rgba(0,0,0,.16)"/>';
 const FRUITS={
-  banana:{nm:'바나나',svg:'<svg viewBox="0 0 40 40"><path d="M7 9 C7 27 21 36 35 29 C33 27 31 27 29 28 C19 30 12 22 12 9 Z" fill="#fdd835" stroke="#b28704" stroke-width="2" stroke-linejoin="round"/><path d="M7 9 L8 5 L12 6 L12 9" fill="#6d4c41" stroke="#4e342e" stroke-width="1.5" stroke-linejoin="round"/></svg>'},
-  strawberry:{nm:'딸기',svg:'<svg viewBox="0 0 40 40"><path d="M7 15 C7 28 17 37 20 37 C23 37 33 28 33 15 C27 12 13 12 7 15 Z" fill="#e53935" stroke="#9e1b1b" stroke-width="2"/><path d="M9 15 L15 8 L20 13 L25 8 L31 15 C25 12 15 12 9 15 Z" fill="#43a047" stroke="#1b5e20" stroke-width="1.5" stroke-linejoin="round"/><g fill="#fff59d"><circle cx="14" cy="20" r="1.4"/><circle cx="20" cy="19" r="1.4"/><circle cx="26" cy="20" r="1.4"/><circle cx="17" cy="26" r="1.4"/><circle cx="23" cy="26" r="1.4"/><circle cx="20" cy="32" r="1.4"/></g></svg>'},
-  lime:{nm:'라임',svg:'<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#558b2f" stroke="#33691e" stroke-width="2"/><circle cx="20" cy="20" r="12" fill="#c5e1a5"/><g stroke="#7cb342" stroke-width="2"><line x1="20" y1="8" x2="20" y2="32"/><line x1="9.6" y1="14" x2="30.4" y2="26"/><line x1="9.6" y1="26" x2="30.4" y2="14"/></g><circle cx="20" cy="20" r="2" fill="#f1f8e9"/></svg>'},
-  plum:{nm:'자두',svg:'<svg viewBox="0 0 40 40"><path d="M20 10 C8 8 4 20 8 29 C12 37 28 37 32 29 C36 20 32 8 20 10 Z" fill="#7b1fa2" stroke="#4a148c" stroke-width="2"/><path d="M20 11 C18 18 18 26 20 34" fill="none" stroke="#4a148c" stroke-width="1.6"/><path d="M20 10 L21 4" stroke="#5d4037" stroke-width="2.2" stroke-linecap="round"/><path d="M21 6 C25 2 30 3 31 5 C28 8 24 8 21 6 Z" fill="#43a047"/><ellipse cx="13" cy="18" rx="2.5" ry="4" fill="#ce93d8" opacity=".7"/></svg>'}
+  banana:{nm:'바나나',svg:'<svg viewBox="0 0 100 100">'+SHADOW+
+    '<path d="M20 20 C12 52 28 84 64 90 C79 92 90 87 95 78 C82 78 64 72 52 62 C41 52 37 38 38 21 Z" fill="url(#gBan)" stroke="#b07d00" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<path d="M28 26 C27 54 40 74 68 84" fill="none" stroke="#d29a00" stroke-width="2" opacity=".75"/>'+
+    '<path d="M33 30 C34 46 40 58 52 67" fill="none" stroke="#fffde7" stroke-width="4" stroke-linecap="round" opacity=".75"/>'+
+    '<path d="M20 20 L19 8 Q26 5 33 8 L38 21 Z" fill="#8d6e3f" stroke="#5d4122" stroke-width="2" stroke-linejoin="round"/>'+
+    '<path d="M94 79 L99 76 L97 83 Z" fill="#4e342e"/></svg>'},
+  strawberry:{nm:'딸기',svg:'<svg viewBox="0 0 100 100">'+SHADOW+
+    '<path d="M50 93 C29 82 13 62 15 43 C17 28 32 23 50 29 C68 23 83 28 85 43 C87 62 71 82 50 93 Z" fill="url(#gStr)" stroke="#8e0f14" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<g fill="#ffe082" stroke="#c49000" stroke-width=".8">'+
+      [[33,44],[50,42],[67,44],[26,56],[42,55],[58,55],[74,56],[34,68],[50,67],[66,68],[42,79],[58,79]].map(p=>'<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="1.8" ry="2.8"/>').join('')+'</g>'+
+    '<ellipse cx="32" cy="46" rx="6" ry="10" fill="#fff" opacity=".28" transform="rotate(-20 32 46)"/>'+
+    '<path d="M50 32 L36 22 L44 30 L28 31 L44 35 L40 41 L50 36 L60 41 L56 35 L72 31 L56 30 L64 22 Z" fill="url(#gLeaf)" stroke="#1b5e20" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<path d="M50 30 Q51 20 56 14" fill="none" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round"/></svg>'},
+  lime:{nm:'라임',svg:'<svg viewBox="0 0 100 100">'+SHADOW+
+    '<g transform="rotate(-25 50 55)">'+
+    '<path d="M50 22 C72 22 88 36 88 55 C88 74 72 88 50 88 C28 88 12 74 12 55 C12 36 28 22 50 22 Z" fill="url(#gLim)" stroke="#2b5410" stroke-width="2.5"/>'+
+    '<path d="M86 50 C92 51 95 54 94 57 C91 58 88 57 87 56" fill="#7cb342" stroke="#2b5410" stroke-width="1.8" stroke-linejoin="round"/>'+
+    '<circle cx="16" cy="55" r="2.2" fill="#556b2f"/>'+
+    '<g fill="#dcedc8" opacity=".45">'+[[30,44],[40,36],[55,34],[68,40],[76,52],[64,64],[48,70],[34,64],[26,54],[46,50],[60,52]].map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="1.2"/>').join('')+'</g>'+
+    '<ellipse cx="36" cy="40" rx="12" ry="7" fill="#fff" opacity=".35" transform="rotate(-15 36 40)"/></g></svg>'},
+  plum:{nm:'자두',svg:'<svg viewBox="0 0 100 100">'+SHADOW+
+    '<path d="M50 28 C28 20 12 38 15 58 C18 80 36 92 50 90 C64 92 82 80 85 58 C88 38 72 20 50 28 Z" fill="url(#gPlm)" stroke="#33074f" stroke-width="2.5"/>'+
+    '<path d="M50 30 C44 46 44 70 50 89" fill="none" stroke="#3b0a5c" stroke-width="2.2" opacity=".8"/>'+
+    '<ellipse cx="32" cy="48" rx="8" ry="13" fill="#e1bee7" opacity=".32" transform="rotate(15 32 48)"/>'+
+    '<path d="M50 29 Q49 18 53 11" fill="none" stroke="#5d4037" stroke-width="3.5" stroke-linecap="round"/>'+
+    '<path d="M52 16 C60 6 74 6 80 11 C72 20 60 21 52 16 Z" fill="url(#gLeaf)" stroke="#1b5e20" stroke-width="1.6"/>'+
+    '<path d="M54 15.5 C62 12 70 11 78 11.5" fill="none" stroke="#1b5e20" stroke-width="1"/></svg>'}
 };
+document.body.insertAdjacentHTML('afterbegin',FRUIT_DEFS);
 const STOP_SVG='<svg viewBox="0 0 100 100" style="position:absolute;left:10%;top:22%;width:80%"><polygon points="30,4 70,4 96,30 96,70 70,96 30,96 4,70 4,30" fill="#e53935" stroke="#fff" stroke-width="5"/><text x="50" y="61" text-anchor="middle" font-size="30" font-weight="900" fill="#fff" font-family="Malgun Gothic,sans-serif">금지</text></svg>';
 const BELL_SVG='<svg viewBox="0 0 64 64"><path d="M32 8 C20 8 14 18 14 30 L14 40 L8 48 L56 48 L50 40 L50 30 C50 18 44 8 32 8 Z" fill="#ffca28" stroke="#b28704" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="7" r="4" fill="#ffca28" stroke="#b28704" stroke-width="3"/><circle cx="32" cy="53" r="5" fill="#b28704"/><path d="M22 22 C23 17 26 14 30 13" fill="none" stroke="#fff8e1" stroke-width="3" stroke-linecap="round"/></svg>';
 const POS={1:[[50,50]],2:[[30,27],[70,73]],3:[[27,22],[50,50],[73,78]],4:[[30,26],[70,26],[30,74],[70,74]],5:[[29,22],[71,22],[50,50],[29,78],[71,78]]};
