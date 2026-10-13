@@ -106,6 +106,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .rep td.l{text-align:left;font-weight:700}
 .okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
 .note{font-size:.88rem;color:var(--sub)}
+#scr-rep{margin-top:50px}
 #err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
 @media(max-width:700px){
   .pile,.pile .back,.pile .slot,.table .card{width:118px;height:165px}
@@ -543,31 +544,31 @@ function endGame(quit){
   if(!G) return;
   G.running=false; stopTimers();
   const L=G.L, lureCats=['near','mix','stop','other'].filter(c=>L.lures.indexOf(c)>=0);
-  const nT=G.n.target, nL=lureCats.reduce((s,c)=>s+G.n[c],0);
-  const faL=lureCats.reduce((s,c)=>s+G.fa[c],0), faAll=faL+G.fa.neutral;
+  const lg=G.log;
+  const hit=lg.filter(x=>x.res==='hit').length, omit=lg.filter(x=>x.res==='omit').length;
+  const fa=lg.filter(x=>x.res==='fa').length, cr=lg.filter(x=>x.res==='ok').length;
+  const good=hit+cr, bad=fa+omit, all=good+bad;
   const rt=avg(G.rts);
   const d=new Date();
   const ds=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+  const goWord=L.mode==='pick'?FRUITS[G.tf].nm+'가 나왔을 때':'같은 과일 5개일 때';
   let h='<h2>할리갈리 억제훈련 결과</h2><div class="meta">'+ds+' · '+L.name+' ('+L.sub+') · 카드 '+G.dealt+'장 · '+(G.iv/1000).toFixed(1)+'초 간격'+(quit?' · 중간에 그만둠':'')+'</div>';
   h+='<div class="tiles">'+
-    tile(pct(G.hits,nT),'%',L.mode==='pick'?'타겟 과일일 때 친 비율':'5개일 때 친 비율')+
-    tile(pct(nL-faL,nL),'%','유혹을 참은 비율')+
-    tile(faAll,'번','잘못 친 횟수')+
-    tile(G.omit,'번','놓친 횟수')+
-    tile(rt==null?null:(rt/1000).toFixed(2),'초','평균 반응시간')+
+    '<div class="tile" style="border:2px solid #a5d6a7;background:#f1f8e9"><div class="v" style="color:#2e7d32">'+good+'<small style="font-size:.9rem">번</small></div><div class="k">정반응 (전체 '+all+'번 중 '+(all?Math.round(good/all*100):0)+'%)</div></div>'+
+    '<div class="tile" style="border:2px solid #ef9a9a;background:#fdecea"><div class="v" style="color:#c62828">'+bad+'<small style="font-size:.9rem">번</small></div><div class="k">오반응 (잘못 침 '+fa+' + 놓침 '+omit+')</div></div>'+
+    '<div class="tile"><div class="v">'+(rt==null?'-':(rt/1000).toFixed(2)+'<small style="font-size:.9rem">초</small>')+'</div><div class="k">종 치기까지 평균 시간</div></div>'+
   '</div>';
-  h+='<table><tr><th>장면</th><th>해야 할 일</th><th>나온 횟수</th><th>잘한 횟수</th><th>실수</th></tr>';
-  h+=row('target',nT,G.hits,G.omit,'놓침',L.mode==='pick'?'타겟 과일 ('+FRUITS[G.tf].nm+')':null);
-  lureCats.forEach(c=>{ h+=row(c,G.n[c],G.n[c]-G.fa[c],G.fa[c],'잘못 침'); });
-  if(L.mode!=='pick'||G.fa.neutral) h+='<tr><td class="l">'+CAT.neutral.nm+'</td><td>참아야 함</td><td>-</td><td>-</td><td>'+(G.fa.neutral?'<span class="badc">잘못 침 '+G.fa.neutral+'</span>':'0')+'</td></tr>';
-  h+='</table>';
+  h+='<h3 style="margin:14px 0 4px">정반응과 오반응</h3><table><tr><th></th><th>종을 침</th><th>종을 안 침</th></tr>'+
+    '<tr><td class="l">쳐야 할 때<br><span class="note">'+goWord+'</span></td><td class="okc" style="font-size:1.2rem">정반응 '+hit+'</td><td class="badc" style="font-size:1.2rem">오반응 '+omit+'<br><span class="note">놓침</span></td></tr>'+
+    '<tr><td class="l">참아야 할 때<br><span class="note">그 밖의 모든 카드</span></td><td class="badc" style="font-size:1.2rem">오반응 '+fa+'<br><span class="note">잘못 침</span></td><td class="okc" style="font-size:1.2rem">정반응 '+cr+'<br><span class="note">잘 참음</span></td></tr></table>';
+  h+='<h3 style="margin:14px 0 4px">참아야 할 장면별</h3><table><tr><th>장면</th><th>나온 횟수</th><th>잘 참음</th><th>잘못 침</th></tr>';
+  lureCats.forEach(c=>{ const n=lg.filter(x=>x.cat===c&&x.res!=='hit').length, f=lg.filter(x=>x.cat===c&&x.res==='fa').length;
+    h+='<tr><td class="l">'+CAT[c].nm+'</td><td>'+n+'</td><td class="okc">'+(n-f)+'</td><td>'+(f?'<span class="badc">'+f+'</span>':'0')+'</td></tr>'; });
+  const nn=lg.filter(x=>x.cat==='neutral').length, nf=lg.filter(x=>x.cat==='neutral'&&x.res==='fa').length;
+  h+='<tr><td class="l">'+CAT.neutral.nm+'</td><td>'+nn+'</td><td class="okc">'+(nn-nf)+'</td><td>'+(nf?'<span class="badc">'+nf+'</span>':'0')+'</td></tr></table>';
   h+='<div class="note">잘못 친 횟수가 많으면 충동 억제가, 놓친 횟수가 많으면 주의 유지나 처리 속도가 더 어려운 것으로 볼 수 있습니다. 다음 회기에는 넘기는 속도나 단계를 조정해 보세요.</div>';
   $('rep').innerHTML=h;
   go('rep');
-  function tile(v,u,k){ return '<div class="tile"><div class="v">'+(v==null?'-':v+'<small style="font-size:.9rem">'+u+'</small>')+'</div><div class="k">'+k+'</div></div>'; }
-  function row(c,n,ok,bad,badName,label){
-    return '<tr><td class="l">'+(label||CAT[c].nm)+'</td><td>'+CAT[c].act+'</td><td>'+n+'</td><td class="okc">'+ok+'</td><td>'+(bad?'<span class="badc">'+badName+' '+bad+'</span>':'0')+'</td></tr>';
-  }
 }
 
 renderHome();

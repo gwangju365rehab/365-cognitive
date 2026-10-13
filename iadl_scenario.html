@@ -157,6 +157,9 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .cal .blk.sel{background:#fff;color:var(--bad);border-color:var(--bad)}
 .cal .blk.ghost{background:transparent;border:2px dashed #9aa2b2;color:#9aa2b2;pointer-events:none}
 .cal .blk.tap{cursor:pointer}
+.cal .blk.narrow{font-size:.8rem;line-height:1.2;padding:20px 4px 2px;word-break:keep-all;overflow:hidden}
+.cal .blk.narrow small{display:none}
+.cal .blk.narrow .x{width:18px;height:18px;font-size:.7rem;top:2px;right:2px}
 .cal .blk.fixed{background:#546e7a}
 .cal .blk.fixed.med{background:#7b1fa2}
 .cal .blk.p2{background:#ef6c00}
@@ -236,6 +239,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid var(--line);border-radius:10px}
 
 .foot{display:flex;justify-content:flex-end;gap:10px}
+#a-prev{margin-right:auto}
 
 /* 리포트 */
 .rep h2{margin:0 0 4px;font-size:1.4rem}
@@ -268,7 +272,6 @@ textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid v
   <h1>IADL 시나리오 훈련</h1>
   <p class="lead">상황을 읽고, 화면에서 직접 계획하고 정리해 보세요.</p>
   <div class="panel field">
-    <label for="pname">환자명</label><input id="pname" placeholder="선택 입력"/>
     <label>날짜</label><span id="today"></span>
   </div>
   <div class="act-list" id="act-list"></div>
@@ -290,7 +293,7 @@ textarea{font:inherit;width:100%;min-height:80px;padding:10px;border:2px solid v
     <p class="hint" id="a-hint"></p>
     <div id="a-body" style="display:flex;flex-direction:column;gap:12px"></div>
   </div>
-  <div class="foot"><button class="big-btn b-pri" id="a-next" disabled>다음 단계</button></div>
+  <div class="foot"><button class="big-btn b-sec" id="a-prev">← 이전 단계</button><button class="big-btn b-pri" id="a-next" disabled>다음 단계</button></div>
 </div>
 
 <!-- 리포트 -->
@@ -425,11 +428,18 @@ function calendar(opts){
         onclick:opts.onCell?()=>opts.onCell(d,t):null,tabindex:opts.pickable?0:-1}));
     }
   }
-  (opts.blocks||[]).forEach(b=>{
+  // 같은 시간에 겹치는 일정은 칸을 나눠 나란히 보여 줌
+  const BL=opts.blocks||[], lane=[], nl=[];
+  cols.forEach((_,dd)=>{ const ends=[];
+    BL.map((b,i)=>i).filter(i=>BL[i].day===dd).sort((x,y)=>BL[x].start-BL[y].start).forEach(i=>{
+      let k=ends.findIndex(e=>e<=BL[i].start); if(k<0){k=ends.length;ends.push(0);} ends[k]=BL[i].start+BL[i].dur; lane[i]=k; }); });
+  BL.forEach((b,i)=>{ nl[i]=1+Math.max.apply(null,BL.map((x,j)=>overlap(x,b)?lane[j]:0)); });
+  BL.forEach((b,i)=>{
     const r0=(b.start-st)/SLOT, span=Math.max(1,b.dur/SLOT), tap=opts.onBlock&&b.tap!==false;
-    const rm=opts.onRemove&&b.removable;
-    g.append(h('div',{class:'blk '+(b.cls||'')+(tap?' tap':'')+(rm?' has-x':''),role:tap?'button':null,
-      style:`grid-row:${r0+2} / span ${span};grid-column:${b.day+2}`,onclick:tap?()=>opts.onBlock(b):null},
+    const rm=opts.onRemove&&b.removable, n=nl[i];
+    const sideStyle=n>1?`;justify-self:start;width:calc(${100/n}% - 5px);margin-left:calc(${100*lane[i]/n}% + 3px);margin-right:0`:'';
+    g.append(h('div',{class:'blk '+(b.cls||'')+(tap?' tap':'')+(rm?' has-x':'')+(n>1?' narrow':''),role:tap?'button':null,
+      style:`grid-row:${r0+2} / span ${span};grid-column:${b.day+2}${sideStyle}`,onclick:tap?e=>opts.onBlock(b,e):null},
       b.name,span>1?h('small',null,one?rangeTxt(b.start,b.start+b.dur):shortRange(b.start,b.start+b.dur)):null,
       rm?h('button',{class:'x','aria-label':`${b.name} 빼기`,title:'빼기',onclick:e=>{e.stopPropagation();opts.onRemove(b);}},'✕'):null));
   });
@@ -464,7 +474,7 @@ const ACTS=[
     { name:'순서 정하기', instr:'', hint:'카드를 끌어서 다른 카드 위에 놓으면 그 자리로 옮겨집니다.',
       render(body,c,d,done,api){
         api.setInstr(`${c.items.length}가지 활동을 가장 알맞은 순서로 배열하세요.`);
-        d.attempts=0;
+        d.attempts=d.attempts||0;
         let check;
         const o=orderer(shuffle(c.items),()=>{});
         const out=h('div');
@@ -475,7 +485,7 @@ const ACTS=[
           if(at('약 복용하기')>=0&&at('약 복용하기')<at('아침 식사하기')) v.push('약은 아침 식사 후에 복용합니다.');
           if(at('혈압 재기')>=0&&at('혈압 재기')>at('약 복용하기')) v.push('혈압은 약을 먹기 전에 잽니다.');
           if(at('이불 정리하기')>=0&&at('이불 정리하기')<at('침대에서 일어나기')) v.push('이불 정리는 일어난 뒤에 합니다.');
-          if(d.attempts===1){d.firstOk=!v.length;d.firstOrder=ord;d.firstViol=v;}
+          if(d.firstOk===undefined){d.firstOk=!v.length;d.firstOrder=ord;d.firstViol=v;}
           d.finalOrder=ord; d.finalOk=!v.length;
           o.lock(); check.style.display='none'; out.innerHTML='';
           if(!v.length){ out.append(fbBox('ok','알맞은 순서입니다.',['세수·옷 입기 같은 활동의 순서는 사람마다 달라도 괜찮습니다.'])); }
@@ -883,7 +893,7 @@ function checker(label,o){
     out.innerHTML='';
     const r=o.evaluate();
     if(r.incomplete){out.append(fbBox('warn',r.incomplete,[]));return;}
-    tries++; if(tries===1) o.d[o.key+'First']=r; o.d[o.key]=r; o.d[o.key+'Tries']=tries;
+    tries++; if(!o.d[o.key+'First']) o.d[o.key+'First']=r; o.d[o.key]=r; o.d[o.key+'Tries']=(o.d[o.key+'Tries']||0)+1;
     o.lock(); btn.style.display='none';
     out.append(fbBox(r.ok?'ok':'bad',r.title,r.lines));
     if(!r.ok&&o.unlock) out.append(h('button',{class:'big-btn b-sec',style:'margin-top:8px',onclick:()=>{o.unlock();out.innerHTML='';btn.style.display='';}},'고치기'));
@@ -926,8 +936,12 @@ function planner(o){
     side.append(msg);
     const cal=calendar({cols:o.cols,colNames:o.colNames,start:st,end:en,pickable:!!sel&&!locked,
       blocks:all().map(b=>({...b,cls:b.fx?('fixed '+(b.cls||'')):(b.cls||'new'),tap:!locked&&!!sel,removable:!locked&&!b.fx})),
-      onBlock:locked?null:b=>{
-        if(sel){stats.clashes++;msg.innerHTML='';msg.append(fbBox('warn',`그 시간에는 이미 ‘${b.name}’이(가) 있습니다.`,[]));}},
+      onBlock:locked?null:(b,e)=>{
+        if(!sel) return;
+        if(o.allowOverlap&&e&&e.currentTarget){ // 겹쳐도 되는 달력: 누른 높이로 시각을 정해 넣음
+          const rc=e.currentTarget.getBoundingClientRect(), k=Math.floor((e.clientY-rc.top)/(rc.height/Math.max(1,b.dur/SLOT)));
+          place(b.day,b.start+Math.max(0,k)*SLOT); return; }
+        stats.clashes++;msg.innerHTML='';msg.append(fbBox('warn',`그 시간에는 이미 ‘${b.name}’이(가) 있습니다.`,[]));},
       onRemove:locked?null:b=>{ delete pos[b.id]; msg.innerHTML=''; draw(); },
       onCell:locked?null:(day,start)=>place(day,start)});
     if(one) wrap.append(h('div',{class:'plan2'},side,h('div',{class:'main'},cal)));
@@ -1619,9 +1633,17 @@ ACTS.push(
   desc:'수리 우선순위를 정하고 예산 안에서 고른 뒤 기간과 추가 비용을 계산합니다. 견적과 예산이 매번 바뀝니다.',
   levels:{1:'수리 3가지 · 추가 비용 10%',2:'수리 4가지 · 추가 비용 20%',3:'수리 5가지 · 추가 비용 15% 또는 25%'},
   init(level){
-    const POOL=[['부엌 싱크대',12,18,2,3],['화장실 샤워 부스',10,15,2,2],['현관 계단 안전 난간',6,9,1,1],['보일러 교체',15,25,1,2],['창문 단열',8,14,1,3],['화장실 안전 손잡이',3,6,1,1],['방 도배',5,9,1,2]];
+    // 단계: 1 안전(낙상 예방) → 2 건강·필수(난방·단열) → 3 생활 편의 → 4 보기 좋게(미관)
+    const SAFE=[['현관 계단 안전 난간',6,9,1,1,1],['화장실 안전 손잡이',3,6,1,1,1]];
+    const MID=[['보일러 교체',15,25,1,2,2],['창문 단열',8,14,1,3,2],['부엌 싱크대',12,18,2,3,3],['화장실 샤워 부스',10,15,2,2,3]];
     const n=level===1?3:level===2?4:5;
-    const R=shuffle(POOL).slice(0,n).map((p,i)=>({id:'r'+i,name:p[0],cost:(p[1]+Math.floor(Math.random()*(p[2]-p[1]+1)))*100000,days:p[3]+Math.floor(Math.random()*(p[4]-p[3]+1))}));
+    const sh=shuffle(SAFE);
+    let P=[sh[0],['방 도배',5,9,1,2,4]];
+    const midN=level===3?2:n-2;
+    // 2단계 이상은 난방·단열 1개 이상 + 편의 1개 이상이 섞이게
+    const mids=level===1?shuffle(MID).slice(0,1):[pick(MID.filter(x=>x[5]===2)),pick(MID.filter(x=>x[5]===3))].concat(shuffle(MID)).filter((x,i,a)=>a.indexOf(x)===i).slice(0,midN);
+    P=P.concat(mids); if(level===3) P.push(sh[1]);
+    const R=shuffle(P).map((p,i)=>({id:'r'+i,name:p[0],tier:p[5],cost:(p[1]+Math.floor(Math.random()*(p[2]-p[1]+1)))*100000,days:p[3]+Math.floor(Math.random()*(p[4]-p[3]+1))}));
     const tot=R.reduce((a,r)=>a+r.cost,0);
     const budget=Math.round(tot*rnd(.5,.7)/100000)*100000;
     const extra=level===1?10:level===2?20:pick([15,25]);
@@ -1629,15 +1651,33 @@ ACTS.push(
   },
   situation(c){ return `<p>집의 여러 부분에 수리가 필요합니다.</p><p>수리 예산으로 <b>${won(c.budget)}</b>이 있으며, 모든 수리를 한 번에 할 수는 없습니다.</p><p>수리 견적:</p><ul>${c.R.map(r=>`<li>${r.name}: ${won(r.cost)} (${r.days}일 소요)</li>`).join('')}</ul>`; },
   steps:[
-    { name:'우선순위', instr:'가장 먼저 해야 할 수리부터 순서대로 놓으세요.', hint:'카드를 끌어서 다른 카드 위에 놓으면 그 자리로 옮겨집니다. 안전과 관련된 수리를 먼저 생각해 보세요. 이유는 치료사에게 말로 설명해 주세요.',
+    { name:'우선순위', instr:'가장 먼저 해야 할 수리부터 순서대로 놓으세요.', hint:'카드를 끌어서 다른 카드 위에 놓으면 그 자리로 옮겨집니다. 다칠 위험이 있는 것 → 건강·생활에 꼭 필요한 것 → 편리하게 하는 것 → 보기 좋게 하는 것 순으로 생각해 보세요.',
       render(body,c,d,done){ const o=orderer(shuffle(c.R.map(r=>r.name)),()=>{});
-        body.append(o.el,h('div',{class:'row'},h('button',{class:'big-btn b-pri',onclick:e=>{d.prio=o.get().join(' → ');o.lock();e.target.style.display='none';done();}},'순서 정하기'))); }},
-    { name:'수리 고르기', instr:'예산 안에서 이번에 할 수리를 고르세요.', hint:'금액을 직접 더해 보고 고르세요.',
-      render(body,c,d,done){ const mp=multiPick(c.R.map(r=>`${r.name} ${won(r.cost)}`));
+        const T=nm=>c.R.filter(r=>r.name===nm)[0].tier;
+        body.append(o.el,checker('순서 확인',{d,key:'prc',done,lock:o.lock,unlock:o.unlock,evaluate(){
+          const a=o.get(); d.prioArr=a; d.prio=a.join(' → ');
+          const at=t=>a.map((x,i)=>T(x)===t?i:-1).filter(i=>i>=0);
+          const safe=at(1), mid=at(2), low=at(3).concat(at(4)), L=[];
+          L.push(crit('안전 수리(난간·손잡이)를 가장 앞에',safe.every(i=>a.every((x,j)=>T(x)===1||j>i))));
+          if(mid.length) L.push(crit('난방·단열을 편의·미관 수리보다 앞에',mid.every(i=>low.every(j=>j>i))));
+          L.push(crit('보기 좋게 하는 도배는 가장 뒤에',T(a[a.length-1])===4));
+          return critResult(L,['낙상을 막는 수리가 가장 급하고, 난방·단열은 겨울 건강과 바로 이어집니다. 도배는 보기 좋게 하는 수리라 가장 나중입니다.']);
+        }})); }},
+    { name:'수리 고르기', instr:'예산 안에서 이번에 할 수리를 고르세요. 앞에서 정한 우선순위를 따르세요.', hint:'우선순위가 높은 것부터 금액을 더해 보세요. 예산이 모자라는 수리만 건너뜁니다.',
+      render(body,c,d,done){
+        const ord=(d.prioArr||c.R.map(r=>r.name)).map(nm=>c.R.findIndex(r=>r.name===nm));
+        const mp=multiPick(ord.map((ri,k)=>`${k+1}순위 ${c.R[ri].name} ${won(c.R[ri].cost)}`));
         body.append(mp.el,checker('확인',{d,key:'sel',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
-          const s=[...mp.get()]; if(!s.length) return {incomplete:'하나 이상 골라 주세요.'};
+          const s=[...mp.get()].map(k=>ord[k]); if(!s.length) return {incomplete:'하나 이상 골라 주세요.'};
           const tot=s.reduce((a,i)=>a+c.R[i].cost,0); d.selIdx=s; d.selTot=tot;
-          return {...critResult([crit(`합계 ${won(tot)} — 예산 ${won(c.budget)} 안`,tot<=c.budget)]),lines:[`고른 수리: ${s.map(i=>c.R[i].name).join(', ')}`,`합계 ${won(tot)}`]};
+          // 앞 순위를 건너뛰고 뒤 순위를 골랐는데, 앞 순위도 예산 안에 넣을 수 있었으면 어긋남
+          const skip=[];
+          ord.forEach((ri,k)=>{ if(s.indexOf(ri)>=0) return;
+            const lower=ord.slice(k+1).filter(x=>s.indexOf(x)>=0); if(!lower.length) return;
+            const higherSum=ord.slice(0,k).filter(x=>s.indexOf(x)>=0).reduce((a,x)=>a+c.R[x].cost,0);
+            if(higherSum+c.R[ri].cost<=c.budget) skip.push(`${k+1}순위 ${c.R[ri].name}을(를) 건너뛰고 ${lower.map(x=>(ord.indexOf(x)+1)+'순위 '+c.R[x].name).join(', ')}을(를) 골랐습니다. 예산 안에 넣을 수 있었습니다.`); });
+          return critResult([crit(`합계 ${won(tot)} — 예산 ${won(c.budget)} 안`,tot<=c.budget),crit('정한 우선순위대로 고름',!skip.length)],
+            skip.concat([`고른 수리: ${s.map(i=>c.R[i].name).join(', ')}`]));
         }})); }},
     { name:'수리 기간', instr:'고른 수리를 차례로 모두 하면 며칠이 걸리나요?', hint:'',
       render(body,c,d,done){ const days=d.selIdx.reduce((a,i)=>a+c.R[i].days,0); d.dy={};
@@ -1657,7 +1697,7 @@ ACTS.push(
         }})); }},
   ],
   questions:['우선순위를 결정할 때 어떤 요소를 고려했나요?','예산 제약 내에서 어떻게 최대한의 수리를 계획했나요?','수리 기간 동안 일상생활을 어떻게 조정하겠습니까?'],
-  summarize(d,c){ return [{label:'우선순위',ok:null,detail:d.prio||'-'}].concat(sumCheck(d,'sel','예산 안에서 고르기'),
+  summarize(d,c){ return sumCheck(d,'prc','우선순위').concat([{label:'우선순위 (최종)',ok:null,detail:d.prio||'-'}],sumCheck(d,'sel','예산 안에서 고르기'),
     [{label:'고른 수리 (최종)',ok:null,detail:(d.selIdx||[]).map(i=>c.R[i].name).join(', ')},{label:'수리 기간 계산 (첫 답)',ok:!!d.daycFirst?.ok,detail:d.dy?.q!=null?d.dy.q+'일':'-'}],sumCheck(d,'extra','추가 비용')); }
 },
 // ── 14. 지역사회 활동 참여 계획하기 ───────────
@@ -1722,7 +1762,7 @@ ACTS.push(
   levels:{1:'나 2개 + 배우자 2개',2:'나 3개 + 배우자 2개',3:'나 3개 + 배우자 2개 + 자녀 2개 (저녁 약속 포함)'},
   init(level){ return familyGen(level); },
   situation(c){ const L=w=>c.A.filter(a=>a.who===w).map(a=>`<li>${DAYN[a.day]} ${fmt(a.start)}: ${a.name} (${durTxt(a.dur)})</li>`).join('');
-    return `<p>가족의 일정 관리를 맡고 있습니다. 혼자 운전하기 어려우며, 가족은 차량 1대를 함께 씁니다.</p>
+    return `<p>가족의 일정 관리를 맡고 있습니다. 혼자 운전하기 어렵고, <b>버스·지하철도 혼자 타기 어렵습니다.</b> 가족은 차량 1대를 함께 씁니다.</p>
     <p>나의 일정:</p><ul>${L('나')}</ul><p>배우자 일정 (배우자가 차를 쓰고 직접 운전해 갑니다):</p><ul>${L('배우자')}</ul>`+
     (c.level===3?`<p>성인 자녀 일정:</p><ul>${L('자녀')}</ul>`:'')+`<p>성인 자녀는 월~금 <b>오전 9시~오후 6시</b>에 직장에 있습니다.</p>`; },
   steps:[
@@ -1736,7 +1776,7 @@ ACTS.push(
         }}));
       }},
     { name:'이동 방법', instr:'나의 약속마다 어떻게 갈지 고르세요.', hint:'그 시간에 배우자는 차를 쓰는지, 자녀는 직장에 있는지 달력을 보고 확인하세요.',
-      render(body,c,d,done){ const OPT=['배우자가 운전해 준다','자녀가 운전해 준다','택시·대중교통을 이용한다','혼자 운전한다']; d.tr={};
+      render(body,c,d,done){ const OPT=['배우자가 운전해 준다','자녀가 운전해 준다','혼자 운전한다','버스·지하철을 탄다','택시를 탄다','교통약자 콜택시(장애인 콜택시)를 예약한다']; d.tr={};
         const mine=c.A.filter(a=>a.who==='나');
         body.append(calendar({start:480,end:c.level===3?1200:1080,blocks:c.A.map(a=>({...a,name:`${a.who}: ${a.name}`,cls:{나:'new',배우자:'p2',자녀:'p3'}[a.who]}))}));
         const r=rowsAsk(mine.map(a=>({key:a.id,label:`${DAYN[a.day]} ${fmt(a.start)} ${a.name}`,options:OPT})),d.tr);
@@ -1744,22 +1784,28 @@ ACTS.push(
           if(!r.all()) return {incomplete:'모든 약속의 이동 방법을 골라 주세요.'};
           const lines=[];
           const list=mine.map(a=>{const v=d.tr[a.id], av=familyAvail(c,a); let ok=true;
-            if(v===OPT[3]){ok=false;lines.push(`${a.name}: 혼자 운전하기 어렵습니다.`);}
+            if(v===OPT[2]){ok=false;lines.push(`${a.name}: 혼자 운전하기 어렵습니다.`);}
+            if(v===OPT[3]){ok=false;lines.push(`${a.name}: 버스·지하철은 혼자 타기 어렵습니다.`);}
             if(v===OPT[0]&&!av.sp){ok=false;lines.push(`${a.name}: 그 시간에 배우자가 차를 쓰고 있습니다.`);}
             if(v===OPT[1]&&!av.ch){ok=false;lines.push(`${a.name}: 그 시간에 자녀는 직장이나 다른 일정이 있습니다.`);}
             return crit(`${a.name}: ${v}`,ok);});
           return critResult(list,lines);
         }})); }},
-    { name:'비상 대비', instr:'약속 날 차가 고장 나면 어떻게 하는 것이 가장 알맞을까요?', hint:'',
-      render(body,c,d,done){ const OPT=['택시·콜택시 번호를 미리 알아 둔다','그날 약속은 연락 없이 빠진다','자녀에게 회사를 쉬라고 한다','고장 나면 그때 생각한다']; d.em={};
-        const r=rowsAsk([{key:'q',label:'',options:shuffle(OPT)}],d.em);
-        body.append(r.el,checker('확인',{d,key:'emc',done,lock:r.lock,unlock:r.unlock,evaluate(){
-          if(!r.all()) return {incomplete:'하나를 골라 주세요.'}; const ok=d.em.q===OPT[0];
-          return {ok,title:ok?'알맞은 대비입니다.':'다시 생각해 보세요.',lines:['다른 이동 방법을 미리 알아 두면 갑작스러운 상황에도 약속을 지킬 수 있습니다.']};
+    { name:'비상 대비', instr:'약속 날 갑자기 차를 쓸 수 없게 되면(고장·가족 사정)? 미리 해 둘 수 있는 대비를 모두 고르세요.', hint:'버스·지하철을 혼자 타기 어렵다는 점을 생각하세요.',
+      render(body,c,d,done){
+        const GOOD=['택시·콜택시 번호를 휴대폰에 저장해 둔다','교통약자 이동지원센터(장애인 콜택시)에 미리 등록해 둔다','태워 줄 수 있는 이웃·친척에게 미리 부탁해 둔다','못 갈 것 같으면 미리 연락해 날짜를 바꾸는 방법을 알아 둔다'];
+        const BAD=['그날 약속은 연락 없이 빠진다','자녀에게 회사를 쉬라고 한다','혼자 운전해서 간다','고장 나면 그때 생각한다'];
+        const L=shuffle(GOOD.concat(BAD)), mp=multiPick(L);
+        body.append(mp.el,checker('확인',{d,key:'emc',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
+          const s=[...mp.get()].map(i=>L[i]); if(!s.length) return {incomplete:'하나 이상 골라 주세요.'};
+          d.emTxt=s.join(', ');
+          const g=s.filter(x=>GOOD.indexOf(x)>=0), b=s.filter(x=>BAD.indexOf(x)>=0);
+          return critResult([crit(`알맞은 대비 2가지 이상 (${g.length}가지)`,g.length>=2),crit('알맞지 않은 방법은 고르지 않음',!b.length)],
+            b.map(x=>`<span class="badc">${x}</span>: 약속을 지키기 어렵거나 다른 사람에게 무리한 부담을 줍니다.`).concat(['교통약자 콜택시는 미리 등록해 두어야 필요할 때 바로 부를 수 있습니다.']));
         }})); }},
   ],
   questions:['약속 장소가 서로 다른 방향에 있다면 어떻게 하겠습니까?','가장 복잡한 일정 충돌은 무엇이었으며 어떻게 해결했나요?','가족 구성원들과 일정 조율을 위해 어떤 의사소통이 필요할까요?'],
-  summarize(d){ return sumCheck(d,'fc','가족 달력').concat(sumCheck(d,'trc','이동 방법'),[{label:'비상 대비 (첫 답)',ok:!!d.emcFirst?.ok,detail:d.em?.q||'-'}]); }
+  summarize(d){ return sumCheck(d,'fc','가족 달력').concat(sumCheck(d,'trc','이동 방법'),sumCheck(d,'emc','비상 대비'),[{label:'고른 대비 (최종)',ok:null,detail:d.emTxt||'-'}]); }
 },
 // ── 16. 제한된 에너지로 우선순위 결정 ─────────
 {
@@ -2018,8 +2064,13 @@ function renderStep(){
   const nx=document.getElementById('a-next');
   nx.disabled=true; nx.textContent=i===steps.length-1?'활동 마치기':'다음 단계';
   nx.onclick=()=>{ if(i===steps.length-1) finishActivity(); else {RUN.i++;renderStep();window.scrollTo(0,0);} };
+  const pv=document.getElementById('a-prev');
+  pv.style.display=i>0?'':'none';
+  pv.onclick=()=>{ if(RUN.i>0){ RUN.i--; renderStep(); window.scrollTo(0,0); } };
   const api={setInstr:t=>{document.getElementById('a-instr').textContent=t;}};
-  st.render(body,RUN.ctx,RUN.data,()=>{nx.disabled=false;},api);
+  RUN.doneSteps=RUN.doneSteps||{};
+  st.render(body,RUN.ctx,RUN.data,()=>{nx.disabled=false;RUN.doneSteps[RUN.i]=true;},api);
+  if(RUN.doneSteps[i]) nx.disabled=false; // 이미 끝낸 단계로 돌아온 경우: 다시 하지 않고 넘어갈 수도 있음
 }
 
 // 자동 판정 항목(첫 시도 기준) 통과율
@@ -2083,12 +2134,11 @@ function leaveActivity(){
 
 function showReport(){
   const b=document.getElementById('rep-body'); b.innerHTML='';
-  const name=document.getElementById('pname').value.trim();
   const done=ACTS.filter(a=>S.results[a.id]);
   let pass=0,tot=0;
   done.forEach(a=>{const sc=S.results[a.id].score;pass+=sc.n;tot+=sc.t;});
   b.append(h('h2',null,'IADL 시나리오 훈련 결과'),
-    h('div',{class:'meta'},`환자명: ${name||'—'}　날짜: ${todayStr()}　완료 활동: ${done.length}/${ACTS.length}　자동 판정 통과: ${pass}/${tot}`));
+    h('div',{class:'meta'},`날짜: ${todayStr()}　완료 활동: ${done.length}/${ACTS.length}　자동 판정 통과: ${pass}/${tot}`));
   // 요약표
   const sum=h('table',null,h('tr',null,h('th',null,'활동'),h('th',null,'난이도'),h('th',null,'통과'),h('th',null,'자기평가'),h('th',null,'도움 수준'),h('th',null,'소요')));
   done.forEach(a=>{const r=S.results[a.id],cmp=selfCompare(r.self,r.score);
