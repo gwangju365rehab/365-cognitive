@@ -75,6 +75,20 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#01579b;font-weight:
 .it.bad{animation:shake .3s}
 @keyframes pop{50%{transform:translate(-50%,-50%) scale(1.15)}}
 @keyframes shake{25%{margin-left:-8px}75%{margin-left:8px}}
+.pads{position:absolute;left:0;right:0;top:0;bottom:0;display:flex}
+.pad{flex:1;margin:14px;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:2.2rem;font-weight:900;
+  cursor:pointer;user-select:none;-webkit-user-select:none;border:6px solid transparent;transition:opacity .15s,box-shadow .15s;touch-action:none}
+.pad svg{width:96px;height:96px;margin-bottom:6px}
+.pad.L{background:#1e88e5}.pad.R{background:#fb8c00}
+.pad.dim{opacity:.38}
+.pad.cue{border-color:#ffeb3b;box-shadow:0 0 0 6px rgba(255,235,59,.55)}
+.pad.ok{animation:padok .3s}.pad.ng{animation:padng .3s}
+@keyframes padok{50%{transform:scale(.95);filter:brightness(1.25)}}
+@keyframes padng{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.seq{display:flex;align-items:center;flex-wrap:wrap;justify-content:center}
+.seq .hd{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:48px;margin:3px;border-radius:12px;font-weight:900;font-size:1.2rem;color:#fff}
+.hd.L{background:#1e88e5}.hd.R{background:#fb8c00}.hd.B{background:linear-gradient(90deg,#1e88e5 50%,#fb8c00 50%)}
+.bigcue{font-size:2rem;font-weight:900;padding:0 18px;border-radius:14px;color:#fff}
 .count{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:6rem;font-weight:900;color:#0277bd;background:rgba(255,255,255,.85);border-radius:30px;padding:0 40px;z-index:5;pointer-events:none}
 .fb{min-height:2.4rem;text-align:center;font-size:1.3rem;font-weight:900}
 .fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}.fb.mid{color:#ef6c00}
@@ -97,6 +111,7 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#01579b;font-weight:
 .bar{height:14px;background:#eceff4;border-radius:7px;overflow:hidden;min-width:120px}
 .bar i{display:block;height:100%;background:#29b6f6}
 .note{font-size:.88rem;color:var(--sub)}
+#scr-rep{margin-top:50px}
 #err-box{display:none;position:fixed;left:10px;right:10px;bottom:40px;z-index:99;background:#fdecea;color:#c62828;border:2px solid #ef9a9a;border-radius:12px;padding:10px 14px;font-size:.9rem;font-weight:700}
 @media(max-width:700px){ .stage{height:380px} .tgt .nm{font-size:1.2rem} }
 @media print{
@@ -205,8 +220,15 @@ const MODES={
        d:'여러 도형 중 위에 보이는 타겟만 소리에 맞춰 누릅니다. 타겟은 중간중간 바뀌고, 도형 자리도 섞입니다.',
        lv:{1:{bpm:40,sec:60,win:.35,items:4,dist:'easy',change:12,shuf:0,d:'도형 4개 · 모양·색이 모두 다른 방해 도형 · 12박자마다 타겟 바뀜'},
            2:{bpm:45,sec:90,win:.28,items:6,dist:'mixed',change:8,shuf:4,d:'도형 6개 · 비슷한 방해 도형 섞임 · 8박자마다 타겟 바뀜 · 4박자마다 자리 섞임'},
-           3:{bpm:50,sec:120,win:.22,items:8,dist:'hard',change:6,shuf:2,d:'도형 8개 · 색이나 모양이 같은 방해 도형 · 6박자마다 타겟 바뀜 · 2박자마다 자리 섞임'}}}
+           3:{bpm:50,sec:120,win:.22,items:8,dist:'hard',change:6,shuf:2,d:'도형 8개 · 색이나 모양이 같은 방해 도형 · 6박자마다 타겟 바뀜 · 2박자마다 자리 섞임'}}},
+  bi:{tab:'양손 탭',title:'양손으로 박자 맞추기',
+       d:'왼손·오른손 버튼을 정해진 차례대로 소리에 맞춰 누릅니다. 양손 협응과 리듬, 순서를 기억하는 연습입니다.',
+       lv:{1:{bpm:40,sec:60,win:.35,pat:'alt',d:'왼손·오른손 번갈아 · 누를 손이 빛남 · 40 BPM · 1분'},
+           2:{bpm:45,sec:90,win:.3,pat:'seq',d:'정해진 순서 반복 (예: 왼·왼·오·오) · 빛나는 안내 없이 순서 기억 · 1분 30초'},
+           3:{bpm:50,sec:120,win:.25,pat:'cue',d:'박자마다 바뀌는 안내를 보고 누름 · 양손 동시 포함 · 2분'}}}
 };
+const HN={L:'왼손',R:'오른손',B:'양손'};
+const HAND_SVG='<svg viewBox="0 0 64 64"><path d="M20 58 C12 50 8 40 10 32 C11 28 15 28 17 31 L20 36 L20 12 C20 8 26 8 26 12 L26 30 L27 8 C27 4 33 4 33 8 L33 30 L34 10 C34 6 40 6 40 10 L40 31 L41 16 C41 12 47 12 47 16 L47 40 C47 50 42 58 34 60 Z" fill="rgba(255,255,255,.9)"/></svg>';
 const SET={mode:'sus',level:1,bpm:0,sec:0,sound:'soft',vol:.6};
 const BPMS=[{k:0,t:'레벨 기본'},{k:40,t:'40'},{k:50,t:'50'},{k:60,t:'60'},{k:80,t:'80'}];
 const TIMES=[{k:0,t:'레벨 기본'},{k:60,t:'1분'},{k:120,t:'2분'},{k:180,t:'3분'}];
@@ -222,12 +244,14 @@ function seg(id,items,key){
 }
 function renderHome(){
   const tabs=$('tabs'); tabs.innerHTML='';
-  ['sus','sel'].forEach(m=>{
+  ['sus','sel','bi'].forEach(m=>{
     const b=document.createElement('button'); b.className='tab'+(SET.mode===m?' on':''); b.textContent=MODES[m].tab;
     b.onclick=()=>{ SET.mode=m; SET.level=1; renderHome(); }; tabs.appendChild(b);
   });
   const M=MODES[SET.mode];
-  const icon=SET.mode==='sus'
+  const icon=SET.mode==='bi'
+    ? '<div style="display:flex;width:110px"><div class="hd L" style="display:flex;align-items:center;justify-content:center;width:52px;height:64px;border-radius:12px;color:#fff;font-weight:900;margin-right:6px">왼</div><div class="hd R" style="display:flex;align-items:center;justify-content:center;width:52px;height:64px;border-radius:12px;color:#fff;font-weight:900">오</div></div>'
+    : SET.mode==='sus'
     ? '<div style="width:70px;height:70px">'+shapeSVG('circle','blue')+'</div>'
     : '<div style="display:flex;width:110px;flex-wrap:wrap"><div style="width:52px;height:52px;margin:1px">'+shapeSVG('star','red')+'</div><div style="width:52px;height:52px;margin:1px;opacity:.45">'+shapeSVG('star','blue')+'</div><div style="width:52px;height:52px;margin:1px;opacity:.45">'+shapeSVG('tri','red')+'</div><div style="width:52px;height:52px;margin:1px;opacity:.45">'+shapeSVG('square','green')+'</div></div>';
   $('how').innerHTML='<div class="ic">'+icon+'</div><div><div class="t">'+M.title+'</div><div class="d">'+M.d+'</div></div>';
@@ -361,7 +385,9 @@ function startGame(){
      rec:[],off:[],extra:0,finalized:-1,running:true,paused:false,timers:[],target:randTarget(null),moved:false,lastSlot:[50,50],changes:[0]};
   $('g-title').textContent=M.tab+' · LEVEL '+SET.level+' · '+P.bpm+' BPM';
   go('game');
-  showTarget(false); layout(); setFb('소리를 듣고 박자를 느껴 보세요','mid');
+  if(S.mode==='bi'){ makeHands(); layoutBi(); cueFor(0); }
+  else { showTarget(false); layout(); }
+  setFb('소리를 듣고 박자를 느껴 보세요','mid');
   runFrom(0,4);
 }
 function runFrom(kStart,countIn){
@@ -392,10 +418,12 @@ function updateClock(k){ $('g-left').textContent='남은 시간 '+mmss((S.N-k)*S
 // 박자 k의 허용 시간이 끝남 → 안 눌렀으면 놓침, 그 다음 화면 변화
 function finalize(k){
   if(!S.running) return;
-  if(!S.rec[k]){ S.rec[k]={t:'omit'}; if(Date.now()-FBAT>600) setFb('놓쳤어요','mid'); }
+  if(S.rec[k]&&S.rec[k].t==='part'){ S.rec[k].t='half'; setFb('양손을 함께 눌러야 해요','bad'); }
+  if(!S.rec[k]){ S.rec[k]={t:'omit',need:S.hands?S.hands[k]:null}; if(Date.now()-FBAT>600) setFb('놓쳤어요','mid'); }
   S.finalized=k; updateClock(k+1);
   if(k>=S.N-1){ later(endGame,400); return; }
   const n=k+1, P=S.P;
+  if(S.mode==='bi'){ cueFor(n); return; }
   if(S.mode==='sel'){
     if(n%P.change===0){ S.target=randTarget(S.target); S.changes.push(n); showTarget(true); layout(); playAt(performance.now(),'change'); setFb('타겟이 바뀌었어요','mid'); }
     else if(P.shuf&&n%P.shuf===0) layout();
@@ -423,8 +451,66 @@ function tap(isT,el){
     setFb('타겟이 아니에요 — '+nameOf(S.target)+'를 누르세요','bad');
   }
 }
+// ── 양손 탭 ──
+function makeHands(){
+  const P=S.P, H=[];
+  if(P.pat==='alt') for(let k=0;k<S.N;k++) H.push(k%2?'R':'L');
+  else if(P.pat==='seq'){ S.pattern=pick(['LLRR','LRRL','LLR','RRL','LRLL','RLRR']); for(let k=0;k<S.N;k++) H.push(S.pattern[k%S.pattern.length]); }
+  else { let prev=''; for(let k=0;k<S.N;k++){ let h; do{ h=Math.random()<.2?'B':pick(['L','R']); }while(h==='B'&&prev==='B'); H.push(h); prev=h; } }
+  S.hands=H;
+}
+function layoutBi(){
+  const st=$('stage'); st.innerHTML='';
+  const box=document.createElement('div'); box.className='pads';
+  ['L','R'].forEach(h=>{
+    const d=document.createElement('div'); d.className='pad '+h; d.id='pad-'+h;
+    d.innerHTML=(h==='R'?HAND_SVG:HAND_SVG.replace('<svg','<svg style="transform:scaleX(-1)"'))+HN[h];
+    const fire=e=>{ if(e){ if(e.cancelable) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); } tapHand(h); };
+    if(window.PointerEvent) d.addEventListener('pointerdown',fire);
+    else { d.addEventListener('touchstart',e=>{ fire(e); },{passive:false}); d.addEventListener('mousedown',fire); }
+    box.appendChild(d);
+  });
+  st.appendChild(box);
+}
+// 다음 박자(n)에 누를 손 안내
+function cueFor(n){
+  const P=S.P, need=S.hands[n];
+  ['L','R'].forEach(h=>{ const el=$('pad-'+h); if(!el) return;
+    const on=need&&(need===h||need==='B');
+    el.classList.toggle('cue',P.pat!=='seq'&&!!on);
+    el.classList.toggle('dim',P.pat!=='seq'&&!!need&&!on); });
+  const t=$('tgt');
+  if(P.pat==='seq') t.innerHTML='<span class="lab">이 순서를 반복</span><span class="seq">'+S.pattern.split('').map(h=>'<span class="hd '+h+'">'+HN[h].replace('손','')+'</span>').join('<span style="margin:0 2px;color:#9aa2b2">›</span>')+'</span>';
+  else if(P.pat==='alt') t.innerHTML='<span class="lab">왼손 → 오른손 번갈아</span><span class="seq"><span class="hd L">왼</span><span class="hd R">오</span><span class="hd L">왼</span><span class="hd R">오</span></span>';
+  else t.innerHTML='<span class="lab">다음 박자</span>'+(need?'<span class="bigcue hd '+need+'" style="display:inline-flex;height:56px;align-items:center">'+HN[need]+'</span>':'');
+  t.classList.remove('changed');
+}
+function tapHand(h){
+  if(!S||!S.running||S.paused) return;
+  const now=performance.now();
+  const k=Math.round((now-S.T0)/S.iv), diff=now-(S.T0+k*S.iv), el=$('pad-'+h);
+  const flash=c=>{ el.classList.remove('ok','ng'); void el.offsetWidth; el.classList.add(c); };
+  if(k<S.countUntil){ setFb('준비 소리예요. 숫자가 끝나면 시작해요','mid'); return; }
+  if(k>=S.N) return;
+  if(Math.abs(diff)>S.W){ S.off.push(diff); flash('ng'); setFb(diff<0?'조금 빨라요 — 소리에 맞춰요':'조금 늦어요 — 소리에 맞춰요','mid'); return; }
+  const need=S.hands[k], r=S.rec[k];
+  if(need==='B'){
+    if(!r){ S.rec[k]={t:'part',need:'B',got:h,d:[diff]}; flash('ok'); return; }
+    if(r.t==='part'&&r.got!==h){ r.t='hit'; r.d=(r.d[0]+diff)/2; r.gap=Math.abs(r.d-diff)*2; flash('ok'); setFb('좋아요 — 양손 함께','ok'); return; }
+    S.extra++; return;
+  }
+  if(r){ S.extra++; setFb('한 박자에 한 번만 눌러요','mid'); return; }
+  if(h===need){ S.rec[k]={t:'hit',need:need,d:diff,hand:h}; flash('ok'); setFb('좋아요','ok'); }
+  else { S.rec[k]={t:'wrong',need:need,hand:h}; flash('ng'); setFb('반대 손이에요 — 이번은 '+HN[need],'bad'); }
+}
+document.addEventListener('keydown',e=>{
+  if(!S||!S.running||S.mode!=='bi'||!$('scr-game').classList.contains('on')) return;
+  const k=e.key; if(e.repeat) return;
+  if(k==='ArrowLeft'||k==='f'||k==='F'){ e.preventDefault(); tapHand('L'); }
+  if(k==='ArrowRight'||k==='j'||k==='J'){ e.preventDefault(); tapHand('R'); }
+});
 // 도형 밖을 누르면 안내만
-bindPress($('stage'),()=>{ if(S&&S.running&&!S.paused) setFb('도형을 눌러 주세요','mid'); });
+bindPress($('stage'),()=>{ if(S&&S.running&&!S.paused&&S.mode!=='bi') setFb('도형을 눌러 주세요','mid'); });
 
 function pauseGame(){
   if(!S||!S.running||S.paused) return;
@@ -438,6 +524,7 @@ function resumeGame(){
   $('pause').classList.remove('on');
   if(!S||!S.running) return;
   initAudio(); S.paused=false;
+  if(S.mode==='bi') cueFor(Math.max(0,S.finalized+1));
   runFrom(Math.max(0,S.finalized+1),2);
 }
 function quitGame(){ $('pause').classList.remove('on'); if(S){ stopAll(); endGame(true); } }
@@ -460,6 +547,7 @@ function endGame(quit){
   if(mSig!=null) tend=Math.abs(mSig)<40?'박자에 잘 맞음':'평균 '+(Math.abs(mSig)/1000).toFixed(2)+'초 '+(mSig<0?'빠르게':'늦게');
   h+='<div class="tiles">'+tile(pct(hits,done),'%','박자 맞춰 누른 비율')+tile(omit,'번','놓친 박자')+
      (S.mode==='sel'?tile(wrong,'번','다른 도형 누름'):'')+
+     (S.mode==='bi'?tile(wrong+cnt('half'),'번','반대 손·한 손만 누름'):'')+
      tile(S.off.length,'번','박자에서 벗어난 누름')+
      tile(mAbs==null?null:(mAbs/1000).toFixed(2),'초','박자와 평균 차이')+
      '<div class="tile"><div class="v" style="font-size:1.1rem;line-height:2.4rem">'+tend+'</div><div class="k">누르는 타이밍</div></div></div>';
@@ -472,6 +560,16 @@ function endGame(quit){
        (S.mode==='sel'?'<td>'+sg.filter(r=>r&&r.t==='wrong').length+'</td>':'')+'</tr>';
   });
   h+='</table>';
+  if(S.mode==='bi'){
+    h+='<h3>손별 결과</h3><table><tr><th>누를 손</th><th>박자 수</th><th>박자 맞춰 누른 비율</th><th>놓침</th><th>반대 손'+(R.some(r=>r&&r.need==='B')?' / 한 손만':'')+'</th><th>박자와 평균 차이</th></tr>';
+    ['L','R','B'].forEach(hd=>{
+      const g=R.filter(r=>r&&r.need===hd); if(!g.length) return;
+      const hh=g.filter(r=>r.t==='hit'), md=avg(hh.map(r=>Math.abs(r.d)));
+      h+='<tr><td class="l"><span class="hd '+hd+'" style="display:inline-flex;min-width:70px;height:34px;align-items:center;justify-content:center;border-radius:10px;color:#fff;font-weight:900">'+HN[hd]+'</span></td><td>'+g.length+'</td><td><b>'+pct(hh.length,g.length)+'%</b></td><td>'+g.filter(r=>r.t==='omit').length+'</td><td>'+g.filter(r=>r.t==='wrong'||r.t==='half').length+'</td><td>'+(md==null?'-':(md/1000).toFixed(2)+'초')+'</td></tr>';
+    });
+    h+='</table>';
+    if(S.pattern) h+='<div class="note">반복 순서: '+S.pattern.split('').map(x=>HN[x]).join(' → ')+'</div>';
+  }
   if(S.mode==='sel'){
     const after=[], rest=[];
     R.forEach((r,k)=>{ if(!r) return; const isAfter=S.changes.some(c=>c>0&&(k===c||k===c+1)); (isAfter?after:rest).push(r); });
@@ -480,7 +578,9 @@ function endGame(quit){
        '<tr><td class="l">타겟 바뀐 직후 2박자</td><td><b>'+(ra==null?'-':ra+'%')+'</b></td></tr>'+
        '<tr><td class="l">그 밖의 박자</td><td><b>'+(rr==null?'-':rr+'%')+'</b></td></tr></table>';
   }
-  h+='<div class="note">'+(S.mode==='sus'
+  h+='<div class="note">'+(S.mode==='bi'
+    ? '왼손과 오른손의 비율·박자 차이를 비교하면 한쪽 손의 어려움을 볼 수 있습니다. 반대 손을 누른 횟수가 많으면 순서 기억이나 좌우 구분을, 놓침이 많으면 속도나 주의 유지를 살펴보세요.'
+    : S.mode==='sus'
     ? '마지막 구간으로 갈수록 비율이 떨어지면 집중을 오래 유지하기 어려운 것으로 볼 수 있습니다.'
     : '다른 도형을 누른 횟수는 방해 자극을 걸러내는 능력, 타겟이 바뀐 직후 비율은 새 타겟으로 주의를 옮기는 속도를 보여 줍니다.')+'</div>';
   $('rep').innerHTML=h;
