@@ -109,6 +109,12 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .tc-h .at{color:var(--sub);font-weight:700}
 .tc-row{display:grid;grid-template-columns:92px 1fr;align-items:center;gap:10px;padding:5px 0}
 .tc-row .k{font-weight:800;color:var(--sub);font-size:.95rem}
+.tp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tp-b{min-height:50px;min-width:70px;padding:8px 10px;border-radius:10px;border:2px solid var(--line);background:#fff;font:inherit;font-weight:800;font-size:.95rem}
+.tp-b:active{background:#e8eaf6}
+.tp-v{min-width:150px;text-align:center;font-weight:900;font-size:1.15rem;padding:10px 12px;border-radius:10px;background:var(--pri);color:#fff}
+.tp-v.empty{background:#eef0f5;color:#9aa1ae;font-size:1rem}
+.locked .tp-b{opacity:.45;pointer-events:none}
 .tc-row .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .tc-row .seg button{min-width:0;padding:9px 4px;font-size:.95rem;white-space:nowrap}
 @media(max-width:560px){.tc-row{grid-template-columns:1fr}.tc-row .seg{grid-template-columns:repeat(2,1fr)}}
@@ -1228,21 +1234,22 @@ ACTS.push(
           return critResult(c.appts.map(a=>{const p=pl.pos(a.id);return crit(`${a.name}: ${DAYN[a.day]} ${fmt(a.start)}`,p.day===a.day&&p.start===a.start);}));
         }}));
       }},
-    { name:'시각 계산하기', instr:'준비와 이동 시간을 포함해서 각 약속의 시각을 고르세요. 여유를 두고 조금 일찍 준비하거나(30분 이내) 조금 늦게 도착한다고 잡아도 맞습니다.', hint:'',
+    { name:'시각 계산하기', instr:'준비와 이동 시간을 포함해서 각 약속의 시각을 직접 맞추세요(− + 버튼). 여유를 두고 조금 일찍 준비하거나(30분 이내) 조금 늦게 도착한다고 잡아도 맞습니다.', hint:'',
       render(body,c,d,done,api){
         document.getElementById('a-hint').textContent=c.level===3
           ?'준비 시작 = 약속 시각 − (준비 시간 + 가는 시간) / 집 도착 = 끝나는 시각 + 오는 시간 — 약속마다 다릅니다.'
           :'준비 시작 = 약속 시각에서 (준비 30분 + 가는 길 30분) 전 / 집 도착 = 약속이 끝나고 오는 길 30분 뒤';
         d.tm={}; let locked=false; const box=h('div',{class:'tcards'});
-        const opt={};
-        c.appts.forEach(a=>{const e=a.start+a.dur, p=prepAt(a), r=homeAt(a);
-          // 틀린 보기는 '너무 늦게 준비'·'너무 일찍 도착'(계산 실수)만, 여유 보기(준비 10~20분 일찍 / 도착 10~20분 늦게)는 맞음
-          opt['p'+a.id]=shufOpts(p,[a.start-a.trav,a.start-a.prep,p+30,a.start,p+10,p-10,p-20]);
-          opt['r'+a.id]=shufOpts(r,[e,r-10,r-20,e+10,r+10,r+20]);});
+        // 보기를 주지 않고 시각을 직접 맞춤: 준비 시작은 약속 시각에서, 집 도착은 끝나는 시각에서 출발해 −/+ 로 조절
+        const anchor={}; c.appts.forEach(a=>{anchor['p'+a.id]=a.start; anchor['r'+a.id]=a.start+a.dur;});
         function draw(){ box.innerHTML='';
           c.appts.forEach(a=>{
+            const step=(k,t,dm)=>h('button',{class:'tp-b',onclick:()=>{if(locked)return;
+              const v=Math.max(300,Math.min(1410,(d.tm[k]!=null?d.tm[k]:anchor[k])+dm)); d.tm[k]=v; draw();}},t);
             const row=(k,label)=>h('div',{class:'tc-row'},h('span',{class:'k'},label),
-              seg(opt[k],v=>{if(locked)return;d.tm[k]=v;draw();},d.tm[k],fmt));
+              h('div',{class:'tp'},step(k,'−1시간',-60),step(k,'−10분',-10),
+                h('div',{class:'tp-v'+(d.tm[k]==null?' empty':'')},d.tm[k]==null?fmt(anchor[k])+' (아직 안 고름)':fmt(d.tm[k])),
+                step(k,'+10분',10),step(k,'+1시간',60)));
             box.append(h('div',{class:'tcard'+(d.tm['p'+a.id]!=null&&d.tm['r'+a.id]!=null?' done':'')},
               h('div',{class:'tc-h'},h('span',{class:'dy'},DAYN[a.day]),h('span',{class:'nm'},a.name),
                 h('span',{class:'at'},rangeTxt(a.start,a.start+a.dur)+(c.level===3?` · 이동 ${a.trav}분 · 준비 ${a.prep}분`:''))),
@@ -1252,7 +1259,7 @@ ACTS.push(
         draw();
         const all=()=>c.appts.every(a=>d.tm['p'+a.id]!=null&&d.tm['r'+a.id]!=null);
         body.append(box,checker('계산 확인',{d,key:'calc',done,lock(){locked=true;box.classList.add('locked');},unlock(){locked=false;box.classList.remove('locked');},evaluate(){
-          if(!all()) return {incomplete:'아직 고르지 않은 칸이 있습니다.'};
+          if(!all()) return {incomplete:'아직 맞추지 않은 시각이 있습니다. − + 버튼으로 시각을 맞춰 주세요.'};
           // 계산한 시각이 기준, 30분 이내로 일찍 준비하거나 늦게 도착한다고 잡은 것도 맞음(여유)
           return critResult(c.appts.flatMap(a=>{
             const P=prepAt(a), R=homeAt(a), pv=d.tm['p'+a.id], rv=d.tm['r'+a.id];
