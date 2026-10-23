@@ -255,7 +255,7 @@
     body.assess-on #panel-assess { display:flex; }
     .as-list { display:flex; flex-direction:column; gap:8px; width:100%; max-width:440px; }
     .as-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border:2px solid #dde3ec; border-radius:14px; font-size:1.05rem; font-weight:700; cursor:pointer; background:#fff; }
-    .as-item input { width:22px; height:22px; }
+    .as-item input { width:22px; height:22px; flex:none; }
     .as-item small { display:block; font-weight:500; color:#777; font-size:.85rem; }
     .as-head { display:flex; justify-content:space-between; width:100%; max-width:440px; font-weight:800; color:#0d47a1; font-size:1.1rem; }
     .resp-btn.pressed { background:#0d47a1; }
@@ -596,16 +596,12 @@
     </div>
     <div class="as-list" id="as-checks"></div>
     <div class="opt-bar">
-      <span class="opt-label">숫자 따라하기 제시</span>
+      <span class="opt-label">Digit Span 제시</span>
       <button class="opt-btn active" data-group="as-pres" data-val="visual">화면</button>
       <button class="opt-btn" data-group="as-pres" data-val="audio" id="as-audio-opt">소리(원 검사 방식)</button>
     </div>
     <div class="feedback-msg err" id="as-intro-msg"></div>
     <button class="ctrl-btn btn-start" onclick="AS.begin()">평가 시작</button>
-    <div class="as-note">
-      · 숫자 따라하기: 웩슬러 지능검사 숫자 따라하기의 실시 절차(1초에 1개 제시, 길이별 2시행, 같은 길이 2시행 모두 실패 시 중지, 거꾸로 따라하기 전 연습문항)를 따랐습니다. 문항은 본 프로그램용으로 따로 만든 것입니다.<br>
-      · N-back: 자극 0.5초 제시 후 2.5초 공백(시행 간격 3초), 표적 비율 30%, 본 검사 전 피드백이 있는 연습 시행을 실시합니다.
-    </div>
   </div>
 
   <div id="as-run" style="display:none;flex-direction:column;align-items:center;gap:14px;width:100%">
@@ -1272,10 +1268,10 @@ const AS = (function () {
   var NB1 = [5,9,5,3,1,1,6,6,7,7,9,7,3,8,8,5,5,3,9,8,8];
   var NB2 = [4,1,9,1,4,5,4,9,4,7,4,7,3,8,9,5,7,9,6,4,9,4];
   var SUBS = {
-    dsf: { name: '숫자 바로 따라하기', type: 'span', dir: 'f', items: DSF, desc: '2~9자리, 16문항', purpose: '주의 폭·단기기억 용량' },
-    dsb: { name: '숫자 거꾸로 따라하기', type: 'span', dir: 'b', items: DSB, practice: ['52', '38'], desc: '2~8자리, 14문항 (연습 포함)', purpose: '정보를 머릿속에 유지하며 조작하는 작업기억' },
-    nb1: { name: '숫자 1-back', type: 'nb', n: 1, seq: NB1, desc: '20시행, 표적 6', purpose: '새 정보로 계속 갱신하는 기초 작업기억' },
-    nb2: { name: '숫자 2-back', type: 'nb', n: 2, seq: NB2, desc: '20시행, 표적 6', purpose: '부하가 높을 때의 작업기억 갱신·유지' }
+    dsf: { name: 'Digit Span 순방향', ko: '숫자 바로 따라하기', type: 'span', dir: 'f', items: DSF, desc: '2~9자리, 16문항', purpose: '주의 폭·단기기억 용량' },
+    dsb: { name: 'Digit Span 역방향', ko: '숫자 거꾸로 따라하기', type: 'span', dir: 'b', items: DSB, practice: ['52', '38'], desc: '2~8자리, 14문항 (연습 포함)', purpose: '정보를 머릿속에 유지하며 조작하는 작업기억' },
+    nb1: { name: 'N-back 1단계', ko: '숫자 1-back', type: 'nb', n: 1, seq: NB1, desc: '20시행, 표적 6', purpose: '새 정보로 계속 갱신하는 기초 작업기억' },
+    nb2: { name: 'N-back 2단계', ko: '숫자 2-back', type: 'nb', n: 2, seq: NB2, desc: '20시행, 표적 6', purpose: '부하가 높을 때의 작업기억 갱신·유지' }
   };
   var ORDER = ['dsf', 'dsb', 'nb1', 'nb2'];
   var NB_STIM = 500, NB_ISI = 2500;
@@ -1295,7 +1291,7 @@ const AS = (function () {
     var h = '';
     ORDER.forEach(function (k) {
       h += '<label class="as-item"><input type="checkbox" value="' + k + '" checked><span>' + SUBS[k].name +
-           '<small>목적: ' + SUBS[k].purpose + ' · ' + SUBS[k].desc + '</small></span></label>';
+           '<small>' + SUBS[k].ko + ' · 목적: ' + SUBS[k].purpose + ' · ' + SUBS[k].desc + '</small></span></label>';
     });
     $('as-checks').innerHTML = h;
   })();
@@ -1583,7 +1579,7 @@ const AS = (function () {
 
     var spans = queue.filter(function (k) { return SUBS[k].type === 'span'; });
     if (spans.length) {
-      h += '<div class="rep-sec">숫자 따라하기</div><table class="rep-table"><tr><th>검사</th><th>원점수</th><th>최장 폭</th><th>비고</th></tr>';
+      h += '<div class="rep-sec">Digit Span (숫자 따라하기)</div><table class="rep-table"><tr><th>검사</th><th>원점수</th><th>최장 폭</th><th>비고</th></tr>';
       spans.forEach(function (k) {
         var r = results[k];
         h += '<tr><td class="l">' + SUBS[k].name + '<br><small style="color:#777">' + SUBS[k].purpose + '</small></td><td><b>' + r.raw + '</b> / ' + r.max + '</td><td><b>' + r.longest + '</b>자리</td><td>' +
