@@ -582,6 +582,9 @@
      평가 모드
 ════════════════════════════════════ -->
 <div id="panel-assess">
+  <div style="width:100%;display:flex" class="no-print">
+    <button class="ctrl-btn btn-reset" id="as-back" onclick="AS.back()" style="padding:10px 22px">&larr; 뒤로</button>
+  </div>
 
   <div id="as-intro" style="display:flex;flex-direction:column;align-items:center;gap:14px;width:100%">
     <div class="rule-box">
@@ -620,7 +623,7 @@
       <button class="resp-btn same" id="as-resp" style="display:none" disabled>같아요!</button>
       <div class="feedback-msg" id="as-fb"></div>
     </div>
-    <button class="ctrl-btn btn-reset no-print" onclick="AS.abort()">평가 중단</button>
+    <button class="ctrl-btn btn-reset no-print" onclick="AS.abort()">처음으로</button>
   </div>
 
   <div id="as-report"></div>
@@ -1269,16 +1272,16 @@ const AS = (function () {
   var NB1 = [5,9,5,3,1,1,6,6,7,7,9,7,3,8,8,5,5,3,9,8,8];
   var NB2 = [4,1,9,1,4,5,4,9,4,7,4,7,3,8,9,5,7,9,6,4,9,4];
   var SUBS = {
-    dsf: { name: '숫자 바로 따라하기', type: 'span', dir: 'f', items: DSF, desc: '2~9자리, 16문항' },
-    dsb: { name: '숫자 거꾸로 따라하기', type: 'span', dir: 'b', items: DSB, practice: ['52', '38'], desc: '2~8자리, 14문항 (연습 포함)' },
-    nb1: { name: '숫자 1-back', type: 'nb', n: 1, seq: NB1, desc: '20시행, 표적 6' },
-    nb2: { name: '숫자 2-back', type: 'nb', n: 2, seq: NB2, desc: '20시행, 표적 6' }
+    dsf: { name: '숫자 바로 따라하기', type: 'span', dir: 'f', items: DSF, desc: '2~9자리, 16문항', purpose: '주의 폭·단기기억 용량' },
+    dsb: { name: '숫자 거꾸로 따라하기', type: 'span', dir: 'b', items: DSB, practice: ['52', '38'], desc: '2~8자리, 14문항 (연습 포함)', purpose: '정보를 머릿속에 유지하며 조작하는 작업기억' },
+    nb1: { name: '숫자 1-back', type: 'nb', n: 1, seq: NB1, desc: '20시행, 표적 6', purpose: '새 정보로 계속 갱신하는 기초 작업기억' },
+    nb2: { name: '숫자 2-back', type: 'nb', n: 2, seq: NB2, desc: '20시행, 표적 6', purpose: '부하가 높을 때의 작업기억 갱신·유지' }
   };
   var ORDER = ['dsf', 'dsb', 'nb1', 'nb2'];
   var NB_STIM = 500, NB_ISI = 2500;
 
   var queue = [], qi = 0, results = {}, timers = [], pres = 'visual', when = null, active = false;
-  var st = null, inputOn = false, input = '', respOn = false;
+  var st = null, inputOn = false, input = '', respOn = false, view = 'intro';
 
   var $ = function (id) { return document.getElementById(id); };
   var stimEl = $('as-stim'), phaseEl = $('as-phase'), ansEl = $('as-answer'), padEl = $('as-numpad'),
@@ -1292,7 +1295,7 @@ const AS = (function () {
     var h = '';
     ORDER.forEach(function (k) {
       h += '<label class="as-item"><input type="checkbox" value="' + k + '" checked><span>' + SUBS[k].name +
-           '<small>' + SUBS[k].desc + '</small></span></label>';
+           '<small>목적: ' + SUBS[k].purpose + ' · ' + SUBS[k].desc + '</small></span></label>';
     });
     $('as-checks').innerHTML = h;
   })();
@@ -1346,7 +1349,7 @@ const AS = (function () {
   }
 
   function abort() {
-    clearAll(); active = false;
+    clearAll(); active = false; view = 'intro';
     show('as-run', 'none'); show('as-report', 'none'); show('as-intro', 'flex');
   }
 
@@ -1360,12 +1363,12 @@ const AS = (function () {
   function nextSub() { qi++; startSub(); }
 
   function instruct(title, body, btn, fn) {
-    show('as-task', 'none'); show('as-inst', 'block');
+    show('as-task', 'none'); show('as-inst', 'block'); view = 'inst';
     $('as-inst-title').textContent = title;
-    $('as-inst-body').innerHTML = body;
+    $('as-inst-body').innerHTML = '<div style="font-size:.95rem;color:#555;font-weight:600;margin-bottom:8px">목적: ' + SUBS[queue[qi]].purpose + '</div>' + body;
     var go = $('as-go');
     go.textContent = btn;
-    go.onclick = function () { go.onclick = null; show('as-inst', 'none'); show('as-task', 'flex'); fn(); };
+    go.onclick = function () { go.onclick = null; view = 'task'; show('as-inst', 'none'); show('as-task', 'flex'); fn(); };
   }
 
   function resetTask() {
@@ -1572,7 +1575,7 @@ const AS = (function () {
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
   function report() {
-    clearAll(); active = false;
+    clearAll(); active = false; view = 'report';
     show('as-run', 'none');
     var d = when, ds = d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
     var h = '<div class="rule-box" style="padding:14px 18px"><div class="rule-title" style="margin:0">작업기억 평가 결과</div>' +
@@ -1583,7 +1586,7 @@ const AS = (function () {
       h += '<div class="rep-sec">숫자 따라하기</div><table class="rep-table"><tr><th>검사</th><th>원점수</th><th>최장 폭</th><th>비고</th></tr>';
       spans.forEach(function (k) {
         var r = results[k];
-        h += '<tr><td class="l">' + SUBS[k].name + '</td><td><b>' + r.raw + '</b> / ' + r.max + '</td><td><b>' + r.longest + '</b>자리</td><td>' +
+        h += '<tr><td class="l">' + SUBS[k].name + '<br><small style="color:#777">' + SUBS[k].purpose + '</small></td><td><b>' + r.raw + '</b> / ' + r.max + '</td><td><b>' + r.longest + '</b>자리</td><td>' +
              (r.stopped ? '중지 규칙 적용' : '전 문항 실시') + '</td></tr>';
       });
       h += '</table>';
@@ -1602,7 +1605,7 @@ const AS = (function () {
       h += '<div class="rep-sec">N-back</div><table class="rep-table"><tr><th>검사</th><th>맞게 누름<br>(표적)</th><th>놓침</th><th>잘못 누름<br>(비표적)</th><th>정확도</th><th>d′</th><th>평균<br>반응시간</th></tr>';
       nbs.forEach(function (k) {
         var r = results[k];
-        h += '<tr><td class="l">' + SUBS[k].name + '</td><td>' + r.h + ' / ' + r.T + '<br>(' + pctTxt(r.h, r.T) + ')</td><td>' + r.m + '</td><td>' +
+        h += '<tr><td class="l">' + SUBS[k].name + '<br><small style="color:#777">' + SUBS[k].purpose + '</small></td><td>' + r.h + ' / ' + r.T + '<br>(' + pctTxt(r.h, r.T) + ')</td><td>' + r.m + '</td><td>' +
              r.fa + ' / ' + r.N + '<br>(' + pctTxt(r.fa, r.N) + ')</td><td><b>' + Math.round(r.acc * 100) + '%</b></td><td>' + r.dp.toFixed(2) +
              '</td><td>' + (r.rt === null ? '-' : r.rt + 'ms') + '</td></tr>';
       });
@@ -1623,7 +1626,20 @@ const AS = (function () {
            ' <span style="color:#888;font-size:.85rem">' + t.seq + (t.ok ? '' : ' / ' + (t.resp || '-')) + '</span></td>';
   }
 
-  return { begin: begin, abort: abort, stop: clearAll };
+  // 뒤로: 진행 중 → 현재 검사 설명 / 설명 화면 → 이전 검사 / 첫 화면 → 훈련 모드
+  function back() {
+    if (view === 'task') { clearAll(); resetTask(); active = true; startSub(); return; }
+    if (view === 'inst') {
+      clearAll(); resetTask();
+      if (qi > 0) { qi--; delete results[queue[qi]]; active = true; startSub(); }
+      else abort();
+      return;
+    }
+    if (view === 'report') { qi = queue.length - 1; delete results[queue[qi]]; show('as-report', 'none'); show('as-run', 'flex'); active = true; startSub(); return; }
+    var tb = document.querySelector('.mode-btn[data-mode=train]'); if (tb) tb.click();
+  }
+
+  return { begin: begin, abort: abort, stop: clearAll, back: back, purpose: function (k) { return SUBS[k].purpose; } };
 })();
 
 // 모드 전환
