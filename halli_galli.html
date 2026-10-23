@@ -546,6 +546,7 @@ function ring(){
   if(!G||!G.running||G.paused) return;
   const b=$('bell'); b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),120);
   const s=G.state; if(!s||s.rung) return;
+  if(s.empty){ setFb('카드가 나오면 눌러요','mid'); return; }
   s.rung=true;
   if(s.cat==='target'){
     const rt=performance.now()-s.start;
@@ -553,9 +554,10 @@ function ring(){
     sDing(); flashTable('win');
     setFb('정답! '+FRUITS[s.info.f].nm+(G.L.mode==='pick'?'':' 5개')+' ('+(rt/1000).toFixed(2)+'초)','ok');
     clearTimeout(G.timer);
-    G.state={cat:'neutral',empty:true,rung:true};
+    G.state={cat:'neutral',empty:true,rung:true}; G.clearPending=true;
     G.timer=setTimeout(()=>{
       if(!G.running) return;
+      G.clearPending=false;
       G.table=G.table.map(()=>null); drawTable(-1);
       G.state={cat:'neutral',start:performance.now(),rung:false,info:{cat:'neutral',tot:{}},empty:true};
       G.timer=setTimeout(flip,Math.round(G.iv*.7));
@@ -590,6 +592,9 @@ function resumeGame(){
   G.paused=false; initAudio();
   // 일시정지 중 화면을 본 시간은 반응시간에 넣지 않도록 지금 장면을 새로 시작
   if(G.state&&!G.state.rung) G.state.start=performance.now();
+  if(G.clearPending){ G.clearPending=false; G.table=G.table.map(()=>null); drawTable(-1); G.state={cat:'neutral',start:performance.now(),rung:false,info:{cat:'neutral',tot:{}},empty:true}; }
+  // 카운트다운 중에 멈췄다면 숫자 표시 지우기
+  const cd=$('table').querySelector('.count'); if(cd) cd.parentNode.removeChild(cd);
   G.timer=setTimeout(flip,G.iv);
 }
 function quitGame(){ $('pause').classList.remove('on'); if(G){ G.running=false; stopTimers(); } endGame(true); }
