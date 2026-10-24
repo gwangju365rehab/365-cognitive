@@ -1678,12 +1678,13 @@ ACTS.push(
           L.push(crit('보기 좋게 하는 도배는 가장 뒤에',T(a[a.length-1])===4));
           return critResult(L,['낙상을 막는 수리가 가장 급하고, 난방·단열은 겨울 건강과 바로 이어집니다. 도배는 보기 좋게 하는 수리라 가장 나중입니다.']);
         }})); }},
-    { name:'수리 고르기', instr:'예산 안에서 이번에 할 수리를 고르세요. 앞에서 정한 우선순위를 따르세요.', hint:'우선순위가 높은 것부터 금액을 더해 보세요. 예산이 모자라는 수리만 건너뜁니다.',
+    { name:'수리 고르기', instr:'예산 안에서 이번에 할 수리를 고르세요. 앞에서 정한 우선순위를 떠올려 그대로 따르세요.', hint:'우선순위가 높은 것부터 금액을 더해 보세요. 예산이 모자라는 수리만 건너뜁니다.',
       render(body,c,d,done){
         const ord=(d.prioArr||c.R.map(r=>r.name)).map(nm=>c.R.findIndex(r=>r.name===nm));
-        const mp=multiPick(ord.map((ri,k)=>`${k+1}순위 ${c.R[ri].name} ${won(c.R[ri].cost)}`));
+        // 보기에는 순위·가격을 적지 않고 견적 순서대로 이름만 (순위는 스스로 떠올리고, 가격은 위 견적을 보고 계산)
+        const mp=multiPick(c.R.map(r=>r.name));
         body.append(mp.el,checker('확인',{d,key:'sel',done,lock:mp.lock,unlock:mp.unlock,evaluate(){
-          const s=[...mp.get()].map(k=>ord[k]); if(!s.length) return {incomplete:'하나 이상 골라 주세요.'};
+          const s=[...mp.get()]; if(!s.length) return {incomplete:'하나 이상 골라 주세요.'};
           const tot=s.reduce((a,i)=>a+c.R[i].cost,0); d.selIdx=s; d.selTot=tot;
           // 앞 순위를 건너뛰고 뒤 순위를 골랐는데, 앞 순위도 예산 안에 넣을 수 있었으면 어긋남
           const skip=[];
