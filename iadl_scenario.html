@@ -185,9 +185,13 @@ h1{margin:30px 0 0;text-align:center;font-size:1.8rem;color:#1a237e;font-weight:
 .amt{min-width:110px;text-align:center;font-variant-numeric:tabular-nums}
 .mx{border-collapse:collapse;width:100%;min-width:520px}
 .mx th,.mx td{border:1px solid var(--line);padding:4px;text-align:center;font-size:.9rem}
-.mx th{background:#f3f5fa}.mx th.rh{text-align:left;padding:6px 10px;white-space:nowrap}
-.mxb{width:100%;min-height:44px;border:none;border-radius:8px;background:#fff;font-weight:800;font-size:1.2rem;color:#fff}
-.mxb.on{background:var(--ok)}
+.mx th{background:#e8eaf6;color:#1a237e;font-size:1rem;font-weight:800;padding:8px 4px}
+.mx th.rh{text-align:left;padding:6px 12px;white-space:nowrap;background:#fff;color:var(--ink);font-size:1.02rem}
+.mx tr:nth-child(even) td,.mx tr:nth-child(even) th.rh{background:#f7f8fc}
+.mxb{width:100%;min-height:50px;border:2px dashed #b3bccb;border-radius:10px;background:#fff;font-weight:900;font-size:1.4rem;color:#c3c9d4}
+.mxb.on{background:var(--ok);border:2px solid var(--ok);color:#fff}
+.mx-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-weight:700;color:var(--sub);font-size:.95rem}
+.mx-legend .sw{display:inline-block;width:30px;height:26px;border-radius:7px;vertical-align:middle;margin-right:6px;text-align:center;font-weight:900;line-height:22px}
 .mtl{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
 .mtr{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:42px;padding:4px 10px;border-top:1px solid #eef1f5}
 .mtr.meal{background:#fff8e1}
@@ -888,9 +892,10 @@ function matrix(rows,cols){
   const draw=()=>{t.innerHTML='';
     t.append(h('tr',null,h('th',null,''),cols.map(c=>h('th',null,c))));
     rows.forEach((r,i)=>t.append(h('tr',null,h('th',{class:'rh'},r),cols.map((c,j)=>h('td',null,
-      h('button',{class:'mxb'+(on[i][j]?' on':''),'aria-label':`${c} ${r}`,onclick:()=>{if(locked)return;on[i][j]=!on[i][j];draw();}},on[i][j]?'✓':''))))));};
+      h('button',{class:'mxb'+(on[i][j]?' on':''),'aria-label':`${c} ${r}`,onclick:()=>{if(locked)return;on[i][j]=!on[i][j];draw();}},on[i][j]?'✓':'+'))))));};
   draw();
-  return {el:h('div',{class:'cal-wrap'},t),get:()=>on.map(r=>r.slice()),lock(){locked=true;t.classList.add('locked');},unlock(){locked=false;t.classList.remove('locked');}};
+  const legend=h('div',{class:'mx-legend',html:'<span><span class="sw" style="border:2px dashed #b3bccb;color:#c3c9d4">+</span>아직 안 함 (누르면 표시)</span><span><span class="sw" style="background:#2e7d32;color:#fff;border:2px solid #2e7d32">✓</span>하기로 함 (다시 누르면 지움)</span>'});
+  return {el:h('div',{style:'display:flex;flex-direction:column;gap:8px'},legend,h('div',{class:'cal-wrap'},t)),get:()=>on.map(r=>r.slice()),lock(){locked=true;t.classList.add('locked');},unlock(){locked=false;t.classList.remove('locked');}};
 }
 // 확인 버튼: 첫 시도와 최종 결과를 기록하고, 틀리면 '고치기'로 이어서 수정
 function checker(label,o){
@@ -1905,7 +1910,7 @@ ACTS.push(
   situation(c){ return `<p>${c.H} 연휴(${c.D.length}일간) 가족 행사:</p><ul>${c.seq.map((e,i)=>`<li>${c.D[i]}: ${e[0]}</li>`).join('')}</ul>
     <p>건강관리 필요 사항: 매일 정해진 시간에 약 복용(하루 ${c.nMed}회), 하루 30분 가벼운 운동, 충분한 휴식(과로 금지)`+(c.level===3?', 매일 혈압 재기':'')+`, 저염식 식단 유지</p>`; },
   steps:[
-    { name:'건강관리표', instr:'연휴 동안 할 건강관리를 표에 표시하세요.', hint:'칸을 누르면 표시되고, 다시 누르면 지워집니다.',
+    { name:'건강관리표', instr:'연휴 동안 날마다 할 건강관리를 표에 표시하세요.', hint:'왼쪽 할 일과 위쪽 날짜가 만나는 칸을 누르면 ✓ 표시됩니다. 예) 첫째 날에 아침 약을 먹는다면 "아침 약" 줄의 "첫째 날" 칸을 누릅니다.',
       render(body,c,d,done){ const mx=matrix(c.rows,c.D);
         body.append(mx.el,checker('표 확인',{d,key:'hm',done,lock:mx.lock,unlock:mx.unlock,evaluate(){
           const g=mx.get(); const cnt=i=>g[i].filter(Boolean).length, N=c.D.length;
