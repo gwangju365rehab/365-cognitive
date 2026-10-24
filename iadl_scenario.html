@@ -897,6 +897,26 @@ function matrix(rows,cols){
   const legend=h('div',{class:'mx-legend',html:'<span><span class="sw" style="border:2px dashed #b3bccb;color:#c3c9d4">+</span>아직 안 함 (누르면 표시)</span><span><span class="sw" style="background:#2e7d32;color:#fff;border:2px solid #2e7d32">✓</span>하기로 함 (다시 누르면 지움)</span>'});
   return {el:h('div',{style:'display:flex;flex-direction:column;gap:8px'},legend,h('div',{class:'cal-wrap'},t)),get:()=>on.map(r=>r.slice()),lock(){locked=true;t.classList.add('locked');},unlock(){locked=false;t.classList.remove('locked');}};
 }
+// 칸마다 알맞은 방법을 고르는 표: 칸을 누르면 그 줄의 선택지가 뜸
+function choiceGrid(rows,cols,colSub,opts){
+  const val=rows.map(()=>cols.map(()=>null)); let locked=false; const t=h('table',{class:'mx'});
+  const draw=()=>{t.innerHTML='';
+    t.append(h('tr',null,h('th',null,''),cols.map((c,j)=>h('th',{html:c+(colSub?'<div style="font-size:.78rem;font-weight:600;color:#5b6375">'+colSub[j]+'</div>':'')}))));
+    rows.forEach((r,i)=>t.append(h('tr',null,h('th',{class:'rh'},r),cols.map((c,j)=>h('td',null,
+      h('button',{class:'mxb'+(val[i][j]?' on':''),style:val[i][j]?'font-size:.95rem':'font-size:.9rem',onclick:()=>{if(!locked) ask(i,j);}},val[i][j]||'+ 고르기'))))));};
+  function ask(i,j){
+    const ov=h('div',{class:'cg-ov',style:'position:fixed;left:0;right:0;top:0;bottom:0;z-index:300;background:rgba(30,35,50,.45);display:flex;align-items:center;justify-content:center;padding:16px'});
+    const close=()=>ov.parentNode&&ov.parentNode.removeChild(ov);
+    const box=h('div',{style:'background:#fff;border-radius:16px;padding:18px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:10px'},
+      h('div',{style:'font-weight:900;font-size:1.15rem;text-align:center'},`${cols[j]} · ${rows[i]}`),
+      colSub?h('div',{style:'text-align:center;color:#5b6375;font-weight:700'},colSub[j]):null,
+      opts[i].map(o=>h('button',{class:'big-btn '+(val[i][j]===o?'b-pri':'b-sec'),onclick:()=>{val[i][j]=o;close();draw();}},o)),
+      h('button',{class:'big-btn b-sec',style:'color:#5b6375',onclick:()=>{close();}},'닫기'));
+    ov.append(box); ov.onclick=e=>{if(e.target===ov) close();}; document.body.appendChild(ov);
+  }
+  draw();
+  return {el:h('div',{class:'cal-wrap'},t),get:()=>val.map(r=>r.slice()),lock(){locked=true;t.classList.add('locked');},unlock(){locked=false;t.classList.remove('locked');}};
+}
 // 확인 버튼: 첫 시도와 최종 결과를 기록하고, 틀리면 '고치기'로 이어서 수정
 function checker(label,o){
   const out=h('div'); let tries=0;
@@ -1905,20 +1925,33 @@ ACTS.push(
     const D=['첫째 날','둘째 날','셋째 날','넷째 날','다섯째 날'].slice(0,seq.length);
     const rows=level===1?['아침 약','저녁 약']:['아침 약','점심 약','저녁 약'];
     rows.push('30분 가벼운 운동','휴식 시간'); if(level===3) rows.push('혈압 재기');
-    return {H,D,seq:seq.map(k=>EV[k]),rows,nMed:level===1?2:3};
+    return {H,D,keys:seq,seq:seq.map(k=>EV[k]),rows,nMed:level===1?2:3};
   },
   situation(c){ return `<p>${c.H} 연휴(${c.D.length}일간) 가족 행사:</p><ul>${c.seq.map((e,i)=>`<li>${c.D[i]}: ${e[0]}</li>`).join('')}</ul>
     <p>건강관리 필요 사항: 매일 정해진 시간에 약 복용(하루 ${c.nMed}회), 하루 30분 가벼운 운동, 충분한 휴식(과로 금지)`+(c.level===3?', 매일 혈압 재기':'')+`, 저염식 식단 유지</p>`; },
   steps:[
-    { name:'건강관리표', instr:'연휴 동안 날마다 할 건강관리를 표에 표시하세요.', hint:'왼쪽 할 일과 위쪽 날짜가 만나는 칸을 누르면 ✓ 표시됩니다. 예) 첫째 날에 아침 약을 먹는다면 "아침 약" 줄의 "첫째 날" 칸을 누릅니다.',
-      render(body,c,d,done){ const mx=matrix(c.rows,c.D);
-        body.append(mx.el,checker('표 확인',{d,key:'hm',done,lock:mx.lock,unlock:mx.unlock,evaluate(){
-          const g=mx.get(); const cnt=i=>g[i].filter(Boolean).length, N=c.D.length;
-          d.hmTxt=c.rows.map((r,i)=>`${r} ${cnt(i)}일`).join(', ');
-          const medI=c.rows.map((r,i)=>r.indexOf('약')>=0?i:-1).filter(i=>i>=0);
-          const L=[crit(`약 하루 ${c.nMed}회, ${N}일 모두`,medI.every(i=>cnt(i)===N)),crit(`30분 운동 ${N}일 모두`,cnt(c.rows.indexOf('30분 가벼운 운동'))===N),crit(`휴식 시간 ${N}일 모두`,cnt(c.rows.indexOf('휴식 시간'))===N)];
-          if(c.rows.indexOf('혈압 재기')>=0) L.push(crit(`혈압 재기 ${N}일 모두`,cnt(c.rows.indexOf('혈압 재기'))===N));
-          return critResult(L);
+    { name:'건강관리표', instr:'연휴 동안 날마다 건강관리를 어떻게 할지 칸마다 고르세요.', hint:'칸을 누르면 고를 수 있는 방법이 나옵니다. 그날 일정(이동이 긴 날, 밖에 나가 있는 날, 일이 많은 날)을 보고 알맞게 바꿔 보세요.',
+      render(body,c,d,done){
+        // 줄마다 선택지와 날짜별 알맞은 답 (밖에 있는 날 = 이동·나들이·방문)
+        const OUT=['go','back','trip','visit'], LONG=['go','back'], BUSY=['go','back','rite'];
+        const R=c.rows.map(r=>{
+          if(r.indexOf('약')>=0) return {opts:['제시간에 먹기','챙겨 가서 먹기','건너뛰기'],ok:k=>r==='점심 약'&&OUT.indexOf(k)>=0?['챙겨 가서 먹기']:['제시간에 먹기','챙겨 가서 먹기'],
+            why:k=>r==='점심 약'&&OUT.indexOf(k)>=0?'밖에 있는 날이라 약을 챙겨 가야 합니다':'약은 거르지 않습니다'};
+          if(r.indexOf('운동')>=0) return {opts:['30분 걷기','짧게 스트레칭','안 함'],ok:k=>LONG.indexOf(k)>=0?['짧게 스트레칭']:['30분 걷기'],
+            why:k=>LONG.indexOf(k)>=0?'이동이 긴 날은 휴게소에서 짧게 스트레칭':'30분 가벼운 운동을 합니다'};
+          if(r.indexOf('휴식')>=0) return {opts:['평소대로 쉬기','더 길게 쉬기','쉬지 않음'],ok:k=>BUSY.indexOf(k)>=0?['더 길게 쉬기']:['평소대로 쉬기','더 길게 쉬기'],
+            why:k=>BUSY.indexOf(k)>=0?'이동이나 일이 많은 날은 더 길게 쉽니다':'과로하지 않게 쉽니다'};
+          return {opts:['재기','안 재기'],ok:()=>['재기'],why:()=>'매일 혈압을 잽니다'};
+        });
+        const sub=c.seq.map(e=>e[0].replace(/\s*\(.*\)/,''));
+        const g=choiceGrid(c.rows,c.D,sub,R.map(x=>x.opts));
+        body.append(g.el,checker('표 확인',{d,key:'hm',done,lock:g.lock,unlock:g.unlock,evaluate(){
+          const v=g.get(); if(v.some(r=>r.some(x=>!x))) return {incomplete:'아직 고르지 않은 칸이 있습니다.'};
+          d.hmTxt=c.rows.map((r,i)=>`${r}: `+v[i].map((x,j)=>`${j+1}일 ${x}`).join(', ')).join(' / ');
+          return critResult(c.rows.map((r,i)=>{
+            const bad=c.keys.map((k,j)=>R[i].ok(k).indexOf(v[i][j])>=0?null:`${c.D[j]}(${sub[j]}) — ${R[i].why(k)}`).filter(Boolean);
+            return crit(r+(bad.length?': '+bad.join(' / '):''),!bad.length);
+          }));
         }})); }},
     { name:'날짜별 어려움', instr:'날마다 예상되는 어려움에 알맞은 대처를 고르세요.', hint:'',
       render(body,c,d,done){
