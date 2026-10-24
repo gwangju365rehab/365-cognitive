@@ -1953,12 +1953,22 @@ ACTS.push(
             return crit(r+(bad.length?': '+bad.join(' / '):''),!bad.length);
           }));
         }})); }},
-    { name:'날짜별 어려움', instr:'날마다 예상되는 어려움에 알맞은 대처를 고르세요.', hint:'',
+    { name:'날짜별 어려움', instr:'날마다 예상되는 어려움을 찾고, 그 어려움을 줄이는 방법을 고르세요.', hint:'칸을 누르면 고를 수 있는 내용이 나옵니다. 어려움과 방법 모두 같은 목록에서 고릅니다.',
       render(body,c,d,done){
-        d.df={}; const r=rowsAsk(c.seq.map((q,i)=>({key:'q'+i,label:`${c.D[i]} (${q[0]})`,options:shuffle([q[1]].concat(q[2]))})),d.df);
-        body.append(r.el,checker('확인',{d,key:'dfc',done,lock:r.lock,unlock:r.unlock,evaluate(){
-          if(!r.all()) return {incomplete:'모든 날의 대처를 골라 주세요.'};
-          return critResult(c.seq.map((q,i)=>crit(`${c.D[i]}: ${q[1]}`,d.df['q'+i]===q[1])));
+        // 모든 날이 같은 목록에서 고름: ① 예상되는 어려움 찾기 → ② 그에 맞는 보상 방법
+        const PB={go:'오래 앉아 이동해 피곤하고 몸이 뻣뻣함',back:'오래 앉아 이동해 피곤하고 몸이 뻣뻣함',rite:'오래 서서 일해 과로하기 쉬움',trip:'오래 걸어 지치기 쉬움',visit:'늦게까지 머물러 쉬지 못함'};
+        const ST={go:'중간 휴게소에서 쉬며 스트레칭한다',back:'중간 휴게소에서 쉬며 스트레칭한다',rite:'앉아서 할 수 있는 일을 맡고 중간에 쉰다',trip:'가까운 곳을 고르고 쉴 곳을 미리 알아 둔다',visit:'방문 시간을 미리 짧게 정해 둔다'};
+        const uniq=a=>a.filter((x,i)=>a.indexOf(x)===i);
+        const PBO=uniq(Object.keys(PB).map(k=>PB[k])).concat(['특별한 어려움 없음']), STO=uniq(Object.keys(ST).map(k=>ST[k]));
+        const sub=c.seq.map(e=>e[0].replace(/\s*\(.*\)/,''));
+        const g=choiceGrid(['예상되는 어려움','줄이는 방법'],c.D,sub,[PBO,STO]);
+        body.append(g.el,checker('확인',{d,key:'dfc',done,lock:g.lock,unlock:g.unlock,evaluate(){
+          const v=g.get(); if(v.some(r=>r.some(x=>!x))) return {incomplete:'모든 날의 어려움과 방법을 골라 주세요.'};
+          return critResult(c.keys.map((k,j)=>{
+            const okP=v[0][j]===PB[k], okS=v[1][j]===ST[k];
+            const msg=okP&&okS?[`${PB[k]} → ${ST[k]}`]:[].concat(okP?[]:[`어려움은 '${PB[k]}'`],okS?[]:[`방법은 '${ST[k]}'`]);
+            return crit(`${c.D[j]}(${sub[j]}): `+msg.join(' / '),okP&&okS);
+          }));
         }}));
       }},
     { name:'명절 음식', instr:'저염식을 지키기 위한 명절 음식 전략으로 알맞은 것을 모두 고르세요.', hint:'',
