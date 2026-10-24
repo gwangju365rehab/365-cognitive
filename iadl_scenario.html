@@ -1699,8 +1699,17 @@ ACTS.push(
       render(body,c,d,done){ const days=d.selIdx.reduce((a,i)=>a+c.R[i].days,0); d.dy={};
         const r=rowsAsk([{key:'q',label:'수리 기간',options:shufOpts(days,[days+1,days-1>0?days-1:days+2,days+2,days+3]),fmt:v=>v+'일'}],d.dy);
         body.append(r.el,checker('확인',{d,key:'dayc',done,lock:r.lock,unlock:r.unlock,evaluate(){
-          if(!r.all()) return {incomplete:'답을 골라 주세요.'}; const ok=d.dy.q===days;
-          return {ok,title:ok?'맞습니다.':'다시 계산해 보세요.',lines:[`${d.selIdx.map(i=>c.R[i].days+'일').join(' + ')} = <b>${days}일</b>`]};
+          if(!r.all()) return {incomplete:'답을 골라 주세요.'}; const ans=d.dy.q, ok=ans===days;
+          // 틀린 이유: 고른 수리만 더해야 하는데 무엇을 놓쳤는지 알려줌
+          const allDays=c.R.reduce((a,x)=>a+x.days,0), lines=[];
+          if(!ok){
+            lines.push(`고른 답: ${ans}일`);
+            if(ans===allDays&&allDays!==days) lines.push('고르지 않은 수리까지 모두 더했습니다. 이번에 하기로 고른 수리만 더해야 합니다.');
+            else if(ans>days) lines.push(`${ans-days}일 많게 계산했습니다. 고른 수리의 기간만 하나씩 더해 보세요.`);
+            else lines.push(`${days-ans}일 적게 계산했습니다. 빠뜨린 수리가 없는지 확인해 보세요.`);
+          }
+          lines.push(`고른 수리: ${d.selIdx.map(i=>`${c.R[i].name} ${c.R[i].days}일`).join(' + ')} = <b>${days}일</b>`);
+          return {ok,title:ok?'맞습니다.':'다시 계산해 보세요.',lines};
         }})); }},
     { name:'추가 비용', instr:'', hint:'숫자를 눌러 입력하세요.',
       render(body,c,d,done,api){ const tot=d.selTot, add=Math.round(tot*(100+c.extra)/100);
