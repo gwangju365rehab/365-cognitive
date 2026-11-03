@@ -1,0 +1,5 @@
+# Cloudflare Worker 설정 (뉴스 읽기·사회적 상호작용 AI 중계 서버)
+# GitHub 사이트(GitHub Pages)와는 상관없고, Cloudflare가 이 파일을 보고 중계 서버만 올립니다.
+name = "365-cognitive"
+main = "proxy/news-worker.js"
+compatibility_date = "2026-10-01"
