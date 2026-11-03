@@ -73,6 +73,27 @@ details.ev ul{margin:8px 0 0;padding-left:20px;font-size:.92rem;color:var(--sub)
 .opt:disabled{cursor:default;color:var(--ink)}
 .opt.wrong:disabled{color:#8e1b1b}
 .bubble+.bubble{margin-top:8px}
+/* 대화 기술: 메신저처럼 주고받는 대화 */
+.scene.chatmode{display:block;padding:14px}
+.chat-sit{background:#f3f5fa;border-radius:12px;padding:8px 12px;color:var(--sub);font-weight:700;margin-bottom:10px}
+.chat-sit b{color:var(--ink)}
+.chat{display:flex;flex-direction:column}
+.msg{display:flex;align-items:flex-end;max-width:92%;margin:6px 0}
+.msg.them{align-self:flex-start}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.msg .av{flex:none;width:58px;height:58px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:#fff}
+.msg .av.big{width:110px;height:110px;border-radius:18px}
+.msg .av img,.msg .av svg{display:block;width:100%;height:100%;object-fit:cover}
+.msg .col{display:flex;flex-direction:column;margin:0 8px}
+.msg.me .col{align-items:flex-end}
+.msg .nm{font-size:.82rem;font-weight:800;color:var(--sub);margin-bottom:2px}
+.msg .bb{padding:10px 14px;border-radius:16px;font-size:1.18rem;font-weight:700;line-height:1.5}
+.msg.them .bb{background:#fff;border:2px solid #cfd6e0;border-bottom-left-radius:4px}
+.msg.me .bb{background:#e8f5e9;border:2px solid #a5d6a7;border-bottom-right-radius:4px}
+.msg.me.wrong .bb{background:#fdecea;border-color:#ef9a9a;text-decoration:line-through;text-decoration-color:rgba(198,40,40,.5)}
+.msg .bb.act{background:#f5f5f5!important;border-color:#e0e0e0!important;color:#555;font-style:italic;font-weight:600}
+.msg.react .bb{background:#fff4f4;border-color:#ef9a9a}
+.chat-q .opt::before{content:'나: ';color:#2e7d32;font-weight:900}
 .fb{border-radius:14px;padding:12px 16px;font-size:1.08rem;font-weight:700;display:none}
 .fb.on{display:block}
 .fb.ok{background:var(--ok-soft);color:#1b5e20;border:2px solid #a5d6a7}
@@ -689,6 +710,7 @@ function clearFb(){ $('fb').className='fb'; $('next').classList.remove('on'); }
 function show(){
   clearFb();
   const it=S.items[S.i];
+  $('scene').className='scene'; $('opts').classList.remove('chat-q');
   $('g-pg').textContent=(S.i+1)+' / '+S.items.length;
   S.first=true; S.tStart=Date.now();
   if(it.kind==='face'){
@@ -711,25 +733,46 @@ function show(){
     setOpts(opts,false,(idx,b)=>answer(opts[idx]===c.ans,b,()=>'<b>'+c.ans+'</b> — '+c.why,()=>'다시 볼까요? 인물이 무엇을 알고, 무엇을 원하는지 생각해 보세요.',{cat:'story'}));
   } else showTurn();
 }
+// 대화 기술: 앞에서 주고받은 말을 메신저처럼 쌓아서 보여 줌
+function isActTxt(t){ return /^\(.*\)$/.test(String(t).trim()); }
+function msgHTML(m,big){
+  const them=m.who==='them', d=S.items[S.i].c;
+  const av=them?'<div class="av'+(big?' big':'')+'">'+faceSVG(d.p,m.e||'neutral',1)+'</div>':'';
+  const act=m.act||isActTxt(m.t);
+  return '<div class="msg '+(them?'them':'me')+(m.wrong?' wrong':'')+(m.react?' react':'')+'">'+av+
+    '<div class="col"><div class="nm">'+(them?d.who:'나')+'</div><div class="bb'+(act?' act':'')+'">'+(act?m.t:'"'+m.t+'"')+'</div></div></div>';
+}
+function drawChat(extra){
+  const d=S.items[S.i].c, sit=d.turns[0].sit||'';
+  const all=S.chat.concat(extra||[]);
+  // 지금 표정을 읽어야 하는 상대 말(가장 마지막 상대 말)은 얼굴을 크게
+  let lastThem=-1; all.forEach((m,i)=>{ if(m.who==='them') lastThem=i; });
+  $('scene').className='scene chatmode';
+  $('scene').innerHTML='<div class="chat-sit"><b>'+d.title+'</b>'+(d.turns.length>1?' ('+(S.turn+1)+'/'+d.turns.length+')':'')+(sit?'<br>'+sit:'')+'</div>'+
+    '<div class="chat">'+all.map((m,i)=>msgHTML(m,i===lastThem)).join('')+'</div>';
+}
 function showTurn(){
   const it=S.items[S.i], d=it.c, tn=d.turns[S.turn];
   S.first=true; S.tStart=Date.now();
-  const who=d.who+' · '+d.title+(d.turns.length>1?' ('+(S.turn+1)+'/'+d.turns.length+')':'');
-  const base=react=>{ $('scene').innerHTML=react?sceneHTML(d.p,react[0],react[1],who,tn.sit||'',tn.say,tn.act,null,'상대 반응: '+react[2]):sceneHTML(d.p,tn.e,tn.t==null?.8:tn.t,who,tn.sit||'',tn.say,tn.act); };
-  base(null);
-  $('qtxt').textContent='나라면 어떻게 할까요?';
+  if(S.turn===0) S.chat=[];
+  S.chat.push({who:'them',t:tn.say,e:tn.e,act:tn.act});
+  drawChat();
+  $('qtxt').textContent='나라면 뭐라고 할까요?';
   const opts=shuffle(tn.o);
   setOpts(opts,false,(idx,b)=>{
     const o=opts[idx];
     if(o.ok){
-      base(null);
+      S.chat.push({who:'me',t:o.t});
+      drawChat();
       answer(true,b,()=>'<span class="tag">'+ESI[o.ok][0]+'</span>좋아요. 상황에 맞는 말이에요.',null,{skill:o.ok,dlg:true});
     } else {
-      // 상대 반응 보여 주기
-      base(REACT[o.x]||['sad',.5,'']);
+      // 내가 고른 말과 상대 반응을 잠깐 보여 줌 (기록에는 남기지 않음)
+      const r=REACT[o.x]||['sad',.5,''];
+      drawChat([{who:'me',t:o.t,wrong:true}].concat(r[2]?[{who:'them',t:r[2],e:r[0],act:true,react:true}]:[]));
       answer(false,b,null,()=>'<span class="tag">'+ESI[o.x][0]+'</span>'+o.why+' 다른 답을 골라 보세요.',{skill:o.x,dlg:true});
     }
   });
+  $('opts').classList.add('chat-q');
 }
 function answer(ok,btn,okMsg,badMsg,meta){
   if(btn.disabled) return;
