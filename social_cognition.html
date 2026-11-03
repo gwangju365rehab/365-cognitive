@@ -131,10 +131,9 @@ details.ev ul{margin:8px 0 0;padding-left:20px;font-size:.92rem;color:var(--sub)
   <div class="tabs" id="tabs"></div>
   <div class="panel"><div class="how" id="how"></div></div>
   <div class="panel"><div class="lbl">난이도</div><div id="levels"></div></div>
-  <div class="panel" id="src-panel"><div class="lbl">문제</div><div class="seg" id="src"></div><div class="note" id="src-note" style="margin-top:6px"></div></div>
   <div id="ai-wait" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;z-index:250;background:rgba(238,241,246,.95);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:16px">
-    <div style="font-size:1.3rem;font-weight:900;margin-bottom:8px" id="ai-wait-t">새 문제를 만드는 중이에요</div>
-    <div class="note" id="ai-wait-d">10~20초 정도 걸려요.</div>
+    <div style="font-size:1.3rem;font-weight:900;margin-bottom:8px" id="ai-wait-t">문제를 준비하고 있어요</div>
+    <div class="note" id="ai-wait-d">잠시만 기다려 주세요.</div>
   </div>
   <div class="panel">
     <details class="ev"><summary>근거와 사용 원칙</summary>
@@ -552,7 +551,7 @@ const MODS={
       lv:{1:'부탁·인사·마무리 · 장면 4개',2:'공감·차례 주고받기·요청 · 장면 4개',3:'거절·불만 말하기·확인·사과 · 장면 4개'},
       steps:[['멈추기','바로 말하지 말고 한 번 멈추기'],['상대 보기','표정과 상황 살피기'],['목적 생각','이 대화로 무엇을 하려는가'],['말하기','정중하게, 알맞은 길이로']]}
 };
-const SET={mod:'m1',level:1,pred:null,src:'base'};
+const SET={mod:'m1',level:1,pred:null};
 const PRED=[{k:'90',t:'거의 다'},{k:'70',t:'대부분'},{k:'40',t:'절반 정도'},{k:'0',t:'절반 미만'}];
 
 function renderHome(){
@@ -564,7 +563,6 @@ function renderHome(){
   const M=MODS[SET.mod];
   const ic=SET.mod==='m1'?faceSVG('yw','happy',1):SET.mod==='m2'?faceSVG('gp','neutral',1):faceSVG('mw','sad',.5);
   $('how').innerHTML='<div class="ic">'+ic+'</div><div><div class="t">'+M.title+'</div><div class="d">'+M.d+'</div></div>';
-  renderSrc();
   const lv=$('levels'); lv.innerHTML='';
   [1,2,3].forEach(n=>{
     const b=document.createElement('button'); b.className='lv-btn lv'+n+(SET.level===n?' on':'');
@@ -577,18 +575,6 @@ function aiProxy(){ return (typeof AI_PROXY_URL!=='undefined'&&AI_PROXY_URL)||''
 function aiKey(){ try{ return localStorage.getItem('anthropic_api_key')||''; }catch(e){ return ''; } }
 function aiReady(){ return !!(aiProxy()||aiKey()); }
 function aiNeeded(){ return !(SET.mod==='m1'&&SET.level<3); } // 표정 사진 문제는 원래 매번 무작위
-function renderSrc(){
-  const box=$('src'), note=$('src-note'); box.innerHTML='';
-  if(!aiNeeded()){ $('src-panel').style.display='none'; return; }
-  $('src-panel').style.display='';
-  [['base','기본 문제'],['ai','AI로 새로 만들기']].forEach(x=>{
-    const b=document.createElement('button'); b.textContent=x[1]; b.className=SET.src===x[0]?'on':'';
-    if(x[0]==='ai'&&!aiReady()) b.disabled=true;
-    b.onclick=()=>{ SET.src=x[0]; renderSrc(); }; box.appendChild(b);
-  });
-  if(!aiReady()){ SET.src='base'; note.textContent='AI 문제를 쓰려면 API 키가 필요합니다. 뉴스 읽기 훈련에서 키를 한 번 입력하면 여기서도 같이 쓰입니다.'; }
-  else note.textContent=SET.src==='ai'?'할 때마다 새로운 상황으로 문제를 만듭니다. 만들지 못하면 기본 문제로 진행합니다.':'미리 만들어 둔 문제로 진행합니다.';
-}
 async function aiCall(prompt){
   const body=JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]});
   const direct=()=>fetch('https://api.anthropic.com/v1/messages',{method:'POST',body:body,headers:{'Content-Type':'application/json','x-api-key':aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}}).then(r=>r.json());
@@ -671,17 +657,13 @@ function toStrategy(){
 let S=null;
 async function startSession(){
   const m=SET.mod, L=SET.level;
-  let items, aiNote='';
-  if(SET.src==='ai'&&aiNeeded()&&aiReady()){
-    const w=$('ai-wait'); w.style.display='flex'; $('ai-wait-t').textContent='새 문제를 만드는 중이에요'; $('go-btn').disabled=true;
+  let items;
+  // 매번 새 상황으로 문제를 만들고, 못 만들면 미리 만든 문제로 조용히 대신함
+  if(aiNeeded()&&aiReady()){
+    const w=$('ai-wait'); w.style.display='flex'; $('go-btn').disabled=true;
     let r=null; try{ r=await aiItems(m,L); }catch(e){ r=null; }
-    $('go-btn').disabled=false;
-    if(!r||!r.made){ $('ai-wait-t').textContent='새 문제를 만들지 못해 기본 문제로 진행합니다'; await new Promise(f=>setTimeout(f,1600)); }
-    else if(r.made<r.need) aiNote=' · AI '+r.made+'문제 + 기본 '+(r.need-r.made)+'문제';
-    else aiNote=' · AI 새 문제';
-    w.style.display='none';
-    const arr=r?r.items:null;
-    if(arr) items=arr.map(x=>({kind:m==='m1'?'ctx':m==='m2'?'story':'dlg',c:x}));
+    $('go-btn').disabled=false; w.style.display='none';
+    if(r&&r.items) items=shuffle(r.items).map(x=>({kind:m==='m1'?'ctx':m==='m2'?'story':'dlg',c:x}));
   }
   if(!items){
     if(m==='m1') items=genM1(L);
@@ -689,7 +671,7 @@ async function startSession(){
     else items=shuffle(M3[L]).map(x=>({kind:'dlg',c:x}));
   }
   S={mod:m,level:L,pred:SET.pred,items:items,i:0,turn:0,res:[],skillMiss:{},skillOk:{},done:false,t0:Date.now()};
-  $('g-title').textContent=MODS[m].tab.replace(/^\d\. /,'')+' · LEVEL '+L+aiNote;
+  $('g-title').textContent=MODS[m].tab.replace(/^\d\. /,'')+' · LEVEL '+L;
   go('game'); show();
 }
 function sceneHTML(pid,emo,t,who,sit,say,isAct,opt,react){
