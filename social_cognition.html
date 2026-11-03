@@ -358,7 +358,9 @@ function spreadPeople(items){
   let pool=items.slice(), out=[];
   while(pool.length){
     const prev=out.length?pOf(out[out.length-1]):null;
-    let i=pool.findIndex(x=>pOf(x)!==prev); if(i<0) i=0;
+    // 남은 수가 가장 많은 사람부터 (앞사람과 다른 사람 중에서) 배치해야 끝에서 겹치지 않음
+    const cnt={}; pool.forEach(x=>{ cnt[pOf(x)]=(cnt[pOf(x)]||0)+1; });
+    let i=-1; pool.forEach((x,k)=>{ if(pOf(x)!==prev&&(i<0||cnt[pOf(x)]>cnt[pOf(pool[i])])) i=k; }); if(i<0) i=0;
     out.push(pool.splice(i,1)[0]);
   }
   return out;
