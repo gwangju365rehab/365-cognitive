@@ -199,6 +199,7 @@
 
     @media(max-width:480px) { .topic-grid { grid-template-columns: repeat(2,1fr); } }
   </style>
+<script src="ai_config.js"></script>
 </head>
 <body>
 <button id="home-btn" onclick="goHome()">← 홈</button>
@@ -400,7 +401,7 @@ window.addEventListener('popstate', (e) => {
 
 /* ═══ API 키 ═══ */
 // 중계 서버 주소: 설정되어 있으면 기기마다 키를 넣지 않아도 됨 (키는 중계 서버에만 저장)
-const PROXY_URL = '';
+const PROXY_URL = (typeof AI_PROXY_URL!=='undefined' && AI_PROXY_URL) || '';
 function hasAccess() { return !!PROXY_URL || !!getKey(); }
 function getKey() {
   return localStorage.getItem('anthropic_api_key') || '';
