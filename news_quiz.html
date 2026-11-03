@@ -509,15 +509,18 @@ document.querySelectorAll('#count-opts .opt-btn').forEach(b => {
 
 /* ═══ API 호출 ═══ */
 async function callAPI(prompt, maxTokens=1500) {
-  const res = await fetch(PROXY_URL || 'https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: PROXY_URL ? { 'Content-Type':'application/json' } :
-      { 'Content-Type':'application/json', 'x-api-key': getKey(),
-        'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-    body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens: maxTokens,
-      messages:[{ role:'user', content: prompt }] })
-  });
-  const data = await res.json();
+  const body = JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens: maxTokens,
+      messages:[{ role:'user', content: prompt }] });
+  const direct = () => fetch('https://api.anthropic.com/v1/messages', { method:'POST', body,
+      headers: { 'Content-Type':'application/json', 'x-api-key': getKey(),
+        'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' } }).then(r=>r.json());
+  let data;
+  if (PROXY_URL) {
+    try { data = await fetch(PROXY_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body }).then(r=>r.json()); }
+    catch (e) { data = { error:{ message:'중계 서버에 연결하지 못했습니다.' } }; }
+    // 중계 서버가 안 되면 이 기기에 저장된 키로 한 번 더 시도
+    if (data.error && getKey()) data = await direct();
+  } else data = await direct();
   if (data.error) throw new Error(data.error.message);
   return data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
 }

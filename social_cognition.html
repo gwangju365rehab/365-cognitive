@@ -569,10 +569,14 @@ function renderSrc(){
   else note.textContent=SET.src==='ai'?'할 때마다 새로운 상황으로 문제를 만듭니다. 만들지 못하면 기본 문제로 진행합니다.':'미리 만들어 둔 문제로 진행합니다.';
 }
 async function aiCall(prompt){
-  const url=aiProxy()||'https://api.anthropic.com/v1/messages';
-  const headers=aiProxy()?{'Content-Type':'application/json'}:{'Content-Type':'application/json','x-api-key':aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
-  const res=await fetch(url,{method:'POST',headers:headers,body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
-  const data=await res.json();
+  const body=JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]});
+  const direct=()=>fetch('https://api.anthropic.com/v1/messages',{method:'POST',body:body,headers:{'Content-Type':'application/json','x-api-key':aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}}).then(r=>r.json());
+  let data;
+  if(aiProxy()){
+    try{ data=await fetch(aiProxy(),{method:'POST',headers:{'Content-Type':'application/json'},body:body}).then(r=>r.json()); }
+    catch(e){ data={error:{message:'중계 서버 연결 실패'}}; }
+    if(data.error&&aiKey()) data=await direct();   // 중계 서버가 안 되면 기기에 저장된 키로 다시 시도
+  } else data=await direct();
   if(data.error) throw new Error(data.error.message);
   const txt=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
   const t=txt.replace(/```(?:json)?/gi,''), a=t.indexOf('['), b=t.lastIndexOf(']');
