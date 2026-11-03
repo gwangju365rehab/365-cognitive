@@ -399,6 +399,9 @@ window.addEventListener('popstate', (e) => {
 });
 
 /* ═══ API 키 ═══ */
+// 중계 서버 주소: 설정되어 있으면 기기마다 키를 넣지 않아도 됨 (키는 중계 서버에만 저장)
+const PROXY_URL = '';
+function hasAccess() { return !!PROXY_URL || !!getKey(); }
 function getKey() {
   return localStorage.getItem('anthropic_api_key') || '';
 }
@@ -437,6 +440,11 @@ function changeApiKey() {
   document.getElementById('api-status').textContent = '';
 }
 function loadApiKeyDisplay() {
+  if (PROXY_URL) {
+    document.getElementById('api-box-full').style.display = 'none';
+    document.getElementById('api-change-link').style.display = 'none';
+    return;
+  }
   if (getKey()) {
     hideKeySetup();
   } else {
@@ -500,10 +508,11 @@ document.querySelectorAll('#count-opts .opt-btn').forEach(b => {
 
 /* ═══ API 호출 ═══ */
 async function callAPI(prompt, maxTokens=1500) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(PROXY_URL || 'https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type':'application/json', 'x-api-key': getKey(),
-      'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    headers: PROXY_URL ? { 'Content-Type':'application/json' } :
+      { 'Content-Type':'application/json', 'x-api-key': getKey(),
+        'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
     body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens: maxTokens,
       messages:[{ role:'user', content: prompt }] })
   });
@@ -561,7 +570,7 @@ function extractJSON(raw) {
 /* ═══ 1단계: 기사 준비하기 ═══ */
 async function prepareArticle() {
   hideErr();
-  if (!getKey()) { showErr('API 키를 먼저 설정해 주세요.'); return; }
+  if (!hasAccess()) { showErr('API 키를 먼저 설정해 주세요.'); return; }
 
   let prompt, isReal;
   const today = new Date();
