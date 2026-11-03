@@ -5,3 +5,7 @@ main = "proxy/news-worker.js"
 compatibility_date = "2026-10-01"
 workers_dev = true
 preview_urls = false
+
+# 한국 접속이 홍콩 서버로 연결되면 Anthropic이 요청을 막음(지원 지역 아님) → 중계 서버를 미국에서 실행
+[placement]
+region = "aws:us-east-1"
