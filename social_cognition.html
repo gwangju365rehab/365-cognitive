@@ -222,7 +222,8 @@ const EMO={
 };
 let FID=0;
 // 실사 표정 사진이 있는 사람·표정은 사진으로 보여줌 (AI 생성 가상 인물)
-const PHOTO={gm:['neutral','happy','sad','angry','surprise','fear','disgust']};
+const PH7=['neutral','happy','sad','angry','surprise','fear','disgust'];
+const PHOTO={gm:PH7,gp:PH7,mw:PH7.concat(['contempt']),mm:PH7,yw:PH7.concat(['embarrassed']),ym:PH7.concat(['contempt','embarrassed'])};
 function faceSVG(pid,emo,t,opt){
   opt=opt||{};
   if(PHOTO[pid]&&PHOTO[pid].indexOf(emo||'neutral')>=0)
