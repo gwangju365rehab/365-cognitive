@@ -628,6 +628,8 @@
 <div id="hospital-logo">광주365재활병원_인지연하팀</div>
 
 <script>
+// 메뉴에서 따로 들어올 때: ?only=nback (N-back만) / ?only=span (Digit Span만)
+var ONLY = (location.search.match(/only=(nback|span)/) || [])[1] || null;
 const TOTAL = 20;
 const STIM_MS  = 800;   // 자극 표시 시간
 const BLANK_MS = 200;   // 자극→응답 사이 공백
@@ -1273,7 +1275,7 @@ const AS = (function () {
     nb1: { name: 'N-back 1단계', ko: '숫자 1-back', type: 'nb', n: 1, seq: NB1, desc: '20시행, 표적 6', purpose: '새 정보로 계속 갱신하는 기초 작업기억' },
     nb2: { name: 'N-back 2단계', ko: '숫자 2-back', type: 'nb', n: 2, seq: NB2, desc: '20시행, 표적 6', purpose: '부하가 높을 때의 작업기억 갱신·유지' }
   };
-  var ORDER = ['dsf', 'dsb', 'nb1', 'nb2'];
+  var ORDER = ONLY === 'span' ? ['dsf', 'dsb'] : ONLY === 'nback' ? ['nb1', 'nb2'] : ['dsf', 'dsb', 'nb1', 'nb2'];
   var NB_STIM = 500, NB_ISI = 2500;
 
   var queue = [], qi = 0, results = {}, timers = [], pres = 'visual', when = null, active = false;
@@ -1636,6 +1638,24 @@ const AS = (function () {
   }
 
   return { begin: begin, abort: abort, stop: clearAll, back: back, purpose: function (k) { return SUBS[k].purpose; } };
+})();
+
+// N-back / Digit Span 따로 보기
+(function () {
+  if (!ONLY) return;
+  var keep = ONLY === 'span' ? ['digit-span'] : ['nback-num', 'nback-pos', 'dual-nback'];
+  var first = null;
+  document.querySelectorAll('.tab-btn').forEach(function (b) {
+    var on = keep.indexOf(b.getAttribute('data-tab')) >= 0;
+    b.style.display = on ? '' : 'none';
+    if (on) b.textContent = '①②③④'.charAt(keep.indexOf(b.getAttribute('data-tab'))) + ' ' + b.textContent.replace(/^[①②③④]\s*/, '');
+    if (on && !first) first = b;
+  });
+  if (first) first.click();
+  if (keep.length === 1) document.getElementById('tabs').style.display = 'none';
+  var nm = ONLY === 'span' ? 'Digit Span 훈련' : 'N-back 훈련';
+  document.querySelector('h1').textContent = nm;
+  document.title = nm + ' - 광주365재활병원';
 })();
 
 // 모드 전환
