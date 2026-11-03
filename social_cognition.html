@@ -232,7 +232,13 @@ const PEOPLE={
   mw:{nm:'중년 여성',skin:'#f6d3b6',line:'#cfa07c',hair:'#3e2a20',brow:'#3e2a20',style:'bob',cloth:'#ad1457'},
   mm:{nm:'중년 남성',skin:'#e8b98f',line:'#b9875c',hair:'#262626',brow:'#262626',style:'short',cloth:'#37474f'},
   yw:{nm:'젊은 여성',skin:'#f8dcc4',line:'#d4a98a',hair:'#5d4037',brow:'#4e342e',style:'long',cloth:'#00897b'},
-  ym:{nm:'젊은 남성',skin:'#f0c7a2',line:'#c4956d',hair:'#4e342e',brow:'#3e2723',style:'short2',cloth:'#1565c0'}
+  ym:{nm:'젊은 남성',skin:'#f0c7a2',line:'#c4956d',hair:'#4e342e',brow:'#3e2723',style:'short2',cloth:'#1565c0'},
+  ow:{nm:'할머니',skin:'#f3cfb0',line:'#c99a78',hair:'#eeeeee',brow:'#bdbdbd',style:'bob',old:true,cloth:'#283593'},
+  op:{nm:'할아버지',skin:'#eec29c',line:'#c08e66',hair:'#e0e0e0',brow:'#9e9e9e',style:'short',old:true,cloth:'#795548'},
+  fw:{nm:'40대 여성',skin:'#f6d3b6',line:'#cfa07c',hair:'#2b1d16',brow:'#2b1d16',style:'bun',cloth:'#d7ccc8'},
+  fm:{nm:'40대 남성',skin:'#e8b98f',line:'#b9875c',hair:'#1f1f1f',brow:'#1f1f1f',style:'short',cloth:'#1a237e'},
+  nr:{nm:'간호사',skin:'#f8dcc4',line:'#d4a98a',hair:'#3e2723',brow:'#3e2723',style:'bun',cloth:'#90caf9'},
+  th:{nm:'치료사',skin:'#f0c7a2',line:'#c4956d',hair:'#212121',brow:'#212121',style:'short2',cloth:'#2e7d32'}
 };
 const NEU={bi:0,bo:0,open:1,smile:0,c:0,mo:0,w:1,up:0,asym:0,blush:0,gx:0,gy:0,frown:0,wrink:0};
 const EMO={
@@ -346,16 +352,28 @@ const M1_CTX=[
   {p:'mw',e:'surprise',t:.8,sit:'오랫동안 못 본 친구가 연락도 없이 병문안을 왔습니다.',say:'어머! 연락도 없이 어떻게 왔어?',ans:'놀랍고 반갑다',ds:['오지 말았으면 했다','무섭다','지루하다'],why:'눈과 입이 크게 벌어진 놀란 얼굴이에요. "어떻게 왔어?"는 따지는 말이 아니라 반가움이에요.'},
   {p:'gp',e:'sad',t:.45,sit:'손자가 시험에 떨어졌다고 풀이 죽어 이야기합니다.',say:'괜찮아, 다음에 잘 보면 되지.',ans:'손자가 안쓰럽고 마음이 아프다',ds:['손자에게 화가 났다','아무 느낌이 없다','기분이 좋다'],why:'위로하는 말 속에 눈썹 안쪽이 올라간 걱정스러운 표정이 보여요. 손자를 안쓰러워하는 마음이에요.'}
 ];
+// 연달아 같은 사람이 나오지 않게 순서 조정
+function spreadPeople(items){
+  const pOf=it=>it.p||(it.c&&it.c.p);
+  let pool=items.slice(), out=[];
+  while(pool.length){
+    const prev=out.length?pOf(out[out.length-1]):null;
+    let i=pool.findIndex(x=>pOf(x)!==prev); if(i<0) i=0;
+    out.push(pool.splice(i,1)[0]);
+  }
+  return out;
+}
 function genM1(level){
   const out=[];
   if(level===3){ shuffle(M1_CTX).slice(0,8).forEach(c=>out.push({kind:'ctx',c:c})); return out; }
   const emos=level===1?['happy','sad','angry','surprise']:['happy','sad','angry','surprise','fear','disgust'];
-  const n=level===1?8:10, pids=Object.keys(PEOPLE);
+  const n=level===1?8:10, pids=Object.keys(PHOTO);
   let pool=[]; while(pool.length<n) pool=pool.concat(shuffle(emos));
   pool=pool.slice(0,n);
   pool.forEach(e=>{
     const t=level===1?1:(.55+Math.random()*.3);
-    out.push({kind:'face',e:e,p:pick(pids),t:t,emos:emos});
+    const prev=out.length?out[out.length-1].p:null;
+    out.push({kind:'face',e:e,p:pick(pids.filter(x=>x!==prev)),t:t,emos:emos});
   });
   return out;
 }
@@ -590,12 +608,14 @@ async function aiCall(prompt){
   if(a<0||b<a) throw new Error('형식 오류');
   return JSON.parse(t.slice(a,b+1));
 }
-const AI_PEOPLE='gm=할머니(70대), gp=할아버지(70대), mw=중년 여성(50대), mm=중년 남성(50대), yw=젊은 여성(20대), ym=젊은 남성(20대)';
+const AI_DESC={gm:'할머니(70대)',gp:'할아버지(70대)',mw:'중년 여성(50대)',mm:'중년 남성(50대)',yw:'젊은 여성(20대)',ym:'젊은 남성(20대)',ow:'할머니(60대 후반)',op:'할아버지(70대, 안경)',fw:'여성(40대)',fm:'남성(40대, 안경)',nr:'간호사(30대 여성)',th:'재활치료사(30대 남성)'};
+const AI_PEOPLE=Object.keys(PHOTO).map(k=>k+'='+AI_DESC[k]).join(', ');
 const AI_EMO='neutral(무표정), happy(기쁨), sad(슬픔), angry(화남), surprise(놀람), fear(두려움), disgust(역겨움·싫음)'+
-  ', contempt(비웃음, mw·ym만), embarrassed(쑥스러움·당황, yw·ym만)';
+  ', contempt(비웃음, '+Object.keys(PHOTO).filter(k=>PHOTO[k].indexOf('contempt')>=0).join('·')+'만)'+
+  ', embarrassed(쑥스러움·당황, '+Object.keys(PHOTO).filter(k=>PHOTO[k].indexOf('embarrassed')>=0).join('·')+'만)';
 const AI_PLACES=['병실','재활치료실','병원 식당','복도와 엘리베이터','면회실','집 거실','가족 식사 자리','시장','버스·택시','은행·주민센터','경로당·복지관','전화 통화','이웃집','약국','명절 가족 모임','동네 산책길','문자·카톡 대화','미용실','마트 계산대','교회·성당·절'];
 function aiSeed(n){ return shuffle(AI_PLACES).slice(0,n).join(', '); }
-const AI_COMMON='뇌졸중·뇌손상 후 재활 중인 한국 성인 환자의 사회인지 훈련 문제를 만듭니다. 쉬운 한국어, 짧은 문장. 실제 생활에서 흔히 있는 상황. 정답은 하나만 분명히 맞고, 오답 3개는 그럴듯하지만 틀려야 합니다. 인물(p)은 다음 중에서 상황에 맞게 고릅니다: '+AI_PEOPLE+'. 표정(e)은 다음 중에서만: '+AI_EMO+'. 사람 이름이 필요하면 흔한 성(김 씨, 박 할머니 등)만 씁니다. 출력은 설명 없이 JSON 배열만, 줄바꿈·들여쓰기 없이 한 줄로(압축 JSON). 아래 예시는 형식만 참고하고, 예시의 상황·문장은 절대 그대로 쓰지 말고 완전히 새로운 상황을 만드세요.';
+const AI_COMMON='뇌졸중·뇌손상 후 재활 중인 한국 성인 환자의 사회인지 훈련 문제를 만듭니다. 문제마다 서로 다른 인물(p)을 고르세요. 쉬운 한국어, 짧은 문장. 실제 생활에서 흔히 있는 상황. 정답은 하나만 분명히 맞고, 오답 3개는 그럴듯하지만 틀려야 합니다. 인물(p)은 다음 중에서 상황에 맞게 고릅니다: '+AI_PEOPLE+'. 표정(e)은 다음 중에서만: '+AI_EMO+'. 사람 이름이 필요하면 흔한 성(김 씨, 박 할머니 등)만 씁니다. 출력은 설명 없이 JSON 배열만, 줄바꿈·들여쓰기 없이 한 줄로(압축 JSON). 아래 예시는 형식만 참고하고, 예시의 상황·문장은 절대 그대로 쓰지 말고 완전히 새로운 상황을 만드세요.';
 const AI_SPEC={
   m1:n=>AI_COMMON+'\n[과제] 말과 표정이 다를 때 진짜 마음 읽기 '+n+'문제. 각 문제: 상황(sit), 인물이 한 말(say), 말과 다른 진짜 마음이 드러나는 표정(e, neutral 제외). 질문은 "이 사람의 진짜 마음은?"\n장소 예: '+aiSeed(n)+'\n형식: [{"p":"gm","e":"sad","sit":"...","say":"...","ans":"진짜 마음","ds":["오답1","오답2","오답3"],"why":"표정 단서와 말을 함께 설명 (2문장)"}]\n예시: '+JSON.stringify(M1_CTX[0]),
   m2:(n,L)=>AI_COMMON+'\n[과제] 마음 읽기(마음 이론) '+n+'문제. 수준: '+MODS.m2.lv[L]+'. 각 문제: 짧은 이야기(story, 2~3문장, 핵심 단어는 <b></b>로 강조 가능), 질문(q), 정답, 오답 3, 해설.\n장소 예: '+aiSeed(n)+'\n형식: [{"p":"gp","e":"neutral","story":"...","q":"...?","ans":"...","ds":["...","...","..."],"why":"... (2문장)"}]\n예시: '+JSON.stringify(M2[L][0]),
@@ -670,6 +690,7 @@ async function startSession(){
     else if(m==='m2') items=shuffle(M2[L]).map(x=>({kind:'story',c:x}));
     else items=shuffle(M3[L]).map(x=>({kind:'dlg',c:x}));
   }
+  items=spreadPeople(items);
   S={mod:m,level:L,pred:SET.pred,items:items,i:0,turn:0,res:[],skillMiss:{},skillOk:{},done:false,t0:Date.now()};
   $('g-title').textContent=MODS[m].tab.replace(/^\d\. /,'')+' · LEVEL '+L;
   go('game'); show();
