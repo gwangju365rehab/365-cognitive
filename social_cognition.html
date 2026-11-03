@@ -233,10 +233,10 @@ const PEOPLE={
   mm:{nm:'중년 남성',skin:'#e8b98f',line:'#b9875c',hair:'#262626',brow:'#262626',style:'short',cloth:'#37474f'},
   yw:{nm:'젊은 여성',skin:'#f8dcc4',line:'#d4a98a',hair:'#5d4037',brow:'#4e342e',style:'long',cloth:'#00897b'},
   ym:{nm:'젊은 남성',skin:'#f0c7a2',line:'#c4956d',hair:'#4e342e',brow:'#3e2723',style:'short2',cloth:'#1565c0'},
-  ow:{nm:'할머니',skin:'#f3cfb0',line:'#c99a78',hair:'#eeeeee',brow:'#bdbdbd',style:'bob',old:true,cloth:'#283593'},
-  op:{nm:'할아버지',skin:'#eec29c',line:'#c08e66',hair:'#e0e0e0',brow:'#9e9e9e',style:'short',old:true,cloth:'#795548'},
-  fw:{nm:'40대 여성',skin:'#f6d3b6',line:'#cfa07c',hair:'#2b1d16',brow:'#2b1d16',style:'bun',cloth:'#d7ccc8'},
-  fm:{nm:'40대 남성',skin:'#e8b98f',line:'#b9875c',hair:'#1f1f1f',brow:'#1f1f1f',style:'short',cloth:'#1a237e'},
+  kd:{nm:'손주',skin:'#f8dcc4',line:'#d4a98a',hair:'#1f1f1f',brow:'#1f1f1f',style:'short2',cloth:'#fbc02d'},
+  dr:{nm:'의사',skin:'#e8b98f',line:'#b9875c',hair:'#757575',brow:'#616161',style:'short',cloth:'#fafafa'},
+  sv:{nm:'가게 직원',skin:'#f8dcc4',line:'#d4a98a',hair:'#3e2723',brow:'#3e2723',style:'long',cloth:'#5d4037'},
+  dl:{nm:'택배 기사',skin:'#e8b98f',line:'#b9875c',hair:'#212121',brow:'#212121',style:'short',cloth:'#616161'},
   nr:{nm:'간호사',skin:'#f8dcc4',line:'#d4a98a',hair:'#3e2723',brow:'#3e2723',style:'bun',cloth:'#90caf9'},
   th:{nm:'치료사',skin:'#f0c7a2',line:'#c4956d',hair:'#212121',brow:'#212121',style:'short2',cloth:'#2e7d32'}
 };
@@ -610,7 +610,7 @@ async function aiCall(prompt){
   if(a<0||b<a) throw new Error('형식 오류');
   return JSON.parse(t.slice(a,b+1));
 }
-const AI_DESC={gm:'할머니(70대)',gp:'할아버지(70대)',mw:'중년 여성(50대)',mm:'중년 남성(50대)',yw:'젊은 여성(20대)',ym:'젊은 남성(20대)',ow:'할머니(60대 후반)',op:'할아버지(70대, 안경)',fw:'여성(40대)',fm:'남성(40대, 안경)',nr:'간호사(30대 여성)',th:'재활치료사(30대 남성)'};
+const AI_DESC={gm:'할머니(70대)',gp:'할아버지(70대)',mw:'중년 여성(50대)',mm:'중년 남성(50대)',yw:'젊은 여성(20대)',ym:'젊은 남성(20대)',kd:'손주(초등학생 남자아이)',dr:'의사(50대 남성)',sv:'가게·식당·카페 직원(20대 여성)',dl:'택배·배달 기사(40대 남성)',nr:'간호사(30대 여성)',th:'재활치료사(30대 남성)'};
 const AI_PEOPLE=Object.keys(PHOTO).map(k=>k+'='+AI_DESC[k]).join(', ');
 const AI_EMO='neutral(무표정), happy(기쁨), sad(슬픔), angry(화남), surprise(놀람), fear(두려움), disgust(역겨움·싫음)'+
   ', contempt(비웃음, '+Object.keys(PHOTO).filter(k=>PHOTO[k].indexOf('contempt')>=0).join('·')+'만)'+
