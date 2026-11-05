@@ -1610,6 +1610,7 @@ const AS = (function () {
       h += '</table>';
     }
 
+    h += interp(spans, nbs);
     h += '<div class="as-note">' +
          '· 원점수: 맞힌 시행 수. 최장 폭: 맞힌 가장 긴 자릿수. 같은 길이 2시행을 모두 틀리면 중지합니다.<br>' +
          '· d′: 신호탐지 민감도(log-linear 보정). 높을수록 표적과 비표적을 잘 구분합니다. 반응시간은 맞게 누른 시행의 평균입니다.<br>' +
@@ -1618,6 +1619,43 @@ const AS = (function () {
          '<button class="ctrl-btn btn-reset" onclick="AS.abort()">처음으로</button></div>';
     $('as-report').innerHTML = h;
     show('as-report', 'flex');
+  }
+  function interp(spans, nbs) {
+    var L = [];
+    var f = results.dsf, b = results.dsb;
+    if (f) {
+      var lf = f.longest, gf = lf >= 6 ? '정상 범위' : lf === 5 ? '정상 하한~경계' : lf === 4 ? '경계 수준' : '저하';
+      L.push('<b>순방향 ' + lf + '자리</b> → ' + gf + '. 한 번에 붙잡아 둘 수 있는 정보량(주의 폭)이 ' +
+        (lf >= 6 ? '일상 대화·지시를 따라가기에 충분한 편입니다.' : lf === 5 ? '약간 짧아, 긴 지시는 나눠서 주는 것이 좋습니다.' : '짧아, 지시를 1~2단계로 끊어 주고 메모·반복 확인이 필요합니다.'));
+    }
+    if (b) {
+      var lb = b.longest, gb = lb >= 4 ? '정상 범위' : lb === 3 ? '경계 수준' : '저하';
+      L.push('<b>역방향 ' + lb + '자리</b> → ' + gb + '. 머릿속에 담은 정보를 바꾸고 다루는 능력' +
+        (lb >= 4 ? '이 유지되어 있습니다.' : '이 떨어져, 암산·계획 세우기·여러 단계 과제에서 어려움이 예상됩니다.'));
+    }
+    if (f && b) {
+      var gap = f.longest - b.longest;
+      L.push('순방향과 역방향 차이 <b>' + gap + '자리</b> → ' + (gap >= 3 ? '단순 기억보다 <b>정보를 조작하는 단계</b>에서 특히 떨어집니다(보통 1~2자리 차이).' : gap < 0 ? '역방향이 더 길어 순방향 수행 중 주의 저하 가능성을 확인하세요.' : '보통 수준의 차이(1~2자리)입니다.'));
+    }
+    var dpTxt = function (d) { return d >= 2 ? '잘 구분합니다' : d >= 1 ? '어느 정도 구분합니다' : '잘 구분하지 못합니다'; };
+    nbs.forEach(function (k) {
+      var r = results[k], hr = r.T ? r.h / r.T : 0, fr = r.N ? r.fa / r.N : 0, pat;
+      if (!r.h && !r.fa) pat = '한 번도 누르지 않았습니다. 규칙 이해·참여 여부를 먼저 확인하세요(수행 능력으로 해석 불가).';
+      else if (fr >= 0.3) pat = '다른 숫자에도 자주 눌렀습니다(잘못 누름 ' + Math.round(fr * 100) + '%). 규칙을 유지하지 못하거나 충동적으로 반응하는 경향입니다.';
+      else if (hr < 0.5) pat = '잘못 누름은 적지만 같은 숫자를 많이 놓쳤습니다. 앞 숫자를 붙잡고 새 숫자로 바꾸는(갱신) 과정이 느리거나 신중하게만 반응하는 경향입니다.';
+      else pat = '맞게 누름은 많고 잘못 누름은 적어 안정적으로 수행했습니다.';
+      L.push('<b>' + SUBS[k].name + '</b> d′ ' + r.dp.toFixed(2) + ' → 같은 숫자와 다른 숫자를 ' + dpTxt(r.dp) + '. ' + pat);
+    });
+    var n1 = results.nb1, n2 = results.nb2;
+    if (n1 && n2 && (n1.h || n1.fa)) {
+      var drop = n1.dp - n2.dp;
+      L.push('1단계 → 2단계 d′ 변화 <b>' + (drop >= 0 ? '−' : '+') + Math.abs(drop).toFixed(2) + '</b> → ' +
+        (drop >= 1 ? '기억해야 할 양이 늘면 수행이 크게 떨어집니다. 훈련은 1단계에서 정확도를 높인 뒤 2단계로 넘어가세요.' : '부하가 늘어도 수행이 비교적 유지됩니다.'));
+    }
+    if (!L.length) return '';
+    return '<div class="rep-sec">결과 해석</div><div class="rule-box" style="padding:12px 18px;text-align:left;line-height:1.75;width:100%;max-width:620px;box-sizing:border-box">' +
+      L.map(function (x) { return '· ' + x; }).join('<br>') +
+      '<div style="color:#777;font-size:.82rem;margin-top:8px">Digit Span 등급은 Lezak 등의 성인 최장 폭 참고 기준(순방향 6 이상 정상·5 정상 하한·4 경계·3 이하 저하, 역방향 4 이상 정상·3 경계·2 이하 저하)이며, 고령·저학력에서는 1자리 정도 낮을 수 있습니다. d′ 구분은 해석을 돕는 대략적 기준으로 규준이 아닙니다.</div></div>';
   }
   function cell(t) {
     return '<td>' + (t.ok ? '<span class="trial-o">O</span>' : '<span class="trial-x">X</span>') +
